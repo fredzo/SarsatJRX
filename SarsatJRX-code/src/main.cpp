@@ -24,6 +24,7 @@
 #include <Arduino.h>
 
 #include <Display.h>
+#include <Location.h>
 
 /********************************
   Definitions des constantes
@@ -32,8 +33,9 @@
 const int ReceiverPin = 18;
 unsigned long microseconds;
 unsigned long duree_palier, pays;
-long latdeg, latmin, londeg, lonmin, latofmin, latofsec, lonofmin, lonofsec, protocolCode;
-boolean longtrame, protocolFlag, latflag, lonflag, latoffset, lonoffset;
+Location location;
+long latofmin, latofsec, lonofmin, lonofsec, protocolCode;
+boolean longtrame, protocolFlag, latoffset, lonoffset;
 boolean der_bit = 1; // debut de trame à 1
 boolean etat = 0; // debut de trame à 1
 byte start_flag = 0;
@@ -170,14 +172,14 @@ void test406()
            
   if (longtrame == 1 && protocolFlag == 1) {    // User loc protocol trame longue
     // TODO : Check if protocol code = 1,2,3,6,7
-    latflag = (frame[13] & 0x10) >> 4;   
-    latdeg = ((frame[13] & 0x0F) << 3 | (frame[14] & 0xE0) >> 5);
-    latmin = (frame[14] & 0x1E) >> 1;
-    latmin = (latmin * 4);
-    lonflag = (frame[14] & 0x01);           
-    londeg = (frame[15]);
-    lonmin = (frame[16] & 0xF0) >> 4;
-    lonmin = (lonmin * 4);
+    location.latitude.orientation = (frame[13] & 0x10) >> 4;   
+    location.latitude.degrees = ((frame[13] & 0x0F) << 3 | (frame[14] & 0xE0) >> 5);
+    location.latitude.minutes = (frame[14] & 0x1E) >> 1;
+    location.latitude.minutes = (location.latitude.minutes * 4);
+    location.longitude.orientation = (frame[14] & 0x01);           
+    location.longitude.degrees = (frame[15]);
+    location.longitude.minutes = (frame[16] & 0xF0) >> 4;
+    location.longitude.minutes = (location.longitude.minutes * 4);
 
     
     display.setCursor(0, 10);
@@ -185,11 +187,11 @@ void test406()
     Serial.println("User location Protocol");   
 
     display.setCursor(0, 30); // Oled Latitude N/S 
-    if (latdeg == 127 || londeg == 255) {
+    if (location.latitude.degrees == 127 || location.longitude.degrees == 255) {
       display.print("GPS non synchronise");
     }
     else {
-    if (latflag == 0) {
+    if (location.latitude.orientation == 0) {
       display.print("N");
       Serial.print("N");
     }
@@ -197,16 +199,16 @@ void test406()
       display.print("S");
       Serial.print("S");
     }
-    display.print(latdeg);
+    display.print(location.latitude.degrees);
     display.print("^");
-    display.print(latmin);
+    display.print(location.latitude.minutes);
     display.print("'");
-    Serial.print(latdeg, DEC);
+    Serial.print(location.latitude.degrees, DEC);
     Serial.print("°");
-    Serial.print(latmin, DEC);
+    Serial.print(location.latitude.minutes, DEC);
     Serial.print("'");
     
-    if (lonflag == 0) {
+    if (location.longitude.orientation == 0) {
       display.print("  E");
       Serial.print("  E");
     }
@@ -214,13 +216,13 @@ void test406()
       display.print("  W");
       Serial.print("  W");
     }
-    display.print(londeg);
+    display.print(location.longitude.degrees);
     display.print("^");
-    display.print(lonmin);
+    display.print(location.longitude.minutes);
     display.print("'");
-    Serial.print(londeg, DEC);
+    Serial.print(location.longitude.degrees, DEC);
     Serial.print("°");
-    Serial.println(lonmin, DEC);
+    Serial.println(location.longitude.minutes, DEC);
     Serial.print("'");
     }
     display.println();
@@ -240,61 +242,61 @@ void test406()
         // TODO ? : RTS Location protocol => protocolCode == 13
 
     latoffset = (frame[14] & 0x80) >> 7;   // Latitude NAT LOCATION
-    latflag = (frame[7] & 0x20) >> 5;   
-    latdeg = ((frame[7] & 0x1F) << 2 | (frame[8] & 0xC0) >> 6);
-    latmin = (frame[8] & 0x3E) >> 1;
-    latmin = (latmin * 2);
+    location.latitude.orientation = (frame[7] & 0x20) >> 5;   
+    location.latitude.degrees = ((frame[7] & 0x1F) << 2 | (frame[8] & 0xC0) >> 6);
+    location.latitude.minutes = (frame[8] & 0x3E) >> 1;
+    location.latitude.minutes = (location.latitude.minutes * 2);
     latofmin = (frame[14] & 0x60) >> 5;
     latofsec = (frame[14] & 0x1E) >> 1;
     latofsec = (latofsec * 4);
     if (latoffset == 1) {
-      latmin = (latmin + latofmin);
-      latmin = (latmin * 10000);
-      latmin = (latmin / 60);
+      location.latitude.minutes = (location.latitude.minutes + latofmin);
+      location.latitude.minutes = (location.latitude.minutes * 10000);
+      location.latitude.minutes = (location.latitude.minutes / 60);
       latofsec = (latofsec * 10000);
       latofsec = (latofsec / 3600);
-      latmin = (latmin + latofsec);
+      location.latitude.minutes = (location.latitude.minutes + latofsec);
     }
     else if (latoffset == 0) {
-      latmin = (latmin - latofmin);
-      if (latmin < 0) {
-        latmin = (60 - abs(latmin));
-        latdeg = (latdeg - 1);
+      location.latitude.minutes = (location.latitude.minutes - latofmin);
+      if (location.latitude.minutes < 0) {
+        location.latitude.minutes = (60 - abs(location.latitude.minutes));
+        location.latitude.degrees = (location.latitude.degrees - 1);
       }
-      latmin = (latmin * 10000);
-      latmin = (latmin / 60);
+      location.latitude.minutes = (location.latitude.minutes * 10000);
+      location.latitude.minutes = (location.latitude.minutes / 60);
       latofsec = (latofsec * 10000);
       latofsec = (latofsec / 3600);
-      latmin = (latmin - latofsec);
+      location.latitude.minutes = (location.latitude.minutes - latofsec);
     }
 
     lonoffset = (frame[14] & 0x01);       //Longitude NAT LOCATION
-    lonflag = (frame[8] & 0x01);           
-    londeg = (frame[9]);
-    lonmin = (frame[10] & 0xF8) >> 3;
-    lonmin = (lonmin * 2);
+    location.longitude.orientation = (frame[8] & 0x01);           
+    location.longitude.degrees = (frame[9]);
+    location.longitude.minutes = (frame[10] & 0xF8) >> 3;
+    location.longitude.minutes = (location.longitude.minutes * 2);
     lonofmin = (frame[15] & 0xC0) >> 6;
     lonofsec = (frame[15] & 0x3C) >> 2;
     lonofsec = (lonofsec * 4);
     if (lonoffset == 1) {
-      lonmin = (lonmin + lonofmin);
-      lonmin = (lonmin * 10000);
-      lonmin = (lonmin / 60);
+      location.longitude.minutes = (location.longitude.minutes + lonofmin);
+      location.longitude.minutes = (location.longitude.minutes * 10000);
+      location.longitude.minutes = (location.longitude.minutes / 60);
       lonofsec = (lonofsec * 10000);
       lonofsec = (lonofsec / 3600);
-      lonmin = (lonmin + lonofsec);
+      location.longitude.minutes = (location.longitude.minutes + lonofsec);
     }
     else if (lonoffset == 0) {
-      lonmin = (lonmin - lonofmin);
-      if (lonmin < 0) {
-        lonmin = (60 - abs(lonmin));
-        londeg = (londeg - 1);
+      location.longitude.minutes = (location.longitude.minutes - lonofmin);
+      if (location.longitude.minutes < 0) {
+        location.longitude.minutes = (60 - abs(location.longitude.minutes));
+        location.longitude.degrees = (location.longitude.degrees - 1);
       }
-      lonmin = (lonmin * 10000);
-      lonmin = (lonmin / 60);
+      location.longitude.minutes = (location.longitude.minutes * 10000);
+      location.longitude.minutes = (location.longitude.minutes / 60);
       lonofsec = (lonofsec * 10000);
       lonofsec = (lonofsec / 3600);
-      lonmin = (lonmin - lonofsec);
+      location.longitude.minutes = (location.longitude.minutes - lonofsec);
     }
     
     
@@ -303,11 +305,11 @@ void test406()
     Serial.println("National Location Protocol");
     
     display.setCursor(0, 30); // Oled Latitude N/S 
-    if (latdeg == 127 || londeg == 255) {
+    if (location.latitude.degrees == 127 || location.longitude.degrees == 255) {
       display.print("GPS non synchronise");
     }
     else {
-    if (latflag == 0) {
+    if (location.latitude.orientation == 0) {
       display.print("N");
       Serial.print("N");
     }
@@ -315,14 +317,14 @@ void test406()
       display.print("S");
       Serial.print("S");
     }
-    display.print(latdeg);
+    display.print(location.latitude.degrees);
     display.print(".");
-    display.print(latmin);
-    Serial.print(latdeg, DEC);
+    display.print(location.latitude.minutes);
+    Serial.print(location.latitude.degrees, DEC);
     Serial.print(".");
-    Serial.print(latmin, DEC);
+    Serial.print(location.latitude.minutes, DEC);
     
-    if (lonflag == 0) {
+    if (location.longitude.orientation == 0) {
       display.print("  E");
       Serial.print("  E");
     }
@@ -330,12 +332,12 @@ void test406()
       display.print("  W");
       Serial.print("  W");
     }
-    display.print(londeg);
+    display.print(location.longitude.degrees);
     display.print(".");
-    display.print(lonmin);
-    Serial.print(londeg, DEC);
+    display.print(location.longitude.minutes);
+    Serial.print(location.longitude.degrees, DEC);
     Serial.print(".");
-    Serial.println(lonmin, DEC);
+    Serial.println(location.longitude.minutes, DEC);
     }
     display.println();
     
@@ -348,75 +350,78 @@ void test406()
     }
     display.println();
   }
-  else if (longtrame == 1 && protocolFlag == 0 && (protocolCode < 8 || protocolCode == 14 /* Standard Test Location Prtocol */)) { //Std loc protocol trame longue
+  else if (longtrame == 1 && protocolFlag == 0 && (protocolCode < 8 || protocolCode == 12 /* Ship Security Protocol */ || protocolCode == 14 /* Standard Test Location Prtocol */)) { //Std loc protocol trame longue
     // TODO : protocole code = 0 and 1 should be excluded
+    Serial.print("longtrame = ");
+    Serial.print(longtrame, DEC);
+    Serial.println();
     latoffset = (frame[14] & 0x80) >> 7;  //Latitude STD LOCATION
-    latflag = (frame[8] & 0x80) >> 7; 
-    latdeg = (frame[8] & 0x7F);
-    latmin = (frame[9] & 0xC0) >> 6;
-    latmin = (latmin * 15);
+    location.latitude.orientation = (frame[8] & 0x80) >> 7; 
+    location.latitude.degrees = (frame[8] & 0x7F);
+    location.latitude.minutes = (frame[9] & 0xC0) >> 6;
+    location.latitude.minutes = (location.latitude.minutes * 15);
     latofmin = (frame[14] & 0x7C) >> 2;
     latofsec = ((frame[14] & 0x03) << 2 | (frame[15] & 0xC0) >> 6);
     latofsec = (latofsec * 4);
     if (latoffset == 1) {
-      latmin = (latmin + latofmin);
-      latmin = (latmin * 10000);
-      latmin = (latmin / 60);
+      location.latitude.minutes = (location.latitude.minutes + latofmin);
+      location.latitude.minutes = (location.latitude.minutes * 10000);
+      location.latitude.minutes = (location.latitude.minutes / 60);
       latofsec = (latofsec * 10000);
       latofsec = (latofsec / 3600);
-      latmin = (latmin + latofsec);
+      location.latitude.minutes = (location.latitude.minutes + latofsec);
     }
     else if (latoffset == 0) {
-      latmin = (latmin - latofmin);
-      if (latmin < 0) {
-        latmin = (60 - abs(latmin));
-        latdeg = (latdeg - 1);
+      location.latitude.minutes = (location.latitude.minutes - latofmin);
+      if (location.latitude.minutes < 0) {
+        location.latitude.minutes = (60 - abs(location.latitude.minutes));
+        location.latitude.degrees = (location.latitude.degrees - 1);
       }
-      latmin = (latmin * 10000);
-      latmin = (latmin / 60);
+      location.latitude.minutes = (location.latitude.minutes * 10000);
+      location.latitude.minutes = (location.latitude.minutes / 60);
       latofsec = (latofsec * 10000);
       latofsec = (latofsec / 3600);
-      latmin = (latmin - latofsec);
+      location.latitude.minutes = (location.latitude.minutes - latofsec);
     }
     
     lonoffset = (frame[15] & 0x20) >> 5;  //Longitude STD LOCATION
-    lonflag = (frame[9] & 0x20) >> 5; 
-    londeg = ((frame[9] & 0x1F) << 3 | (frame[10] & 0xE0) >> 5);
-    lonmin = (frame[10] & 0x18) >> 3;
-    lonmin = (lonmin * 15);
+    location.longitude.orientation = (frame[9] & 0x20) >> 5; 
+    location.longitude.degrees = ((frame[9] & 0x1F) << 3 | (frame[10] & 0xE0) >> 5);
+    location.longitude.minutes = (frame[10] & 0x18) >> 3;
+    location.longitude.minutes = (location.longitude.minutes * 15);
     lonofmin = (frame[15] & 0x1F);
     lonofsec = (frame[16] & 0xF0) >> 4;
     lonofsec = (lonofsec * 4);
     if (lonoffset == 1) {
-      lonmin = (lonmin + lonofmin);
-      lonmin = (lonmin * 10000);
-      lonmin = (lonmin / 60);
+      location.longitude.minutes = (location.longitude.minutes + lonofmin);
+      location.longitude.minutes = (location.longitude.minutes * 10000);
+      location.longitude.minutes = (location.longitude.minutes / 60);
       lonofsec = (lonofsec * 10000);
       lonofsec = (lonofsec / 3600);
-      lonmin = (lonmin + lonofsec);
+      location.longitude.minutes = (location.longitude.minutes + lonofsec);
     }
     else if (lonoffset == 0) {
-      lonmin = (lonmin - lonofmin);
-      if (lonmin < 0) {
-        lonmin = (60 - abs(lonmin));
-        londeg = (londeg - 1);
+      location.longitude.minutes = (location.longitude.minutes - lonofmin);
+      if (location.longitude.minutes < 0) {
+        location.longitude.minutes = (60 - abs(location.longitude.minutes));
+        location.longitude.degrees = (location.longitude.degrees - 1);
       }
-      lonmin = (lonmin * 10000);
-      lonmin = (lonmin / 60);
+      location.longitude.minutes = (location.longitude.minutes * 10000);
+      location.longitude.minutes = (location.longitude.minutes / 60);
       lonofsec = (lonofsec * 10000);
       lonofsec = (lonofsec / 3600);
-      lonmin = (lonmin - lonofsec);
+      location.longitude.minutes = (location.longitude.minutes - lonofsec);
     }
     
     display.println("Standard Protocol");
     Serial.println("Standard Location Protocol");
     
     display.setCursor(0, 30); // Oled Latitude N/S 
-    if (latdeg == 127 || londeg == 255) {
+    if (location.latitude.degrees == 127 || location.longitude.degrees == 255) {
       display.print("GPS non synchronise");
     }
     else {
-    if (latflag == 0) {
+    if (location.latitude.orientation == 0) {
       display.print("N");
       Serial.print("N");
     }
@@ -424,27 +429,27 @@ void test406()
       display.print("S");
       Serial.print("S");
     }
-    display.print(latdeg);
+    display.print(location.latitude.degrees);
     display.print(".");
-      if (latmin < 0x0A) {
+      if (location.latitude.minutes < 0x0A) {
         display.print("000");
-        display.print(latmin);
+        display.print(location.latitude.minutes);
       }
-      if (latmin < 0x64) {
+      if (location.latitude.minutes < 0x64) {
         display.print("00");
-        display.print(latmin);
+        display.print(location.latitude.minutes);
       }
-      if (latmin < 0x3E8) {
+      if (location.latitude.minutes < 0x3E8) {
         display.print("0");
-        display.print(latmin);
+        display.print(location.latitude.minutes);
       }
       else {
-        display.print(latmin);
+        display.print(location.latitude.minutes);
       }
-    Serial.print(latdeg, DEC);
+    Serial.print(location.latitude.degrees, DEC);
     Serial.print(".");
-    Serial.print(latmin, DEC);
-    if (lonflag == 0) {
+    Serial.print(location.latitude.minutes, DEC);
+    if (location.longitude.orientation == 0) {
       display.print("  E");
       Serial.print("  E");
     }
@@ -452,26 +457,26 @@ void test406()
       display.print("  W");
       Serial.print("  W");
     }
-    display.print(londeg);
+    display.print(location.longitude.degrees);
     display.print(".");
-      if (lonmin < 0x0A) {
+      if (location.longitude.minutes < 0x0A) {
         display.print("000");
-        display.print(lonmin);
+        display.print(location.longitude.minutes);
       }
-      if (lonmin < 0x64) {
+      if (location.longitude.minutes < 0x64) {
         display.print("00");
-        display.print(lonmin);
+        display.print(location.longitude.minutes);
       }
-      if (lonmin < 0x3E8) {
+      if (location.longitude.minutes < 0x3E8) {
         display.print("0");
-        display.print(lonmin);
+        display.print(location.longitude.minutes);
       }
       else {
-        display.print(lonmin);
+        display.print(location.longitude.minutes);
       }
-    Serial.print(londeg, DEC);
+    Serial.print(location.longitude.degrees, DEC);
     Serial.print(".");
-    Serial.println(lonmin, DEC);
+    Serial.println(location.longitude.minutes, DEC);
     }
     display.println();
 
@@ -589,9 +594,9 @@ static const String frames[] = {
   "FFFE2FE29325ACB12E938B671E0FE0FF0F61", // 18 - ELT Aviation User 
   "FFFE2FEDF67B7182038C2F0E10CFE0FF0F61", // 19 - Serial user -	ELT with Aircraft Operator Designator & Serial Number 
   "FFFE2FA157B081437FDFF8B4833783E0F66C", // 20 - Standard Location Protocol - PLB (Serial) 
-  "FFFE2FADCC40504000185"                 // 21 - Short
+  "FFFE2F3EF613523F81FE0"                 // 21 - Short
   };
-static const int framesSize = 10;
+static const int framesSize = 21;
 
 void setup()
 {

@@ -1,16 +1,23 @@
 #include "Location.h"
 
-double Location::distance(const Location &P)
+String Location::toString(bool sexagesimal)
 {
- double dx,dy;
- dx = x - P.x;
- dy = y - P.y;
- return 0 ;
+    char buffer[32];
+    if(sexagesimal)
+    {   // Format :  <xxx°yy'zz"N, xxx°yy'zz"W>
+        sprintf(buffer, "%ld°%02ld'%02ld\"%c, %ld°%02ld'%02ld\"%c", latitude.degrees,latitude.minutes, latitude.seconds, latitude.orientation ? 'S' : 'N',longitude.degrees, longitude.minutes, longitude.seconds, longitude.orientation ? 'W' : 'E');
+    }
+    else
+    {   // Format :  <-xx.yyy, xxx.yyy>
+        sprintf(buffer, "%f, %f", latitude.getFloatValue(),longitude.getFloatValue());
+    }
+    return buffer;
 }
-Location Location::milieu(const Location &P)
+
+double Location::Angle::getFloatValue()
 {
- Location M;
- M.x = (P.x+x) /2;
- M.y = (P.y+y) /2;
- return M;
-} 
+    double result = degrees;
+    result += (((double)minutes)/60);
+    result += (((double)seconds)/3600);
+    return result;
+}

@@ -1,10 +1,25 @@
 #ifndef LOCATION_H
 #define LOCATION_H
+
+#include <Arduino.h>
+
 class Location
 {
- public:
- double x,y;
- double distance(const Location &P);
- Location milieu(const Location &P);
+    public:
+        class Angle
+        {
+            public :
+            long degrees = 0;
+            long minutes = 0;
+            long seconds = 0;
+            bool orientation = false;
+            double getFloatValue();
+        };
+
+        Angle longitude;
+        Angle latitude;
+
+        String toString(bool sexagesimal);
+
 };
 #endif 
