@@ -201,6 +201,11 @@ void test406()
     for ( byte i = 3; i < 18; i++) {
       display.printHex(frame[i]);
       display.print(" ");
+      if(i==13) 
+      { // Next line
+        display.println();
+        display.setCursor(0, 75);
+      }
     }
     display.println();
   }
@@ -284,6 +289,11 @@ void test406()
     for ( byte i = 3; i < 18; i++) {
       display.printHex(frame[i]);
       display.print(" ");
+      if(i==13) 
+      { // Next line
+        display.println();
+        display.setCursor(0, 75);
+      }
     }
     display.println();
   }
@@ -360,10 +370,13 @@ void test406()
 
     display.setCursor(0, 60);      // HEX ID 30 Hexa
     for ( byte i = 3; i < 18; i++) {
-      if (frame[i] < 16)
-      display.print("0");
       display.printHex(frame[i]);
       display.print(" ");
+      if(i==13) 
+      { // Next line
+        display.println();
+        display.setCursor(0, 75);
+      }
     }
     display.println();
   }
