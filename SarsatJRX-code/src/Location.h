@@ -14,10 +14,12 @@ class Location
             long seconds = 0;
             bool orientation = false;
             double getFloatValue();
+            void clear();
         };
 
         Angle longitude;
         Angle latitude;
+        void clear();
 
         String toString(bool sexagesimal);
 

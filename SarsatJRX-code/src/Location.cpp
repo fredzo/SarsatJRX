@@ -9,9 +9,29 @@ String Location::toString(bool sexagesimal)
     }
     else
     {   // Format :  <-xx.yyy, xxx.yyy>
-        sprintf(buffer, "%f, %f", latitude.getFloatValue(),longitude.getFloatValue());
+        // sprintf %f is not supported by Arduino :-/
+        char latStr[16];
+        char longStr[16];
+        /* 4 is mininum width, 2 is precision; float value is copied onto str_temp*/
+        dtostrf(latitude.getFloatValue(), 6, 4, latStr);
+        dtostrf(longitude.getFloatValue(), 6, 4, longStr);
+        sprintf(buffer, "%s, %s",latStr,longStr);
     }
     return buffer;
+}
+
+void Location::clear()
+{
+    latitude.clear();
+    longitude.clear();
+}
+
+void Location::Angle::clear()
+{
+    degrees = 0;
+    minutes = 0;
+    seconds = 0;
+    orientation = false;
 }
 
 double Location::Angle::getFloatValue()
@@ -19,5 +39,9 @@ double Location::Angle::getFloatValue()
     double result = degrees;
     result += (((double)minutes)/60);
     result += (((double)seconds)/3600);
+    if(orientation)
+    {
+        result = -result;
+    }
     return result;
 }

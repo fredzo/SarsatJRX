@@ -33,10 +33,12 @@ void Display::setCursor(int x, int y)
 }
 
 void Display::println(String s)
-{   // Font adaptation for ° sign
+{   
+    displayBuffer+=s;
+    // Font adaptation for ° sign
     displayBuffer.replace("°","^");
     // Actually display the string
-    myGLCD.print(displayBuffer + s, x, y);
+    myGLCD.print(displayBuffer, x, y);
     displayBuffer = "";
 }
 
