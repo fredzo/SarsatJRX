@@ -32,8 +32,8 @@
 const int ReceiverPin = 18;
 unsigned long microseconds;
 unsigned long duree_palier, pays;
-long latdeg, latmin, londeg, lonmin, latofmin, latofsec, lonofmin, lonofsec, protflag;
-boolean longtrame, protocole, latflag, lonflag, latoffset, lonoffset;
+long latdeg, latmin, londeg, lonmin, latofmin, latofsec, lonofmin, lonofsec, protocolCode;
+boolean longtrame, protocolFlag, latflag, lonflag, latoffset, lonoffset;
 boolean der_bit = 1; // debut de trame à 1
 boolean etat = 0; // debut de trame à 1
 byte start_flag = 0;
@@ -41,7 +41,7 @@ byte count;
 byte count_oct;
 byte data_demod;
 const byte Nb_octet = 17; //3 + 15 **18 octets 1er FF  = octet 0**
-byte octet[18];
+byte frame[18];
 float vout = 0.0;   // pour lecture tension batterie
 float vin = 0.0;    // pour lecture tension batterie
 int value = 0;      // pour lecture tension batterie
@@ -55,10 +55,18 @@ Display display;
 ****************************************/
 
 void Test()
-{
+{ 
+  // Frame format :
+  // First Byte / Second Byte = Bit synchronization = 0xFF+0xFE
+  // Third Byte = Frame synchrnization = 0xD0 for normal message / 0x2F for self-test message
+  // First bit of fourth byte indicates the message format : 0 = short message (11 more bytes, i.e. 14 bytes in total) / 1 = long message (15 more bytes, i.e. 18 bytes in total)
+  // Short Message :
+  // |----------------------------------------------------------------------------------------|
+  // | Byte 0 | Byte 1 | Byte 2 | Byte 3 | Byte 4  
+  // Long Message :
   if (start_flag == 0) {
     if (data_demod == 255) {         // si 0xFF recu, start_flag = 1
-      octet[0] = data_demod;
+      frame[0] = data_demod;
       start_flag = 1;
       count = 0;
       count_oct = 1;
@@ -71,7 +79,7 @@ void Test()
 
   if (start_flag == 1) {   //si 0xFF recu
     if (data_demod == 254) { // si 0xFE
-      octet[1]= data_demod;
+      frame[1]= data_demod;
       start_flag = 2;
       count = 0;
       count_oct = 2;
@@ -84,7 +92,7 @@ void Test()
    
   if (start_flag == 2) {   //si 0xFE recu
     if (data_demod == 208 || data_demod == 47) { // si 0xD0 ou 2F
-      octet[2]= data_demod;
+      frame[2]= data_demod;
       start_flag = 3;
       count = 0;
       count_oct = 3;
@@ -97,7 +105,7 @@ void Test()
   
   else if (start_flag == 3) {           //si 0xFE recu 
     if (count == 7) {                   //si nombre de bits = 8
-      octet[count_oct] = data_demod;    //data dans octet numero xx
+      frame[count_oct] = data_demod;    //data dans octet numero xx
       count_oct ++;
       data_demod = 0;
       count = 0;
@@ -143,32 +151,32 @@ void analyze(void)
 ******************************/
 void test406()
 {
-  longtrame = (octet[3] & 0x80) >> 7;      // taille         bit 25
-  protocole = (octet[3] & 0x40) >> 6;      // protocole      bit 26
-  protflag = (octet[4] & 0x0F);            // protocole flag bit 37-40
-  pays = ((octet[3] & 0x3F) << 4 | (octet[4] & 0xF0) >> 4); // pays bit 27-36
+  longtrame = (frame[3] & 0x80) >> 7;      // taille            bit 25
+  protocolFlag = (frame[3] & 0x40) >> 6;   // protocol flag     bit 26
+  protocolCode = (frame[4] & 0x0F);        // protocol code     bit 37-40
+  pays = ((frame[3] & 0x3F) << 4 | (frame[4] & 0xF0) >> 4); // pays bit 27-36
   pays = pays & 0x3FF; // pays
     
   display.clearDisplay();        // rafraichissement Oled
   display.setCursor(0, 0);       // Balise TEST ou DETRESSE
-  if (octet[2] == 208) {
+  if (frame[2] == 0xD0) {  // Self-test message frame synchronisation byte
     display.println("AutoTest 406 F4GMU");
     Serial.println("AutoTest 406 F4GMU");    
   }
-  else if (octet[2] == 47) {
+  else if (frame[2] == 0x2F) { // Normal message frame synchronisation byte
     display.println("DETRESSE 406 F4GMU");
     Serial.println("DETRESSE 406 F4GMU");
   }
            
-  if (longtrame == 1 && protocole == 1) {    // User loc protocol trame longue
-    
-    latflag = (octet[13] & 0x10) >> 4;   
-    latdeg = ((octet[13] & 0x0F) << 3 | (octet[14] & 0xE0) >> 5);
-    latmin = (octet[14] & 0x1E) >> 1;
+  if (longtrame == 1 && protocolFlag == 1) {    // User loc protocol trame longue
+    // TODO : Check if protocol code = 1,2,3,6,7
+    latflag = (frame[13] & 0x10) >> 4;   
+    latdeg = ((frame[13] & 0x0F) << 3 | (frame[14] & 0xE0) >> 5);
+    latmin = (frame[14] & 0x1E) >> 1;
     latmin = (latmin * 4);
-    lonflag = (octet[14] & 0x01);           
-    londeg = (octet[15]);
-    lonmin = (octet[16] & 0xF0) >> 4;
+    lonflag = (frame[14] & 0x01);           
+    londeg = (frame[15]);
+    lonmin = (frame[16] & 0xF0) >> 4;
     lonmin = (lonmin * 4);
 
     
@@ -219,22 +227,25 @@ void test406()
 
     display.setCursor(0, 40);      // HEX ID 30 Hexa
     for ( byte i = 3; i < 18; i++) {
-      if (octet[i] < 16)
+      if (frame[i] < 16)
       display.print("0");
-      display.printHex(octet[i]);
+      display.printHex(frame[i]);
       display.print(" ");
     }
     display.println();
   }
-  else if (longtrame == 1 && protocole == 0 && (protflag == 8 || protflag == 10 || protflag == 11)) { //Nat loc protocole trame longue
+  else if (longtrame == 1 && protocolFlag == 0 && (protocolCode == 8 /*ELT*/ || protocolCode == 10 /* EPIRB */ 
+        || protocolCode == 11 /* PLB */ || protocolCode == 16 /* National Test Location Protocol */)) { //Nat loc protocol / trame longue
+        // TODO : ELT(DT) Location protocol => protocolCode == 9
+        // TODO ? : RTS Location protocol => protocolCode == 13
 
-    latoffset = (octet[14] & 0x80) >> 7;   // Latitude NAT LOCATION
-    latflag = (octet[7] & 0x20) >> 5;   
-    latdeg = ((octet[7] & 0x1F) << 2 | (octet[8] & 0xC0) >> 6);
-    latmin = (octet[8] & 0x3E) >> 1;
+    latoffset = (frame[14] & 0x80) >> 7;   // Latitude NAT LOCATION
+    latflag = (frame[7] & 0x20) >> 5;   
+    latdeg = ((frame[7] & 0x1F) << 2 | (frame[8] & 0xC0) >> 6);
+    latmin = (frame[8] & 0x3E) >> 1;
     latmin = (latmin * 2);
-    latofmin = (octet[14] & 0x60) >> 5;
-    latofsec = (octet[14] & 0x1E) >> 1;
+    latofmin = (frame[14] & 0x60) >> 5;
+    latofsec = (frame[14] & 0x1E) >> 1;
     latofsec = (latofsec * 4);
     if (latoffset == 1) {
       latmin = (latmin + latofmin);
@@ -257,13 +268,13 @@ void test406()
       latmin = (latmin - latofsec);
     }
 
-    lonoffset = (octet[14] & 0x01);       //Longitude NAT LOCATION
-    lonflag = (octet[8] & 0x01);           
-    londeg = (octet[9]);
-    lonmin = (octet[10] & 0xF8) >> 3;
+    lonoffset = (frame[14] & 0x01);       //Longitude NAT LOCATION
+    lonflag = (frame[8] & 0x01);           
+    londeg = (frame[9]);
+    lonmin = (frame[10] & 0xF8) >> 3;
     lonmin = (lonmin * 2);
-    lonofmin = (octet[15] & 0xC0) >> 6;
-    lonofsec = (octet[15] & 0x3C) >> 2;
+    lonofmin = (frame[15] & 0xC0) >> 6;
+    lonofsec = (frame[15] & 0x3C) >> 2;
     lonofsec = (lonofsec * 4);
     if (lonoffset == 1) {
       lonmin = (lonmin + lonofmin);
@@ -330,22 +341,22 @@ void test406()
     
     display.setCursor(0, 40);      // HEX ID 30 Hexa
     for ( byte i = 3; i < 18; i++) {
-      if (octet[i] < 16)
+      if (frame[i] < 16)
       display.print("0");
-      display.printHex(octet[i]);
+      display.printHex(frame[i]);
       display.print(" ");
     }
     display.println();
   }
-  else if (longtrame == 1 && protocole == 0 && (protflag < 8 || protflag == 14)) { //Std loc protocol trame longue
-
-    latoffset = (octet[14] & 0x80) >> 7;  //Latitude STD LOCATION
-    latflag = (octet[8] & 0x80) >> 7; 
-    latdeg = (octet[8] & 0x7F);
-    latmin = (octet[9] & 0xC0) >> 6;
+  else if (longtrame == 1 && protocolFlag == 0 && (protocolCode < 8 || protocolCode == 14 /* Standard Test Location Prtocol */)) { //Std loc protocol trame longue
+    // TODO : protocole code = 0 and 1 should be excluded
+    latoffset = (frame[14] & 0x80) >> 7;  //Latitude STD LOCATION
+    latflag = (frame[8] & 0x80) >> 7; 
+    latdeg = (frame[8] & 0x7F);
+    latmin = (frame[9] & 0xC0) >> 6;
     latmin = (latmin * 15);
-    latofmin = (octet[14] & 0x7C) >> 2;
-    latofsec = ((octet[14] & 0x03) << 2 | (octet[15] & 0xC0) >> 6);
+    latofmin = (frame[14] & 0x7C) >> 2;
+    latofsec = ((frame[14] & 0x03) << 2 | (frame[15] & 0xC0) >> 6);
     latofsec = (latofsec * 4);
     if (latoffset == 1) {
       latmin = (latmin + latofmin);
@@ -368,13 +379,13 @@ void test406()
       latmin = (latmin - latofsec);
     }
     
-    lonoffset = (octet[15] & 0x20) >> 5;  //Longitude STD LOCATION
-    lonflag = (octet[9] & 0x20) >> 5; 
-    londeg = ((octet[9] & 0x1F) << 3 | (octet[10] & 0xE0) >> 5);
-    lonmin = (octet[10] & 0x18) >> 3;
+    lonoffset = (frame[15] & 0x20) >> 5;  //Longitude STD LOCATION
+    lonflag = (frame[9] & 0x20) >> 5; 
+    londeg = ((frame[9] & 0x1F) << 3 | (frame[10] & 0xE0) >> 5);
+    lonmin = (frame[10] & 0x18) >> 3;
     lonmin = (lonmin * 15);
-    lonofmin = (octet[15] & 0x1F);
-    lonofsec = (octet[16] & 0xF0) >> 4;
+    lonofmin = (frame[15] & 0x1F);
+    lonofsec = (frame[16] & 0xF0) >> 4;
     lonofsec = (lonofsec * 4);
     if (lonoffset == 1) {
       lonmin = (lonmin + lonofmin);
@@ -466,9 +477,9 @@ void test406()
 
     display.setCursor(0, 40);      // HEX ID 30 Hexa
     for ( byte i = 3; i < 18; i++) {
-      if (octet[i] < 16)
+      if (frame[i] < 16)
       display.print("0");
-      display.printHex(octet[i]);
+      display.printHex(frame[i]);
       display.print(" ");
     }
     display.println();
@@ -482,9 +493,9 @@ void test406()
     
     display.setCursor(0, 40);      // HEX ID 22 Hexa bit 26 to 112
     for ( byte i = 3; i < 14; i++) {
-      if (octet[i] < 16)
+      if (frame[i] < 16)
       display.print("0");
-      display.printHex(octet[i]);
+      display.printHex(frame[i]);
       display.print(" ");
     }
     display.println();
@@ -547,7 +558,7 @@ void readHexString(String hexString)
   for (unsigned int i = 0; i < hexString.length(); i += 2) {
     String byteString = hexString.substring(i, i+2);
     byte b = (byte)strtol(byteString.c_str(), NULL, 16);
-    octet[i/2]=b;
+    frame[i/2]=b;
   }
   count_oct = Nb_octet;
 }
@@ -557,8 +568,30 @@ void readHexString(String hexString)
 *************************/
 
 int curFrame = 0;
-static const String frames[] = {"FFFED0D6E6202820000C29FF51041775302D","FFFE2FD6E6202820000C29FF51041775302D", "FFFED0ADCC40504000185", "FFFE2FADCC40504000185"};
-static const int framesSize = 4;
+static const String frames[] = {
+  "FFFED0D6E6202820000C29FF51041775302D", // 1  - Selftest - Serial user -	ELT with Serial Identification
+  "FFFE2FD6E6202820000C29FF51041775302D", // 2  - Serial user -	ELT with Serial Identification
+  "FFFE2F8DB345B146202DDF3C71F59BAB7072", // 3  - Standard Location
+  "FFFE2F8E0D0990014710021963C85C7009F5", // 4  - RLS Location
+  "FFFE2F8E3B15F1DFC0FF07FD1F769F3C0672", // 5  - PLB Location: National Location 
+  "FFFE2F8F4DCBC01ACD004BB10D4E79C4DD86", // 6  - RLS Location Protocol 
+  "FFFE2F96E3AAAAAA7FDFF8211F3583E0FAA8", // 7  - Std Loc. ELT 24-bit Address Protocol 
+  "FFFE2F96E61B0CAE7FDFFF0E58B583E0FAA8", // 8  - Standard Location Protocol - EPIRB (Serial) 
+  "FFFE2F9F7B00F9E8EC737E5312378A1802B0", // 9  - PLB Location: National Location 
+  "FFFE2FA0D205F260850F3DC9E0B70B6E4FD7", // 10 - Standard Location Protocol EPIRB-MMSI 
+  "FFFE2FA3E7B10016150D364D8B3689C09437", // 11 - Standard Location Protocol - PLB (Serial) 
+  "FFFE2FA5DC19E1A07FDFFE5C803483E0FCCA", // 12 - Std. Location ship security protocol (SSAS) 
+  "FFFE2FCE46E76EF8C00C2BAA31CFE0FF0F61", // 13 - Serial user - ELT with Aircraft 24-bit Address 
+  "FFFE2FD9D4EB28140AA6893F16A2C67282EC", // 14 - Maritime User Protocol MMSI - EPIRB 
+  "FFFE2FDF76A9A9C800174DE27BE1F0277E45", // 15 - Serial user - Float Free EPIRB with Serial Identification Number 
+  "FFFE2FDF77200000001168C610AFE0FF0146", // 16 - Serial user - Non Float Free EPIRB with Serial Identification 
+  "FFFE2FE0DDAE599508268E4C05E054651307", // 17 - Radio Call Sign - EPIRB 
+  "FFFE2FE29325ACB12E938B671E0FE0FF0F61", // 18 - ELT Aviation User 
+  "FFFE2FEDF67B7182038C2F0E10CFE0FF0F61", // 19 - Serial user -	ELT with Aircraft Operator Designator & Serial Number 
+  "FFFE2FA157B081437FDFF8B4833783E0F66C", // 20 - Standard Location Protocol - PLB (Serial) 
+  "FFFE2FADCC40504000185"                 // 21 - Short
+  };
+static const int framesSize = 10;
 
 void setup()
 {
@@ -593,15 +626,15 @@ void loop()
     /*
     for ( byte i = 0; i < Nb_octet; i++) // RAW data
     {
-      if (octet[i] < 16)
+      if (frame[i] < 16)
       Serial.print('0');
-      Serial.print (octet[i], HEX);
+      Serial.print (frame[i], HEX);
       Serial.print(" ");
     }
     Serial.println("");*/
     
 
-    if (((octet[1] == 0xFE) && (octet[2] == 0xD0)) || ((octet[1] == 0xFE) && (octet[2] == 0x2F)))// 0XFE/0xD0 for normal mode, 0xFE/0xD0  for autotest
+    if (((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
     {
       test406();
       ledblink();
