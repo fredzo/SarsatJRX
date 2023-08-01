@@ -39,7 +39,7 @@ void Display::setBackgroundColor(Color color)
 
 void Display::fillRectangle(int width, int height)
 {
-  myGLCD.fillRect(x,y,width,height);
+  myGLCD.fillRect(x,y,x+width,y+height);
 }
 
 void Display::setup()
@@ -53,8 +53,8 @@ void Display::setup()
 
     // myGLCD.setFont(BigFont);
     myGLCD.setFont(SmallFont);
-    myGLCD.setBackColor(0, 0, 0);
-    myGLCD.setColor(255, 255, 255);
+    setColor(Color::BLACK);
+    setBackgroundColor(Color::WHITE);
 }
 
 void Display::setCursor(int x, int y)
@@ -99,7 +99,18 @@ void Display::printHex(byte value)
 void Display::clearDisplay()
 {
     myGLCD.clrScr();
+    myGLCD.fillScr(myGLCD.getBackColor());
     displayBuffer = "";
+}
+
+int Display::getWidth()
+{
+  return myGLCD.getDisplayXSize();
+}
+
+int Display::getHeight()
+{
+  return myGLCD.getDisplayYSize();
 }
 
 boolean Display::touchAvailable()

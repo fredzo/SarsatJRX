@@ -42,6 +42,8 @@ class Display
         bool touchAvailable();
         int getTouchX();
         int getTouchY();
+        int getWidth();
+        int getHeight();
 
         void drawButtons();
 

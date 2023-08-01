@@ -162,28 +162,34 @@ String toHexString(byte* frame, bool withSpace, int start, int end)
   return result;
 }
 
-void generateQrCode(QRCode qrcode, Beacon beacon)
+static const int QR_VERSION = 6;
+void generateQrCode(QRCode* qrcode, Beacon* beacon)
 { // Version 6 (41x41) allows 154 alphanumeric characters with medium error correcion
-  uint8_t qrcodeData[qrcode_getBufferSize(6)];
-  String url = "https://0w66030c9i.execute-api.ap-southeast-2.amazonaws.com/dev/v1/beacon/fgb/detection/" + toHexString(beacon.frame, false, 3, beacon.longFrame ? 18 : 14) + "/decode";
-	qrcode_initText(&qrcode, qrcodeData, 3, ECC_MEDIUM, url.c_str());
+  // For some reason, to have the qr code library work properly, the version passed to getBufferSize needs to be one step ahed the actual version...
+  uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+2)];
+  String url = "https://0w66030c9i.execute-api.ap-southeast-2.amazonaws.com/dev/v1/beacon/fgb/detection/" + toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14) + "/decode";
+  Serial.println(url);
+	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_LOW, url.c_str());
 }
 
-void displayQrCode (QRCode qrcode, int xPos, int yPos)
+static const int MODULE_SIZE = 3;
+void displayQrCode (QRCode* qrcode, int xPos, int yPos)
 {
   display.setCursor(xPos,yPos);
   display.setColor(Display::Color::WHITE);
-  // 2px per module
-  display.fillRectangle(qrcode.size*2,qrcode.size*2);
+  // Add a padding around the QR code
+  display.fillRectangle((qrcode->size+2)*MODULE_SIZE,(qrcode->size+2)*MODULE_SIZE);
   display.setColor(Display::Color::BLACK);
-  for (int y = 0; y < qrcode.size; y++) 
+  xPos += MODULE_SIZE;
+  yPos += MODULE_SIZE;
+  for (int y = 0; y < qrcode->size; y++) 
   {
-      for (int x = 0; x < qrcode.size; x++) 
+      for (int x = 0; x < qrcode->size; x++) 
       {
-          if (qrcode_getModule(&qrcode, x, y)) 
+          if (qrcode_getModule(qrcode, x, y)) 
           {
-              display.setCursor(xPos + (x * 2),yPos + (y * 2));
-							display.fillRectangle(2, 2);
+              display.setCursor(xPos + (x * MODULE_SIZE),yPos + (y * MODULE_SIZE));
+							display.fillRectangle(MODULE_SIZE, MODULE_SIZE);
           }
       }
   }
@@ -196,6 +202,8 @@ void test406()
 {
   Beacon beacon = Beacon(frame);
     
+  display.setBackgroundColor(Display::Color::BLACK);
+  display.setColor(Display::Color::WHITE);
   display.clearDisplay();        // rafraichissement Oled
   display.setCursor(0, 0);       // Balise TEST ou DETRESSE
   if (beacon.frameMode == Beacon::FrameMode::SELF_TEST) 
@@ -203,7 +211,7 @@ void test406()
     display.println("Self-test 406 - SarsatJRX");
     Serial.println("Self-test 406 - SarsatJRX");    
   }
-  else if (beacon.frameMode == Beacon::FrameMode::SELF_TEST) 
+  else if (beacon.frameMode == Beacon::FrameMode::NORMAL) 
   { // Normal message frame synchronisation byte
     display.println("Distress 406 - SarsatJRX");
     Serial.println("Distress 406 - SarsatJRX");
@@ -234,7 +242,10 @@ void test406()
     String locationDeci = beacon.location.toString(false);
     display.println(locationSexa);
     Serial.println(locationSexa);
-    Serial.println(locationDeci);
+    if(!beacon.location.isUnknown())
+    {
+      Serial.println(locationDeci);
+    }
 
     // HEX ID 30 Hexa
     display.setCursor(0, 60);
@@ -252,9 +263,11 @@ void test406()
     display.println(toHexString(beacon.frame,true,3,14));
   }
 
-  QRCode qrCode;
-  generateQrCode(qrCode,beacon);
-  displayQrCode(qrCode,0,90);
+    QRCode qrCode;
+    generateQrCode(&qrCode,&beacon);
+    int xPos = display.getWidth()-((qrCode.size+3)*MODULE_SIZE);
+    int yPos = display.getHeight()-((qrCode.size+3)*MODULE_SIZE);
+    displayQrCode(&qrCode,xPos,yPos);
   
  // display.setCursor(80, 30); // Oled Voltmetre
  // display.print("V= ");
