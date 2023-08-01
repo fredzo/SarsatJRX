@@ -11,6 +11,37 @@ Display::Display()
     displayBuffer = "";
 }
 
+Display::Color::Color(byte red, byte green, byte blue)
+{
+    this->red = red;
+    this->green= green;
+    this->blue = blue;
+}
+
+const Display::Color Display::Color::WHITE(255,255,255);
+const Display::Color Display::Color::BLACK(0,0,0);
+const Display::Color Display::Color::RED(255,0,0);
+const Display::Color Display::Color::GREEN(0,255,0);
+const Display::Color Display::Color::BLUE(0,0,255);
+const Display::Color Display::Color::YELLOW(255,255,0);
+const Display::Color Display::Color::MAGENTA(255,0,255);
+const Display::Color Display::Color::CYAN(0,255,255);
+
+void Display::setColor(Color color)
+{
+  myGLCD.setColor(color.red, color.green, color.blue);
+}
+
+void Display::setBackgroundColor(Color color)
+{
+  myGLCD.setBackColor(color.red, color.green, color.blue);
+}
+
+void Display::fillRectangle(int width, int height)
+{
+  myGLCD.fillRect(x,y,width,height);
+}
+
 void Display::setup()
 {
     // Initial setup

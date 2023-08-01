@@ -1,7 +1,16 @@
 #include "Location.h"
 
+bool Location::isUnknown()
+{
+    return (latitude.degrees == 127 || longitude.degrees == 255);
+}
+
 String Location::toString(bool sexagesimal)
 {
+    if(isUnknown())
+    {
+        return "GPS not synchronized";
+    }
     char buffer[32];
     if(sexagesimal)
     {   // Format :  <xxx°yy'zz"N, xxx°yy'zz"W>

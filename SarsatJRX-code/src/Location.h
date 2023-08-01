@@ -20,7 +20,7 @@ class Location
         Angle longitude;
         Angle latitude;
         void clear();
-
+        boolean isUnknown();
         String toString(bool sexagesimal);
 
 };

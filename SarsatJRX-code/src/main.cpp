@@ -25,6 +25,9 @@
 
 #include <Display.h>
 #include <Location.h>
+#include <Country.h>
+#include <qrcode.h>
+#include <Beacon.h>
 
 /********************************
   Definitions des constantes
@@ -32,10 +35,7 @@
 // Interupt pin : use digital pin 18
 const int ReceiverPin = 18;
 unsigned long microseconds;
-unsigned long duree_palier, pays;
-Location location;
-long latofmin, latofsec, lonofmin, lonofsec, protocolCode;
-boolean longtrame, protocolFlag, latoffset, lonoffset;
+unsigned long duree_palier;
 boolean der_bit = 1; // debut de trame à 1
 boolean etat = 0; // debut de trame à 1
 byte start_flag = 0;
@@ -43,7 +43,7 @@ byte count;
 byte count_oct;
 byte data_demod;
 const byte Nb_octet = 17; //3 + 15 **18 octets 1er FF  = octet 0**
-byte frame[18];
+byte frame[Beacon::SIZE];
 float vout = 0.0;   // pour lecture tension batterie
 float vin = 0.0;    // pour lecture tension batterie
 int value = 0;      // pour lecture tension batterie
@@ -146,265 +146,115 @@ void analyze(void)
   Test();
 }
 
+String toHexString(byte* frame, bool withSpace, int start, int end)
+{
+  char buffer[4];
+  String result = "";
+  for ( byte i = start; i < end; i++) 
+  {
+    sprintf(buffer, "%02X", frame[i]);
+    if(withSpace) 
+    {
+      result += " ";
+    }
+    result += buffer;
+  }
+  return result;
+}
 
+void generateQrCode(QRCode qrcode, Beacon beacon)
+{ // Version 6 (41x41) allows 154 alphanumeric characters with medium error correcion
+  uint8_t qrcodeData[qrcode_getBufferSize(6)];
+  String url = "https://0w66030c9i.execute-api.ap-southeast-2.amazonaws.com/dev/v1/beacon/fgb/detection/" + toHexString(beacon.frame, false, 3, beacon.longFrame ? 18 : 14) + "/decode";
+	qrcode_initText(&qrcode, qrcodeData, 3, ECC_MEDIUM, url.c_str());
+}
+
+void displayQrCode (QRCode qrcode, int xPos, int yPos)
+{
+  display.setCursor(xPos,yPos);
+  display.setColor(Display::Color::WHITE);
+  // 2px per module
+  display.fillRectangle(qrcode.size*2,qrcode.size*2);
+  display.setColor(Display::Color::BLACK);
+  for (int y = 0; y < qrcode.size; y++) 
+  {
+      for (int x = 0; x < qrcode.size; x++) 
+      {
+          if (qrcode_getModule(&qrcode, x, y)) 
+          {
+              display.setCursor(xPos + (x * 2),yPos + (y * 2));
+							display.fillRectangle(2, 2);
+          }
+      }
+  }
+}
 
 /*****************************
   Routine autotest 406
 ******************************/
 void test406()
 {
-  longtrame = (frame[3] & 0x80) >> 7;      // taille            bit 25
-  protocolFlag = (frame[3] & 0x40) >> 6;   // protocol flag     bit 26
-  protocolCode = (frame[4] & 0x0F);        // protocol code     bit 37-40
-  pays = ((frame[3] & 0x3F) << 4 | (frame[4] & 0xF0) >> 4); // pays bit 27-36
-  pays = pays & 0x3FF; // pays
+  Beacon beacon = Beacon(frame);
     
   display.clearDisplay();        // rafraichissement Oled
   display.setCursor(0, 0);       // Balise TEST ou DETRESSE
-  if (frame[2] == 0xD0) {  // Self-test message frame synchronisation byte
-    display.println("AutoTest 406 F4GMU");
-    Serial.println("AutoTest 406 F4GMU");    
+  if (beacon.frameMode == Beacon::FrameMode::SELF_TEST) 
+  {  // Self-test message frame synchronisation byte
+    display.println("Self-test 406 - SarsatJRX");
+    Serial.println("Self-test 406 - SarsatJRX");    
   }
-  else if (frame[2] == 0x2F) { // Normal message frame synchronisation byte
-    display.println("DETRESSE 406 F4GMU");
-    Serial.println("DETRESSE 406 F4GMU");
+  else if (beacon.frameMode == Beacon::FrameMode::SELF_TEST) 
+  { // Normal message frame synchronisation byte
+    display.println("Distress 406 - SarsatJRX");
+    Serial.println("Distress 406 - SarsatJRX");
+  }
+  else
+  { // Unknown fram format
+    display.println("Unknown 406 - SarsatJRX");
+    Serial.println("Unknown 406 - SarsatJRX");
   }
 
-  location.clear();
-           
-  if (longtrame == 1 && protocolFlag == 1) {    // User loc protocol trame longue
-    // TODO : Check if protocol code = 1,2,3,6,7
-    location.latitude.orientation = (frame[13] & 0x10) >> 4;   
-    location.latitude.degrees = ((frame[13] & 0x0F) << 3 | (frame[14] & 0xE0) >> 5);
-    location.latitude.minutes = (frame[14] & 0x1E) >> 1;
-    location.latitude.minutes = (location.latitude.minutes * 4);
-    location.longitude.orientation = (frame[14] & 0x01);           
-    location.longitude.degrees = (frame[15]);
-    location.longitude.minutes = (frame[16] & 0xF0) >> 4;
-    location.longitude.minutes = (location.longitude.minutes * 4);
+  // Description           
+  display.setCursor(0, 15);
+  display.println(beacon.desciption);
+  Serial.println(beacon.desciption);   
 
-    
-    display.setCursor(0, 15);
-    display.println("User loc. Protocol");
-    Serial.println("User location Protocol");   
+  // Country
+  display.setCursor(0, 30);
+  String country = beacon.country.toString();
+  display.println(country);
+  Serial.println(country);
 
-    display.setCursor(0, 45); // Oled Latitude N/S 
-    if (location.latitude.degrees == 127 || location.longitude.degrees == 255) {
-      display.println("GPS non synchronise");
-    }
-    else {
-      display.println(location.toString(true));
-      Serial.println(location.toString(true));
-      Serial.println(location.toString(false));
-    }
-    display.setCursor(0, 60);      // HEX ID 30 Hexa
-    for ( byte i = 3; i < 18; i++) {
-      display.printHex(frame[i]);
-      display.print(" ");
-      if(i==13) 
-      { // Next line
-        display.println();
-        display.setCursor(0, 75);
-      }
-    }
-    display.println();
+  if (beacon.longFrame) 
+  { // Long frame
+
+    // Location 
+    display.setCursor(0, 45); 
+    String locationSexa = beacon.location.toString(true);
+    String locationDeci = beacon.location.toString(false);
+    display.println(locationSexa);
+    Serial.println(locationSexa);
+    Serial.println(locationDeci);
+
+    // HEX ID 30 Hexa
+    display.setCursor(0, 60);
+    display.println(toHexString(beacon.frame,true,3,13));
+    display.setCursor(0, 75);
+    display.println(toHexString(beacon.frame,true,13,18));
   }
-  else if (longtrame == 1 && protocolFlag == 0 && (protocolCode == 8 /*ELT*/ || protocolCode == 10 /* EPIRB */ 
-        || protocolCode == 11 /* PLB */ || protocolCode == 16 /* National Test Location Protocol */)) { //Nat loc protocol / trame longue
-        // TODO : ELT(DT) Location protocol => protocolCode == 9
-        // TODO ? : RTS Location protocol => protocolCode == 13
-
-    latoffset = (frame[14] & 0x80) >> 7;   // Latitude NAT LOCATION
-    location.latitude.orientation = (frame[7] & 0x20) >> 5;   
-    location.latitude.degrees = ((frame[7] & 0x1F) << 2 | (frame[8] & 0xC0) >> 6);
-    location.latitude.minutes = (frame[8] & 0x3E) >> 1;
-    location.latitude.minutes = (location.latitude.minutes * 2);
-    latofmin = (frame[14] & 0x60) >> 5;
-    latofsec = (frame[14] & 0x1E) >> 1;
-    latofsec = (latofsec * 4);
-    if (latoffset == 1) {
-      location.latitude.minutes += latofmin;
-      location.latitude.seconds += latofsec;
-    }
-    else if (latoffset == 0) {
-      location.latitude.minutes -= latofmin;
-      if (location.latitude.minutes < 0) 
-      {
-        location.latitude.minutes += 60;
-        location.latitude.degrees -= 1;
-      }
-      location.latitude.seconds -= latofsec;
-      if (location.latitude.seconds < 0) 
-      {
-        location.latitude.seconds += 60;
-        location.latitude.minutes -= 1;
-      }
-    }
-
-    lonoffset = (frame[14] & 0x01);       //Longitude NAT LOCATION
-    location.longitude.orientation = (frame[8] & 0x01);           
-    location.longitude.degrees = (frame[9]);
-    location.longitude.minutes = (frame[10] & 0xF8) >> 3;
-    location.longitude.minutes = (location.longitude.minutes * 2);
-    lonofmin = (frame[15] & 0xC0) >> 6;
-    lonofsec = (frame[15] & 0x3C) >> 2;
-    lonofsec = (lonofsec * 4);
-    if (lonoffset == 1) {
-      location.longitude.minutes += lonofmin;
-      location.longitude.seconds += lonofsec;
-    }
-    else if (lonoffset == 0) 
-    {
-      location.longitude.minutes -= lonofmin;
-      if (location.longitude.minutes < 0) 
-      {
-        location.longitude.minutes += 60;
-        location.longitude.degrees -= 1;
-      }
-      location.longitude.seconds -= lonofsec;
-      if (location.longitude.seconds < 0) 
-      {
-        location.longitude.seconds += 60;
-        location.longitude.minutes -= 1;
-      }
-    }
-    
-    
-    
-    display.setCursor(0, 15);
-    display.println("National Protocol");
-    Serial.println("National Location Protocol");
-    
-    display.setCursor(0, 45); // Oled Latitude N/S 
-    if (location.latitude.degrees == 127 || location.longitude.degrees == 255) {
-      display.println("GPS non synchronise");
-    }
-    else {
-      display.println(location.toString(true));
-      Serial.println(location.toString(true));
-      Serial.println(location.toString(false));
-    }
-    
-    display.setCursor(0, 60);      // HEX ID 30 Hexa
-    for ( byte i = 3; i < 18; i++) {
-      display.printHex(frame[i]);
-      display.print(" ");
-      if(i==13) 
-      { // Next line
-        display.println();
-        display.setCursor(0, 75);
-      }
-    }
-    display.println();
-  }
-  else if (longtrame == 1 && protocolFlag == 0 && (protocolCode < 8 || protocolCode == 12 /* Ship Security Protocol */ || protocolCode == 14 /* Standard Test Location Prtocol */)) { //Std loc protocol trame longue
-    // TODO : protocole code = 0 and 1 should be excluded
-    latoffset = (frame[14] & 0x80) >> 7;  //Latitude STD LOCATION
-    location.latitude.orientation = (frame[8] & 0x80) >> 7; 
-    location.latitude.degrees = (frame[8] & 0x7F);
-    location.latitude.minutes = (frame[9] & 0xC0) >> 6;
-    location.latitude.minutes = (location.latitude.minutes * 15);
-    latofmin = (frame[14] & 0x7C) >> 2;
-    latofsec = ((frame[14] & 0x03) << 2 | (frame[15] & 0xC0) >> 6);
-    latofsec = (latofsec * 4);
-    if (latoffset == 1) {
-      location.latitude.minutes += latofmin;
-      location.latitude.seconds += latofsec;
-    }
-    else if (latoffset == 0) {
-      location.latitude.minutes -= latofmin;
-      if (location.latitude.minutes < 0) 
-      {
-        location.latitude.minutes += 60;
-        location.latitude.degrees -= 1;
-      }
-      location.latitude.seconds -= latofsec;
-      if (location.latitude.seconds < 0) 
-      {
-        location.latitude.seconds += 60;
-        location.latitude.minutes -= 1;
-      }
-    }
-    
-    lonoffset = (frame[15] & 0x20) >> 5;  //Longitude STD LOCATION
-    location.longitude.orientation = (frame[9] & 0x20) >> 5; 
-    location.longitude.degrees = ((frame[9] & 0x1F) << 3 | (frame[10] & 0xE0) >> 5);
-    location.longitude.minutes = (frame[10] & 0x18) >> 3;
-    location.longitude.minutes = (location.longitude.minutes * 15);
-    lonofmin = (frame[15] & 0x1F);
-    lonofsec = (frame[16] & 0xF0) >> 4;
-    lonofsec = (lonofsec * 4);
-    if (lonoffset == 1) {
-      location.longitude.minutes += lonofmin;
-      location.longitude.seconds += lonofsec;
-    }
-    else if (lonoffset == 0) 
-    {
-      location.longitude.minutes -= lonofmin;
-      if (location.longitude.minutes < 0) 
-      {
-        location.longitude.minutes += 60;
-        location.longitude.degrees -= 1;
-      }
-      location.longitude.seconds -= lonofsec;
-      if (location.longitude.seconds < 0) 
-      {
-        location.longitude.seconds += 60;
-        location.longitude.minutes -= 1;
-      }
-    }
-    
-    display.setCursor(0, 15);
-    display.println("Standard Protocol");
-    Serial.println("Standard Location Protocol");
-    
-    display.setCursor(0, 45); // Oled Latitude N/S 
-    if (location.latitude.degrees == 127 || location.longitude.degrees == 255) {
-      display.println("GPS non synchronise");
-    }
-    else {
-      display.println(location.toString(true));
-      Serial.println(location.toString(true));
-      Serial.println(location.toString(false));
-    }
-
-    display.setCursor(0, 60);      // HEX ID 30 Hexa
-    for ( byte i = 3; i < 18; i++) {
-      display.printHex(frame[i]);
-      display.print(" ");
-      if(i==13) 
-      { // Next line
-        display.println();
-        display.setCursor(0, 75);
-      }
-    }
-    display.println();
-  }
-  else {                                // User protocol trame courte
-    display.setCursor(0, 15);
-    display.println("User Protocol");
-    Serial.println("User Protocol");
+  else 
+  { // Short frame
     display.setCursor(5, 45);
     display.println("22 HEX. No location");
     
-    display.setCursor(0, 60);      // HEX ID 22 Hexa bit 26 to 112
-    for ( byte i = 3; i < 14; i++) {
-      display.printHex(frame[i]);
-      display.print(" ");
-    }
-    display.println();
+    display.setCursor(0, 60);  
+    // HEX ID 22 Hexa bit 26 to 112
+    display.println(toHexString(beacon.frame,true,3,14));
   }
-  display.setCursor(0, 30);     // Oled Pays
-  if (pays == 226 || pays == 227 || pays == 228) {
-    display.println("Pays= FRANCE");
-    Serial.println("Pays= FRANCE");
-  }
-  else {
-    display.print("Pays= ");
-    Serial.print("Pays : ");
-    display.println(String(pays));
-    Serial.println(pays, DEC);
-  }
+
+  QRCode qrCode;
+  generateQrCode(qrCode,beacon);
+  displayQrCode(qrCode,0,90);
   
  // display.setCursor(80, 30); // Oled Voltmetre
  // display.print("V= ");
@@ -419,6 +269,7 @@ void test406()
   data_demod = 0;
   der_bit = 1;
 }
+
 
 /****************************************
  * LED trame recu
