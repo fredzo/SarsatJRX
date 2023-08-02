@@ -20,12 +20,17 @@ Display::Color::Color(byte red, byte green, byte blue)
 
 const Display::Color Display::Color::WHITE(255,255,255);
 const Display::Color Display::Color::BLACK(0,0,0);
-const Display::Color Display::Color::RED(255,0,0);
-const Display::Color Display::Color::GREEN(0,255,0);
-const Display::Color Display::Color::BLUE(0,0,255);
+const Display::Color Display::Color::RED(206,132,85);
+const Display::Color Display::Color::GREEN(106,138,54);
+const Display::Color Display::Color::BLUE(28,143,255);
 const Display::Color Display::Color::YELLOW(255,255,0);
 const Display::Color Display::Color::MAGENTA(255,0,255);
-const Display::Color Display::Color::CYAN(0,255,255);
+const Display::Color Display::Color::BEIGE(220,220,170);
+const Display::Color Display::Color::GREY(121,121,121);
+const Display::Color Display::Color::DARK_GREY(24,24,24);
+const Display::Color Display::Color::LIGHT_BLUE(156,220,254);
+const Display::Color Display::Color::ORANGE(255,200,20);
+const Display::Color Display::Color::PURPLE(218,85,131);
 
 void Display::setColor(Color color)
 {
@@ -44,6 +49,21 @@ void Display::fillRectangle(int width, int height)
   myGLCD.fillRect(x,y,x+width,y+height);
 }
 
+void Display::drawRectangle(int width, int height)
+{
+  myGLCD.drawRect(x,y,x+width,y+height);
+}
+
+void Display::fillRoundRectangle(int width, int height)
+{
+  myGLCD.fillRoundRect(x,y,x+width,y+height);
+}
+
+void Display::drawRoundRectangle(int width, int height)
+{
+  myGLCD.drawRoundRect(x,y,x+width,y+height);
+}
+
 void Display::setup()
 {
     // Initial setup
@@ -60,6 +80,7 @@ void Display::setup()
 
 void Display::setFontSize(FontSize fontSize)
 {
+  this->fontSize = fontSize;
   switch(fontSize)
   {
     case FontSize::LARGE :
@@ -152,6 +173,11 @@ int Display::getTouchY()
     return touchY;
 }
 
+void Display::centerText(String text, int width)
+{
+  x += (width-(((fontSize == FontSize::SMALL) ? 8 : 16)*text.length()))/2;
+}
+
 void Display::drawButton(const char* caption, bool pressed)
 { // Caption will be up to 6 char long
   int captionSize = strlen(caption);
@@ -167,7 +193,7 @@ void Display::drawButton(const char* caption, bool pressed)
   myGLCD.fillRoundRect (x, y, x+BUTTON_WIDTH, y+BUTTON_HEIGHT);
   setColor(fColor);
   myGLCD.print(caption, x+((BUTTON_WIDTH-8*captionSize)/2), y+((BUTTON_HEIGHT-12)/2));
-  setColor(Color::GREEN);
+  setColor(Color::ORANGE);
   myGLCD.drawRoundRect (x, y, x+BUTTON_WIDTH, y+BUTTON_HEIGHT);
   // Restore color
   setColor(backupColor);

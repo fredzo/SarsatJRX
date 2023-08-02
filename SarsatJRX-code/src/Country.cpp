@@ -313,7 +313,7 @@ Country Country::getCountry(int code)
         case	765	 : result.setValues(765	,F("SUR"),F("Suriname"),F("Suriname"));break;
         case	770	 : result.setValues(770	,F("URU"),F("Uruguay"),F("Uruguay"));break;
         case	775	 : result.setValues(775	,F("VEN"),F("Venezuela"),F("Venezuela"));break;
-        default : result.setValues(code,F("UNK"),F("Unknown country code"),F("Unkown"));
+        default : result.setValues(code,F("UNK"),F("Unknown country"),F("Unkown"));
     }
     return result;
 }

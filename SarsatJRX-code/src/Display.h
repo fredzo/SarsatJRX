@@ -19,7 +19,7 @@ class Display
             byte green = 0;
             byte blue = 0;
             Color(byte red, byte green, byte blue);
-            static const Color WHITE, BLACK, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN;
+            static const Color WHITE, BLACK, RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN, BEIGE, GREY, DARK_GREY, LIGHT_BLUE, PURPLE, ORANGE;
         };
         Display();
         void setup();
@@ -28,6 +28,9 @@ class Display
         void setColor(Color color);
         void setBackgroundColor(Color color);
         void fillRectangle(int width, int height);
+        void drawRectangle(int width, int height);
+        void fillRoundRectangle(int width, int height);
+        void drawRoundRectangle(int width, int height);
         void println(String s);
         void println();
         void print(String s);
@@ -42,6 +45,7 @@ class Display
         int getHeight();
         void drawButton(const char* caption, bool pressed);
         void setFontSize(FontSize fontSize);
+        void centerText(String text, int width);
         void drawButtons();
 
     private : 
@@ -53,6 +57,7 @@ class Display
         Color currentColor = Color::WHITE;
         Color currentBackColor = Color::BLACK;
         int touchX, touchY;
+        FontSize fontSize = FontSize::SMALL;
 
 };
 

@@ -29,11 +29,15 @@
 #include <qrcode.h>
 #include <Beacon.h>
 
+#define HEADER_HEIGHT     20
+#define LINE_HEIGHT       15
+#define HEADER_TEXT       "- SarsatJRX -"
+#define HEADER_BOTTOM     24
 #define MAPS_BUTTON_X     246
-#define MAPS_BUTTON_Y     2
+#define MAPS_BUTTON_Y     HEADER_BOTTOM
 #define MAPS_BUTTON_CAPTION "MAPS"
 #define BEACON_BUTTON_X   246
-#define BEACON_BUTTON_Y   34
+#define BEACON_BUTTON_Y   HEADER_BOTTOM+32
 #define BEACON_BUTTON_CAPTION "BEACON"
 
 
@@ -162,7 +166,7 @@ String toHexString(byte* frame, bool withSpace, int start, int end)
   for ( byte i = start; i < end; i++) 
   {
     sprintf(buffer, "%02X", frame[i]);
-    if(withSpace) 
+    if(withSpace && i>start) 
     {
       result += " ";
     }
@@ -237,72 +241,106 @@ void test406()
   free(beacon);
   beacon = new Beacon(frame);
   //Serial.println(freeRam());
-    
-  display.setBackgroundColor(Display::Color::BLACK);
-  display.setColor(Display::Color::WHITE);
-  display.clearDisplay();        // rafraichissement Oled
-  display.setCursor(0, 0);       // Balise TEST ou DETRESSE
+  // Refresh screen
+  display.setBackgroundColor(Display::Color::DARK_GREY);
+  display.clearDisplay();
+
+  // Header
+  display.setCursor(0, 0);
+  // Draw header background
+  display.setColor(Display::Color::GREY);
+  display.setBackgroundColor(Display::Color::GREY);
+  display.fillRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
+  display.setColor(Display::Color::PURPLE);
+  display.drawRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
+  display.setColor(Display::Color::LIGHT_BLUE);
+  display.setCursor(0, 3);
+  display.setFontSize(Display::FontSize::LARGE);
+  display.centerText(HEADER_TEXT,display.getWidth());
+  display.println(HEADER_TEXT);
+  Serial.println(HEADER_TEXT);
+  //Serial.println(freeRam());
+
+  int currentY = HEADER_BOTTOM;
+  // For the rest of the screen
+  display.setFontSize(Display::FontSize::SMALL);
+  display.setColor(Display::Color::BEIGE);
+  display.setBackgroundColor(Display::Color::DARK_GREY);
+
+  // Frame mode
+  String frameMode;
   if (beacon->frameMode == Beacon::FrameMode::SELF_TEST) 
   {  // Self-test message frame synchronisation byte
-    display.println("Self-test 406 - SarsatJRX");
-    Serial.println("Self-test 406 - SarsatJRX");    
+    frameMode = F("Frame mode : Self-test 406");
   }
   else if (beacon->frameMode == Beacon::FrameMode::NORMAL) 
   { // Normal message frame synchronisation byte
-    display.println("Distress 406 - SarsatJRX");
-    Serial.println("Distress 406 - SarsatJRX");
+    frameMode = F("Frame mode : Distress 406");
   }
   else
   { // Unknown fram format
-    display.println("Unknown 406 - SarsatJRX");
-    Serial.println("Unknown 406 - SarsatJRX");
+    frameMode = F("Frame mode : Unknown 406");
   }
-  //Serial.println(freeRam());
+  display.setCursor(0, currentY);
+  display.println(frameMode);
+  Serial.println(frameMode);
+  currentY+=LINE_HEIGHT;
 
   // Description           
-  display.setCursor(0, 15);
+  display.setCursor(0, currentY);
   display.println(beacon->desciption);
   Serial.println(beacon->desciption);   
+  currentY+=LINE_HEIGHT;
   //Serial.println(freeRam());
 
   // Country
-  display.setCursor(0, 30);
+  display.setCursor(0, currentY);
   String country = beacon->country.toString();
   display.println(country);
   Serial.println(country);
+  currentY+=LINE_HEIGHT;
   //Serial.println(freeRam());
 
   if (beacon->longFrame) 
   { // Long frame
 
     // Location 
-    display.setCursor(0, 45); 
+    display.setCursor(0, currentY); 
     String locationSexa = beacon->location.toString(true);
     String locationDeci = beacon->location.toString(false);
     display.println(locationSexa);
     Serial.println(locationSexa);
+    currentY+=LINE_HEIGHT;
     if(!beacon->location.isUnknown())
     {
+      display.setCursor(0, currentY); 
+      display.println(locationDeci);
       Serial.println(locationDeci);
       // Maps button
       display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
       display.drawButton(MAPS_BUTTON_CAPTION,false);
     }
+    currentY+=LINE_HEIGHT;
 
     // HEX ID 30 Hexa
-    display.setCursor(0, 60);
-    display.println(toHexString(beacon->frame,true,3,13));
-    display.setCursor(0, 75);
-    display.println(toHexString(beacon->frame,true,13,18));
+    display.setCursor(0, currentY);
+    display.println(toHexString(beacon->frame,true,3,11));
+    currentY+=LINE_HEIGHT;
+    display.setCursor(0, currentY);
+    display.println(toHexString(beacon->frame,true,11,18));
   }
   else 
   { // Short frame
-    display.setCursor(5, 45);
+    display.setCursor(5, currentY);
     display.println("22 HEX. No location");
+    currentY+=LINE_HEIGHT;
     
-    display.setCursor(0, 60);  
+    display.setCursor(0, currentY);  
     // HEX ID 22 Hexa bit 26 to 112
-    display.println(toHexString(beacon->frame,true,3,14));
+    display.println(toHexString(beacon->frame,true,3,11));
+    currentY+=LINE_HEIGHT;
+    display.setCursor(0, currentY);
+    display.println(toHexString(beacon->frame,true,11,14));
   }
   //Serial.println(freeRam());
 
@@ -371,7 +409,7 @@ int curFrame = 0;
 static const String frames[] = {
   "FFFED0D6E6202820000C29FF51041775302D", // 1  - Selftest - Serial user -	ELT with Serial Identification
   "FFFE2FD6E6202820000C29FF51041775302D", // 2  - Serial user -	ELT with Serial Identification
-  "FFFE2F8DB345B146202DDF3C71F59BAB7072", // 3  - Standard Location
+  "FFFE2F3EF613523F81FE0",                // 3  - Short
   "FFFE2F8E0D0990014710021963C85C7009F5", // 4  - RLS Location
   "FFFE2F8E3B15F1DFC0FF07FD1F769F3C0672", // 5  - PLB Location: National Location 
   "FFFE2F8F4DCBC01ACD004BB10D4E79C4DD86", // 6  - RLS Location Protocol 
@@ -389,7 +427,7 @@ static const String frames[] = {
   "FFFE2FE29325ACB12E938B671E0FE0FF0F61", // 18 - ELT Aviation User 
   "FFFE2FEDF67B7182038C2F0E10CFE0FF0F61", // 19 - Serial user -	ELT with Aircraft Operator Designator & Serial Number 
   "FFFE2FA157B081437FDFF8B4833783E0F66C", // 20 - Standard Location Protocol - PLB (Serial) 
-  "FFFE2F3EF613523F81FE0"                 // 21 - Short
+  "FFFE2F8DB345B146202DDF3C71F59BAB7072"  // 21 - Standard Location
   };
 static const int framesSize = 21;
 
@@ -401,10 +439,9 @@ void setup()
   pinMode(16, OUTPUT);                  // sortie Buzzer pin 16
   
   Serial.begin(115200);
-  // attachInterrupt(0, analyze, CHANGE);  // interruption sur Rise et Fall
+  attachInterrupt(0, analyze, CHANGE);  // interruption sur Rise et Fall
 
   display.setup();
-  //display.drawButtons();  
   readHexString(frames[curFrame]);
   Serial.println("### Boot complete !");
 }
