@@ -166,10 +166,10 @@ static const int QR_VERSION = 6;
 void generateQrCode(QRCode* qrcode, Beacon* beacon)
 { // Version 6 (41x41) allows 154 alphanumeric characters with medium error correcion
   // For some reason, to have the qr code library work properly, the version passed to getBufferSize needs to be one step ahed the actual version...
-  uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+2)];
-  String url = "https://0w66030c9i.execute-api.ap-southeast-2.amazonaws.com/dev/v1/beacon/fgb/detection/" + toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14) + "/decode";
+  uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+1)];
+  String url = "http://audiocaine.free.fr/beacon.html?hex=" + toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14);
   Serial.println(url);
-	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_LOW, url.c_str());
+	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_MEDIUM, url.c_str());
 }
 
 static const int MODULE_SIZE = 3;
