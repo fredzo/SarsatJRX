@@ -14,7 +14,8 @@ class Beacon
         Country country;
         byte frame[SIZE];
         Location location;
-        const char* desciption;
+        String desciption;
+        String identifier;
         Beacon(byte frameBuffer[]);
     private:
         void parseFrame();
