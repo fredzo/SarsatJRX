@@ -15,6 +15,7 @@ class Location
             bool orientation = false;
             double getFloatValue();
             void clear();
+            void toFloatString(char* angleStr);
         };
 
         Angle longitude;
@@ -22,6 +23,7 @@ class Location
         void clear();
         boolean isUnknown();
         String toString(bool sexagesimal);
+        void formatFloatLocation(char* buffer, const char* format);
 
 };
 #endif 

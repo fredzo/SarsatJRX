@@ -163,13 +163,23 @@ String toHexString(byte* frame, bool withSpace, int start, int end)
 }
 
 static const int QR_VERSION = 6;
-void generateQrCode(QRCode* qrcode, Beacon* beacon)
+void generateBeaconDecoderQrCode(QRCode* qrcode, Beacon* beacon)
 { // Version 6 (41x41) allows 154 alphanumeric characters with medium error correcion
   // For some reason, to have the qr code library work properly, the version passed to getBufferSize needs to be one step ahed the actual version...
   uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+1)];
   String url = "http://audiocaine.free.fr/beacon.html?hex=" + toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14);
   Serial.println(url);
 	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_MEDIUM, url.c_str());
+}
+
+void generateMapsQrCode(QRCode* qrcode, Beacon* beacon)
+{ // Version 6 (41x41) allows 154 alphanumeric characters with medium error correcion
+  // For some reason, to have the qr code library work properly, the version passed to getBufferSize needs to be one step ahed the actual version...
+  uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+1)];
+  char buffer[128];
+  beacon->location.formatFloatLocation(buffer,"https://www.google.com/maps/search/?api=1&query=%s%%2C%s");
+  Serial.println(buffer);
+	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_MEDIUM, buffer);
 }
 
 static const int MODULE_SIZE = 3;
@@ -264,7 +274,8 @@ void test406()
   }
 
     QRCode qrCode;
-    generateQrCode(&qrCode,&beacon);
+//    generateBeaconDecoderQrCode(&qrCode,&beacon);
+    generateMapsQrCode(&qrCode,&beacon);
     int xPos = display.getWidth()-((qrCode.size+3)*MODULE_SIZE);
     int yPos = display.getHeight()-((qrCode.size+3)*MODULE_SIZE);
     displayQrCode(&qrCode,xPos,yPos);

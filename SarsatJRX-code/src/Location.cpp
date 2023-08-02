@@ -18,15 +18,19 @@ String Location::toString(bool sexagesimal)
     }
     else
     {   // Format :  <-xx.yyy, xxx.yyy>
-        // sprintf %f is not supported by Arduino :-/
-        char latStr[16];
-        char longStr[16];
-        /* 4 is mininum width, 2 is precision; float value is copied onto str_temp*/
-        dtostrf(latitude.getFloatValue(), 6, 4, latStr);
-        dtostrf(longitude.getFloatValue(), 6, 4, longStr);
-        sprintf(buffer, "%s, %s",latStr,longStr);
+        formatFloatLocation(buffer, "%s, %s");
     }
     return buffer;
+}
+
+void Location::formatFloatLocation(char* buffer, const char* format)
+{   // Format :  <-xx.yyy>
+    // sprintf %f is not supported by Arduino :-/
+    char latStr[16];
+    latitude.toFloatString(latStr);
+    char longStr[16];
+    longitude.toFloatString(longStr);
+    sprintf(buffer, format, latStr,longStr);
 }
 
 void Location::clear()
@@ -53,4 +57,9 @@ double Location::Angle::getFloatValue()
         result = -result;
     }
     return result;
+}
+
+void Location::Angle::toFloatString(char* angleStr)
+{   /* 6 is mininum width, 4 is precision; float value is copied onto angleStr */
+    dtostrf(getFloatValue(), 6, 4, angleStr);
 }
