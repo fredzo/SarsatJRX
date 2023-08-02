@@ -29,6 +29,14 @@
 #include <qrcode.h>
 #include <Beacon.h>
 
+#define MAPS_BUTTON_X     246
+#define MAPS_BUTTON_Y     2
+#define MAPS_BUTTON_CAPTION "MAPS"
+#define BEACON_BUTTON_X   246
+#define BEACON_BUTTON_Y   34
+#define BEACON_BUTTON_CAPTION "BEACON"
+
+
 /********************************
   Definitions des constantes
 *********************************/
@@ -47,7 +55,8 @@ byte frame[Beacon::SIZE];
 float vout = 0.0;   // pour lecture tension batterie
 float vin = 0.0;    // pour lecture tension batterie
 int value = 0;      // pour lecture tension batterie
-
+// Current beacon
+Beacon* beacon;
 
 Display display;
 
@@ -163,21 +172,19 @@ String toHexString(byte* frame, bool withSpace, int start, int end)
 }
 
 static const int QR_VERSION = 6;
-void generateBeaconDecoderQrCode(QRCode* qrcode, Beacon* beacon)
-{ // Version 6 (41x41) allows 154 alphanumeric characters with medium error correcion
-  // For some reason, to have the qr code library work properly, the version passed to getBufferSize needs to be one step ahed the actual version...
-  uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+1)];
-  String url = "http://audiocaine.free.fr/beacon.html?hex=" + toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14);
-  Serial.println(url);
-	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_MEDIUM, url.c_str());
-}
-
-void generateMapsQrCode(QRCode* qrcode, Beacon* beacon)
+void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
 { // Version 6 (41x41) allows 154 alphanumeric characters with medium error correcion
   // For some reason, to have the qr code library work properly, the version passed to getBufferSize needs to be one step ahed the actual version...
   uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+1)];
   char buffer[128];
-  beacon->location.formatFloatLocation(buffer,"https://www.google.com/maps/search/?api=1&query=%s%%2C%s");
+  if(isMaps)
+  {
+    beacon->location.formatFloatLocation(buffer,"https://www.google.com/maps/search/?api=1&query=%s%%2C%s");
+  }
+  else
+  {
+    sprintf(buffer,"http://audiocaine.free.fr/beacon.html?hex=%s", toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14).c_str());
+  }
   Serial.println(buffer);
 	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_MEDIUM, buffer);
 }
@@ -205,23 +212,42 @@ void displayQrCode (QRCode* qrcode, int xPos, int yPos)
   }
 }
 
+void drawQrCode(bool isMaps)
+{
+    QRCode qrCode;
+    generateQrCode(&qrCode,beacon,isMaps);
+    int xPos = display.getWidth()-((qrCode.size+3)*MODULE_SIZE);
+    int yPos = display.getHeight()-((qrCode.size+3)*MODULE_SIZE);
+    displayQrCode(&qrCode,xPos,yPos);
+}
+
+int freeRam() {
+  extern int __heap_start,*__brkval;
+  int v;
+  return (int)&v - (__brkval == 0  
+    ? (int)&__heap_start : (int) __brkval);  
+}
+
 /*****************************
   Routine autotest 406
 ******************************/
 void test406()
 {
-  Beacon beacon = Beacon(frame);
+  //Serial.println(freeRam());
+  free(beacon);
+  beacon = new Beacon(frame);
+  //Serial.println(freeRam());
     
   display.setBackgroundColor(Display::Color::BLACK);
   display.setColor(Display::Color::WHITE);
   display.clearDisplay();        // rafraichissement Oled
   display.setCursor(0, 0);       // Balise TEST ou DETRESSE
-  if (beacon.frameMode == Beacon::FrameMode::SELF_TEST) 
+  if (beacon->frameMode == Beacon::FrameMode::SELF_TEST) 
   {  // Self-test message frame synchronisation byte
     display.println("Self-test 406 - SarsatJRX");
     Serial.println("Self-test 406 - SarsatJRX");    
   }
-  else if (beacon.frameMode == Beacon::FrameMode::NORMAL) 
+  else if (beacon->frameMode == Beacon::FrameMode::NORMAL) 
   { // Normal message frame synchronisation byte
     display.println("Distress 406 - SarsatJRX");
     Serial.println("Distress 406 - SarsatJRX");
@@ -231,37 +257,43 @@ void test406()
     display.println("Unknown 406 - SarsatJRX");
     Serial.println("Unknown 406 - SarsatJRX");
   }
+  //Serial.println(freeRam());
 
   // Description           
   display.setCursor(0, 15);
-  display.println(beacon.desciption);
-  Serial.println(beacon.desciption);   
+  display.println(beacon->desciption);
+  Serial.println(beacon->desciption);   
+  //Serial.println(freeRam());
 
   // Country
   display.setCursor(0, 30);
-  String country = beacon.country.toString();
+  String country = beacon->country.toString();
   display.println(country);
   Serial.println(country);
+  //Serial.println(freeRam());
 
-  if (beacon.longFrame) 
+  if (beacon->longFrame) 
   { // Long frame
 
     // Location 
     display.setCursor(0, 45); 
-    String locationSexa = beacon.location.toString(true);
-    String locationDeci = beacon.location.toString(false);
+    String locationSexa = beacon->location.toString(true);
+    String locationDeci = beacon->location.toString(false);
     display.println(locationSexa);
     Serial.println(locationSexa);
-    if(!beacon.location.isUnknown())
+    if(!beacon->location.isUnknown())
     {
       Serial.println(locationDeci);
+      // Maps button
+      display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
+      display.drawButton(MAPS_BUTTON_CAPTION,false);
     }
 
     // HEX ID 30 Hexa
     display.setCursor(0, 60);
-    display.println(toHexString(beacon.frame,true,3,13));
+    display.println(toHexString(beacon->frame,true,3,13));
     display.setCursor(0, 75);
-    display.println(toHexString(beacon.frame,true,13,18));
+    display.println(toHexString(beacon->frame,true,13,18));
   }
   else 
   { // Short frame
@@ -270,16 +302,14 @@ void test406()
     
     display.setCursor(0, 60);  
     // HEX ID 22 Hexa bit 26 to 112
-    display.println(toHexString(beacon.frame,true,3,14));
+    display.println(toHexString(beacon->frame,true,3,14));
   }
+  //Serial.println(freeRam());
 
-    QRCode qrCode;
-//    generateBeaconDecoderQrCode(&qrCode,&beacon);
-    generateMapsQrCode(&qrCode,&beacon);
-    int xPos = display.getWidth()-((qrCode.size+3)*MODULE_SIZE);
-    int yPos = display.getHeight()-((qrCode.size+3)*MODULE_SIZE);
-    displayQrCode(&qrCode,xPos,yPos);
-  
+    // Beacon button
+    display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
+    display.drawButton(BEACON_BUTTON_CAPTION,false);
+
  // display.setCursor(80, 30); // Oled Voltmetre
  // display.print("V= ");
  // display.print(vin);
@@ -370,25 +400,50 @@ void setup()
   pinMode(15, INPUT);                   // entree batterie pin 15
   pinMode(16, OUTPUT);                  // sortie Buzzer pin 16
   
-  Serial.begin(9600);
-  attachInterrupt(0, analyze, CHANGE);  // interruption sur Rise et Fall
+  Serial.begin(115200);
+  // attachInterrupt(0, analyze, CHANGE);  // interruption sur Rise et Fall
 
   display.setup();
   //display.drawButtons();  
   readHexString(frames[curFrame]);
+  Serial.println("### Boot complete !");
 }
+
 
 
 void loop()
 {
   if(display.touchAvailable())
   {
-    curFrame++;
-    if(curFrame >= framesSize)
+    int x = display.getTouchX();
+    int y = display.getTouchY();
+    //Serial.println(x);
+    //Serial.println(y);
+    if( x >= MAPS_BUTTON_X && x <= (MAPS_BUTTON_X+BUTTON_WIDTH) && y >= MAPS_BUTTON_Y && y <= (MAPS_BUTTON_Y + BUTTON_HEIGHT))
     {
-      curFrame = 0;
+      display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
+      display.drawButton(MAPS_BUTTON_CAPTION,true);
+      drawQrCode(true);
+      display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
+      display.drawButton(MAPS_BUTTON_CAPTION,false);
     }
-    readHexString(frames[curFrame]);
+    else if( x >= BEACON_BUTTON_X && x <= (BEACON_BUTTON_X+BUTTON_WIDTH) && y >= BEACON_BUTTON_Y && y <= (BEACON_BUTTON_Y + BUTTON_HEIGHT))
+    {
+      display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
+      display.drawButton(BEACON_BUTTON_CAPTION,true);
+      drawQrCode(false);
+      display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
+      display.drawButton(BEACON_BUTTON_CAPTION,false);
+    }
+    else
+    {
+      curFrame++;
+      if(curFrame >= framesSize)
+      {
+        curFrame = 0;
+      }
+      readHexString(frames[curFrame]);
+    }
   }
   if (count_oct == Nb_octet)
   {

@@ -16,10 +16,12 @@ class Location
             double getFloatValue();
             void clear();
             void toFloatString(char* angleStr);
+            Angle();
+            Angle(long degrees);
         };
 
-        Angle longitude;
-        Angle latitude;
+        Angle latitude = Angle(127);
+        Angle longitude = Angle(255);
         void clear();
         boolean isUnknown();
         String toString(bool sexagesimal);

@@ -5,17 +5,13 @@
 #include <UTFT.h>
 #include <UTouch.h>
 
+#define BUTTON_WIDTH  70
+#define BUTTON_HEIGHT 28
 
 class Display
 {
-    private : 
-        // Init display and touch screen
-        UTFT myGLCD = UTFT(ITDB32S, 38,39,40,41); 
-        UTouch  myTouch = UTouch(6,5,4,3,2);
-        int x, y;
-        String displayBuffer;
-
     public :
+        enum class FontSize {SMALL,LARGE};
         class Color
         {
             public :
@@ -44,8 +40,19 @@ class Display
         int getTouchY();
         int getWidth();
         int getHeight();
-
+        void drawButton(const char* caption, bool pressed);
+        void setFontSize(FontSize fontSize);
         void drawButtons();
+
+    private : 
+        // Init display and touch screen
+        UTFT myGLCD = UTFT(ITDB32S, 38,39,40,41); 
+        UTouch  myTouch = UTouch(6,5,4,3,2);
+        int x, y;
+        String displayBuffer;
+        Color currentColor = Color::WHITE;
+        Color currentBackColor = Color::BLACK;
+        int touchX, touchY;
 
 };
 

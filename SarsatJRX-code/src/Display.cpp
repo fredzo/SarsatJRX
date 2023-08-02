@@ -29,11 +29,13 @@ const Display::Color Display::Color::CYAN(0,255,255);
 
 void Display::setColor(Color color)
 {
+  currentColor = color;
   myGLCD.setColor(color.red, color.green, color.blue);
 }
 
 void Display::setBackgroundColor(Color color)
 {
+  currentBackColor = color;
   myGLCD.setBackColor(color.red, color.green, color.blue);
 }
 
@@ -51,10 +53,22 @@ void Display::setup()
     myTouch.InitTouch();
     myTouch.setPrecision(PREC_MEDIUM);
 
-    // myGLCD.setFont(BigFont);
-    myGLCD.setFont(SmallFont);
+    setFontSize(FontSize::SMALL);
     setColor(Color::BLACK);
     setBackgroundColor(Color::WHITE);
+}
+
+void Display::setFontSize(FontSize fontSize)
+{
+  switch(fontSize)
+  {
+    case FontSize::LARGE :
+      myGLCD.setFont(BigFont);
+      break;
+    case FontSize::SMALL :
+      myGLCD.setFont(SmallFont);
+      break;  
+  }
 }
 
 void Display::setCursor(int x, int y)
@@ -118,6 +132,8 @@ boolean Display::touchAvailable()
     if (myTouch.dataAvailable())
     {
         myTouch.read();
+        touchX = myTouch.getX();
+        touchY = myTouch.getY();
         return true;
     }
     else
@@ -128,12 +144,34 @@ boolean Display::touchAvailable()
 
 int Display::getTouchX()
 {
-    return myTouch.getX();
+    return touchX;
 }
 
 int Display::getTouchY()
 {
-    return myTouch.getY();
+    return touchY;
+}
+
+void Display::drawButton(const char* caption, bool pressed)
+{ // Caption will be up to 6 char long
+  int captionSize = strlen(caption);
+  // Small font is 8x12
+  // Large font is 16x16
+  // Store current color
+  Color backupColor = currentColor;
+  Color backupBackColor = currentBackColor;
+  Color fColor = pressed ? Color::YELLOW : Color::BLACK;
+  Color bColor = pressed ? Color::BLACK : Color::YELLOW;
+  setBackgroundColor(bColor);
+  setColor(bColor);
+  myGLCD.fillRoundRect (x, y, x+BUTTON_WIDTH, y+BUTTON_HEIGHT);
+  setColor(fColor);
+  myGLCD.print(caption, x+((BUTTON_WIDTH-8*captionSize)/2), y+((BUTTON_HEIGHT-12)/2));
+  setColor(Color::GREEN);
+  myGLCD.drawRoundRect (x, y, x+BUTTON_WIDTH, y+BUTTON_HEIGHT);
+  // Restore color
+  setColor(backupColor);
+  setBackgroundColor(backupBackColor);
 }
 
 /*************************

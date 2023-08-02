@@ -7,10 +7,10 @@ class Country
 {
     public:
         int code;
-        const char* alphaCode;
-        const char* longName;
-        const char* shortName;
-        void setValues(int code, const char* alphaCode, const char* longName, const char* shortName);
+        String alphaCode;
+        String longName;
+        String shortName;
+        void setValues(int code, String alphaCode, String longName, String shortName);
         String toString();
         static Country getCountry(int code);
 };

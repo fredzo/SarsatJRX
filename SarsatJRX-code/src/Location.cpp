@@ -39,6 +39,15 @@ void Location::clear()
     longitude.clear();
 }
 
+Location::Angle::Angle()
+{
+}
+
+Location::Angle::Angle(long degrees)
+{
+    this->degrees = degrees;
+}
+
 void Location::Angle::clear()
 {
     degrees = 0;
