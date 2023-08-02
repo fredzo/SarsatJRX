@@ -55,7 +55,7 @@ void Beacon::parseFrame()
             switch(protocolCode)
             {
                 case 0b000 :
-                    desciption = F("User loc. Protocol-Orbitography");
+                    desciption = F("User loc. Prot. - Orbitography");
                     break;
                 case 0b001 :
                     desciption = F("ELT - Aviation User Protocol");
@@ -73,7 +73,7 @@ void Beacon::parseFrame()
                     desciption = F("Second Generation Beacon");
                     break;
                 case 0b110 :
-                    desciption += F("EPIRB-Radio Call Sign User Prot.");
+                    desciption += F("EPIRB-Radio Call Sign User P.");
                     break;
                 case 0b111 :
                     desciption += F("Test User Location Protocol");
@@ -221,29 +221,29 @@ void Beacon::parseFrame()
                     desciption += F("EPIRB - MMSI/Location Protocol");
                     break;
                 case 0b0011 :
-                    desciption += F("ELT-24-bit Address/Location Prot.");
+                    desciption += F("ELT-24-bit Address/Loc. Prot.");
                     break;
                 case 0b0100 :
                 case 0b0101 :
-                    desciption += F("Serial Location Protocols - ELT");
+                    desciption += F("Serial Location Prot. - ELT");
                     break;
                 case 0b0110 :
-                    desciption += F("Serial Location Protocols - EPIRB");
+                    desciption += F("Serial Location Prot. - EPIRB");
                     break;
                 case 0b0111 :
-                    desciption += F("Serial Location Protocols - PLB");
+                    desciption += F("Serial Location Prot. - PLB");
                     break;
                 case 0b1000 :
-                    desciption += F("National Location Protocol - ELT");
+                    desciption += F("National Location Prot. - ELT");
                     break;
                 case 0b1001 :
                     desciption += F("ELT(DT) Location Protocol");
                     break;
                 case 0b1010 :
-                    desciption += F("National Location Protocol - EPIRB");
+                    desciption += F("National Location Prot.-EPIRB");
                     break;
                 case 0b1011 :
-                    desciption += F("National Location Protocol - PLB");
+                    desciption += F("National Location Prot. - PLB");
                     break;
                 case 0b1100 :
                     desciption += F("Ship Security");
@@ -252,17 +252,14 @@ void Beacon::parseFrame()
                     desciption += F("RLS Location Protocol");
                     break;
                 case 0b1110 :
-                    desciption += F("Standard Test Location Protocol");
+                    desciption += F("Standard Test Location Prot.");
                     break;
                 case 0b1111 :
-                    desciption += F("National Test Location Protocol");
+                    desciption += F("National Test Location Prot.");
                     break;
                 default:
                     desciption += F("Unknown");
             }
-                desciption = F("Unknown protocol");
-                desciption = F("National Location Protocol");
-                desciption = F("Standard Location Protocol");
         }
     }
     else 
@@ -289,7 +286,7 @@ void Beacon::parseFrame()
                 desciption += F("Spare");
                 break;
             case 0b110 :
-                desciption += F("Radio call sign");
+                desciption += F("Radio callsign");
                 break;
             case 0b111 :
                 desciption += F("Test");
