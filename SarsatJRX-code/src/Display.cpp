@@ -21,7 +21,8 @@ Display::Color::Color(byte red, byte green, byte blue)
 const Display::Color Display::Color::WHITE(255,255,255);
 const Display::Color Display::Color::BLACK(0,0,0);
 const Display::Color Display::Color::RED(206,132,85);
-const Display::Color Display::Color::GREEN(106,138,54);
+const Display::Color Display::Color::DARK_GREEN(106,138,54);
+const Display::Color Display::Color::GREEN(59,201,176);
 const Display::Color Display::Color::BLUE(28,143,255);
 const Display::Color Display::Color::YELLOW(255,255,0);
 const Display::Color Display::Color::MAGENTA(255,0,255);

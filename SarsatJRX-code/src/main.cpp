@@ -32,6 +32,11 @@
 #define HEADER_HEIGHT     20
 #define LINE_HEIGHT       15
 #define HEADER_TEXT       "- SarsatJRX -"
+#define FRAME_MODE_LABEL  "Frame mode :"
+#define FRAME_MODE_WIDTH  100
+#define INFO_LABEL        "Info :"
+#define LOCATION_LABEL    "Location :"
+#define DATA_LABEL        "Data :"
 #define HEADER_BOTTOM     24
 #define MAPS_BUTTON_X     246
 #define MAPS_BUTTON_Y     HEADER_BOTTOM
@@ -271,28 +276,43 @@ void test406()
   String frameMode;
   if (beacon->frameMode == Beacon::FrameMode::SELF_TEST) 
   {  // Self-test message frame synchronisation byte
-    frameMode = F("Frame mode : Self-test 406");
+    frameMode = F("Self-test 406");
   }
   else if (beacon->frameMode == Beacon::FrameMode::NORMAL) 
   { // Normal message frame synchronisation byte
-    frameMode = F("Frame mode : Distress 406");
+    frameMode = F("Distress 406");
   }
   else
   { // Unknown fram format
-    frameMode = F("Frame mode : Unknown 406");
+    frameMode = F("Unknown 406");
   }
   display.setCursor(0, currentY);
+  display.setColor(Display::Color::GREEN);
+  display.println(FRAME_MODE_LABEL);
+  display.setColor(Display::Color::BEIGE);
+  display.setCursor(FRAME_MODE_WIDTH, currentY);
   display.println(frameMode);
   Serial.println(frameMode);
   currentY+=LINE_HEIGHT;
 
-  // Description           
+  // Info           
+  display.setCursor(0, currentY);
+  display.setColor(Display::Color::GREEN);
+  display.println(INFO_LABEL);
+  display.setColor(Display::Color::BEIGE);
+  currentY+=LINE_HEIGHT;
   display.setCursor(0, currentY);
   display.println(beacon->desciption);
   Serial.println(beacon->desciption);   
   currentY+=LINE_HEIGHT;
   //Serial.println(freeRam());
 
+  // Location
+  display.setCursor(0, currentY);
+  display.setColor(Display::Color::GREEN);
+  display.println(LOCATION_LABEL);
+  display.setColor(Display::Color::BEIGE);
+  currentY+=LINE_HEIGHT;
   // Country
   display.setCursor(0, currentY);
   String country = beacon->country.toString();
@@ -301,10 +321,9 @@ void test406()
   currentY+=LINE_HEIGHT;
   //Serial.println(freeRam());
 
+  // Coordinates
   if (beacon->longFrame) 
   { // Long frame
-
-    // Location 
     display.setCursor(0, currentY); 
     String locationSexa = beacon->location.toString(true);
     String locationDeci = beacon->location.toString(false);
@@ -321,7 +340,22 @@ void test406()
       display.drawButton(MAPS_BUTTON_CAPTION,false);
     }
     currentY+=LINE_HEIGHT;
+  }
+  else 
+  { // Short frame
+    display.setCursor(5, currentY);
+    display.println("22 HEX. No location");
+    currentY+=LINE_HEIGHT;
+  }
 
+  // Data
+  display.setCursor(0, currentY);
+  display.setColor(Display::Color::GREEN);
+  display.println(DATA_LABEL);
+  display.setColor(Display::Color::BEIGE);
+  currentY+=LINE_HEIGHT;
+  if (beacon->longFrame) 
+  { // Long frame
     // HEX ID 30 Hexa
     display.setCursor(0, currentY);
     display.println(toHexString(beacon->frame,true,3,11));
@@ -331,10 +365,6 @@ void test406()
   }
   else 
   { // Short frame
-    display.setCursor(5, currentY);
-    display.println("22 HEX. No location");
-    currentY+=LINE_HEIGHT;
-    
     display.setCursor(0, currentY);  
     // HEX ID 22 Hexa bit 26 to 112
     display.println(toHexString(beacon->frame,true,3,11));
@@ -342,11 +372,12 @@ void test406()
     display.setCursor(0, currentY);
     display.println(toHexString(beacon->frame,true,11,14));
   }
+
   //Serial.println(freeRam());
 
-    // Beacon button
-    display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
-    display.drawButton(BEACON_BUTTON_CAPTION,false);
+  // Beacon button
+  display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
+  display.drawButton(BEACON_BUTTON_CAPTION,false);
 
  // display.setCursor(80, 30); // Oled Voltmetre
  // display.print("V= ");
