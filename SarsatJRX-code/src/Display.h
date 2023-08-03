@@ -12,6 +12,7 @@ class Display
 {
     public :
         enum class FontSize {SMALL,LARGE};
+        enum class ButtonStatus {NORMAL,PRESSED,DISABLED};
         class Color
         {
             public :
@@ -43,7 +44,7 @@ class Display
         int getTouchY();
         int getWidth();
         int getHeight();
-        void drawButton(const char* caption, bool pressed);
+        void drawButton(const char* caption, ButtonStatus status);
         void setFontSize(FontSize fontSize);
         void centerText(String text, int width);
         void drawButtons();

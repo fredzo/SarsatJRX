@@ -179,7 +179,7 @@ void Display::centerText(String text, int width)
   x += (width-(((fontSize == FontSize::SMALL) ? 8 : 16)*text.length()))/2;
 }
 
-void Display::drawButton(const char* caption, bool pressed)
+void Display::drawButton(const char* caption, ButtonStatus status)
 { // Caption will be up to 6 char long
   int captionSize = strlen(caption);
   // Small font is 8x12
@@ -187,8 +187,8 @@ void Display::drawButton(const char* caption, bool pressed)
   // Store current color
   Color backupColor = currentColor;
   Color backupBackColor = currentBackColor;
-  Color fColor = pressed ? Color::YELLOW : Color::BLACK;
-  Color bColor = pressed ? Color::BLACK : Color::YELLOW;
+  Color fColor = (status == ButtonStatus::PRESSED) ? Color::YELLOW : (status ==  ButtonStatus::DISABLED) ? Color::BEIGE : Color::BLACK;
+  Color bColor = (status == ButtonStatus::PRESSED) ? Color::BLACK : (status ==  ButtonStatus::DISABLED) ? Color::GREY : Color::YELLOW;;
   setBackgroundColor(bColor);
   setColor(bColor);
   myGLCD.fillRoundRect (x, y, x+BUTTON_WIDTH, y+BUTTON_HEIGHT);

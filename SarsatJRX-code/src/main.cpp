@@ -68,6 +68,11 @@ int value = 0;      // pour lecture tension batterie
 Beacon* beacon;
 
 Display display;
+// Buttons status
+bool mapsButtonEnabled = false;
+bool beaconButtonEnabled = false;
+bool previousButtonEnabled = false;
+bool nextButtonEnabled = false;
 
 /***************************************
   Test octets recu et transfert data
@@ -192,7 +197,7 @@ void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
   }
   else
   {
-    sprintf(buffer,"http://audiocaine.free.fr/beacon.html?hex=%s", toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14).c_str());
+    sprintf(buffer,"https://cryptic-earth-89063heroku-20.herokuapp.com/decoded/%s", toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14).c_str());
   }
   Serial.println(buffer);
 	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_MEDIUM, buffer);
@@ -322,6 +327,7 @@ void test406()
   //Serial.println(freeRam());
 
   // Coordinates
+  bool locationKnown = !beacon->location.isUnknown(); 
   if (beacon->longFrame) 
   { // Long frame
     display.setCursor(0, currentY); 
@@ -330,14 +336,11 @@ void test406()
     display.println(locationSexa);
     Serial.println(locationSexa);
     currentY+=LINE_HEIGHT;
-    if(!beacon->location.isUnknown())
+    if(locationKnown)
     {
       display.setCursor(0, currentY); 
       display.println(locationDeci);
       Serial.println(locationDeci);
-      // Maps button
-      display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
-      display.drawButton(MAPS_BUTTON_CAPTION,false);
     }
     currentY+=LINE_HEIGHT;
   }
@@ -375,9 +378,15 @@ void test406()
 
   //Serial.println(freeRam());
 
+  // Maps button
+  display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
+  display.drawButton(MAPS_BUTTON_CAPTION,locationKnown ? Display::ButtonStatus::NORMAL : Display::ButtonStatus::DISABLED);
+  mapsButtonEnabled = locationKnown;
+
   // Beacon button
   display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
-  display.drawButton(BEACON_BUTTON_CAPTION,false);
+  display.drawButton(BEACON_BUTTON_CAPTION,Display::ButtonStatus::NORMAL);
+  beaconButtonEnabled = true;
 
  // display.setCursor(80, 30); // Oled Voltmetre
  // display.print("V= ");
@@ -458,9 +467,10 @@ static const String frames[] = {
   "FFFE2FE29325ACB12E938B671E0FE0FF0F61", // 18 - ELT Aviation User 
   "FFFE2FEDF67B7182038C2F0E10CFE0FF0F61", // 19 - Serial user -	ELT with Aircraft Operator Designator & Serial Number 
   "FFFE2FA157B081437FDFF8B4833783E0F66C", // 20 - Standard Location Protocol - PLB (Serial) 
-  "FFFE2F8DB345B146202DDF3C71F59BAB7072"  // 21 - Standard Location
+  "FFFE0D96ED09900149D4D467EE0851A3B2E8", // 21 - RLS Location Protocol
+  "FFFE2F8DB345B146202DDF3C71F59BAB7072"  // 22 - Standard Location
   };
-static const int framesSize = 21;
+static const int framesSize = 22;
 
 void setup()
 {
@@ -485,32 +495,41 @@ void loop()
   {
     int x = display.getTouchX();
     int y = display.getTouchY();
-    //Serial.println(x);
-    //Serial.println(y);
-    if( x >= MAPS_BUTTON_X && x <= (MAPS_BUTTON_X+BUTTON_WIDTH) && y >= MAPS_BUTTON_Y && y <= (MAPS_BUTTON_Y + BUTTON_HEIGHT))
+    if(x>=0 && y>=0)
     {
-      display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
-      display.drawButton(MAPS_BUTTON_CAPTION,true);
-      drawQrCode(true);
-      display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
-      display.drawButton(MAPS_BUTTON_CAPTION,false);
-    }
-    else if( x >= BEACON_BUTTON_X && x <= (BEACON_BUTTON_X+BUTTON_WIDTH) && y >= BEACON_BUTTON_Y && y <= (BEACON_BUTTON_Y + BUTTON_HEIGHT))
-    {
-      display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
-      display.drawButton(BEACON_BUTTON_CAPTION,true);
-      drawQrCode(false);
-      display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
-      display.drawButton(BEACON_BUTTON_CAPTION,false);
-    }
-    else
-    {
-      curFrame++;
-      if(curFrame >= framesSize)
+      //Serial.println(x);
+      //Serial.println(y);
+      if(x >= MAPS_BUTTON_X && x <= (MAPS_BUTTON_X+BUTTON_WIDTH) && y >= MAPS_BUTTON_Y && y <= (MAPS_BUTTON_Y + BUTTON_HEIGHT))
       {
-        curFrame = 0;
+        if(mapsButtonEnabled)
+        {
+          display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
+          display.drawButton(MAPS_BUTTON_CAPTION,Display::ButtonStatus::PRESSED);
+          drawQrCode(true);
+          display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
+          display.drawButton(MAPS_BUTTON_CAPTION,Display::ButtonStatus::NORMAL);
+        }
       }
-      readHexString(frames[curFrame]);
+      else if( x >= BEACON_BUTTON_X && x <= (BEACON_BUTTON_X+BUTTON_WIDTH) && y >= BEACON_BUTTON_Y && y <= (BEACON_BUTTON_Y + BUTTON_HEIGHT))
+      {
+        if(beaconButtonEnabled)
+        {
+          display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
+          display.drawButton(BEACON_BUTTON_CAPTION,Display::ButtonStatus::PRESSED);
+          drawQrCode(false);
+          display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
+          display.drawButton(BEACON_BUTTON_CAPTION,Display::ButtonStatus::NORMAL);
+        }
+      }
+      else
+      {
+        curFrame++;
+        if(curFrame >= framesSize)
+        {
+          curFrame = 0;
+        }
+        readHexString(frames[curFrame]);
+      }
     }
   }
   if (count_oct == Nb_octet)
