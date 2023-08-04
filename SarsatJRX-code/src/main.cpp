@@ -54,9 +54,9 @@ Display::Button beaconButton = Display::Button(BEACON_BUTTON_X,BEACON_BUTTON_Y,B
 #define PREVIONS_BUTTON_Y   DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT-1
 #define PREVIONS_BUTTON_CAPTION "<"
 Display::Button previousButton = Display::Button(PREVIONS_BUTTON_X,PREVIONS_BUTTON_Y,PREVIONS_BUTTON_CAPTION,Display::ButtonStyle::SMALL);
-#define NEXT_BUTTON_X   0
+#define NEXT_BUTTON_X   DISPLAY_WIDTH-SMALL_BUTTON_WIDTH-1
 #define NEXT_BUTTON_Y   DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT-1
-#define NEXT_BUTTON_CAPTION "<"
+#define NEXT_BUTTON_CAPTION ">"
 Display::Button nextButton = Display::Button(NEXT_BUTTON_X,NEXT_BUTTON_Y,NEXT_BUTTON_CAPTION,Display::ButtonStyle::SMALL);
 // URL templates
 #define MAPS_URL_TEMPLATE   "https://www.google.com/maps/search/?api=1&query=%s%%2C%s"
@@ -246,12 +246,6 @@ void drawQrCode(bool isMaps)
     displayQrCode(&qrCode,xPos,yPos);
 }
 
-void drawNavigationButtons()
-{
-    int yPos = display.getHeight()-SMALL_BUTTON_HEIGHT-1;
-    //display.drawSmallButton();
-}
-
 int freeRam() {
   extern int __heap_start,*__brkval;
   int v;
@@ -403,6 +397,12 @@ void test406()
   beaconButton.enabled = true;
   display.drawButton(beaconButton);
 
+  // Navigation buttons
+  previousButton.enabled = true;
+  display.drawButton(previousButton);
+  nextButton.enabled = false;
+  display.drawButton(nextButton);
+
  // display.setCursor(80, 30); // Oled Voltmetre
  // display.print("V= ");
  // display.print(vin);
@@ -534,6 +534,28 @@ void loop()
           drawQrCode(false);
           beaconButton.pressed = false;
           display.drawButton(beaconButton);
+        }
+      }
+      else if(previousButton.contains(x,y))
+      {
+        if(previousButton.enabled)
+        {
+          previousButton.pressed = true;
+          display.drawButton(previousButton);
+          delay(2000);
+          previousButton.pressed = false;
+          display.drawButton(previousButton);
+        }
+      }
+      else if(nextButton.contains(x,y))
+      {
+        if(nextButton.enabled)
+        {
+          nextButton.pressed = true;
+          display.drawButton(nextButton);
+          delay(2000);
+          nextButton.pressed = false;
+          display.drawButton(nextButton);
         }
       }
       else
