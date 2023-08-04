@@ -141,12 +141,12 @@ void Display::clearDisplay()
 
 int Display::getWidth()
 {
-  return myGLCD.getDisplayXSize();
+  return DISPLAY_WIDTH;
 }
 
 int Display::getHeight()
 {
-  return myGLCD.getDisplayYSize();
+  return DISPLAY_HEIGHT;
 }
 
 boolean Display::touchAvailable()
@@ -179,85 +179,77 @@ void Display::centerText(String text, int width)
   x += (width-(((fontSize == FontSize::SMALL) ? 8 : 16)*text.length()))/2;
 }
 
-void Display::drawButton(const char* caption, ButtonStatus status)
-{ // Caption will be up to 6 char long
-  int captionSize = strlen(caption);
-  // Small font is 8x12
-  // Large font is 16x16
+int Display::Button::getWidth()
+{
+  switch (style)
+  {
+    case ButtonStyle::SMALL:
+      return SMALL_BUTTON_WIDTH;
+      break;
+    case ButtonStyle::NORMAL:
+    default:
+      return BUTTON_WIDTH;
+      break;
+  }
+}
+
+int Display::Button::getHeight()
+{
+  switch (style)
+  {
+    case ButtonStyle::SMALL:
+      return SMALL_BUTTON_HEIGHT;
+      break;
+    case ButtonStyle::NORMAL:
+    default:
+      return BUTTON_HEIGHT;
+      break;
+  }
+}
+
+bool Display::Button::contains(int xPos, int yPos)
+{
+  
+  return (xPos >= x && xPos <= (x+getWidth()) && yPos >= y && yPos <= (y+getHeight()));
+}
+
+Display::Colors Display::getColorsForButton(Display::Button button)
+{
+  Colors result;
+  switch (button.style)
+  {
+    case ButtonStyle::SMALL :
+      result.foreground = &(button.pressed ? Color::GREY : button.enabled ? Color::LIGHT_BLUE : Color::GREY);
+      result.background = &(button.pressed ? Color::LIGHT_BLUE : button.enabled ? Color::GREY : Color::DARK_GREY);
+      result.border = &Color::PURPLE;
+      break;
+    case ButtonStyle::NORMAL :
+    default :
+      result.foreground = &(button.pressed ? Color::YELLOW : button.enabled ? Color::BLACK :Color::BEIGE);
+      result.background = &(button.pressed ? Color::BLACK : button.enabled ? Color::YELLOW : Color::GREY);
+      result.border = &Color::ORANGE;
+      break;
+  }
+  return result;
+}
+
+void Display::drawButton(Button button)
+{ 
+  int captionSize = strlen(button.caption);
   // Store current color
+  Colors colors = getColorsForButton(button);
   Color backupColor = currentColor;
   Color backupBackColor = currentBackColor;
-  Color fColor = (status == ButtonStatus::PRESSED) ? Color::YELLOW : (status ==  ButtonStatus::DISABLED) ? Color::BEIGE : Color::BLACK;
-  Color bColor = (status == ButtonStatus::PRESSED) ? Color::BLACK : (status ==  ButtonStatus::DISABLED) ? Color::GREY : Color::YELLOW;;
-  setBackgroundColor(bColor);
-  setColor(bColor);
-  myGLCD.fillRoundRect (x, y, x+BUTTON_WIDTH, y+BUTTON_HEIGHT);
-  setColor(fColor);
-  myGLCD.print(caption, x+((BUTTON_WIDTH-8*captionSize)/2), y+((BUTTON_HEIGHT-12)/2));
-  setColor(Color::ORANGE);
-  myGLCD.drawRoundRect (x, y, x+BUTTON_WIDTH, y+BUTTON_HEIGHT);
+  int xx = button.x+button.getWidth();
+  int yy = button.y+button.getHeight();
+  setBackgroundColor(*colors.background);
+  setColor(*colors.background);
+  myGLCD.fillRoundRect (button.x, button.y, xx, yy);
+  setColor(*colors.foreground);
+  myGLCD.print(button.caption, button.x+((button.getWidth()-8*captionSize)/2), button.y+((button.getHeight()-12)/2));
+  setColor(*colors.border);
+  myGLCD.drawRoundRect (button.x, button.y, xx, yy);
   // Restore color
   setColor(backupColor);
   setBackgroundColor(backupBackColor);
-}
-
-/*************************
-**   Custom functions   **
-*************************/
-
-void Display::drawButtons()
-{
-// Draw the upper row of buttons
-  for (x=0; x<5; x++)
-  {
-    myGLCD.setColor(0, 0, 255);
-    myGLCD.fillRoundRect (10+(x*60), 10, 60+(x*60), 60);
-    myGLCD.setColor(255, 255, 255);
-    myGLCD.drawRoundRect (10+(x*60), 10, 60+(x*60), 60);
-    myGLCD.printNumI(x+1, 27+(x*60), 27);
-  }
-// Draw the center row of buttons
-  for (x=0; x<5; x++)
-  {
-    myGLCD.setColor(0, 0, 255);
-    myGLCD.fillRoundRect (10+(x*60), 70, 60+(x*60), 120);
-    myGLCD.setColor(255, 255, 255);
-    myGLCD.drawRoundRect (10+(x*60), 70, 60+(x*60), 120);
-    if (x<4)
-      myGLCD.printNumI(x+6, 27+(x*60), 87);
-  }
-  myGLCD.print("0", 267, 87);
-// Draw the lower row of buttons
-  myGLCD.setColor(0, 0, 255);
-  myGLCD.fillRoundRect (10, 130, 150, 180);
-  myGLCD.setColor(255, 255, 255);
-  myGLCD.drawRoundRect (10, 130, 150, 180);
-  myGLCD.print("Clearo", 40, 147);
-  myGLCD.setColor(0, 0, 255);
-  myGLCD.fillRoundRect (160, 130, 300, 180);
-  myGLCD.setColor(255, 255, 255);
-  myGLCD.drawRoundRect (160, 130, 300, 180);
-  myGLCD.print("Entero", 190, 147);
-  myGLCD.setBackColor (0, 0, 0);
-}
-
-// Draw a red frame while a button is touched
-void Display::waitForIt(int x1, int y1, int x2, int y2)
-{
-  myGLCD.setColor(255, 0, 0);
-  myGLCD.drawRoundRect (x1, y1, x2, y2);
-  while (myTouch.dataAvailable())
-    myTouch.read();
-  myGLCD.setColor(255, 255, 255);
-  myGLCD.drawRoundRect (x1, y1, x2, y2);
-}
-
-void Display::loop()
-{
-    if (myTouch.dataAvailable())
-    {
-      myTouch.read();
-      x=myTouch.getX();
-      y=myTouch.getY();
-    }
 }

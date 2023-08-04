@@ -29,22 +29,38 @@
 #include <qrcode.h>
 #include <Beacon.h>
 
+// Header
 #define HEADER_HEIGHT     20
-#define LINE_HEIGHT       15
 #define HEADER_TEXT       "- SarsatJRX -"
+#define HEADER_BOTTOM     24
+// Beacont info
+#define LINE_HEIGHT       15
 #define FRAME_MODE_LABEL  "Frame mode :"
 #define FRAME_MODE_WIDTH  100
 #define INFO_LABEL        "Info :"
 #define LOCATION_LABEL    "Location :"
 #define DATA_LABEL        "Data :"
-#define HEADER_BOTTOM     24
+// MAPS and BEACON buttons
 #define MAPS_BUTTON_X     246
 #define MAPS_BUTTON_Y     HEADER_BOTTOM
 #define MAPS_BUTTON_CAPTION "MAPS"
+Display::Button mapsButton = Display::Button(MAPS_BUTTON_X,MAPS_BUTTON_Y,MAPS_BUTTON_CAPTION,Display::ButtonStyle::NORMAL);
 #define BEACON_BUTTON_X   246
 #define BEACON_BUTTON_Y   HEADER_BOTTOM+32
 #define BEACON_BUTTON_CAPTION "BEACON"
-
+Display::Button beaconButton = Display::Button(BEACON_BUTTON_X,BEACON_BUTTON_Y,BEACON_BUTTON_CAPTION,Display::ButtonStyle::NORMAL);
+// Navigation BUTTONS
+#define PREVIONS_BUTTON_X   0
+#define PREVIONS_BUTTON_Y   DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT-1
+#define PREVIONS_BUTTON_CAPTION "<"
+Display::Button previousButton = Display::Button(PREVIONS_BUTTON_X,PREVIONS_BUTTON_Y,PREVIONS_BUTTON_CAPTION,Display::ButtonStyle::SMALL);
+#define NEXT_BUTTON_X   0
+#define NEXT_BUTTON_Y   DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT-1
+#define NEXT_BUTTON_CAPTION "<"
+Display::Button nextButton = Display::Button(NEXT_BUTTON_X,NEXT_BUTTON_Y,NEXT_BUTTON_CAPTION,Display::ButtonStyle::SMALL);
+// URL templates
+#define MAPS_URL_TEMPLATE   "https://www.google.com/maps/search/?api=1&query=%s%%2C%s"
+#define BEACON_URL_TEMPALTE "https://cryptic-earth-89063heroku-20.herokuapp.com/decoded/%s"
 
 /********************************
   Definitions des constantes
@@ -68,11 +84,6 @@ int value = 0;      // pour lecture tension batterie
 Beacon* beacon;
 
 Display display;
-// Buttons status
-bool mapsButtonEnabled = false;
-bool beaconButtonEnabled = false;
-bool previousButtonEnabled = false;
-bool nextButtonEnabled = false;
 
 /***************************************
   Test octets recu et transfert data
@@ -193,11 +204,11 @@ void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
   char buffer[128];
   if(isMaps)
   {
-    beacon->location.formatFloatLocation(buffer,"https://www.google.com/maps/search/?api=1&query=%s%%2C%s");
+    beacon->location.formatFloatLocation(buffer,MAPS_URL_TEMPLATE);
   }
   else
   {
-    sprintf(buffer,"https://cryptic-earth-89063heroku-20.herokuapp.com/decoded/%s", toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14).c_str());
+    sprintf(buffer,BEACON_URL_TEMPALTE, toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14).c_str());
   }
   Serial.println(buffer);
 	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_MEDIUM, buffer);
@@ -233,6 +244,12 @@ void drawQrCode(bool isMaps)
     int xPos = display.getWidth()-((qrCode.size+3)*MODULE_SIZE);
     int yPos = display.getHeight()-((qrCode.size+3)*MODULE_SIZE);
     displayQrCode(&qrCode,xPos,yPos);
+}
+
+void drawNavigationButtons()
+{
+    int yPos = display.getHeight()-SMALL_BUTTON_HEIGHT-1;
+    //display.drawSmallButton();
 }
 
 int freeRam() {
@@ -379,14 +396,12 @@ void test406()
   //Serial.println(freeRam());
 
   // Maps button
-  display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
-  display.drawButton(MAPS_BUTTON_CAPTION,locationKnown ? Display::ButtonStatus::NORMAL : Display::ButtonStatus::DISABLED);
-  mapsButtonEnabled = locationKnown;
+  mapsButton.enabled = locationKnown;
+  display.drawButton(mapsButton);
 
   // Beacon button
-  display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
-  display.drawButton(BEACON_BUTTON_CAPTION,Display::ButtonStatus::NORMAL);
-  beaconButtonEnabled = true;
+  beaconButton.enabled = true;
+  display.drawButton(beaconButton);
 
  // display.setCursor(80, 30); // Oled Voltmetre
  // display.print("V= ");
@@ -499,26 +514,26 @@ void loop()
     {
       //Serial.println(x);
       //Serial.println(y);
-      if(x >= MAPS_BUTTON_X && x <= (MAPS_BUTTON_X+BUTTON_WIDTH) && y >= MAPS_BUTTON_Y && y <= (MAPS_BUTTON_Y + BUTTON_HEIGHT))
+      if(mapsButton.contains(x,y))
       {
-        if(mapsButtonEnabled)
+        if(mapsButton.enabled)
         {
-          display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
-          display.drawButton(MAPS_BUTTON_CAPTION,Display::ButtonStatus::PRESSED);
+          mapsButton.pressed = true;
+          display.drawButton(mapsButton);
           drawQrCode(true);
-          display.setCursor(MAPS_BUTTON_X,MAPS_BUTTON_Y); 
-          display.drawButton(MAPS_BUTTON_CAPTION,Display::ButtonStatus::NORMAL);
+          mapsButton.pressed = false;
+          display.drawButton(mapsButton);
         }
       }
-      else if( x >= BEACON_BUTTON_X && x <= (BEACON_BUTTON_X+BUTTON_WIDTH) && y >= BEACON_BUTTON_Y && y <= (BEACON_BUTTON_Y + BUTTON_HEIGHT))
+      else if(beaconButton.contains(x,y))
       {
-        if(beaconButtonEnabled)
+        if(beaconButton.enabled)
         {
-          display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
-          display.drawButton(BEACON_BUTTON_CAPTION,Display::ButtonStatus::PRESSED);
+          beaconButton.pressed = true;
+          display.drawButton(beaconButton);
           drawQrCode(false);
-          display.setCursor(BEACON_BUTTON_X,BEACON_BUTTON_Y); 
-          display.drawButton(BEACON_BUTTON_CAPTION,Display::ButtonStatus::NORMAL);
+          beaconButton.pressed = false;
+          display.drawButton(beaconButton);
         }
       }
       else

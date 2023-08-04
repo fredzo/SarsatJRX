@@ -5,14 +5,20 @@
 #include <UTFT.h>
 #include <UTouch.h>
 
+#define DISPLAY_WIDTH   320
+#define DISPLAY_HEIGHT  240
+
 #define BUTTON_WIDTH  70
 #define BUTTON_HEIGHT 28
+#define SMALL_BUTTON_WIDTH  32
+#define SMALL_BUTTON_HEIGHT 28
 
 class Display
 {
     public :
         enum class FontSize {SMALL,LARGE};
         enum class ButtonStatus {NORMAL,PRESSED,DISABLED};
+        enum class ButtonStyle {NORMAL,SMALL};
         class Color
         {
             public :
@@ -21,6 +27,20 @@ class Display
             byte blue = 0;
             Color(byte red, byte green, byte blue);
             static const Color WHITE, BLACK, RED, GREEN, DARK_GREEN, BLUE, YELLOW, MAGENTA, CYAN, BEIGE, GREY, DARK_GREY, LIGHT_BLUE, PURPLE, ORANGE;
+        };
+        class Button
+        {
+            public:
+            int x;
+            int y;
+            const char* caption;
+            ButtonStyle style;
+            bool enabled = false;
+            bool pressed = false;
+            Button(int x,int y,const char* caption, ButtonStyle style) : x(x), y(y), caption(caption), style(style) {}
+            bool contains(int xPos, int yPos);
+            int getWidth();
+            int getHeight();
         };
         Display();
         void setup();
@@ -37,17 +57,14 @@ class Display
         void print(String s);
         void print(long value);
         void printHex(byte value);
-        void loop();
-        void waitForIt(int x1, int y1, int x2, int y2);
         bool touchAvailable();
         int getTouchX();
         int getTouchY();
         int getWidth();
         int getHeight();
-        void drawButton(const char* caption, ButtonStatus status);
+        void drawButton(Button button);
         void setFontSize(FontSize fontSize);
         void centerText(String text, int width);
-        void drawButtons();
 
     private : 
         // Init display and touch screen
@@ -59,6 +76,13 @@ class Display
         Color currentBackColor = Color::BLACK;
         int touchX, touchY;
         FontSize fontSize = FontSize::SMALL;
+        class Colors {
+            public:
+            const Color* foreground;
+            const Color* background;
+            const Color* border;
+        };
+        Colors getColorsForButton(Button button);
 
 };
 
