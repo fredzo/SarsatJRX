@@ -85,11 +85,13 @@ float vin = 0.0;    // pour lecture tension batterie
 int value = 0;      // pour lecture tension batterie
 
 // Beacon list
-#define BEACON_LIST_MAX_SIZE  64
+#define BEACON_LIST_MAX_SIZE  20
 
 Beacon* beacons[BEACON_LIST_MAX_SIZE];
-int beaconsCurrentIndex = -1;
+int beaconsWriteIndex = -1;
+int beaconsReadIndex = -1;
 int beaconsSize = 0;
+bool beaconsFull = false;
 
 
 Display display;
@@ -249,7 +251,7 @@ void displayQrCode (QRCode* qrcode, int xPos, int yPos)
 void drawQrCode(bool isMaps)
 {
     QRCode qrCode;
-    generateQrCode(&qrCode,beacons[beaconsCurrentIndex],isMaps);
+    generateQrCode(&qrCode,beacons[beaconsReadIndex],isMaps);
     int xPos = display.getWidth()-((qrCode.size+3)*MODULE_SIZE);
     int yPos = display.getHeight()-((qrCode.size+3)*MODULE_SIZE);
     displayQrCode(&qrCode,xPos,yPos);
@@ -265,22 +267,42 @@ int freeRam() {
 void readBeacon()
 {
   Serial.println(freeRam());
-  // Move to the end of the list
-  beaconsCurrentIndex = beaconsSize;
-  if(beaconsCurrentIndex >= BEACON_LIST_MAX_SIZE)
-  { // Circle back to zero
-    beaconsCurrentIndex = 0;
-  }
-  if(beaconsSize < BEACON_LIST_MAX_SIZE)
+  if(beaconsFull)
   {
-    beaconsSize++;
+    beaconsWriteIndex++;
   }
-  // Help freeing heap
-  free(beacons[beaconsCurrentIndex]);
+  else
+  { // Move to the end of the list
+    beaconsWriteIndex = beaconsSize;
+    if(beaconsSize < BEACON_LIST_MAX_SIZE)
+    {
+      beaconsSize++;
+    }
+    else
+    {
+      beaconsFull = true;
+    }
+  }
+  if(beaconsWriteIndex >= BEACON_LIST_MAX_SIZE)
+  { // Circle back to zero
+    beaconsWriteIndex = 0;
+  }
+  // Delete previously stored beacon to prevent memory leak
+  delete beacons[beaconsWriteIndex];
   Beacon* beacon = new Beacon(frame);
   // Add beacon to the list
-  beacons[beaconsCurrentIndex] = beacon;
+  beacons[beaconsWriteIndex] = beacon;
+  // Move to last received
+  beaconsReadIndex = beaconsWriteIndex;
+
   Serial.println(freeRam());
+
+  // Reset frame decoding
+  count_oct = 0;     
+  count = 0;
+  start_flag = 0;
+  data_demod = 0;
+  der_bit = 1;
 }
 
 /*****************************
@@ -288,7 +310,8 @@ void readBeacon()
 ******************************/
 void updateDisplay()
 {
- // Refresh screen
+  Serial.println(freeRam());
+  // Refresh screen
   display.setBackgroundColor(Display::Color::DARK_GREY);
   display.clearDisplay();
 
@@ -312,23 +335,23 @@ void updateDisplay()
   display.setColor(Display::Color::GREEN);
   display.setCursor(HEADER_PAGES_X, HEADER_PAGES_Y);
   char buffer[8];
-  sprintf(buffer,HEADER_PAGES_TEMPLATE,beaconsCurrentIndex+1,beaconsSize);
+  // Rotating index based on beacon list max size and position of last read frame
+  int displayIndex = ((beaconsSize-1 + beaconsReadIndex - beaconsWriteIndex) % BEACON_LIST_MAX_SIZE)+1;
+  sprintf(buffer,HEADER_PAGES_TEMPLATE,displayIndex,beaconsSize);
   display.println(buffer);
   Serial.println(buffer);
-
-  //Serial.println(freeRam());
 
   int currentY = HEADER_BOTTOM;
   // For the rest of the screen
   display.setColor(Display::Color::BEIGE);
   display.setBackgroundColor(Display::Color::DARK_GREY);
 
-  if(beaconsCurrentIndex<0)
+  if(beaconsReadIndex<0)
   { // Nothing to display
     return;
   }
   // Get current beacon
-  Beacon* beacon = beacons[beaconsCurrentIndex];
+  Beacon* beacon = beacons[beaconsReadIndex];
   // Frame mode
   String frameMode;
   if (beacon->frameMode == Beacon::FrameMode::SELF_TEST) 
@@ -428,8 +451,6 @@ void updateDisplay()
     display.println(toHexString(beacon->frame,true,11,14));
   }
 
-  //Serial.println(freeRam());
-
   // Maps button
   mapsButton.enabled = locationKnown;
   display.drawButton(mapsButton);
@@ -442,18 +463,14 @@ void updateDisplay()
   display.drawButton(previousButton);
   display.drawButton(nextButton);
 
+  Serial.println(freeRam());
+
  // display.setCursor(80, 30); // Oled Voltmetre
  // display.print("V= ");
  // display.print(vin);
  // display.println();
 
 //  display.display();
-
-  count_oct = 0;     // repart pour trame suivante
-  count = 0;
-  start_flag = 0;
-  data_demod = 0;
-  der_bit = 1;
 }
 
 
@@ -584,10 +601,10 @@ void loop()
         {
           previousButton.pressed = true;
           display.drawButton(previousButton);
-          beaconsCurrentIndex--;
-          if(beaconsCurrentIndex<0)
+          beaconsReadIndex--;
+          if(beaconsReadIndex<0)
           {
-            beaconsCurrentIndex = beaconsSize-1;
+            beaconsReadIndex = beaconsSize-1;
           }
           updateDisplay();
           previousButton.pressed = false;
@@ -600,10 +617,10 @@ void loop()
         {
           nextButton.pressed = true;
           display.drawButton(nextButton);
-          beaconsCurrentIndex++;
-          if(beaconsCurrentIndex>=beaconsSize)
+          beaconsReadIndex++;
+          if(beaconsReadIndex>=beaconsSize)
           {
-            beaconsCurrentIndex = 0;
+            beaconsReadIndex = 0;
           }
           updateDisplay();
           nextButton.pressed = false;
