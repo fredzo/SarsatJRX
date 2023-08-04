@@ -266,7 +266,7 @@ int freeRam() {
 
 void readBeacon()
 {
-  Serial.println(freeRam());
+  //Serial.println(freeRam());
   if(beaconsFull)
   {
     beaconsWriteIndex++;
@@ -295,7 +295,7 @@ void readBeacon()
   // Move to last received
   beaconsReadIndex = beaconsWriteIndex;
 
-  Serial.println(freeRam());
+  //Serial.println(freeRam());
 
   // Reset frame decoding
   count_oct = 0;     
@@ -310,7 +310,7 @@ void readBeacon()
 ******************************/
 void updateDisplay()
 {
-  Serial.println(freeRam());
+  //Serial.println(freeRam());
   // Refresh screen
   display.setBackgroundColor(Display::Color::DARK_GREY);
   display.clearDisplay();
@@ -463,7 +463,7 @@ void updateDisplay()
   display.drawButton(previousButton);
   display.drawButton(nextButton);
 
-  Serial.println(freeRam());
+  //Serial.println(freeRam());
 
  // display.setCursor(80, 30); // Oled Voltmetre
  // display.print("V= ");

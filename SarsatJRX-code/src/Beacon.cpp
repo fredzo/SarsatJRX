@@ -1,5 +1,37 @@
 #include "Beacon.h"
 
+uint64_t getBits(byte *data, int startBit, int endBit)
+{
+    uint64_t result = 0;
+    // 0 bases bit count
+    startBit--;
+    int numBits = endBit - startBit;
+
+    // get a pointer to the starting byte...
+    const byte *pData = &(data[startBit / 8]);
+    byte b = *pData;
+
+    // calculate the starting bit within that byte...
+    int bitOffset = 7 - (startBit % 8);
+
+    // iterate for the desired number of bits...
+    for(int i = 0; i < numBits; ++i)
+    {
+        // make room for the next bit...
+        result <<= 1;
+        // copy the bit...
+        result |= ((b >> bitOffset) & 0x01);
+        // reached the end of the current byte?
+        if (--bitOffset < 0)
+        {
+            b = *(++pData); // go to the next byte...
+            bitOffset = 7; // restart at the first bit in that byte...
+        }
+    }
+
+    // all done...
+    return result;
+}
 
 Beacon::Beacon(byte frameBuffer[])
 {   // Get a local copy of the original frame
@@ -22,9 +54,7 @@ void Beacon::parseFrame()
     {   // Other protocols
         protocolCode = (frame[4] & 0x0F);    // protocol code     bit 37-40
     }
-    unsigned long countryCode;
-    countryCode = ((frame[3] & 0x3F) << 4 | (frame[4] & 0xF0) >> 4); // country code bit 27-36
-    countryCode = countryCode & 0x3FF; // country code
+    unsigned long countryCode = getBits(frame, 27,36); // country code bit 27-36
     country = Country::getCountry(countryCode);
         
     if (frame[2] == 0xD0) 
