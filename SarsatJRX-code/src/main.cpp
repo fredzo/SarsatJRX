@@ -33,6 +33,9 @@
 #define HEADER_HEIGHT     20
 #define HEADER_TEXT       "- SarsatJRX -"
 #define HEADER_BOTTOM     24
+#define HEADER_PAGES_TEMPLATE "%02d/%02d"
+#define HEADER_PAGES_X    3
+#define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
 // Beacont info
 #define LINE_HEIGHT       15
 #define FRAME_MODE_LABEL  "Frame mode :"
@@ -42,11 +45,11 @@
 #define DATA_LABEL        "Data :"
 // MAPS and BEACON buttons
 #define MAPS_BUTTON_X     246
-#define MAPS_BUTTON_Y     HEADER_BOTTOM
+#define MAPS_BUTTON_Y     HEADER_BOTTOM-1
 #define MAPS_BUTTON_CAPTION "MAPS"
 Display::Button mapsButton = Display::Button(MAPS_BUTTON_X,MAPS_BUTTON_Y,MAPS_BUTTON_CAPTION,Display::ButtonStyle::NORMAL);
 #define BEACON_BUTTON_X   246
-#define BEACON_BUTTON_Y   HEADER_BOTTOM+32
+#define BEACON_BUTTON_Y   HEADER_BOTTOM+BUTTON_HEIGHT+1
 #define BEACON_BUTTON_CAPTION "BEACON"
 Display::Button beaconButton = Display::Button(BEACON_BUTTON_X,BEACON_BUTTON_Y,BEACON_BUTTON_CAPTION,Display::ButtonStyle::NORMAL);
 // Navigation BUTTONS
@@ -80,8 +83,14 @@ byte frame[Beacon::SIZE];
 float vout = 0.0;   // pour lecture tension batterie
 float vin = 0.0;    // pour lecture tension batterie
 int value = 0;      // pour lecture tension batterie
-// Current beacon
-Beacon* beacon;
+
+// Beacon list
+#define BEACON_LIST_MAX_SIZE  64
+
+Beacon* beacons[BEACON_LIST_MAX_SIZE];
+int beaconsCurrentIndex = -1;
+int beaconsSize = 0;
+
 
 Display display;
 
@@ -240,7 +249,7 @@ void displayQrCode (QRCode* qrcode, int xPos, int yPos)
 void drawQrCode(bool isMaps)
 {
     QRCode qrCode;
-    generateQrCode(&qrCode,beacon,isMaps);
+    generateQrCode(&qrCode,beacons[beaconsCurrentIndex],isMaps);
     int xPos = display.getWidth()-((qrCode.size+3)*MODULE_SIZE);
     int yPos = display.getHeight()-((qrCode.size+3)*MODULE_SIZE);
     displayQrCode(&qrCode,xPos,yPos);
@@ -253,16 +262,33 @@ int freeRam() {
     ? (int)&__heap_start : (int) __brkval);  
 }
 
+void readBeacon()
+{
+  Serial.println(freeRam());
+  // Move to the end of the list
+  beaconsCurrentIndex = beaconsSize;
+  if(beaconsCurrentIndex >= BEACON_LIST_MAX_SIZE)
+  { // Circle back to zero
+    beaconsCurrentIndex = 0;
+  }
+  if(beaconsSize < BEACON_LIST_MAX_SIZE)
+  {
+    beaconsSize++;
+  }
+  // Help freeing heap
+  free(beacons[beaconsCurrentIndex]);
+  Beacon* beacon = new Beacon(frame);
+  // Add beacon to the list
+  beacons[beaconsCurrentIndex] = beacon;
+  Serial.println(freeRam());
+}
+
 /*****************************
   Routine autotest 406
 ******************************/
-void test406()
+void updateDisplay()
 {
-  //Serial.println(freeRam());
-  free(beacon);
-  beacon = new Beacon(frame);
-  //Serial.println(freeRam());
-  // Refresh screen
+ // Refresh screen
   display.setBackgroundColor(Display::Color::DARK_GREY);
   display.clearDisplay();
 
@@ -274,20 +300,35 @@ void test406()
   display.fillRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
   display.setColor(Display::Color::PURPLE);
   display.drawRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
+  // Header text
   display.setColor(Display::Color::LIGHT_BLUE);
   display.setCursor(0, 3);
   display.setFontSize(Display::FontSize::LARGE);
   display.centerText(HEADER_TEXT,display.getWidth());
   display.println(HEADER_TEXT);
-  Serial.println(HEADER_TEXT);
+  Serial.print(HEADER_TEXT);
+  // Header pages
+  display.setFontSize(Display::FontSize::SMALL);
+  display.setColor(Display::Color::GREEN);
+  display.setCursor(HEADER_PAGES_X, HEADER_PAGES_Y);
+  char buffer[8];
+  sprintf(buffer,HEADER_PAGES_TEMPLATE,beaconsCurrentIndex+1,beaconsSize);
+  display.println(buffer);
+  Serial.println(buffer);
+
   //Serial.println(freeRam());
 
   int currentY = HEADER_BOTTOM;
   // For the rest of the screen
-  display.setFontSize(Display::FontSize::SMALL);
   display.setColor(Display::Color::BEIGE);
   display.setBackgroundColor(Display::Color::DARK_GREY);
 
+  if(beaconsCurrentIndex<0)
+  { // Nothing to display
+    return;
+  }
+  // Get current beacon
+  Beacon* beacon = beacons[beaconsCurrentIndex];
   // Frame mode
   String frameMode;
   if (beacon->frameMode == Beacon::FrameMode::SELF_TEST) 
@@ -398,9 +439,7 @@ void test406()
   display.drawButton(beaconButton);
 
   // Navigation buttons
-  previousButton.enabled = true;
   display.drawButton(previousButton);
-  nextButton.enabled = false;
   display.drawButton(nextButton);
 
  // display.setCursor(80, 30); // Oled Voltmetre
@@ -498,6 +537,9 @@ void setup()
   attachInterrupt(0, analyze, CHANGE);  // interruption sur Rise et Fall
 
   display.setup();
+  previousButton.enabled = true;
+  nextButton.enabled = true;
+
   readHexString(frames[curFrame]);
   Serial.println("### Boot complete !");
 }
@@ -542,7 +584,12 @@ void loop()
         {
           previousButton.pressed = true;
           display.drawButton(previousButton);
-          delay(2000);
+          beaconsCurrentIndex--;
+          if(beaconsCurrentIndex<0)
+          {
+            beaconsCurrentIndex = beaconsSize-1;
+          }
+          updateDisplay();
           previousButton.pressed = false;
           display.drawButton(previousButton);
         }
@@ -553,7 +600,12 @@ void loop()
         {
           nextButton.pressed = true;
           display.drawButton(nextButton);
-          delay(2000);
+          beaconsCurrentIndex++;
+          if(beaconsCurrentIndex>=beaconsSize)
+          {
+            beaconsCurrentIndex = 0;
+          }
+          updateDisplay();
           nextButton.pressed = false;
           display.drawButton(nextButton);
         }
@@ -585,7 +637,8 @@ void loop()
 
     if (((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
     {
-      test406();
+      readBeacon();
+      updateDisplay();
       ledblink();
       voltmetre();
 

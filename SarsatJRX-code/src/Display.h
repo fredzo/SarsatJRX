@@ -9,9 +9,9 @@
 #define DISPLAY_HEIGHT  240
 
 #define BUTTON_WIDTH  70
-#define BUTTON_HEIGHT 28
-#define SMALL_BUTTON_WIDTH  32
-#define SMALL_BUTTON_HEIGHT 28
+#define BUTTON_HEIGHT 40
+#define SMALL_BUTTON_WIDTH  50
+#define SMALL_BUTTON_HEIGHT 40
 
 class Display
 {
