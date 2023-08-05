@@ -15,7 +15,7 @@ class Beacon
         byte frame[SIZE];
         Location location;
         String desciption;
-        String identifier;
+        uint64_t identifier;
         Beacon(byte frameBuffer[]);
     private:
         void parseFrame();

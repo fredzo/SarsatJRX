@@ -69,6 +69,9 @@ void Beacon::parseFrame()
         frameMode = UNKNOWN;
     }
 
+    // Hex id from bits 26-85
+    identifier = getBits(frame,26,85);
+
     if (longFrame)
     {
         if(protocolFlag == 1) 
@@ -177,7 +180,9 @@ void Beacon::parseFrame()
                         location.longitude.minutes -= 1;
                     }
                 }
-                // Identification data in bits 41-58
+                // Default location on bits 1/7-5/1/8-5 (27bits)
+                identifier &= 0xFFFFFFFFF8000000ULL;
+                identifier |= 0b011111110000001111111100000;
             }
             else if ((protocolCode > 1 && protocolCode < 8 )|| protocolCode == 0b1100 /* Ship Security Protocol */ || protocolCode == 0b1110 /* Standard Test Location Prtocol */)
             {   //Std loc protocol
@@ -238,7 +243,9 @@ void Beacon::parseFrame()
                         location.longitude.minutes -= 1;
                     }
                 }
-                // Identification data in bits 41-64
+                // Default location on bits 1/9/1/10
+                identifier &= 0xFFFFFFFFFFE00000ULL;
+                identifier |= 0b011111111101111111111;
             }
             else if((protocolCode == 0b1101) || (protocolCode == 0b1001))
             {   // RLS Location protocol => protocolCode == 0b1101 / ELT(DT) Location protocol => protocolCode == 0b1001
@@ -299,8 +306,9 @@ void Beacon::parseFrame()
                         location.longitude.minutes -= 1;
                     }
                 }
-                // Identification data in bits 41-66
-
+                // Default location on bits 1/8/1/9 (19bits)
+                identifier &= 0xFFFFFFFFFFF80000ULL;
+                identifier |= 0b0111111110111111111;
             }
             else
             {   // Protocole code 0000 and 0001 = Spare : no location
@@ -393,6 +401,5 @@ void Beacon::parseFrame()
                 desciption += ")";
         }
         // Identification data in bits 40-83
-        // 0x11223344556677
     }
 }

@@ -42,6 +42,8 @@
 #define FRAME_MODE_WIDTH  100
 #define INFO_LABEL        "Info :"
 #define LOCATION_LABEL    "Location :"
+#define HEX_ID_LABEL      "Hex ID:"
+#define HEX_ID_WIDTH      60
 #define DATA_LABEL        "Data :"
 // MAPS and BEACON buttons
 #define MAPS_BUTTON_X     246
@@ -334,7 +336,7 @@ void updateDisplay()
   display.setFontSize(Display::FontSize::SMALL);
   display.setColor(Display::Color::GREEN);
   display.setCursor(HEADER_PAGES_X, HEADER_PAGES_Y);
-  char buffer[8];
+  char buffer[32];
   // Rotating index based on beacon list max size and position of last read frame
   int displayIndex = ((beaconsSize-1 + beaconsReadIndex - beaconsWriteIndex) % BEACON_LIST_MAX_SIZE)+1;
   sprintf(buffer,HEADER_PAGES_TEMPLATE,displayIndex,beaconsSize);
@@ -425,6 +427,20 @@ void updateDisplay()
     display.println("22 HEX. No location");
     currentY+=LINE_HEIGHT;
   }
+
+  // Hex ID
+  display.setCursor(0, currentY);
+  display.setColor(Display::Color::GREEN);
+  display.println(HEX_ID_LABEL);
+  display.setColor(Display::Color::BEIGE);
+  display.setCursor(HEX_ID_WIDTH, currentY);
+  // "Id = 0x1122334455667788"
+  uint32_t msb = beacon->identifier >> 32;
+  uint32_t lsb = beacon->identifier;
+  sprintf(buffer,"%07lX%08lX",msb,lsb);
+  display.println(buffer);
+  Serial.println(buffer);   
+  currentY+=LINE_HEIGHT;
 
   // Data
   display.setCursor(0, currentY);
