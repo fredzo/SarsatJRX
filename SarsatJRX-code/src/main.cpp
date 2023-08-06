@@ -385,7 +385,6 @@ void updateDisplay()
   display.setColor(Display::Color::BEIGE);
   // Protocol name
   display.setCursor(INFO_LABEL_WIDTH, currentY);
-  const Beacon::Protocol* protocol = beacon->protocol;
   if(beacon->protocol->isUnknown())
   {
     // Unknwon protocol (xxxx)
@@ -553,7 +552,7 @@ int curFrame = 0;
 static const String frames[] = {
   "FFFED0D6E6202820000C29FF51041775302D", // 1  - Selftest - Serial user Location Protocol
   "FFFE2FD6E6202820000C29FF51041775302D", // 2  - Serial user -	Serial user Location Protocol
-  "FFFE2F3EF613523F81FE0",                // 3  - User protocol Radion call sign
+  "FFFE2F3EF613523F81FE0",                // 3  - User protocol Radio call sign
   "FFFE2F8E0D0990014710021963C85C7009F5", // 4  - RLS Location
   "FFFE2F8E3B15F1DFC0FF07FD1F769F3C0672", // 5  - PLB Location: National Location 
   "FFFE2F8F4DCBC01ACD004BB10D4E79C4DD86", // 6  - RLS Location Protocol 
@@ -571,7 +570,7 @@ static const String frames[] = {
   "FFFE2FE29325ACB12E938B671E0FE0FF0F61", // 18 - ELT Aviation User 
   "FFFE2FEDF67B7182038C2F0E10CFE0FF0F61", // 19 - Serial user -	ELT with Aircraft Operator Designator & Serial Number 
   "FFFE2FA157B081437FDFF8B4833783E0F66C", // 20 - Standard Location Protocol - PLB (Serial) 
-  "FFFE0D96ED09900149D4D467EE0851A3B2E8", // 21 - RLS Location Protocol
+  "FFFED096ED09900149D4D467EE0851A3B2E8", // 21 - RLS Location Protocol
   "FFFE2F8DB345B146202DDF3C71F59BAB7072"  // 22 - ELT 24 bits
   };
 static const int framesSize = 22;
@@ -598,6 +597,7 @@ void setup()
 
 void loop()
 {
+  //Serial.print(".");
   if(display.touchAvailable())
   {
     int x = display.getTouchX();
@@ -667,6 +667,8 @@ void loop()
         {
           curFrame = 0;
         }
+        //Serial.print("Read frame #");
+        //Serial.println(curFrame);
         readHexString(frames[curFrame]);
       }
     }
@@ -689,8 +691,9 @@ void loop()
     {
       readBeacon();
       updateDisplay();
+      Serial.println("Led Blink");
       ledblink();
-      voltmetre();
+      //voltmetre();
 
       count_oct = 0;     // repart pour trame suivante
       count = 0;
