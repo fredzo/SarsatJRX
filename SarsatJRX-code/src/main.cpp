@@ -41,6 +41,7 @@
 #define FRAME_MODE_LABEL  "Frame mode :"
 #define FRAME_MODE_WIDTH  100
 #define INFO_LABEL        "Info :"
+#define INFO_LABEL_WIDTH  50
 #define LOCATION_LABEL    "Location :"
 #define HEX_ID_LABEL      "Hex ID:"
 #define HEX_ID_WIDTH      60
@@ -268,7 +269,7 @@ int freeRam() {
 
 void readBeacon()
 {
-  //Serial.println(freeRam());
+  Serial.println(freeRam());
   if(beaconsFull)
   {
     beaconsWriteIndex++;
@@ -297,7 +298,7 @@ void readBeacon()
   // Move to last received
   beaconsReadIndex = beaconsWriteIndex;
 
-  //Serial.println(freeRam());
+  Serial.println(freeRam());
 
   // Reset frame decoding
   count_oct = 0;     
@@ -312,7 +313,7 @@ void readBeacon()
 ******************************/
 void updateDisplay()
 {
-  //Serial.println(freeRam());
+  Serial.println(freeRam());
   // Refresh screen
   display.setBackgroundColor(Display::Color::DARK_GREY);
   display.clearDisplay();
@@ -382,10 +383,26 @@ void updateDisplay()
   display.setColor(Display::Color::GREEN);
   display.println(INFO_LABEL);
   display.setColor(Display::Color::BEIGE);
+  // Protocol name
+  display.setCursor(INFO_LABEL_WIDTH, currentY);
+  const Beacon::Protocol* protocol = beacon->protocol;
+  if(beacon->protocol->isUnknown())
+  {
+    // Unknwon protocol (xxxx)
+    sprintf(buffer,"%s (%lu)",beacon->getProtocolName().c_str(),beacon->protocolCode);
+    display.println(buffer);
+    Serial.println(buffer);   
+  }
+  else
+  {
+    display.println(beacon->getProtocolName());
+    Serial.println(beacon->getProtocolName());   
+  }
+  // Protocol desciption
   currentY+=LINE_HEIGHT;
   display.setCursor(0, currentY);
-  display.println(beacon->desciption);
-  Serial.println(beacon->desciption);   
+  display.println(beacon->getProtocolDesciption());
+  Serial.println(beacon->getProtocolDesciption());   
   currentY+=LINE_HEIGHT;
   //Serial.println(freeRam());
 
@@ -479,7 +496,7 @@ void updateDisplay()
   display.drawButton(previousButton);
   display.drawButton(nextButton);
 
-  //Serial.println(freeRam());
+  Serial.println(freeRam());
 
  // display.setCursor(80, 30); // Oled Voltmetre
  // display.print("V= ");
@@ -534,9 +551,9 @@ void readHexString(String hexString)
 
 int curFrame = 0;
 static const String frames[] = {
-  "FFFED0D6E6202820000C29FF51041775302D", // 1  - Selftest - Serial user -	ELT with Serial Identification
-  "FFFE2FD6E6202820000C29FF51041775302D", // 2  - Serial user -	ELT with Serial Identification
-  "FFFE2F3EF613523F81FE0",                // 3  - Short
+  "FFFED0D6E6202820000C29FF51041775302D", // 1  - Selftest - Serial user Location Protocol
+  "FFFE2FD6E6202820000C29FF51041775302D", // 2  - Serial user -	Serial user Location Protocol
+  "FFFE2F3EF613523F81FE0",                // 3  - User protocol Radion call sign
   "FFFE2F8E0D0990014710021963C85C7009F5", // 4  - RLS Location
   "FFFE2F8E3B15F1DFC0FF07FD1F769F3C0672", // 5  - PLB Location: National Location 
   "FFFE2F8F4DCBC01ACD004BB10D4E79C4DD86", // 6  - RLS Location Protocol 
@@ -546,7 +563,7 @@ static const String frames[] = {
   "FFFE2FA0D205F260850F3DC9E0B70B6E4FD7", // 10 - Standard Location Protocol EPIRB-MMSI 
   "FFFE2FA3E7B10016150D364D8B3689C09437", // 11 - Standard Location Protocol - PLB (Serial) 
   "FFFE2FA5DC19E1A07FDFFE5C803483E0FCCA", // 12 - Std. Location ship security protocol (SSAS) 
-  "FFFE2FCE46E76EF8C00C2BAA31CFE0FF0F61", // 13 - Serial user - ELT with Aircraft 24-bit Address 
+  "FFFE2FCE46E76EF8C00C2BAA31CFE0FF0F61", // 13 - Serial user Location Protocol (ELT with Aircraft 24-bit Address)
   "FFFE2FD9D4EB28140AA6893F16A2C67282EC", // 14 - Maritime User Protocol MMSI - EPIRB 
   "FFFE2FDF76A9A9C800174DE27BE1F0277E45", // 15 - Serial user - Float Free EPIRB with Serial Identification Number 
   "FFFE2FDF77200000001168C610AFE0FF0146", // 16 - Serial user - Non Float Free EPIRB with Serial Identification 
@@ -555,7 +572,7 @@ static const String frames[] = {
   "FFFE2FEDF67B7182038C2F0E10CFE0FF0F61", // 19 - Serial user -	ELT with Aircraft Operator Designator & Serial Number 
   "FFFE2FA157B081437FDFF8B4833783E0F66C", // 20 - Standard Location Protocol - PLB (Serial) 
   "FFFE0D96ED09900149D4D467EE0851A3B2E8", // 21 - RLS Location Protocol
-  "FFFE2F8DB345B146202DDF3C71F59BAB7072"  // 22 - Standard Location
+  "FFFE2F8DB345B146202DDF3C71F59BAB7072"  // 22 - ELT 24 bits
   };
 static const int framesSize = 22;
 
@@ -587,8 +604,8 @@ void loop()
     int y = display.getTouchY();
     if(x>=0 && y>=0)
     {
-      //Serial.println(x);
-      //Serial.println(y);
+      Serial.println(x);
+      Serial.println(y);
       if(mapsButton.contains(x,y))
       {
         if(mapsButton.enabled)
