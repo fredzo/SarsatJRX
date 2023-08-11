@@ -33,7 +33,7 @@
 // #define DEBUG_RAM
 
 // Enable decode debuging
-//#define DEBUG_DECODE
+#define DEBUG_DECODE
 
 // Header
 #define HEADER_HEIGHT     20
@@ -86,7 +86,8 @@ unsigned long microseconds;
 unsigned long modDuration;
 unsigned long frameStartTime;
 int frameStartCount = 0;
-bool frameStarted;
+bool frameStarted = false;
+bool frameFinished = false;
 bool lastModState = 1; // Start with 1
 bool currentBitValue = 1; // Start with 1
 byte frameParseState = 0;
@@ -171,10 +172,15 @@ void Test()
     }    
   }
   
-  else if (frameParseState == 3) {           //si 0xFE recu 
-    if (bitCount == 7) {                   //si nombre de bits = 8
+  else if (frameParseState == 3) { //si 0xFE recu 
+    if (bitCount == 7) 
+    {                   //si nombre de bits = 8
       frame[byteCount] = currentByte;    //data dans octet numero xx
       byteCount ++;
+      if(byteCount >= Beacon::SIZE)
+      {
+        frameFinished = true; 
+      }
       currentByte = 0;
       bitCount = 0;
     }
@@ -194,6 +200,7 @@ void resetFrameReading()
   currentBitValue = 1; // Frame always start with 1 bits
   frameStartCount = 0;
   frameStarted = false;
+  frameFinished = false;
   // Clear frame content
   for ( byte i = 0; i < Beacon::SIZE; i++)
   {
@@ -256,6 +263,10 @@ void analyze(void)
   }
   else
   { // We are in a frame
+    if(frameFinished)
+    { // Frame finished, ignore future bits
+      return;
+    }
     if(modDuration <= SAME_PHASE_START)
     { // Debounce too short changes
       return;
