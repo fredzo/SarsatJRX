@@ -29,6 +29,12 @@
 #include <qrcode.h>
 #include <Beacon.h>
 
+// Enable RAM debuging
+// #define DEBUG_RAM
+
+// Enable decode debuging
+//#define DEBUG_DECODE
+
 // Header
 #define HEADER_HEIGHT     20
 #define HEADER_TEXT       "- SarsatJRX -"
@@ -72,15 +78,20 @@ Display::Button nextButton = Display::Button(NEXT_BUTTON_X,NEXT_BUTTON_Y,NEXT_BU
   Definitions des constantes
 *********************************/
 // Interupt pin : use digital pin 18
-const int ReceiverPin = 18;
+const int receiverPin = 18;
+// Notification led : use digital pin 19
+const int notificationPin = 19;
+
 unsigned long microseconds;
-unsigned long duree_palier;
-boolean der_bit = 1; // debut de trame à 1
-boolean etat = 0; // debut de trame à 1
-byte start_flag = 0;
-byte count;
-byte count_oct;
-byte data_demod;
+unsigned long modDuration;
+unsigned long frameStartTime;
+bool frameStarted;
+bool lastModState = 1; // Start with 1
+bool currentBitValue = 1; // Start with 1
+byte frameParseState = 0;
+byte bitCount;
+byte byteCount;
+byte currentByte;
 const byte Nb_octet = 17; //3 + 15 **18 octets 1er FF  = octet 0**
 byte frame[Beacon::SIZE];
 float vout = 0.0;   // pour lecture tension batterie
@@ -104,6 +115,12 @@ Display display;
   header 0xFF 0xFE 
 ****************************************/
 
+#ifdef DEBUG_DECODE
+  // For debug
+  int events[512];
+  int eventCount = 0;
+#endif
+
 void Test()
 { 
   // Frame format :
@@ -114,84 +131,155 @@ void Test()
   // |----------------------------------------------------------------------------------------|
   // | Byte 0 | Byte 1 | Byte 2 | Byte 3 | Byte 4  
   // Long Message :
-  if (start_flag == 0) {
-    if (data_demod == 255) {         // si 0xFF recu, start_flag = 1
-      frame[0] = data_demod;
-      start_flag = 1;
-      count = 0;
-      count_oct = 1;
-      data_demod = 0;
+  if (frameParseState == 0) {
+    if (currentByte == 255) {         // si 0xFF recu, frameParseState = 1
+      frame[0] = currentByte;
+      frameParseState = 1;
+      bitCount = 0;
+      byteCount = 1;
+      currentByte = 0;
     }
     else {
       return;
     }
   }
 
-  if (start_flag == 1) {   //si 0xFF recu
-    if (data_demod == 254) { // si 0xFE
-      frame[1]= data_demod;
-      start_flag = 2;
-      count = 0;
-      count_oct = 2;
-      data_demod = 0;
+  if (frameParseState == 1) {   //si 0xFF recu
+    if (currentByte == 254) { // si 0xFE
+      frame[1]= currentByte;
+      frameParseState = 2;
+      bitCount = 0;
+      byteCount = 2;
+      currentByte = 0;
     }
     else {
       return;
     }    
   }  
    
-  if (start_flag == 2) {   //si 0xFE recu
-    if (data_demod == 208 || data_demod == 47) { // si 0xD0 ou 2F
-      frame[2]= data_demod;
-      start_flag = 3;
-      count = 0;
-      count_oct = 3;
-      data_demod = 0;
+  if (frameParseState == 2) {   //si 0xFE recu
+    if (currentByte == 208 || currentByte == 47) { // si 0xD0 ou 2F
+      frame[2]= currentByte;
+      frameParseState = 3;
+      bitCount = 0;
+      byteCount = 3;
+      currentByte = 0;
     }
     else {
       return;
     }    
   }
   
-  else if (start_flag == 3) {           //si 0xFE recu 
-    if (count == 7) {                   //si nombre de bits = 8
-      frame[count_oct] = data_demod;    //data dans octet numero xx
-      count_oct ++;
-      data_demod = 0;
-      count = 0;
+  else if (frameParseState == 3) {           //si 0xFE recu 
+    if (bitCount == 7) {                   //si nombre de bits = 8
+      frame[byteCount] = currentByte;    //data dans octet numero xx
+      byteCount ++;
+      currentByte = 0;
+      bitCount = 0;
     }
-    else if (count < 7) {
-      count ++;
+    else if (bitCount < 7) {
+      bitCount ++;
     }
   }
 }
 
+void resetFrameReading()
+{ // Reset frame reading state machine
+  byteCount = 0;     // repart pour trame suivante
+  bitCount = 0;
+  frameParseState = 0;
+  currentByte = 0;
+  lastModState = 1;
+  currentBitValue = 1; // (?)
+  frameStarted = false;
+  // Clear frame content
+  for ( byte i = 0; i < Beacon::SIZE; i++)
+  {
+    frame[i] = 0x00;
+  }
+
+#ifdef DEBUG_DECODE
+  for ( int i = 0; i < 512; i++)
+  {
+    events[i] = 0UL;
+  }
+  eventCount = 0;
+#endif
+}
+
+#define BIT_DURATION        2500UL            // Bit duration = 2.5 ms = 2500 us
+#define MOD_DURATION        BIT_DURATION/2    // Modulation duration 1.25 ms = 1250 us (half a bit)
+#define TOLERANCE           625UL             // Tolerate a 625 us time deviation
+#define SAME_PHASE_START    MOD_DURATION-TOLERANCE // 1250 - 625 = 625 us
+#define SAME_PHASE_END      MOD_DURATION+TOLERANCE // 1250 + 625 = 1875 us
+#define CHANGE_PHASE_START  (2*MOD_DURATION)-TOLERANCE // 2500 - 625 = 1875 us
+#define CHANGE_PHASE_END    (2*MOD_DURATION)+TOLERANCE // 2500 + 625 = 3125 us
 
 /***********************************************
   Extraction des bits
 ***********************************************/
 void analyze(void)
 {
-  duree_palier = micros() - microseconds;
-  microseconds = micros();
+  modDuration = micros() - microseconds;
+#ifdef DEBUG_DECODE
+  events[eventCount]=modDuration;
+  eventCount++;
+  if(eventCount>=512)
+  {
+    eventCount = 0;
+  }
+#endif
 
-  if (duree_palier > 1500 && duree_palier < 1700) {
+  if(modDuration <= SAME_PHASE_START)
+  { // Debounce too short changes
     return;
   }
-  if (duree_palier > 1150 && duree_palier < 1350 && der_bit == 0) {   // si T = 125ms ET der_bit == 0; der_bit = 1
-    der_bit = 1;
-    return;
+  microseconds = micros();
+  if(!frameStarted)
+  {
+    frameStartTime = millis();
+    frameStarted = true;
   }
-  if (duree_palier > 1150 && duree_palier < 1350 && der_bit == 1) {    // si T = 125ms ET der_bit == 1; bit = etat
-    data_demod = data_demod << 1 | etat; // ajout du 1 en fin
-    der_bit = 0;
+  if(modDuration >= SAME_PHASE_START && modDuration < SAME_PHASE_END)
+  { // Same phase
+    if(lastModState)
+    { // New modulation
+      lastModState = 0;
+      // Store new bit and lauch parsing
+      currentByte = currentByte << 1 | currentBitValue;
+      Test();
+    }
+    lastModState = !lastModState;
   }
-  if (duree_palier > 2450 && duree_palier < 2650) {    // si T = 250ms; bit = !etat
-    etat = !etat;
-    data_demod = data_demod << 1 | etat; // ajout du 1 en fin
-    der_bit = 0;
+  else if(modDuration >= CHANGE_PHASE_START && modDuration < CHANGE_PHASE_END)
+  { // Phase change => bit value change
+    currentBitValue = !currentBitValue;
+    // Store new bit and lauch parsing
+    currentByte = currentByte << 1 | currentBitValue;
+    lastModState = 0;
+    Test();
   }
-  Test();
+  else 
+  { // We have missed changes
+    int missedModulation = modDuration / MOD_DURATION;
+    // Check if it's an even number of modulations
+    int missedBits = missedModulation/2;
+    // Let's assume we received n times the same value 
+    for(int i = 0 ; i < missedBits ; i++)
+    {
+      currentByte = currentByte << 1 | currentBitValue;
+      Test();
+    }
+    bool odd = ((missedModulation%2) != 0);
+    if(odd) 
+    { // We have a phase change
+      currentBitValue = !currentBitValue;
+      // Store new bit and lauch parsing
+      currentByte = currentByte << 1 | currentBitValue;
+      lastModState = 0;
+      Test();
+    }
+  }
 }
 
 String toHexString(byte* frame, bool withSpace, int start, int end)
@@ -260,16 +348,20 @@ void drawQrCode(bool isMaps)
     displayQrCode(&qrCode,xPos,yPos);
 }
 
+#ifdef DEBUG_RAM
 int freeRam() {
   extern int __heap_start,*__brkval;
   int v;
   return (int)&v - (__brkval == 0  
     ? (int)&__heap_start : (int) __brkval);  
 }
+#endif
 
 void readBeacon()
 {
+#ifdef DEBUG_RAM
   Serial.println(freeRam());
+#endif
   if(beaconsFull)
   {
     beaconsWriteIndex++;
@@ -298,14 +390,9 @@ void readBeacon()
   // Move to last received
   beaconsReadIndex = beaconsWriteIndex;
 
+#ifdef DEBUG_RAM
   Serial.println(freeRam());
-
-  // Reset frame decoding
-  count_oct = 0;     
-  count = 0;
-  start_flag = 0;
-  data_demod = 0;
-  der_bit = 1;
+#endif
 }
 
 /*****************************
@@ -313,7 +400,9 @@ void readBeacon()
 ******************************/
 void updateDisplay()
 {
+#ifdef DEBUG_RAM
   Serial.println(freeRam());
+#endif
   // Refresh screen
   display.setBackgroundColor(Display::Color::DARK_GREY);
   display.clearDisplay();
@@ -403,7 +492,6 @@ void updateDisplay()
   display.println(beacon->getProtocolDesciption());
   Serial.println(beacon->getProtocolDesciption());   
   currentY+=LINE_HEIGHT;
-  //Serial.println(freeRam());
 
   // Location
   display.setCursor(0, currentY);
@@ -417,7 +505,6 @@ void updateDisplay()
   display.println(country);
   Serial.println(country);
   currentY+=LINE_HEIGHT;
-  //Serial.println(freeRam());
 
   // Coordinates
   bool locationKnown = !beacon->location.isUnknown(); 
@@ -495,7 +582,9 @@ void updateDisplay()
   display.drawButton(previousButton);
   display.drawButton(nextButton);
 
+#ifdef DEBUG_RAM
   Serial.println(freeRam());
+#endif
 
  // display.setCursor(80, 30); // Oled Voltmetre
  // display.print("V= ");
@@ -511,10 +600,10 @@ void updateDisplay()
  ****************************************/
 void ledblink()
   {
-  digitalWrite(13, HIGH);  // Clignotement LED Trame décodée
+  digitalWrite(notificationPin, HIGH);  // Clignotement LED Trame décodée
   delay(100);
-  digitalWrite(13, LOW); 
-  /*delay(45000);            // Alarme Buzzer Trame suivante
+  digitalWrite(notificationPin, LOW); 
+  /*delay(45000);            // Alarme Buzzer for next frame ?
   digitalWrite(7, HIGH);  
   delay(4500);
   digitalWrite(7, LOW);*/
@@ -541,7 +630,7 @@ void readHexString(String hexString)
     byte b = (byte)strtol(byteString.c_str(), NULL, 16);
     frame[i/2]=b;
   }
-  count_oct = Nb_octet;
+  byteCount = Nb_octet;
 }
 
 /*************************
@@ -577,13 +666,12 @@ static const int framesSize = 22;
 
 void setup()
 {
-  pinMode(ReceiverPin, INPUT);          // entree sur interruption 0
-  pinMode(14, OUTPUT);                  // sortie LED pin 14
-  pinMode(15, INPUT);                   // entree batterie pin 15
-  pinMode(16, OUTPUT);                  // sortie Buzzer pin 16
+  pinMode(receiverPin, INPUT);          // Detection stage inpit
+  pinMode(notificationPin, OUTPUT);     // Notification led output
+  // pinMode(16, OUTPUT);                  // Buzzer output
   
   Serial.begin(115200);
-  attachInterrupt(0, analyze, CHANGE);  // interruption sur Rise et Fall
+  attachInterrupt(digitalPinToInterrupt(receiverPin), analyze, CHANGE);  // interruption sur Rise et Fall
 
   display.setup();
   previousButton.enabled = true;
@@ -592,8 +680,6 @@ void setup()
   readHexString(frames[curFrame]);
   Serial.println("### Boot complete !");
 }
-
-
 
 void loop()
 {
@@ -673,10 +759,15 @@ void loop()
       }
     }
   }
-  if (count_oct == Nb_octet)
+  // If frameParseState > 0, we are reading an frame, if more thant 500ms elapsed (a frame should be 144x2.5ms = 360 ms max)
+  bool frameTimeout = (frameStarted && ((millis()-frameStartTime) > 500 ));
+  if ((byteCount == Nb_octet) || frameTimeout)
   {
     // Pour debug 
-    /*
+    if(frameTimeout)
+    {
+      Serial.println("Frame timeout !");
+    }
     for ( byte i = 0; i < Nb_octet; i++) // RAW data
     {
       if (frame[i] < 16)
@@ -684,25 +775,25 @@ void loop()
       Serial.print (frame[i], HEX);
       Serial.print(" ");
     }
-    Serial.println("");*/
-    
+    Serial.println("");
+
+#ifdef DEBUG_DECODE
+    for ( int i = 0; i < eventCount; i++)
+    {
+      Serial.println(events[i],DEC);
+    }
+    Serial.println("");
+#endif    
 
     if (((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
     {
       readBeacon();
       updateDisplay();
-      Serial.println("Led Blink");
       ledblink();
       //voltmetre();
-
-      count_oct = 0;     // repart pour trame suivante
-      count = 0;
-      start_flag = 0;
-      data_demod = 0;
-      der_bit = 1;
-      etat = 1;
-      
     } 
+    // Reset frame decoding
+    resetFrameReading();
   }
 }
 
