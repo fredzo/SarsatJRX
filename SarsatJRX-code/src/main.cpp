@@ -33,7 +33,7 @@
 // #define DEBUG_RAM
 
 // Enable decode debuging
-#define DEBUG_DECODE
+//#define DEBUG_DECODE
 
 // Header
 #define HEADER_HEIGHT     20
@@ -213,7 +213,7 @@ void resetFrameReading()
 #define MOD_DURATION        BIT_DURATION/2                // Modulation duration 1.25 ms = 1250 us (half a bit)
 #define TOLERANCE           625UL                         // Tolerate a 625 us time deviation
 #define START_TOLERANCE     250UL                         // Tolerate a 250 us time deviation for frame start detection
-#define FRAME_START_SIZE    29                            // Frame synchronisation pattern is 15 bits i.e. 30 modulations
+#define FRAME_START_SIZE    28                            // Frame synchronisation pattern is 15 bits i.e. at least 28 modulations
 #define START_PHASE_START   MOD_DURATION-START_TOLERANCE  // 1250 - 250 = 1000 us
 #define START_PHASE_END     MOD_DURATION+START_TOLERANCE  // 1250 + 250 = 1500 us
 #define SAME_PHASE_START    MOD_DURATION-TOLERANCE        // 1250 - 625 = 625 us
