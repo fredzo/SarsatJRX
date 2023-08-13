@@ -28,12 +28,14 @@
 #include <Country.h>
 #include <qrcode.h>
 #include <Beacon.h>
+#include <Power.h>
+#include <Util.h>
 
 // Enable RAM debuging
 // #define DEBUG_RAM
 
 // Enable decode debuging
-#define DEBUG_DECODE
+//#define DEBUG_DECODE
 
 // Header
 #define HEADER_HEIGHT     20
@@ -42,7 +44,10 @@
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
 #define HEADER_PAGES_X    3
 #define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
-// Beacont info
+#define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
+#define HEADER_POWER_X    DISPLAY_WIDTH-50
+#define HEADER_POWER_Y    (HEADER_HEIGHT-12)/2
+// Beacon info
 #define LINE_HEIGHT       15
 #define FRAME_MODE_LABEL  "Frame mode :"
 #define FRAME_MODE_WIDTH  100
@@ -315,22 +320,6 @@ void analyze(void)
   }
 }
 
-String toHexString(byte* frame, bool withSpace, int start, int end)
-{
-  char buffer[4];
-  String result = "";
-  for ( byte i = start; i < end; i++) 
-  {
-    sprintf(buffer, "%02X", frame[i]);
-    if(withSpace && i>start) 
-    {
-      result += " ";
-    }
-    result += buffer;
-  }
-  return result;
-}
-
 static const int QR_VERSION = 6;
 void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
 { // Version 6 (41x41) allows 154 alphanumeric characters with medium error correcion
@@ -465,6 +454,14 @@ void updateDisplay()
   sprintf(buffer,HEADER_PAGES_TEMPLATE,displayIndex,beaconsSize);
   display.println(buffer);
   Serial.println(buffer);
+  // Header power
+  display.setCursor(HEADER_POWER_X, HEADER_POWER_Y);
+  char powerString[8];
+  getVccStringValue(powerString);
+  sprintf(buffer,HEADER_POWER_TEMPLATE,powerString);
+  display.println(buffer);
+  Serial.println(buffer);
+
 
   int currentY = HEADER_BOTTOM;
   // For the rest of the screen
@@ -642,20 +639,6 @@ void ledblink()
   digitalWrite(7, LOW);*/
   }
 
-/***************************************
- * Voltmetre sur A5
- ***************************************/
-void voltmetre()
-  {
-    value = analogRead(3);
-    vout = (value * 5.0) / 1024.0;
-    vin = vout / (0.088); // vin = vout / (R2/(R1+R2)) R1=100k R2=10k
-    if (vin<0.09) {
-      vin=0.0;//Condition pour eviter des lectures indesirable !
-    }
-  }
-
-
 void readHexString(String hexString) 
 {
   for (unsigned int i = 0; i < hexString.length(); i += 2) {
@@ -823,7 +806,6 @@ void loop()
       readBeacon();
       updateDisplay();
       ledblink();
-      //voltmetre();
     } 
     // Reset frame decoding
     resetFrameReading();
