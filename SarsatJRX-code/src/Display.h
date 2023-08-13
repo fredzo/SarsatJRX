@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <UTFT.h>
 #include <UTouch.h>
+#include <qrcode.h>
 
 #define DISPLAY_WIDTH   320
 #define DISPLAY_HEIGHT  240
@@ -65,6 +66,7 @@ class Display
         void drawButton(Button button);
         void setFontSize(FontSize fontSize);
         void centerText(String text, int width);
+        void drawQrCode (QRCode* qrcode,int moduleSize);
 
     private : 
         // Init display and touch screen

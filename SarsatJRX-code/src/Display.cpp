@@ -253,3 +253,25 @@ void Display::drawButton(Button button)
   setColor(backupColor);
   setBackgroundColor(backupBackColor);
 }
+
+void Display::drawQrCode (QRCode* qrcode, int moduleSize)
+{
+  setColor(Display::Color::WHITE);
+  // Add a padding around the QR code
+  fillRectangle((qrcode->size+2)*moduleSize,(qrcode->size+2)*moduleSize);
+  setColor(Display::Color::BLACK);
+  x += moduleSize;
+  y += moduleSize;
+  for (int iY = 0; iY < qrcode->size; y++) 
+  {
+      for (int iX = 0; iX < qrcode->size; x++) 
+      {
+          if (qrcode_getModule(qrcode, iX, iY)) 
+          {
+              x = x + (iX * moduleSize);
+              y = y + (iY * moduleSize);
+							fillRectangle(moduleSize, moduleSize);
+          }
+      }
+  }
+}

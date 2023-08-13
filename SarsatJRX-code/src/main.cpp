@@ -332,35 +332,14 @@ void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
 }
 
 static const int MODULE_SIZE = 3;
-void displayQrCode (QRCode* qrcode, int xPos, int yPos)
-{
-  display.setCursor(xPos,yPos);
-  display.setColor(Display::Color::WHITE);
-  // Add a padding around the QR code
-  display.fillRectangle((qrcode->size+2)*MODULE_SIZE,(qrcode->size+2)*MODULE_SIZE);
-  display.setColor(Display::Color::BLACK);
-  xPos += MODULE_SIZE;
-  yPos += MODULE_SIZE;
-  for (int y = 0; y < qrcode->size; y++) 
-  {
-      for (int x = 0; x < qrcode->size; x++) 
-      {
-          if (qrcode_getModule(qrcode, x, y)) 
-          {
-              display.setCursor(xPos + (x * MODULE_SIZE),yPos + (y * MODULE_SIZE));
-							display.fillRectangle(MODULE_SIZE, MODULE_SIZE);
-          }
-      }
-  }
-}
-
 void drawQrCode(bool isMaps)
 {
     QRCode qrCode;
     generateQrCode(&qrCode,beacons[beaconsReadIndex],isMaps);
     int xPos = display.getWidth()-((qrCode.size+3)*MODULE_SIZE);
     int yPos = display.getHeight()-((qrCode.size+3)*MODULE_SIZE);
-    displayQrCode(&qrCode,xPos,yPos);
+    display.setCursor(xPos,yPos);
+    display.drawQrCode(&qrCode,MODULE_SIZE);
 }
 
 #ifdef DEBUG_RAM
