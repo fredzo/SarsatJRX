@@ -25,3 +25,18 @@ String toHexString(byte* frame, bool withSpace, int start, int end)
   return result;
 }
 
+/**
+ * @brief Read the provided hexString and store the content in the buffer
+ * 
+ * @param buffer the buffer to store the converted hex bytes into (the size must match the hex string size)
+ * @param hexString the hex string to read
+ */
+void readHexString(byte* buffer, String hexString) 
+{
+  for (unsigned int i = 0; i < hexString.length(); i += 2) {
+    String byteString = hexString.substring(i, i+2);
+    byte b = (byte)strtol(byteString.c_str(), NULL, 16);
+    buffer[i/2]=b;
+  }
+}
+

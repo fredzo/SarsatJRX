@@ -14,4 +14,13 @@
  */
 String toHexString(byte* frame, bool withSpace, int start, int end);
 
+/**
+ * @brief Read the provided hexString and store the content in the buffer
+ * 
+ * @param buffer the buffer to store the converted hex bytes into (the size must match the hex string size)
+ * @param hexString the hex string to read
+ */
+void readHexString(byte* buffer, String hexString);
+
+
 #endif 
