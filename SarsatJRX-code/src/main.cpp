@@ -46,6 +46,21 @@
 #define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
 #define HEADER_POWER_X    DISPLAY_WIDTH-50
 #define HEADER_POWER_Y    (HEADER_HEIGHT-12)/2
+// Header LEDS
+#define LED_SIG_1_X       DISPLAY_WIDTH-4*(LED_RADIUS+4)
+#define LED_SIG_1_Y       (HEADER_HEIGHT-LED_RADIUS)/2
+Display::Led ledSig1 =    Display::Led(LED_SIG_1_X,LED_SIG_1_Y,Display::LedColor::GREEN);
+#define LED_SIG_2_X       DISPLAY_WIDTH-3*(LED_RADIUS+4)
+#define LED_SIG_2_Y       (HEADER_HEIGHT-LED_RADIUS)/2
+Display::Led ledSig2 =    Display::Led(LED_SIG_2_X,LED_SIG_2_Y,Display::LedColor::GREEN);
+#define LED_SIG_IN_FRAME_X      DISPLAY_WIDTH-2*(LED_RADIUS+4)
+#define LED_SIG_IN_FRAME_Y      (HEADER_HEIGHT-LED_RADIUS)/2
+Display::Led ledInFrame =       Display::Led(LED_SIG_IN_FRAME_X,LED_SIG_IN_FRAME_Y,Display::LedColor::RED);
+#define LED_SIG_FRAME_R_X       DISPLAY_WIDTH-1*(LED_RADIUS+4)
+#define LED_SIG_FRAME_R_Y       (HEADER_HEIGHT-LED_RADIUS)/2
+Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y,Display::LedColor::BLUE);
+
+
 // Beacon info
 #define LINE_HEIGHT       15
 #define FRAME_MODE_LABEL  "Frame mode :"
@@ -173,22 +188,29 @@ void readBeacon()
 
 // Leds management (header + physical led)
 #define LED_BLINK_TIME 100 // 100 ms
-unsigned long frameReceivedLedStartBlinkTime;
-bool frameReceivedLedOn = false;
+unsigned long ledFrameReceivedStartBlinkTime;
+unsigned long ledSig1StartBlinkTime;
+unsigned long ledSig2StartBlinkTime;
+bool ledSig1On = false;
+bool ledSig2On = false;
+bool ledInFrameOn = false;
+bool ledFrameReceivedOn = false;
+bool lastInputState = false;
+
 void updateLeds()
 {
-  if(frameReceivedLedOn && ((millis() - frameReceivedLedStartBlinkTime)>LED_BLINK_TIME))
+  if(ledFrameReceivedOn && ((millis() - ledFrameReceivedStartBlinkTime)>LED_BLINK_TIME))
   { // Led has been on for more than 100 ms => switch it off
     digitalWrite(notificationPin, LOW); 
-    frameReceivedLedOn = false;
+    ledFrameReceivedOn = false;
   }
 }
 
 void frameReceivedLedBlink()
 { // Switch led on and record time
   digitalWrite(notificationPin, HIGH);
-  frameReceivedLedOn = true;
-  frameReceivedLedStartBlinkTime = millis();
+  ledFrameReceivedOn = true;
+  ledFrameReceivedStartBlinkTime = millis();
 }
 
 // Store last displayed power value
@@ -205,10 +227,53 @@ void updatePowerValueHeader()
   sprintf(buffer,HEADER_POWER_TEMPLATE,powerString);
   display.println(buffer);
 }
-void updateLedHeader()
-{  // Led header
-// TODO
+void updateLedHeader(bool force)
+{ // Led header
+  bool newInputState = getInputState();
+  bool drawledSig1 = force;
+  bool drawledSig2 = force;
+  bool drawledInFrame = force;
+  bool drawledFrameReceived = force;
+  unsigned long now = millis();
+  if(newInputState != lastInputState)
+  { // Flip ledSig1 and ledSig2 according to decoder input stage state
+    lastInputState = newInputState;
+    ledSig1.on = newInputState;
+    ledSig2.on = !newInputState;
+    drawledSig1 = true;
+    drawledSig2 = true;
+    if(ledSig1.on) ledSig1StartBlinkTime = now;
+    if(ledSig2.on) ledSig1StartBlinkTime = now;
+  }
+  else
+  { // Chec if we have to turn decoder input leds off
+    if((now - ledSig1StartBlinkTime) > LED_BLINK_TIME)
+    {
+      ledSig1.on = false;
+      drawledSig1 = true;
+    }
+    if((now - ledSig2StartBlinkTime) > LED_BLINK_TIME)
+    {
+      ledSig2.on = false;
+      drawledSig2 = true;
+    }
+  }
+  if(ledInFrame.on != isFrameStarted())
+  { // Check if frame started state changed
+    ledInFrame.on = isFrameStarted();
+    drawledInFrame = true;
+  }
+  if(ledFrameReceived.on != ledFrameReceivedOn)
+  { // Check if frame received state changed
+    ledFrameReceived.on = ledFrameReceivedOn;
+    drawledFrameReceived = true;
+  }
+  if(drawledSig1) display.drawLed(ledSig1);
+  if(drawledSig2) display.drawLed(ledSig2);
+  if(drawledInFrame) display.drawLed(ledInFrame);
+  if(drawledFrameReceived) display.drawLed(ledFrameReceived);
 }
+
 void updateHeader()
 { // Check for power value update
   float newValue = getVccValue();
@@ -217,7 +282,7 @@ void updateHeader()
     powerValue = newValue;
     updatePowerValueHeader();
   }
-  updateLedHeader();
+  updateLedHeader(false);
 }
 
 void updateDisplay()
@@ -256,7 +321,7 @@ void updateDisplay()
   Serial.println(buffer);
   // Header power and leds
   updatePowerValueHeader();
-  updateLedHeader();
+  updateLedHeader(true);
 
 
 

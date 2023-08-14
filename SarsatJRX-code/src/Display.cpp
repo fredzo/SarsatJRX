@@ -244,7 +244,7 @@ Display::Colors Display::getColorsForLed(Display::Led led)
       break;
     case LedColor::BLUE :
       result.foreground = &(led.on ? Color::BLUE : Color::GREY);
-      result.border = &Color::CYAN;
+      result.border = &Color::LIGHT_BLUE;
       break;
     case LedColor::GREEN :
     default :

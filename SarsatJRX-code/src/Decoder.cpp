@@ -2,6 +2,7 @@
 
 unsigned long microseconds;
 unsigned long modDuration;
+bool intputState = false;
 int frameStartCount = 0;
 bool frameComplete = false;
 bool lastModState = 1; // Start with 1
@@ -141,6 +142,11 @@ void resetFrameReading()
 #endif
 }
 
+bool getInputState()
+{
+  return intputState;
+}
+
 #define BIT_DURATION        2500UL                        // Bit duration = 2.5 ms = 2500 us
 #define MOD_DURATION        BIT_DURATION/2                // Modulation duration 1.25 ms = 1250 us (half a bit)
 #define TOLERANCE           625UL                         // Tolerate a 625 us time deviation
@@ -159,6 +165,8 @@ void resetFrameReading()
 void analyze(void)
 {
   modDuration = micros() - microseconds;
+  intputState = !intputState;
+
 #ifdef DEBUG_DECODE
   if(eventCount<512)
   {

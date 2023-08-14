@@ -10,6 +10,8 @@
 
 void analyze(void);
 
+bool getInputState();
+
 void resetFrameReading();
 
 bool isFrameStarted();
