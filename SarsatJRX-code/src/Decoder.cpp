@@ -103,7 +103,7 @@ void readFrameBits()
       frame[byteCount] = currentByte;    //data dans octet numero xx
       byteCount ++;
       if(byteCount >= Beacon::SIZE)
-      {
+      { // TODO : handle different byte count for small messages
         frameComplete = true; 
       }
       currentByte = 0;
@@ -128,7 +128,7 @@ void resetFrameReading()
   frameComplete = false;
   // Clear frame content
   for ( byte i = 0; i < Beacon::SIZE; i++)
-  {
+  { 
     frame[i] = 0x00;
   }
 

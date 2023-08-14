@@ -171,9 +171,55 @@ void readBeacon()
 #endif
 }
 
-/*****************************
-  Routine autotest 406
-******************************/
+// Leds management (header + physical led)
+#define LED_BLINK_TIME 100 // 100 ms
+unsigned long frameReceivedLedStartBlinkTime;
+bool frameReceivedLedOn = false;
+void updateLeds()
+{
+  if(frameReceivedLedOn && ((millis() - frameReceivedLedStartBlinkTime)>LED_BLINK_TIME))
+  { // Led has been on for more than 100 ms => switch it off
+    digitalWrite(notificationPin, LOW); 
+    frameReceivedLedOn = false;
+  }
+}
+
+void frameReceivedLedBlink()
+{ // Switch led on and record time
+  digitalWrite(notificationPin, HIGH);
+  frameReceivedLedOn = true;
+  frameReceivedLedStartBlinkTime = millis();
+}
+
+// Store last displayed power value
+float powerValue = 0;
+
+void updatePowerValueHeader()
+{  // Power header
+  display.setFontSize(Display::FontSize::SMALL);
+  display.setColor(Display::Color::GREEN);
+  display.setCursor(HEADER_POWER_X, HEADER_POWER_Y);
+  char powerString[8];
+  getVccStringValue(powerString);
+  char buffer[8];
+  sprintf(buffer,HEADER_POWER_TEMPLATE,powerString);
+  display.println(buffer);
+}
+void updateLedHeader()
+{  // Led header
+// TODO
+}
+void updateHeader()
+{ // Check for power value update
+  float newValue = getVccValue();
+  if(newValue != powerValue)
+  {
+    powerValue = newValue;
+    updatePowerValueHeader();
+  }
+  updateLedHeader();
+}
+
 void updateDisplay()
 {
 #ifdef DEBUG_RAM
@@ -208,13 +254,10 @@ void updateDisplay()
   sprintf(buffer,HEADER_PAGES_TEMPLATE,displayIndex,beaconsSize);
   display.println(buffer);
   Serial.println(buffer);
-  // Header power
-  display.setCursor(HEADER_POWER_X, HEADER_POWER_Y);
-  char powerString[8];
-  getVccStringValue(powerString);
-  sprintf(buffer,HEADER_POWER_TEMPLATE,powerString);
-  display.println(buffer);
-  Serial.println(buffer);
+  // Header power and leds
+  updatePowerValueHeader();
+  updateLedHeader();
+
 
 
   int currentY = HEADER_BOTTOM;
@@ -373,19 +416,14 @@ void updateDisplay()
 }
 
 
-void ledblink()
-{
-  digitalWrite(notificationPin, HIGH);  // Clignotement LED Trame décodée
-  delay(100);
-  digitalWrite(notificationPin, LOW); 
-}
-
 void readNextSampleFrame()
 { // Read the frame content
   readNextSample(getFrame());
   // Tell the state machine that we have a complete frame
   setFrameComplete(true);
 }
+
+
 
 void setup()
 {
@@ -508,12 +546,14 @@ void loop()
 
     if (((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
     {
+      frameReceivedLedBlink();
       readBeacon();
       updateDisplay();
-      ledblink();
     } 
     // Reset frame decoding
     resetFrameReading();
   }
+  updateLeds();
+  updateHeader();
 }
 
