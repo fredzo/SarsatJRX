@@ -233,6 +233,28 @@ Display::Colors Display::getColorsForButton(Display::Button button)
   return result;
 }
 
+Display::Colors Display::getColorsForLed(Display::Led led)
+{
+  Colors result;
+  switch (led.color)
+  {
+    case LedColor::RED :
+      result.foreground = &(led.on ? Color::RED : Color::GREY);
+      result.border = &Color::ORANGE;
+      break;
+    case LedColor::BLUE :
+      result.foreground = &(led.on ? Color::BLUE : Color::GREY);
+      result.border = &Color::CYAN;
+      break;
+    case LedColor::GREEN :
+    default :
+      result.foreground = &(led.on ? Color::GREEN : Color::GREY);
+      result.border = &Color::DARK_GREEN;
+      break;
+  }
+  return result;
+}
+
 void Display::drawButton(Button button)
 { 
   int captionSize = strlen(button.caption);
@@ -252,6 +274,19 @@ void Display::drawButton(Button button)
   // Restore color
   setColor(backupColor);
   setBackgroundColor(backupBackColor);
+}
+
+void Display::drawLed(Led led)
+{ 
+  // Store current color
+  Colors colors = getColorsForLed(led);
+  Color backupColor = currentColor;
+  setColor(*colors.foreground);
+  myGLCD.fillCircle(led.x, led.y,LED_RADIUS);
+  setColor(*colors.border);
+  myGLCD.drawCircle (led.x, led.y,LED_RADIUS);
+  // Restore color
+  setColor(backupColor);
 }
 
 void Display::drawQrCode (QRCode* qrcode, int moduleSize)

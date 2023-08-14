@@ -14,11 +14,12 @@
 #define SMALL_BUTTON_WIDTH  50
 #define SMALL_BUTTON_HEIGHT 40
 
+#define LED_RADIUS 8
+
 class Display
 {
     public :
         enum class FontSize {SMALL,LARGE};
-        enum class ButtonStatus {NORMAL,PRESSED,DISABLED};
         enum class ButtonStyle {NORMAL,SMALL};
         class Color
         {
@@ -43,6 +44,16 @@ class Display
             int getWidth();
             int getHeight();
         };
+        enum class LedColor {RED,GREEN,BLUE};
+        class Led
+        {
+            public:
+            int x;
+            int y;
+            bool on = false;
+            LedColor color;
+            Led(int x,int y,LedColor color) : x(x), y(y), color(color) {}
+        };
         Display();
         void setup();
         void clearDisplay();
@@ -64,6 +75,7 @@ class Display
         int getWidth();
         int getHeight();
         void drawButton(Button button);
+        void drawLed(Led led);
         void setFontSize(FontSize fontSize);
         void centerText(String text, int width);
         void drawQrCode (QRCode* qrcode,int moduleSize);
@@ -85,6 +97,7 @@ class Display
             const Color* border;
         };
         Colors getColorsForButton(Button button);
+        Colors getColorsForLed(Led led);
 
 };
 
