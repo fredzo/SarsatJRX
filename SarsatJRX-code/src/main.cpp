@@ -36,6 +36,9 @@
 // Enable RAM debuging
 // #define DEBUG_RAM
 
+// Enable serial out
+#define SERIAL_OUT
+
 // Header
 #define HEADER_HEIGHT     20
 #define HEADER_TEXT       "- SarsatJRX -"
@@ -130,7 +133,9 @@ void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
   {
     sprintf(buffer,BEACON_URL_TEMPALTE, toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14).c_str());
   }
-  Serial.println(buffer);
+  #ifdef SERIAL_OUT 
+  Serial.println(buffer); 
+  #endif
 	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_MEDIUM, buffer);
 }
 
@@ -314,7 +319,9 @@ void updateDisplay()
   display.setFontSize(Display::FontSize::LARGE);
   display.centerText(HEADER_TEXT,display.getWidth());
   display.println(HEADER_TEXT);
+#ifdef SERIAL_OUT 
   Serial.print(HEADER_TEXT);
+#endif  
   // Header pages
   display.setFontSize(Display::FontSize::SMALL);
   display.setColor(Display::Color::GREEN);
@@ -324,7 +331,9 @@ void updateDisplay()
   int displayIndex = ((beaconsSize-1 + beaconsReadIndex - beaconsWriteIndex) % BEACON_LIST_MAX_SIZE)+1;
   sprintf(buffer,HEADER_PAGES_TEMPLATE,displayIndex,beaconsSize);
   display.println(buffer);
+#ifdef SERIAL_OUT 
   Serial.println(buffer);
+#endif
   // Header power and leds
   updatePowerValueHeader();
   updateLedHeader(true);
@@ -362,7 +371,9 @@ void updateDisplay()
   display.setColor(Display::Color::BEIGE);
   display.setCursor(FRAME_MODE_WIDTH, currentY);
   display.println(frameMode);
+#ifdef SERIAL_OUT 
   Serial.println(frameMode);
+#endif
   currentY+=LINE_HEIGHT;
 
   // Info           
@@ -377,18 +388,24 @@ void updateDisplay()
     // Unknwon protocol (xxxx)
     sprintf(buffer,"%s (%lu)",beacon->getProtocolName().c_str(),beacon->protocolCode);
     display.println(buffer);
+  #ifdef SERIAL_OUT 
     Serial.println(buffer);   
+  #endif
   }
   else
   {
     display.println(beacon->getProtocolName());
+  #ifdef SERIAL_OUT 
     Serial.println(beacon->getProtocolName());   
+  #endif
   }
   // Protocol desciption
   currentY+=LINE_HEIGHT;
   display.setCursor(0, currentY);
   display.println(beacon->getProtocolDesciption());
+#ifdef SERIAL_OUT 
   Serial.println(beacon->getProtocolDesciption());   
+#endif
   currentY+=LINE_HEIGHT;
 
   // Location
@@ -401,7 +418,9 @@ void updateDisplay()
   display.setCursor(0, currentY);
   String country = beacon->country.toString();
   display.println(country);
+#ifdef SERIAL_OUT 
   Serial.println(country);
+#endif
   currentY+=LINE_HEIGHT;
 
   // Coordinates
@@ -412,13 +431,17 @@ void updateDisplay()
     String locationSexa = beacon->location.toString(true);
     String locationDeci = beacon->location.toString(false);
     display.println(locationSexa);
+  #ifdef SERIAL_OUT 
     Serial.println(locationSexa);
+  #endif
     currentY+=LINE_HEIGHT;
     if(locationKnown)
     {
       display.setCursor(0, currentY); 
       display.println(locationDeci);
+    #ifdef SERIAL_OUT 
       Serial.println(locationDeci);
+    #endif
     }
     currentY+=LINE_HEIGHT;
   }
@@ -440,7 +463,9 @@ void updateDisplay()
   uint32_t lsb = beacon->identifier;
   sprintf(buffer,"%07lX%08lX",msb,lsb);
   display.println(buffer);
+#ifdef SERIAL_OUT 
   Serial.println(buffer);   
+#endif  
   currentY+=LINE_HEIGHT;
 
   // Data
@@ -454,6 +479,7 @@ void updateDisplay()
   display.setColor(beacon->isBch2Valid() ? Display::Color::GREEN : Display::Color::RED);
   display.setCursor(DATA_LABEL_WIDTH+BCH_LABEL_WIDTH, currentY);
   display.println(beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
+#ifdef SERIAL_OUT 
   if(!beacon->isBch1Valid())
   {
     Serial.println("Wrong BCH1 value :");
@@ -470,6 +496,7 @@ void updateDisplay()
     Serial.print("Expected :");
     Serial.println(beacon->computedBch2,2);
   }
+#endif
 
   display.setColor(Display::Color::BEIGE);
   currentY+=LINE_HEIGHT;
@@ -534,7 +561,9 @@ void setup()
   nextButton.enabled = true;
 
   readNextSampleFrame();
+#ifdef SERIAL_OUT 
   Serial.println("### Boot complete !");
+#endif
 }
 
 void loop()
@@ -546,8 +575,8 @@ void loop()
     int y = display.getTouchY();
     if(x>=0 && y>=0)
     {
-      Serial.println(x);
-      Serial.println(y);
+      //Serial.println(x);
+      //Serial.println(y);
       if(mapsButton.contains(x,y))
       {
         if(mapsButton.enabled)
@@ -614,12 +643,13 @@ void loop()
   bool frameTimeout = (isFrameStarted() && ((millis()-getFrameStartTime()) > 500 ));
   if (isFrameComplete() || frameTimeout)
   {
+    byte* frame = getFrame();
     // Debug purpose 
-    if(frameTimeout)
+ #ifdef SERIAL_OUT 
+   if(frameTimeout)
     {
       Serial.println("Frame timeout !");
     }
-    byte* frame = getFrame();
     for ( byte i = 0; i < Beacon::SIZE; i++) // RAW data
     {
       if (frame[i] < 16)
@@ -628,8 +658,8 @@ void loop()
       Serial.print(" ");
     }
     Serial.println("");
-
-#ifdef DEBUG_DECODE
+  #endif
+  #ifdef DEBUG_DECODE
     int* events = getEvents();
     int eventCount = getEventCount();
     for ( int i = 0; i < eventCount; i++)
@@ -637,7 +667,7 @@ void loop()
       Serial.println(events[i],DEC);
     }
     Serial.println("");
-#endif    
+  #endif    
 
     if (((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
     {
