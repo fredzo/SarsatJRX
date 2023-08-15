@@ -1,5 +1,11 @@
 #include "Beacon.h"
 
+// 21 bits BCH polynomial
+#define BCH_21_POLYNOMIAL   0b1001101101100111100011UL 
+#define BCH_21_POLY_LENGTH  22
+// 12 bits BCH polynomial
+#define BCH_12_POLYNOMIAL   0b1010100111001UL
+#define BCH_12_POLY_LENGTH  13
 
 // User
 const Beacon::Protocol Beacon::Protocol::USER_EPIRB_MARITIME(Beacon::Protocol::Type::USER);
@@ -90,6 +96,39 @@ uint64_t getBits(byte *data, int startBit, int endBit)
 
     // all done...
     return result;
+}
+
+uint64_t computeBCH(byte* frame, int startBit, int endBit, unsigned long poly, int polyLength)
+{   // Length of data to be checked (not including the BCH code)
+    int dataLength = endBit-startBit+1;
+    // Total lengh (including the BCH code that will be padded to zeros (BCH code length is polyLengh-1))
+    int totalLength = dataLength+polyLength-1;
+    uint64_t result = getBits(frame, startBit,startBit+polyLength);
+    for (int i = polyLength; i < totalLength; i++) 
+    {
+        bool firstBit = result >> (polyLength-1);
+        if(firstBit)
+        {   // We have a leading 1 => xor the result with the poly
+            result = result^poly;
+        }
+        // Move to next bit
+        result = result << 1;
+        if(i<dataLength)
+        {   // Append next bit
+            result = result & getBits(frame,i,i);
+        } // else : 0 padding after data length
+    }
+    return result;
+}
+
+uint64_t computeBCH1(byte* frame)
+{
+    return computeBCH(frame,25,85,BCH_21_POLYNOMIAL,BCH_21_POLY_LENGTH);
+}
+
+uint64_t computeBCH2(byte* frame)
+{
+    return computeBCH(frame,107,132,BCH_12_POLYNOMIAL,BCH_12_POLY_LENGTH);
 }
 
 Beacon::Beacon(byte frameBuffer[])
@@ -540,3 +579,4 @@ void Beacon::parseFrame()
     }
     // else = User Protocol / short frame => Identification data in bits 26-85 (no default values)
 }
+
