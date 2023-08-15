@@ -103,9 +103,10 @@ uint64_t computeBCH(byte* frame, int startBit, int endBit, unsigned long poly, i
     int dataLength = endBit-startBit+1;
     // Total lengh (including the BCH code that will be padded to zeros (BCH code length is polyLengh-1))
     int totalLength = dataLength+polyLength-1;
+    // Start with the first polyLength bits
     uint64_t result = getBits(frame, startBit,startBit+polyLength);
     for (int i = polyLength; i < totalLength; i++) 
-    {
+    {   // Iterate on each bit after the first polyLength batch
         bool firstBit = result >> (polyLength-1);
         if(firstBit)
         {   // We have a leading 1 => xor the result with the poly
@@ -578,5 +579,20 @@ void Beacon::parseFrame()
         }
     }
     // else = User Protocol / short frame => Identification data in bits 26-85 (no default values)
+
+    // Actual and computed BCH1 and BCH2 values
+    bch1 = getBits(frame,88,106);
+    computedBch1 = computeBCH1(frame);
+    bch2 = getBits(frame,133,144);
+    computedBch2 = computeBCH2(frame);
 }
 
+bool Beacon::isBch1Valid()
+{
+    return (bch1 == computedBch1);
+}
+
+bool Beacon::isBch2Valid()
+{
+    return (bch2 == computedBch2);
+}

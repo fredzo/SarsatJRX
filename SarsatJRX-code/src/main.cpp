@@ -71,6 +71,12 @@ Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y
 #define HEX_ID_LABEL      "Hex ID:"
 #define HEX_ID_WIDTH      60
 #define DATA_LABEL        "Data :"
+#define DATA_LABEL_WIDTH  50
+#define BCH1_OK_LABEL     "BCH1-OK"
+#define BCH1_KO_LABEL     "BCH1-KO"
+#define BCH2_OK_LABEL     "BCH2-OK"
+#define BCH2_KO_LABEL     "BCH2-KO"
+#define BCH_LABEL_WIDTH   60
 // MAPS and BEACON buttons
 #define MAPS_BUTTON_X     246
 #define MAPS_BUTTON_Y     HEADER_BOTTOM-1
@@ -441,6 +447,30 @@ void updateDisplay()
   display.setCursor(0, currentY);
   display.setColor(Display::Color::GREEN);
   display.println(DATA_LABEL);
+  // Append BCH values before frame data
+  display.setColor(beacon->isBch1Valid() ? Display::Color::GREEN : Display::Color::RED);
+  display.setCursor(DATA_LABEL_WIDTH, currentY);
+  display.println(beacon->isBch1Valid() ? BCH1_OK_LABEL : BCH1_KO_LABEL);
+  display.setColor(beacon->isBch2Valid() ? Display::Color::GREEN : Display::Color::RED);
+  display.setCursor(DATA_LABEL_WIDTH+BCH_LABEL_WIDTH, currentY);
+  display.println(beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
+  if(!beacon->isBch1Valid())
+  {
+    Serial.println("Wrong BCH1 value :");
+    Serial.print("Found    :");
+    Serial.println(beacon->bch1,2);
+    Serial.print("Expected :");
+    Serial.println(beacon->computedBch1,2);
+  }
+  if(!beacon->isBch2Valid())
+  {
+    Serial.println("Wrong BCH2 value :");
+    Serial.print("Found    :");
+    Serial.println(beacon->bch2,2);
+    Serial.print("Expected :");
+    Serial.println(beacon->computedBch2,2);
+  }
+
   display.setColor(Display::Color::BEIGE);
   currentY+=LINE_HEIGHT;
   if (beacon->longFrame) 
