@@ -14,7 +14,7 @@
 #define SMALL_BUTTON_WIDTH  50
 #define SMALL_BUTTON_HEIGHT 40
 
-#define LED_RADIUS 8
+#define LED_RADIUS 4
 
 class Display
 {

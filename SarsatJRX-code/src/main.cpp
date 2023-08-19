@@ -47,17 +47,17 @@
 #define HEADER_PAGES_X    3
 #define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
 // Header LEDS
-#define LED_SIG_1_X       DISPLAY_WIDTH-4*(LED_RADIUS+4)
-#define LED_SIG_1_Y       (HEADER_HEIGHT-LED_RADIUS)/2
+#define LED_SIG_1_X       DISPLAY_WIDTH-(4*(2*LED_RADIUS+2))+LED_RADIUS
+#define LED_SIG_1_Y       HEADER_HEIGHT/2
 Display::Led ledSig1 =    Display::Led(LED_SIG_1_X,LED_SIG_1_Y,Display::LedColor::GREEN);
-#define LED_SIG_2_X       DISPLAY_WIDTH-3*(LED_RADIUS+4)
-#define LED_SIG_2_Y       (HEADER_HEIGHT-LED_RADIUS)/2
+#define LED_SIG_2_X       DISPLAY_WIDTH-(3*(2*LED_RADIUS+2))+LED_RADIUS
+#define LED_SIG_2_Y       LED_SIG_1_Y
 Display::Led ledSig2 =    Display::Led(LED_SIG_2_X,LED_SIG_2_Y,Display::LedColor::GREEN);
-#define LED_SIG_IN_FRAME_X      DISPLAY_WIDTH-2*(LED_RADIUS+4)
-#define LED_SIG_IN_FRAME_Y      (HEADER_HEIGHT-LED_RADIUS)/2
+#define LED_SIG_IN_FRAME_X      DISPLAY_WIDTH-(2*(2*LED_RADIUS+2))+LED_RADIUS
+#define LED_SIG_IN_FRAME_Y      LED_SIG_1_Y
 Display::Led ledInFrame =       Display::Led(LED_SIG_IN_FRAME_X,LED_SIG_IN_FRAME_Y,Display::LedColor::RED);
-#define LED_SIG_FRAME_R_X       DISPLAY_WIDTH-1*(LED_RADIUS+4)
-#define LED_SIG_FRAME_R_Y       (HEADER_HEIGHT-LED_RADIUS)/2
+#define LED_SIG_FRAME_R_X       DISPLAY_WIDTH-(1*(2*LED_RADIUS+2))+LED_RADIUS
+#define LED_SIG_FRAME_R_Y       LED_SIG_1_Y
 Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y,Display::LedColor::BLUE);
 // Power
 #define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
@@ -256,10 +256,10 @@ void updateLedHeader(bool force)
     drawledSig1 = true;
     drawledSig2 = true;
     if(ledSig1.on) ledSig1StartBlinkTime = now;
-    if(ledSig2.on) ledSig1StartBlinkTime = now;
+    if(ledSig2.on) ledSig2StartBlinkTime = now;
   }
   else
-  { // Chec if we have to turn decoder input leds off
+  { // Check if we have to turn decoder input leds off
     if((now - ledSig1StartBlinkTime) > LED_BLINK_TIME)
     {
       ledSig1.on = false;
@@ -290,12 +290,12 @@ void updateLedHeader(bool force)
 void updateHeader()
 { // Check for power value update
   float newValue = getVccValue();
-  if(newValue != powerValue)
+  if(abs(newValue - powerValue) > 0.07)
   {
     powerValue = newValue;
     updatePowerValueHeader();
   }
-  //updateLedHeader(false);
+  updateLedHeader(false);
 }
 
 void updateDisplay()
