@@ -291,20 +291,22 @@ void Display::drawLed(Led led)
 
 void Display::drawQrCode (QRCode* qrcode, int moduleSize)
 {
+  int xPos = x;
+  int yPos = y;
   setColor(Display::Color::WHITE);
   // Add a padding around the QR code
   fillRectangle((qrcode->size+2)*moduleSize,(qrcode->size+2)*moduleSize);
   setColor(Display::Color::BLACK);
-  x += moduleSize;
-  y += moduleSize;
-  for (int iY = 0; iY < qrcode->size; y++) 
+  xPos += moduleSize;
+  yPos += moduleSize;
+  for (int iY = 0; iY < qrcode->size; iY++) 
   {
-      for (int iX = 0; iX < qrcode->size; x++) 
+      for (int iX = 0; iX < qrcode->size; iX++) 
       {
           if (qrcode_getModule(qrcode, iX, iY)) 
           {
-              x = x + (iX * moduleSize);
-              y = y + (iY * moduleSize);
+              x = xPos + (iX * moduleSize);
+              y = yPos + (iY * moduleSize);
 							fillRectangle(moduleSize, moduleSize);
           }
       }
