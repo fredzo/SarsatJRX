@@ -34,21 +34,18 @@
 #include <Decoder.h>
 
 // Enable RAM debuging
-// #define DEBUG_RAM
+#define DEBUG_RAM
 
 // Enable serial out
 #define SERIAL_OUT
 
 // Header
 #define HEADER_HEIGHT     20
-#define HEADER_TEXT       "- SarsatJRX -"
+#define HEADER_TEXT       "SarsatJRX    "
 #define HEADER_BOTTOM     24
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
 #define HEADER_PAGES_X    3
 #define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
-#define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
-#define HEADER_POWER_X    DISPLAY_WIDTH-50
-#define HEADER_POWER_Y    (HEADER_HEIGHT-12)/2
 // Header LEDS
 #define LED_SIG_1_X       DISPLAY_WIDTH-4*(LED_RADIUS+4)
 #define LED_SIG_1_Y       (HEADER_HEIGHT-LED_RADIUS)/2
@@ -62,6 +59,10 @@ Display::Led ledInFrame =       Display::Led(LED_SIG_IN_FRAME_X,LED_SIG_IN_FRAME
 #define LED_SIG_FRAME_R_X       DISPLAY_WIDTH-1*(LED_RADIUS+4)
 #define LED_SIG_FRAME_R_Y       (HEADER_HEIGHT-LED_RADIUS)/2
 Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y,Display::LedColor::BLUE);
+// Power
+#define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
+#define HEADER_POWER_X    LED_SIG_1_X-50
+#define HEADER_POWER_Y    (HEADER_HEIGHT-12)/2
 
 
 // Beacon info
@@ -229,6 +230,7 @@ float powerValue = 0;
 
 void updatePowerValueHeader()
 {  // Power header
+  display.setBackgroundColor(Display::Color::GREY);
   display.setFontSize(Display::FontSize::SMALL);
   display.setColor(Display::Color::GREEN);
   display.setCursor(HEADER_POWER_X, HEADER_POWER_Y);
@@ -293,7 +295,7 @@ void updateHeader()
     powerValue = newValue;
     updatePowerValueHeader();
   }
-  updateLedHeader(false);
+  //updateLedHeader(false);
 }
 
 void updateDisplay()
