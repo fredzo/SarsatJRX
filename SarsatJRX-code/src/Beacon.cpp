@@ -104,19 +104,29 @@ uint64_t computeBCH(byte* frame, int startBit, int endBit, unsigned long poly, i
     // Total lengh (including the BCH code that will be padded to zeros (BCH code length is polyLengh-1))
     int totalLength = dataLength+polyLength-1;
     // Start with the first polyLength bits
-    uint64_t result = getBits(frame, startBit,startBit+polyLength);
+    uint64_t result = getBits(frame, startBit,startBit+polyLength-1);
+    Serial.println("BCH calculation :");
+    Serial.println((unsigned long)result,2);
     for (int i = polyLength; i < totalLength; i++) 
     {   // Iterate on each bit after the first polyLength batch
         bool firstBit = result >> (polyLength-1);
+        Serial.print("First bit :");
+        Serial.println(firstBit,2);
         if(firstBit)
         {   // We have a leading 1 => xor the result with the poly
             result = result^poly;
+            for(int j = 0; j < i-polyLength; j++) Serial.print(" ");
+            Serial.println((unsigned long)result,2);
         }
         // Move to next bit
         result = result << 1;
+        for(int j = 0; j < i-polyLength; j++) Serial.print(" ");
+        Serial.println((unsigned long)result,2);
         if(i<dataLength)
         {   // Append next bit
-            result = result & getBits(frame,i,i);
+            result |= getBits(frame,i,i);
+            for(int j = 0; j < i-polyLength; j++) Serial.print(" ");
+            Serial.println((unsigned long)result,2);
         } // else : 0 padding after data length
     }
     return result;
