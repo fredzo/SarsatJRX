@@ -260,12 +260,12 @@ void updateLedHeader(bool force)
   }
   else
   { // Check if we have to turn decoder input leds off
-    if((now - ledSig1StartBlinkTime) > LED_BLINK_TIME)
+    if(ledSig1.on && ((now - ledSig1StartBlinkTime) > LED_BLINK_TIME))
     {
       ledSig1.on = false;
       drawledSig1 = true;
     }
-    if((now - ledSig2StartBlinkTime) > LED_BLINK_TIME)
+    if(ledSig2.on && ((now - ledSig2StartBlinkTime) > LED_BLINK_TIME))
     {
       ledSig2.on = false;
       drawledSig2 = true;
