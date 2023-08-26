@@ -105,29 +105,41 @@ uint64_t computeBCH(byte* frame, int startBit, int endBit, unsigned long poly, i
     int totalLength = dataLength+polyLength-1;
     // Start with the first polyLength bits
     uint64_t result = getBits(frame, startBit,startBit+polyLength-1);
+#ifdef DEBUG_BCH    
     Serial.println("BCH calculation :");
     Serial.println((unsigned long)result,2);
-    for (int i = polyLength; i < totalLength; i++) 
+#endif
+    for (int i = polyLength; i <= totalLength; i++) 
     {   // Iterate on each bit after the first polyLength batch
         bool firstBit = result >> (polyLength-1);
+#ifdef DEBUG_BCH    
         Serial.print("First bit :");
         Serial.println(firstBit,2);
+#endif
         if(firstBit)
         {   // We have a leading 1 => xor the result with the poly
             result = result^poly;
+#ifdef DEBUG_BCH    
             for(int j = 0; j < i-polyLength; j++) Serial.print(" ");
             Serial.println((unsigned long)result,2);
+#endif
         }
-        // Move to next bit
-        result = result << 1;
-        for(int j = 0; j < i-polyLength; j++) Serial.print(" ");
-        Serial.println((unsigned long)result,2);
-        if(i<dataLength)
-        {   // Append next bit
-            result |= getBits(frame,i,i);
+        if(i<totalLength)
+        {   // Move to next bit
+            result = result << 1;
+#ifdef DEBUG_BCH    
             for(int j = 0; j < i-polyLength; j++) Serial.print(" ");
             Serial.println((unsigned long)result,2);
-        } // else : 0 padding after data length
+#endif
+            if(i<dataLength)
+            {   // Append next bit
+                result |= getBits(frame,startBit+i,startBit+i);
+#ifdef DEBUG_BCH    
+                for(int j = 0; j < i-polyLength; j++) Serial.print(" ");
+                Serial.println((unsigned long)result,2);
+#endif
+            } // else : 0 padding after data length
+        }
     }
     return result;
 }
@@ -591,7 +603,7 @@ void Beacon::parseFrame()
     // else = User Protocol / short frame => Identification data in bits 26-85 (no default values)
 
     // Actual and computed BCH1 and BCH2 values
-    bch1 = getBits(frame,88,106);
+    bch1 = getBits(frame,86,106);
     computedBch1 = computeBCH1(frame);
     bch2 = getBits(frame,133,144);
     computedBch2 = computeBCH2(frame);

@@ -478,9 +478,12 @@ void updateDisplay()
   display.setColor(beacon->isBch1Valid() ? Display::Color::GREEN : Display::Color::RED);
   display.setCursor(DATA_LABEL_WIDTH, currentY);
   display.println(beacon->isBch1Valid() ? BCH1_OK_LABEL : BCH1_KO_LABEL);
-  display.setColor(beacon->isBch2Valid() ? Display::Color::GREEN : Display::Color::RED);
-  display.setCursor(DATA_LABEL_WIDTH+BCH_LABEL_WIDTH, currentY);
-  display.println(beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
+  if(beacon->longFrame) 
+  { // No second proteced field in short frames
+    display.setColor(beacon->isBch2Valid() ? Display::Color::GREEN : Display::Color::RED);
+    display.setCursor(DATA_LABEL_WIDTH+BCH_LABEL_WIDTH, currentY);
+    display.println(beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
+  }
 #ifdef SERIAL_OUT 
   if(!beacon->isBch1Valid())
   {
@@ -490,7 +493,7 @@ void updateDisplay()
     Serial.print("Expected :");
     Serial.println(beacon->computedBch1,2);
   }
-  if(!beacon->isBch2Valid())
+  if(beacon->longFrame && !beacon->isBch2Valid())
   {
     Serial.println("Wrong BCH2 value :");
     Serial.print("Found    :");

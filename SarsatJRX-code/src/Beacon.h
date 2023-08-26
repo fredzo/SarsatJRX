@@ -4,6 +4,10 @@
 #include <Arduino.h>
 #include <Country.h>
 #include <Location.h>
+
+// Enable BCH debuging
+// #define DEBUG_BCH
+
 class Beacon
 {
     public:
