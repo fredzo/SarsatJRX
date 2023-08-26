@@ -28,7 +28,7 @@ class Display
             byte green = 0;
             byte blue = 0;
             Color(byte red, byte green, byte blue);
-            static const Color WHITE, BLACK, RED, GREEN, DARK_GREEN, BLUE, YELLOW, MAGENTA, BEIGE, GREY, DARK_GREY, LIGHT_BLUE, PURPLE, ORANGE;
+            static const Color WHITE, BLACK, RED, LIGHT_GREEN, GREEN, DARK_GREEN, BLUE, YELLOW, MAGENTA, BEIGE, GREY, DARK_GREY, LIGHT_BLUE, PURPLE, ORANGE;
         };
         class Button
         {

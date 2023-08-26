@@ -232,7 +232,7 @@ void updatePowerValueHeader()
 {  // Power header
   display.setBackgroundColor(Display::Color::GREY);
   display.setFontSize(Display::FontSize::SMALL);
-  display.setColor(Display::Color::GREEN);
+  display.setColor(Display::Color::LIGHT_GREEN);
   display.setCursor(HEADER_POWER_X, HEADER_POWER_Y);
   char powerString[8];
   getVccStringValue(powerString);
@@ -326,7 +326,7 @@ void updateDisplay()
 #endif  
   // Header pages
   display.setFontSize(Display::FontSize::SMALL);
-  display.setColor(Display::Color::GREEN);
+  display.setColor(Display::Color::LIGHT_GREEN);
   display.setCursor(HEADER_PAGES_X, HEADER_PAGES_Y);
   char buffer[32];
   // Rotating index based on beacon list max size and position of last read frame
@@ -368,7 +368,7 @@ void updateDisplay()
     frameMode = F("Unknown 406");
   }
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::GREEN);
+  display.setColor(Display::Color::LIGHT_GREEN);
   display.println(FRAME_MODE_LABEL);
   display.setColor(Display::Color::BEIGE);
   display.setCursor(FRAME_MODE_WIDTH, currentY);
@@ -380,7 +380,7 @@ void updateDisplay()
 
   // Info           
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::GREEN);
+  display.setColor(Display::Color::LIGHT_GREEN);
   display.println(INFO_LABEL);
   display.setColor(Display::Color::BEIGE);
   // Protocol name
@@ -412,7 +412,7 @@ void updateDisplay()
 
   // Location
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::GREEN);
+  display.setColor(Display::Color::LIGHT_GREEN);
   display.println(LOCATION_LABEL);
   display.setColor(Display::Color::BEIGE);
   currentY+=LINE_HEIGHT;
@@ -456,7 +456,7 @@ void updateDisplay()
 
   // Hex ID
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::GREEN);
+  display.setColor(Display::Color::LIGHT_GREEN);
   display.println(HEX_ID_LABEL);
   display.setColor(Display::Color::BEIGE);
   display.setCursor(HEX_ID_WIDTH, currentY);
@@ -472,7 +472,7 @@ void updateDisplay()
 
   // Data
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::GREEN);
+  display.setColor(Display::Color::LIGHT_GREEN);
   display.println(DATA_LABEL);
   // Append BCH values before frame data
   display.setColor(beacon->isBch1Valid() ? Display::Color::GREEN : Display::Color::RED);

@@ -22,7 +22,8 @@ const Display::Color Display::Color::WHITE(255,255,255);
 const Display::Color Display::Color::BLACK(0,0,0);
 const Display::Color Display::Color::RED(206,132,85);
 const Display::Color Display::Color::DARK_GREEN(106,138,54);
-const Display::Color Display::Color::GREEN(59,201,176);
+const Display::Color Display::Color::GREEN(106,153,85);
+const Display::Color Display::Color::LIGHT_GREEN(59,201,176);
 const Display::Color Display::Color::BLUE(28,143,255);
 const Display::Color Display::Color::YELLOW(255,255,0);
 const Display::Color Display::Color::MAGENTA(255,0,255);
@@ -249,7 +250,7 @@ Display::Colors Display::getColorsForLed(Display::Led led)
     case LedColor::GREEN :
     default :
       result.foreground = &(led.on ? Color::GREEN : Color::GREY);
-      result.border = &Color::DARK_GREEN;
+      result.border = &Color::LIGHT_GREEN;
       break;
   }
   return result;
