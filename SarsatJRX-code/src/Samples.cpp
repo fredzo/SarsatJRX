@@ -3,7 +3,8 @@
 
 static const String frames[] = {
   "FFFED0D6E6202820000C29FF51041775302D", // 1  - Selftest - Serial user Location Protocol
-  "FFFE2FD6E6202820000C29FF51041775302D", // 2  - Serial user -	Serial user Location Protocol
+//  "FFFE2FD6E6202820000C29FF51041775302D", // 2  - Serial user -	Serial user Location Protocol
+  "FFFE2F8e3e0425a8318074fe44b735cd7b46", // 2  - File "ExerciceADRASEC02_30_11_2014.wav" -> Standard Test - N 49d16m32s /  E 3d16m32s
   "FFFE2F3EF613523F81FE0",                // 3  - User protocol Radio call sign (wrong BCH1)
 //"FFFE2F56E6804002202009655250",         // 3  - User protocol Radio call sign (valid BCH1)
   "FFFE2F8E0D0990014710021963C85C7009F5", // 4  - RLS Location

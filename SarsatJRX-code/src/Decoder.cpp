@@ -201,7 +201,7 @@ void analyze(void)
   { // Monitor closely first 1250-ish us modulations
     microseconds = micros();
     if(modDuration >= START_PHASE_START && modDuration < START_PHASE_END)
-    { // This looks like a frame start
+    { // This looks like a frame start => take each state change as a new bit to make sure we don't miss the frame start
       frameStartCount ++;
       readFrameBit(1);
       if(frameStartCount >= FRAME_START_SIZE)
@@ -228,10 +228,8 @@ void analyze(void)
     microseconds = micros();
     if(modDuration >= SAME_PHASE_START && modDuration < SAME_PHASE_END)
     { // Same phase
-      if(lastModState)
-      { // New modulation
-        lastModState = 0;
-        // Store new bit and lauch parsing
+      if(!lastModState)
+      { // New modulation => Store new bit and launch parsing
         readFrameBit(currentBitValue);
       }
       lastModState = !lastModState;

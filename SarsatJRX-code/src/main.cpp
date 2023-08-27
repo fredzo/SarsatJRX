@@ -676,7 +676,7 @@ void loop()
     int bitCount = getBitCount();
     for (int i = 0; i < bitCount; i++)
     {
-      Serial.println(bits[i],DEC);
+      Serial.print(bits[i],DEC);
     }
     Serial.println("");
   #endif    
