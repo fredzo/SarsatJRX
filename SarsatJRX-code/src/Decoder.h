@@ -5,7 +5,7 @@
 #include <Beacon.h>
 
 // Enable decode debuging
-//#define DEBUG_DECODE
+#define DEBUG_DECODE
 
 
 void analyze(void);
@@ -29,6 +29,8 @@ void setFrameComplete(bool complete);
 #ifdef DEBUG_DECODE
 int* getEvents();
 int getEventCount();
+bool* getBits();
+int getBitCount();
 #endif
 
 #endif 

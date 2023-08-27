@@ -21,6 +21,10 @@ byte byteCount;
   int eventCount = 0;
   int* getEvents() {return events;}
   int getEventCount() {return eventCount;}
+  bool bits[512];
+  int debugBitCount = 0;
+  bool* getBits() {return bits;}
+  int getBitCount() {return debugBitCount;}
 #endif
 
 bool isFrameStarted()
@@ -53,55 +57,67 @@ void setFrameComplete(bool complete)
   frameComplete = complete;
 }
 
-void readFrameBits()
+void readFrameBit(bool newBit)
 { 
+  // Store new bit and start parsing
+  currentByte = currentByte << 1 | newBit;
+
+#ifdef DEBUG_DECODE
+  if(debugBitCount<512)
+  {
+    bits[debugBitCount]=newBit;
+    debugBitCount++;
+  }
+#endif
+
   // Frame format :
   // First Byte / Second Byte = Bit synchronization = 0xFF+0xFE
   // Third Byte = Frame synchrnization = 0xD0 for normal message / 0x2F for self-test message
   // First bit of fourth byte indicates the message format : 0 = short message (11 more bytes, i.e. 14 bytes in total) / 1 = long message (15 more bytes, i.e. 18 bytes in total)
-  if (frameParseState == 0) {
-    if (currentByte == 255) {         // si 0xFF recu, frameParseState = 1
+  if (frameParseState == 0) 
+  { // Bit synchronization pattern detection
+    if (currentByte == 255) 
+    { // First 8 synchronization bits received
       frame[0] = currentByte;
       frameParseState = 1;
       bitCount = 0;
       byteCount = 1;
       currentByte = 0;
     }
-    else {
-      return;
-    }
+    return;
   }
 
-  if (frameParseState == 1) {   //si 0xFF recu
-    if (currentByte == 254) { // si 0xFE
+  if (frameParseState == 1) 
+  { // Bit synchronization pattern detection (second byte)
+    if (currentByte == 254) 
+    { // 7 more synchronization byte received + first byte of frame synchronization (0)
       frame[1]= currentByte;
       frameParseState = 2;
       bitCount = 0;
       byteCount = 2;
       currentByte = 0;
     }
-    else {
-      return;
-    }    
+    return;
   }  
    
-  if (frameParseState == 2) {   //si 0xFE recu
-    if (currentByte == 208 || currentByte == 47) { // si 0xD0 ou 2F
+  if (frameParseState == 2) 
+  { // Frame synchronization detection
+    if (currentByte == 208 || currentByte == 47) 
+    { // Frame synchonization pattern received (0xD0 for normal mode or 0x2F for test mode)
       frame[2]= currentByte;
       frameParseState = 3;
       bitCount = 0;
       byteCount = 3;
       currentByte = 0;
     }
-    else {
-      return;
-    }    
+    return;
   }
   
-  else if (frameParseState == 3) { //si 0xFE recu 
+  if (frameParseState == 3) 
+  { // Frame reading
     if (bitCount == 7) 
-    {                   //si nombre de bits = 8
-      frame[byteCount] = currentByte;    //data dans octet numero xx
+    { // We have a complete byte
+      frame[byteCount] = currentByte;
       byteCount ++;
       if(byteCount >= Beacon::SIZE)
       { // TODO : handle different byte count for small messages
@@ -110,7 +126,8 @@ void readFrameBits()
       currentByte = 0;
       bitCount = 0;
     }
-    else if (bitCount < 7) {
+    else if (bitCount < 7) 
+    {
       bitCount ++;
     }
   }
@@ -139,6 +156,11 @@ void resetFrameReading()
     events[i] = 0UL;
   }
   eventCount = 0;
+  for ( int i = 0; i < 512; i++)
+  {
+    bits[i] = 0UL;
+  }
+  debugBitCount = 0;
 #endif
 }
 
@@ -181,8 +203,7 @@ void analyze(void)
     if(modDuration >= START_PHASE_START && modDuration < START_PHASE_END)
     { // This looks like a frame start
       frameStartCount ++;
-      currentByte = currentByte << 1 | 1;
-      readFrameBits();
+      readFrameBit(1);
       if(frameStartCount >= FRAME_START_SIZE)
       {
         frameStarted = true;
@@ -211,8 +232,7 @@ void analyze(void)
       { // New modulation
         lastModState = 0;
         // Store new bit and lauch parsing
-        currentByte = currentByte << 1 | currentBitValue;
-        readFrameBits();
+        readFrameBit(currentBitValue);
       }
       lastModState = !lastModState;
     }
@@ -220,9 +240,8 @@ void analyze(void)
     { // Phase change => bit value change
       currentBitValue = !currentBitValue;
       // Store new bit and lauch parsing
-      currentByte = currentByte << 1 | currentBitValue;
       lastModState = 0;
-      readFrameBits();
+      readFrameBit(currentBitValue);
     }
     else 
     { // We have missed changes
@@ -232,17 +251,15 @@ void analyze(void)
       // Let's assume we received n times the same value 
       for(int i = 0 ; i < missedBits ; i++)
       {
-        currentByte = currentByte << 1 | currentBitValue;
-        readFrameBits();
+        readFrameBit(currentBitValue);
       }
       bool odd = ((missedModulation%2) != 0);
       if(odd) 
       { // We have a phase change
         currentBitValue = !currentBitValue;
         // Store new bit and lauch parsing
-        currentByte = currentByte << 1 | currentBitValue;
         lastModState = 0;
-        readFrameBits();
+        readFrameBit(currentBitValue);
       }
     }
   }

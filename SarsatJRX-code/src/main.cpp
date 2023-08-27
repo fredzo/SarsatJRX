@@ -672,6 +672,13 @@ void loop()
       Serial.println(events[i],DEC);
     }
     Serial.println("");
+    bool* bits = getBits();
+    int bitCount = getBitCount();
+    for (int i = 0; i < bitCount; i++)
+    {
+      Serial.println(bits[i],DEC);
+    }
+    Serial.println("");
   #endif    
 
     if (((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
