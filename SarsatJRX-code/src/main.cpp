@@ -40,54 +40,54 @@
 #define SERIAL_OUT
 
 // Header
-#define HEADER_HEIGHT     20
-#define HEADER_TEXT       "SarsatJRX    "
-#define HEADER_BOTTOM     24
+#define HEADER_HEIGHT     40
+#define HEADER_TEXT       "- SarsatJRX -"
+#define HEADER_BOTTOM     HEADER_HEIGHT+8
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
 #define HEADER_PAGES_X    3
 #define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
 // Header LEDS
-#define LED_SIG_1_X       DISPLAY_WIDTH-(4*(2*LED_RADIUS+2))+LED_RADIUS
+#define LED_SIG_1_X       DISPLAY_WIDTH-(4*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_1_Y       HEADER_HEIGHT/2
 Display::Led ledSig1 =    Display::Led(LED_SIG_1_X,LED_SIG_1_Y,Display::LedColor::GREEN);
-#define LED_SIG_2_X       DISPLAY_WIDTH-(3*(2*LED_RADIUS+2))+LED_RADIUS
+#define LED_SIG_2_X       DISPLAY_WIDTH-(3*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_2_Y       LED_SIG_1_Y
 Display::Led ledSig2 =    Display::Led(LED_SIG_2_X,LED_SIG_2_Y,Display::LedColor::GREEN);
-#define LED_SIG_IN_FRAME_X      DISPLAY_WIDTH-(2*(2*LED_RADIUS+2))+LED_RADIUS
+#define LED_SIG_IN_FRAME_X      DISPLAY_WIDTH-(2*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_IN_FRAME_Y      LED_SIG_1_Y
 Display::Led ledInFrame =       Display::Led(LED_SIG_IN_FRAME_X,LED_SIG_IN_FRAME_Y,Display::LedColor::RED);
-#define LED_SIG_FRAME_R_X       DISPLAY_WIDTH-(1*(2*LED_RADIUS+2))+LED_RADIUS
+#define LED_SIG_FRAME_R_X       DISPLAY_WIDTH-(1*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_FRAME_R_Y       LED_SIG_1_Y
 Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y,Display::LedColor::BLUE);
 // Power
 #define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
-#define HEADER_POWER_X    LED_SIG_1_X-50
+#define HEADER_POWER_X    LED_SIG_1_X-100
 #define HEADER_POWER_Y    (HEADER_HEIGHT-12)/2
 
 
 // Beacon info
-#define LINE_HEIGHT       15
+#define LINE_HEIGHT       20
 #define FRAME_MODE_LABEL  "Frame mode :"
-#define FRAME_MODE_WIDTH  100
+#define FRAME_MODE_WIDTH  200
 #define INFO_LABEL        "Info :"
-#define INFO_LABEL_WIDTH  50
+#define INFO_LABEL_WIDTH  100
 #define LOCATION_LABEL    "Location :"
 #define HEX_ID_LABEL      "Hex ID:"
-#define HEX_ID_WIDTH      60
+#define HEX_ID_WIDTH      120
 #define DATA_LABEL        "Data :"
-#define DATA_LABEL_WIDTH  50
+#define DATA_LABEL_WIDTH  100
 #define BCH1_OK_LABEL     "BCH1-OK"
 #define BCH1_KO_LABEL     "BCH1-KO"
 #define BCH2_OK_LABEL     "BCH2-OK"
 #define BCH2_KO_LABEL     "BCH2-KO"
-#define BCH_LABEL_WIDTH   60
+#define BCH_LABEL_WIDTH   120
 // MAPS and BEACON buttons
-#define MAPS_BUTTON_X     246
+#define MAPS_BUTTON_X     DISPLAY_WIDTH-BUTTON_WIDTH
 #define MAPS_BUTTON_Y     HEADER_BOTTOM-1
 #define MAPS_BUTTON_CAPTION "MAPS"
 Display::Button mapsButton = Display::Button(MAPS_BUTTON_X,MAPS_BUTTON_Y,MAPS_BUTTON_CAPTION,Display::ButtonStyle::NORMAL);
-#define BEACON_BUTTON_X   246
-#define BEACON_BUTTON_Y   HEADER_BOTTOM+BUTTON_HEIGHT+1
+#define BEACON_BUTTON_X   MAPS_BUTTON_X
+#define BEACON_BUTTON_Y   HEADER_BOTTOM+BUTTON_HEIGHT+4
 #define BEACON_BUTTON_CAPTION "BEACON"
 Display::Button beaconButton = Display::Button(BEACON_BUTTON_X,BEACON_BUTTON_Y,BEACON_BUTTON_CAPTION,Display::ButtonStyle::NORMAL);
 // Navigation BUTTONS
@@ -124,7 +124,7 @@ static const int QR_VERSION = 6;
 void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
 { // Version 6 (41x41) allows 154 alphanumeric characters with medium error correcion
   // For some reason, to have the qr code library work properly, the version passed to getBufferSize needs to be one step ahed the actual version...
-  uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+1)];
+  uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+2)];
   char buffer[128];
   if(isMaps)
   {
@@ -140,7 +140,7 @@ void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
 	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_MEDIUM, buffer);
 }
 
-static const int MODULE_SIZE = 3;
+static const int MODULE_SIZE = 4;
 void drawQrCode(bool isMaps)
 {
     QRCode qrCode;
@@ -580,8 +580,8 @@ void loop()
     int y = display.getTouchY();
     if(x>=0 && y>=0)
     {
-      //Serial.println(x);
-      //Serial.println(y);
+      // Serial.println(x);
+      // Serial.println(y);
       if(mapsButton.contains(x,y))
       {
         if(mapsButton.enabled)

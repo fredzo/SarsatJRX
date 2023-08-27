@@ -2,24 +2,27 @@
 #define DISPLAY_H
 
 #include <Arduino.h>
-#include <UTFT.h>
-#include <UTouch.h>
+#include <LCDWIKI_GUI.h> //Core graphics library
+#include <LCDWIKI_KBV.h> //Hardware-specific library
+#include <LCDWIKI_TOUCH.h> //touch screen library
 #include <qrcode.h>
 
-#define DISPLAY_WIDTH   320
-#define DISPLAY_HEIGHT  240
+#define DISPLAY_WIDTH   800
+#define DISPLAY_HEIGHT  480
 
-#define BUTTON_WIDTH  70
-#define BUTTON_HEIGHT 40
-#define SMALL_BUTTON_WIDTH  50
-#define SMALL_BUTTON_HEIGHT 40
+#define BUTTON_WIDTH  140
+#define BUTTON_HEIGHT 80
+#define SMALL_BUTTON_WIDTH  100
+#define SMALL_BUTTON_HEIGHT 80
 
-#define LED_RADIUS 4
+#define LED_RADIUS 12
+
+#define ROUND_RECT_RADIUS 8
 
 class Display
 {
     public :
-        enum class FontSize {SMALL,LARGE};
+        enum class FontSize {SMALL,MEDIUM,LARGE};
         enum class ButtonStyle {NORMAL,SMALL};
         class Color
         {
@@ -64,6 +67,8 @@ class Display
         void drawRectangle(int width, int height);
         void fillRoundRectangle(int width, int height);
         void drawRoundRectangle(int width, int height);
+        void fillCircle(int width, int height);
+        void drawCircle(int width, int height);
         void println(String s);
         void println();
         void print(String s);
@@ -79,11 +84,13 @@ class Display
         void setFontSize(FontSize fontSize);
         void centerText(String text, int width);
         void drawQrCode (QRCode* qrcode,int moduleSize);
+        int getFontWidth(FontSize fontSize);
+        int getFontHeight(FontSize fontSize);
 
     private : 
         // Init display and touch screen
-        UTFT myGLCD = UTFT(ITDB32S, 38,39,40,41); 
-        UTouch  myTouch = UTouch(6,5,4,3,2);
+        LCDWIKI_KBV myGLCD = LCDWIKI_KBV(NT35510,40,38,39,43,41); //model,cs,cd,wr,rd,reset
+        LCDWIKI_TOUCH myTouch = LCDWIKI_TOUCH(53,52,50,51,44); //tcs,tclk,tdout,tdin,tirq
         int x, y;
         String displayBuffer;
         Color currentColor = Color::WHITE;

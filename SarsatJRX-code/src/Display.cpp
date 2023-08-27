@@ -1,8 +1,5 @@
 #include <Display.h>
 
-// Declare which fonts we will be using
-extern uint8_t BigFont[];
-extern uint8_t SmallFont[];
 
 Display::Display()
 { 
@@ -37,47 +34,48 @@ const Display::Color Display::Color::PURPLE(218,85,131);
 void Display::setColor(Color color)
 {
   currentColor = color;
-  myGLCD.setColor(color.red, color.green, color.blue);
+  myGLCD.Set_Draw_color(color.red, color.green, color.blue);
+  myGLCD.Set_Text_colour(color.red, color.green, color.blue);
 }
 
 void Display::setBackgroundColor(Color color)
 {
   currentBackColor = color;
-  myGLCD.setBackColor(color.red, color.green, color.blue);
+  myGLCD.Set_Text_Back_colour(color.red, color.green, color.blue);
 }
 
 void Display::fillRectangle(int width, int height)
 {
-  myGLCD.fillRect(x,y,x+width,y+height);
+  myGLCD.Fill_Rectangle(x,y,x+width,y+height);
 }
 
 void Display::drawRectangle(int width, int height)
 {
-  myGLCD.drawRect(x,y,x+width,y+height);
+  myGLCD.Draw_Rectangle(x,y,x+width,y+height);
 }
 
 void Display::fillRoundRectangle(int width, int height)
 {
-  myGLCD.fillRoundRect(x,y,x+width,y+height);
+  myGLCD.Fill_Round_Rectangle(x,y,x+width,y+height,ROUND_RECT_RADIUS);
 }
 
 void Display::drawRoundRectangle(int width, int height)
 {
-  myGLCD.drawRoundRect(x,y,x+width,y+height);
+  myGLCD.Draw_Round_Rectangle(x,y,x+width,y+height,ROUND_RECT_RADIUS);
 }
 
 void Display::setup()
 {
     // Initial setup
-    myGLCD.InitLCD();
-    myGLCD.clrScr();
+  myGLCD.Init_LCD();
+  myGLCD.Set_Rotation(1);
+  myTouch.TP_Set_Rotation(3);
+  myTouch.TP_Init(myGLCD.Get_Rotation(),myGLCD.Get_Display_Width(),myGLCD.Get_Display_Height()); 
+  myGLCD.Fill_Screen(0,0,0);
 
-    myTouch.InitTouch();
-    myTouch.setPrecision(PREC_MEDIUM);
-
-    setFontSize(FontSize::SMALL);
-    setColor(Color::BLACK);
-    setBackgroundColor(Color::WHITE);
+  setFontSize(FontSize::SMALL);
+  setColor(Color::BLACK);
+  setBackgroundColor(Color::WHITE);
 }
 
 void Display::setFontSize(FontSize fontSize)
@@ -86,11 +84,40 @@ void Display::setFontSize(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      myGLCD.setFont(BigFont);
+      myGLCD.Set_Text_Size(4);
+      break;
+    case FontSize::MEDIUM :
+      myGLCD.Set_Text_Size(3);
       break;
     case FontSize::SMALL :
-      myGLCD.setFont(SmallFont);
+      myGLCD.Set_Text_Size(2);
       break;  
+  }
+}
+
+int Display::getFontWidth(FontSize fontSize)
+{
+  switch(fontSize)
+  {
+    case FontSize::LARGE :
+      return 28; // 4*7
+    case FontSize::MEDIUM :
+      return 21; // 3*7
+    case FontSize::SMALL :
+      return 14; // 2*7
+  }
+}
+
+int Display::getFontHeight(FontSize fontSize)
+{
+  switch(fontSize)
+  {
+    case FontSize::LARGE :
+      return 64; // 4*16
+    case FontSize::MEDIUM :
+      return 48; // 3*16
+    case FontSize::SMALL :
+      return 32; // 2*16
   }
 }
 
@@ -106,13 +133,13 @@ void Display::println(String s)
     // Font adaptation for ° sign
     displayBuffer.replace("°","^");
     // Actually display the string
-    myGLCD.print(displayBuffer, x, y);
+    myGLCD.Print_String(displayBuffer, x, y);
     displayBuffer = "";
 }
 
 void Display::println()
 {
-    myGLCD.print(displayBuffer, x, y);
+    myGLCD.Print_String(displayBuffer, x, y);
     displayBuffer = "";
 }
 
@@ -135,8 +162,7 @@ void Display::printHex(byte value)
 
 void Display::clearDisplay()
 {
-    myGLCD.clrScr();
-    myGLCD.fillScr(myGLCD.getBackColor());
+    myGLCD.Fill_Screen(0,0,0);
     displayBuffer = "";
 }
 
@@ -152,11 +178,11 @@ int Display::getHeight()
 
 boolean Display::touchAvailable()
 {
-    if (myTouch.dataAvailable())
+    myTouch.TP_Scan(0);
+    if (myTouch.TP_Get_State()&TP_PRES_DOWN)
     {
-        myTouch.read();
-        touchX = myTouch.getX();
-        touchY = myTouch.getY();
+        touchX = myTouch.x;
+        touchY = myTouch.y;
         return true;
     }
     else
@@ -177,7 +203,7 @@ int Display::getTouchY()
 
 void Display::centerText(String text, int width)
 {
-  x += (width-(((fontSize == FontSize::SMALL) ? 8 : 16)*text.length()))/2;
+  x += (width-((getFontWidth(fontSize))*text.length()))/2;
 }
 
 int Display::Button::getWidth()
@@ -263,18 +289,23 @@ void Display::drawButton(Button button)
   Colors colors = getColorsForButton(button);
   Color backupColor = currentColor;
   Color backupBackColor = currentBackColor;
+  // Store font size
+  FontSize backupFontSize = fontSize;
+  setFontSize(FontSize::MEDIUM);
   int xx = button.x+button.getWidth();
   int yy = button.y+button.getHeight();
   setBackgroundColor(*colors.background);
   setColor(*colors.background);
-  myGLCD.fillRoundRect (button.x, button.y, xx, yy);
+  myGLCD.Fill_Round_Rectangle(button.x, button.y, xx, yy, ROUND_RECT_RADIUS);
   setColor(*colors.foreground);
-  myGLCD.print(button.caption, button.x+((button.getWidth()-8*captionSize)/2), button.y+((button.getHeight()-12)/2));
+  myGLCD.Print_String(button.caption, button.x+((button.getWidth()-16*captionSize)/2), button.y+((button.getHeight()-16)/2));
   setColor(*colors.border);
-  myGLCD.drawRoundRect (button.x, button.y, xx, yy);
+  myGLCD.Draw_Round_Rectangle(button.x, button.y, xx, yy, ROUND_RECT_RADIUS);
   // Restore color
   setColor(backupColor);
   setBackgroundColor(backupBackColor);
+  // Restore font size
+  fontSize = backupFontSize;
 }
 
 void Display::drawLed(Led led)
@@ -283,9 +314,9 @@ void Display::drawLed(Led led)
   Colors colors = getColorsForLed(led);
   Color backupColor = currentColor;
   setColor(*colors.foreground);
-  myGLCD.fillCircle(led.x, led.y,LED_RADIUS);
+  myGLCD.Fill_Circle(led.x, led.y,LED_RADIUS);
   setColor(*colors.border);
-  myGLCD.drawCircle (led.x, led.y,LED_RADIUS);
+  myGLCD.Draw_Circle(led.x, led.y,LED_RADIUS);
   // Restore color
   setColor(backupColor);
 }
