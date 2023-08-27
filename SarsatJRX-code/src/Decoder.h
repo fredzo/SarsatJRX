@@ -5,7 +5,7 @@
 #include <Beacon.h>
 
 // Enable decode debuging
-#define DEBUG_DECODE
+//#define DEBUG_DECODE
 
 
 void analyze(void);
