@@ -34,7 +34,7 @@
 #include <Decoder.h>
 
 // Enable RAM debuging
-// #define DEBUG_RAM
+#define DEBUG_RAM
 
 // Enable serial out
 #define SERIAL_OUT
@@ -46,6 +46,9 @@
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
 #define HEADER_PAGES_X    6
 #define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
+#define HEADER_BUTTON_LEFT    DISPLAY_WIDTH/3
+#define HEADER_BUTTON_RIGHT   (2*DISPLAY_WIDTH)/3
+#define HEADER_BUTTON_BOTTOM  2*HEADER_HEIGHT
 // Header LEDS
 #define LED_SIG_1_X       DISPLAY_WIDTH-(4*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_1_Y       HEADER_HEIGHT/2
@@ -409,6 +412,15 @@ void updateDisplay()
   Serial.println(beacon->getProtocolDesciption());   
 #endif
   currentY+=LINE_HEIGHT;
+  if(beacon->hasAdditionalData)
+  {
+    display.setCursor(0, currentY);
+    display.println(beacon->additionalData);
+  #ifdef SERIAL_OUT 
+    Serial.println(beacon->additionalData);   
+  #endif
+    currentY+=LINE_HEIGHT;
+  }
 
   // Location
   display.setCursor(0, currentY);
@@ -675,7 +687,7 @@ void loop()
           display.drawButton(nextButton);
         }
       }
-      else
+      else if((y <= HEADER_BUTTON_BOTTOM)&&(x >= HEADER_BUTTON_LEFT)&&(x <= HEADER_BUTTON_RIGHT))
       {
         //Serial.print("Read frame #");
         //Serial.println(curFrame);
