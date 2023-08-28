@@ -44,7 +44,7 @@
 #define HEADER_TEXT       "- SarsatJRX -"
 #define HEADER_BOTTOM     HEADER_HEIGHT+8
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
-#define HEADER_PAGES_X    3
+#define HEADER_PAGES_X    6
 #define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
 // Header LEDS
 #define LED_SIG_1_X       DISPLAY_WIDTH-(4*(2*LED_RADIUS+6))+LED_RADIUS

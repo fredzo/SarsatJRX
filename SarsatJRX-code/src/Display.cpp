@@ -95,14 +95,14 @@ void Display::setFontSize(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      myGLCD->setTextSize(4);
+      myGLCD->setTextSize(4); // 24x32
       break;
     case FontSize::MEDIUM :
-      myGLCD->setTextSize(3);
+      myGLCD->setTextSize(3); // 18x24
       break;
     case FontSize::SMALL :
-      myGLCD->setTextSize(2);
-      break;  
+      myGLCD->setTextSize(2); // 12x16
+      break;  // 1 = 6x8
   }
 }
 
@@ -111,13 +111,13 @@ int Display::getFontWidth(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      return 28; // 4*7
+      return 24; // 4*6
     case FontSize::MEDIUM :
-      return 21; // 3*7
+      return 18; // 3*6
     case FontSize::SMALL :
-      return 14; // 2*7
+      return 12; // 2*6
   }
-  return 21;
+  return 18;
 }
 
 int Display::getFontHeight(FontSize fontSize)
@@ -125,13 +125,13 @@ int Display::getFontHeight(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      return 64; // 4*16
+      return 32; // 4*8
     case FontSize::MEDIUM :
-      return 48; // 3*16
+      return 24; // 3*8
     case FontSize::SMALL :
-      return 32; // 2*16
+      return 16; // 2*8
   }
-  return 48;
+  return 24;
 }
 
 void Display::setCursor(int x, int y)
@@ -318,19 +318,20 @@ void Display::drawButton(Button button)
   Color backupTextBackColor = currentTextBackColor;
   // Store font size
   FontSize backupFontSize = fontSize;
-  setFontSize(FontSize::MEDIUM);
+  FontSize buttonFontSize = (button.style == ButtonStyle::SMALL) ? FontSize::MEDIUM : FontSize::SMALL;
+  setFontSize(buttonFontSize);
   setTextColors(*colors.foreground,*colors.background);
   Color color = *colors.background;
   myGLCD->fillRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(color.red, color.green, color.blue));
   color = *colors.foreground;
-  myGLCD->setCursor(button.x+((button.getWidth()-16*captionSize)/2), button.y+((button.getHeight()-16)/2));
+  myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+((button.getHeight()-getFontHeight(buttonFontSize))/2));
   myGLCD->println(button.caption);
   color = *colors.border;
   myGLCD->drawRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(color.red, color.green, color.blue));
   // Restore text colors
   setTextColors(backupTextColor,backupTextBackColor);
   // Restore font size
-  fontSize = backupFontSize;
+  setFontSize(backupFontSize);
 }
 
 void Display::drawLed(Led led)
