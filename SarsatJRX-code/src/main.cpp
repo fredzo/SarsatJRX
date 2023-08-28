@@ -66,7 +66,7 @@ Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y
 
 
 // Beacon info
-#define LINE_HEIGHT       20
+#define LINE_HEIGHT       22
 #define FRAME_MODE_LABEL  "Frame mode :"
 #define FRAME_MODE_WIDTH  200
 #define INFO_LABEL        "Info :"

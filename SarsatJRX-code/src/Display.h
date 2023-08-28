@@ -2,6 +2,7 @@
 #define DISPLAY_H
 
 #include <Arduino.h>
+#include <U8g2lib.h>
 #include <Arduino_GFX_Library.h>
 #include <LCDWIKI_TOUCH.h> //touch screen library
 #include <qrcode.h>

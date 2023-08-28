@@ -81,7 +81,7 @@ void Display::setup(Color bgColor)
   //myGLCD.Set_Rotation(1);
   myTouch.TP_Set_Rotation(3);
   myTouch.TP_Init(1,DISPLAY_WIDTH,DISPLAY_HEIGHT); 
-  fontSize = FontSize::SMALL;
+  setFontSize(FontSize::SMALL);
   currentBackColor = bgColor;
   currentColor = Color::White;
   currentTextBackColor = bgColor;
@@ -95,13 +95,16 @@ void Display::setFontSize(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      myGLCD->setTextSize(4); // 24x32
+      //myGLCD->setTextSize(4); // 24x32
+      myGLCD->setFont(u8g2_font_logisoso32_tf);
       break;
     case FontSize::MEDIUM :
-      myGLCD->setTextSize(3); // 18x24
+      //myGLCD->setTextSize(3); // 18x24
+      myGLCD->setFont( u8g2_font_inr24_mf );
       break;
     case FontSize::SMALL :
-      myGLCD->setTextSize(2); // 12x16
+      //myGLCD->setTextSize(2); // 12x16
+      myGLCD->setFont(u8g2_font_inr16_mf);
       break;  // 1 = 6x8
   }
 }
@@ -149,17 +152,21 @@ void Display::setHeaderHeight(int headerHeight)
 void Display::println(String s)
 {   
     displayBuffer+=s;
-    // Font adaptation for ° sign
-    displayBuffer.replace("°","^");
+    // Font adaptation for ° sign => No more needed with u8g2 font
+    //displayBuffer.replace("°","^");
+
+    // u8g2 fonts are printend with bottom left position instead of top left...
+    setCursor(x,y+getFontHeight(fontSize));
     // Actually display the string
     myGLCD->println(displayBuffer);
+    // Restpre original position
+    setCursor(x,y);
     displayBuffer = "";
 }
 
 void Display::println()
 {
-    myGLCD->println(displayBuffer);
-    displayBuffer = "";
+    Display::println("");
 }
 
 void Display::print(String s)
@@ -324,7 +331,7 @@ void Display::drawButton(Button button)
   Color color = *colors.background;
   myGLCD->fillRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(color.red, color.green, color.blue));
   color = *colors.foreground;
-  myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+((button.getHeight()-getFontHeight(buttonFontSize))/2));
+  myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+button.getHeight()-((button.getHeight()-getFontHeight(buttonFontSize))/2));
   myGLCD->println(button.caption);
   color = *colors.border;
   myGLCD->drawRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(color.red, color.green, color.blue));
