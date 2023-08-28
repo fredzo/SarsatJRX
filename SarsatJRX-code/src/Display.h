@@ -4,8 +4,11 @@
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include <Arduino_GFX_Library.h>
-#include <LCDWIKI_TOUCH.h> //touch screen library
 #include <qrcode.h>
+
+// Enable touch calibration
+//#define TOUCH_CAL
+
 
 #define DISPLAY_WIDTH   800
 #define DISPLAY_HEIGHT  480
@@ -72,6 +75,7 @@ class Display
         void drawRoundRectangle(int width, int height);
         void fillCircle(int width, int height);
         void drawCircle(int width, int height);
+        void drawLine(int x1,int y1,int x2,int y2);
         void println(String s);
         void println();
         void print(String s);
@@ -94,7 +98,6 @@ class Display
         // Init display and touch screen
         Arduino_DataBus *bus = new Arduino_AVRPAR16(38 /* DC */, 40 /* CS */, 39 /* WR */, 43 /* RD */, 3 /* PORT LOW */, 1 /* PORT HIGH */);
         Arduino_GFX *myGLCD = new Arduino_NT35510(bus, 41, 1 /* rotation */);
-        LCDWIKI_TOUCH myTouch = LCDWIKI_TOUCH(53,52,50,51,44); //tcs,tclk,tdout,tdin,tirq
         int x, y, headerHeight;
         String displayBuffer;
         Color currentColor = Color::White;

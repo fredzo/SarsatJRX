@@ -1,5 +1,5 @@
 #include <Display.h>
-
+#include <touch.h>
 
 Display::Display()
 { 
@@ -74,13 +74,16 @@ void Display::drawRoundRectangle(int width, int height)
   myGLCD->drawRoundRect(x,y,width,height,ROUND_RECT_RADIUS,RGB565(currentColor.red, currentColor.green, currentColor.blue));
 }
 
+void Display::drawLine(int x1,int y1,int x2,int y2)
+{
+  myGLCD->drawLine(x1,y1,x2,y2,RGB565(currentColor.red, currentColor.green, currentColor.blue));
+}
+
 void Display::setup(Color bgColor)
 {
   // Initial setup
   myGLCD->begin();
-  //myGLCD.Set_Rotation(1);
-  myTouch.TP_Set_Rotation(3);
-  myTouch.TP_Init(1,DISPLAY_WIDTH,DISPLAY_HEIGHT); 
+  touch_init(DISPLAY_WIDTH,DISPLAY_HEIGHT,1);
   setFontSize(FontSize::SMALL);
   currentBackColor = bgColor;
   currentColor = Color::White;
@@ -152,8 +155,8 @@ void Display::setHeaderHeight(int headerHeight)
 void Display::println(String s)
 {   
     displayBuffer+=s;
-    // Font adaptation for ° sign => No more needed with u8g2 font
-    //displayBuffer.replace("°","^");
+    // Font adaptation for ° sign
+    displayBuffer.replace("°","\xB0");
 
     // u8g2 fonts are printend with bottom left position instead of top left...
     setCursor(x,y+getFontHeight(fontSize));
@@ -211,11 +214,15 @@ int Display::getHeight()
 
 boolean Display::touchAvailable()
 {
-    myTouch.TP_Scan(0);
-    if (myTouch.TP_Get_State()&TP_PRES_DOWN)
+    if(touch_touched())
     {
-        touchX = myTouch.x;
-        touchY = myTouch.y;
+      #ifdef TOUCH_CAL
+        touchX = touch_raw_x;
+        touchY = touch_raw_y;
+      #else
+        touchX = touch_last_x;
+        touchY = touch_last_y;
+      #endif
         return true;
     }
     else
@@ -270,8 +277,8 @@ int Display::Button::getHeight()
 
 bool Display::Button::contains(int xPos, int yPos)
 {
-  
-  return (xPos >= x && xPos <= (x+getWidth()) && yPos >= y && yPos <= (y+getHeight()));
+  int margin = (style == ButtonStyle::SMALL) ? 80 : 5; // Use large margin of error for small buttons to compensate resistive screen innacurracy
+  return (xPos >= x-margin && xPos <= (x+getWidth()+margin) && yPos >= y-margin && yPos <= (y+getHeight()+margin));
 }
 
 Display::Colors Display::getColorsForButton(Display::Button button)
