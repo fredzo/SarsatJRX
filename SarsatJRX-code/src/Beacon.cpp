@@ -1,4 +1,5 @@
 #include "Beacon.h"
+#include "Util.h"
 
 // 21 bits BCH polynomial
 #define BCH_21_POLYNOMIAL   0b1001101101100111100011UL 
@@ -371,6 +372,22 @@ void Beacon::parseProtocol()
     }
 }
 
+void Beacon::parseAdditionalData()
+{
+    hasAdditionalData = false;
+    switch(protocolCode)
+    {
+        case 0b0010 :
+        case 0b1100 :
+            uint32_t mmsi = getBits(frame,41,60);
+            *additionalData = "MMSI=" + String(mmsi, HEX) + " MID=" + mmsi;
+            hasAdditionalData = true;
+            break;
+        default:
+            hasAdditionalData = false;
+    }
+}
+
 void Beacon::parseFrame()
 {
     long latofmin, latofsec, lonofmin, lonofsec;
@@ -601,6 +618,9 @@ void Beacon::parseFrame()
         }
     }
     // else = User Protocol / short frame => Identification data in bits 26-85 (no default values)
+
+    // Parse additional data
+    parseAdditionalData();
 
     // Actual and computed BCH1 and BCH2 values
     bch1 = getBits(frame,86,106);

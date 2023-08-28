@@ -36,6 +36,7 @@ class Beacon
         };
         static const byte SIZE = 18;
         bool longFrame;
+        bool hasAdditionalData;
         FrameMode frameMode;
         long protocolCode;
         const Protocol* protocol = &Protocol::UNKNOWN;
@@ -46,6 +47,7 @@ class Beacon
         Beacon(byte frameBuffer[]);
         String getProtocolName();
         String getProtocolDesciption();
+        String* additionalData;
         uint32_t bch1;
         uint32_t computedBch1;
         bool isBch1Valid();
@@ -55,5 +57,6 @@ class Beacon
     private:
         void parseFrame();
         void parseProtocol();
+        void parseAdditionalData();
 };
 #endif 
