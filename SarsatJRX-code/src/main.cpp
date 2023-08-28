@@ -34,7 +34,7 @@
 #include <Decoder.h>
 
 // Enable RAM debuging
-#define DEBUG_RAM
+// #define DEBUG_RAM
 
 // Enable serial out
 #define SERIAL_OUT
@@ -230,9 +230,8 @@ float powerValue = 0;
 
 void updatePowerValueHeader()
 {  // Power header
-  display.setBackgroundColor(Display::Color::Grey);
+  display.setTextColors(Display::Color::LightGreen,Display::Color::Grey);
   display.setFontSize(Display::FontSize::SMALL);
-  display.setColor(Display::Color::LightGreen);
   display.setCursor(HEADER_POWER_X, HEADER_POWER_Y);
   char powerString[8];
   getVccStringValue(powerString);
@@ -298,35 +297,37 @@ void updateHeader()
   updateLedHeader(false);
 }
 
+void drawHeader()
+{
+  // Header
+  display.setCursor(0, 0);
+  // Draw header background
+  display.setColor(Display::Color::Grey);
+  display.fillRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
+  display.setColor(Display::Color::Purple);
+  display.drawRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
+  // Header text
+  display.setTextColors(Display::Color::LightBlue,Display::Color::Grey);
+  display.setCursor(0, 3);
+  display.setFontSize(Display::FontSize::LARGE);
+  display.centerText(HEADER_TEXT,display.getWidth());
+  display.println(HEADER_TEXT);
+}
+
 void updateDisplay()
 {
 #ifdef DEBUG_RAM
   Serial.println(freeRam());
 #endif
   // Refresh screen
-  display.setBackgroundColor(Display::Color::DarkGrey);
-  display.clearDisplay();
+  display.clearDisplay(true);
 
-  // Header
-  display.setCursor(0, 0);
-  // Draw header background
-  display.setColor(Display::Color::Grey);
-  display.setBackgroundColor(Display::Color::Grey);
-  display.fillRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
-  display.setColor(Display::Color::Purple);
-  display.drawRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
-  // Header text
-  display.setColor(Display::Color::LightBlue);
-  display.setCursor(0, 3);
-  display.setFontSize(Display::FontSize::LARGE);
-  display.centerText(HEADER_TEXT,display.getWidth());
-  display.println(HEADER_TEXT);
 #ifdef SERIAL_OUT 
   Serial.print(HEADER_TEXT);
 #endif  
   // Header pages
   display.setFontSize(Display::FontSize::SMALL);
-  display.setColor(Display::Color::LightGreen);
+  display.setTextColors(Display::Color::LightGreen,Display::Color::Grey);
   display.setCursor(HEADER_PAGES_X, HEADER_PAGES_Y);
   char buffer[32];
   // Rotating index based on beacon list max size and position of last read frame
@@ -344,8 +345,7 @@ void updateDisplay()
 
   int currentY = HEADER_BOTTOM;
   // For the rest of the screen
-  display.setColor(Display::Color::Beige);
-  display.setBackgroundColor(Display::Color::DarkGrey);
+  display.setTextColors(Display::Color::Beige,Display::Color::DarkGrey);
 
   if(beaconsReadIndex<0)
   { // Nothing to display
@@ -368,9 +368,9 @@ void updateDisplay()
     frameMode = F("Unknown 406");
   }
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::LightGreen);
+  display.setTextColor(Display::Color::LightGreen);
   display.println(FRAME_MODE_LABEL);
-  display.setColor(Display::Color::Beige);
+  display.setTextColor(Display::Color::Beige);
   display.setCursor(FRAME_MODE_WIDTH, currentY);
   display.println(frameMode);
 #ifdef SERIAL_OUT 
@@ -380,9 +380,9 @@ void updateDisplay()
 
   // Info           
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::LightGreen);
+  display.setTextColor(Display::Color::LightGreen);
   display.println(INFO_LABEL);
-  display.setColor(Display::Color::Beige);
+  display.setTextColor(Display::Color::Beige);
   // Protocol name
   display.setCursor(INFO_LABEL_WIDTH, currentY);
   if(beacon->protocol->isUnknown())
@@ -412,9 +412,9 @@ void updateDisplay()
 
   // Location
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::LightGreen);
+  display.setTextColor(Display::Color::LightGreen);
   display.println(LOCATION_LABEL);
-  display.setColor(Display::Color::Beige);
+  display.setTextColor(Display::Color::Beige);
   currentY+=LINE_HEIGHT;
   // Country
   display.setCursor(0, currentY);
@@ -456,9 +456,9 @@ void updateDisplay()
 
   // Hex ID
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::LightGreen);
+  display.setTextColor(Display::Color::LightGreen);
   display.println(HEX_ID_LABEL);
-  display.setColor(Display::Color::Beige);
+  display.setTextColor(Display::Color::Beige);
   display.setCursor(HEX_ID_WIDTH, currentY);
   // "Id = 0x1122334455667788"
   uint32_t msb = beacon->identifier >> 32;
@@ -472,15 +472,15 @@ void updateDisplay()
 
   // Data
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::LightGreen);
+  display.setTextColor(Display::Color::LightGreen);
   display.println(DATA_LABEL);
   // Append BCH values before frame data
-  display.setColor(beacon->isBch1Valid() ? Display::Color::Green : Display::Color::Red);
+  display.setTextColor(beacon->isBch1Valid() ? Display::Color::Green : Display::Color::Red);
   display.setCursor(DATA_LABEL_WIDTH, currentY);
   display.println(beacon->isBch1Valid() ? BCH1_OK_LABEL : BCH1_KO_LABEL);
   if(beacon->longFrame) 
   { // No second proteced field in short frames
-    display.setColor(beacon->isBch2Valid() ? Display::Color::Green : Display::Color::Red);
+    display.setTextColor(beacon->isBch2Valid() ? Display::Color::Green : Display::Color::Red);
     display.setCursor(DATA_LABEL_WIDTH+BCH_LABEL_WIDTH, currentY);
     display.println(beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
   }
@@ -503,7 +503,7 @@ void updateDisplay()
   }
 #endif
 
-  display.setColor(Display::Color::Beige);
+  display.setTextColor(Display::Color::Beige);
   currentY+=LINE_HEIGHT;
   if (beacon->longFrame) 
   { // Long frame
@@ -561,7 +561,9 @@ void setup()
   Serial.begin(115200);
   attachInterrupt(digitalPinToInterrupt(receiverPin), analyze, CHANGE);  // interruption sur Rise et Fall
 
-  display.setup();
+  display.setup(Display::Color::DarkGrey);
+  display.setHeaderHeight(HEADER_HEIGHT);
+  drawHeader();
   previousButton.enabled = true;
   nextButton.enabled = true;
 

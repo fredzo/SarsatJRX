@@ -57,11 +57,14 @@ class Display
             Led(int x,int y,LedColor color) : x(x), y(y), color(color) {}
         };
         Display();
-        void setup();
-        void clearDisplay();
+        void setup(Color bgColor);
+        void clearDisplay(bool noHeader);
+        void setHeaderHeight(int headerHeight);
         void setCursor(int x, int y);
         void setColor(Color color);
-        void setBackgroundColor(Color color);
+        void setBackgroundColor(Color bgColor);
+        void setTextColor(Color color);
+        void setTextColors(Color color, Color bgColor);
         void fillRectangle(int width, int height);
         void drawRectangle(int width, int height);
         void fillRoundRectangle(int width, int height);
@@ -91,10 +94,12 @@ class Display
         Arduino_DataBus *bus = new Arduino_AVRPAR16(38 /* DC */, 40 /* CS */, 39 /* WR */, 43 /* RD */, 3 /* PORT LOW */, 1 /* PORT HIGH */);
         Arduino_GFX *myGLCD = new Arduino_NT35510(bus, 41, 1 /* rotation */);
         LCDWIKI_TOUCH myTouch = LCDWIKI_TOUCH(53,52,50,51,44); //tcs,tclk,tdout,tdin,tirq
-        int x, y;
+        int x, y, headerHeight;
         String displayBuffer;
         Color currentColor = Color::White;
-        Color currentBackColor = Color::Black;
+        Color currentBackColor = Color::White;
+        Color currentTextColor = Color::White;
+        Color currentTextBackColor = Color::Black;
         int touchX, touchY;
         FontSize fontSize = FontSize::SMALL;
         class Colors {
