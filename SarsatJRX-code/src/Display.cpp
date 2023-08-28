@@ -15,67 +15,66 @@ Display::Color::Color(byte red, byte green, byte blue)
     this->blue = blue;
 }
 
-const Display::Color Display::Color::WHITE(255,255,255);
-const Display::Color Display::Color::BLACK(0,0,0);
-const Display::Color Display::Color::RED(206,132,85);
-const Display::Color Display::Color::DARK_GREEN(106,138,54);
-const Display::Color Display::Color::GREEN(106,153,85);
-const Display::Color Display::Color::LIGHT_GREEN(59,201,176);
-const Display::Color Display::Color::BLUE(28,143,255);
-const Display::Color Display::Color::YELLOW(255,255,0);
-const Display::Color Display::Color::MAGENTA(255,0,255);
-const Display::Color Display::Color::BEIGE(220,220,170);
-const Display::Color Display::Color::GREY(121,121,121);
-const Display::Color Display::Color::DARK_GREY(24,24,24);
-const Display::Color Display::Color::LIGHT_BLUE(156,220,254);
-const Display::Color Display::Color::ORANGE(255,200,20);
-const Display::Color Display::Color::PURPLE(218,85,131);
+const Display::Color Display::Color::White(255,255,255);
+const Display::Color Display::Color::Black(0,0,0);
+const Display::Color Display::Color::Red(206,132,85);
+const Display::Color Display::Color::DarkGreen(106,138,54);
+const Display::Color Display::Color::Green(106,153,85);
+const Display::Color Display::Color::LightGreen(59,201,176);
+const Display::Color Display::Color::Blue(28,143,255);
+const Display::Color Display::Color::Yellow(255,255,0);
+const Display::Color Display::Color::Magenta(255,0,255);
+const Display::Color Display::Color::Beige(220,220,170);
+const Display::Color Display::Color::Grey(121,121,121);
+const Display::Color Display::Color::DarkGrey(24,24,24);
+const Display::Color Display::Color::LightBlue(156,220,254);
+const Display::Color Display::Color::Orange(255,200,20);
+const Display::Color Display::Color::Purple(218,85,131);
 
 void Display::setColor(Color color)
 {
   currentColor = color;
-  myGLCD.Set_Draw_color(color.red, color.green, color.blue);
-  myGLCD.Set_Text_colour(color.red, color.green, color.blue);
+  myGLCD->setTextColor(RGB565(color.red, color.green, color.blue));
 }
 
 void Display::setBackgroundColor(Color color)
 {
   currentBackColor = color;
-  myGLCD.Set_Text_Back_colour(color.red, color.green, color.blue);
+  myGLCD->setTextColor(RGB565(currentColor.red, currentColor.green, currentColor.blue),RGB565(currentBackColor.red, currentBackColor.green, currentBackColor.blue));
 }
 
 void Display::fillRectangle(int width, int height)
 {
-  myGLCD.Fill_Rectangle(x,y,x+width,y+height);
+  myGLCD->fillRect(x,y,width,height,RGB565(currentColor.red, currentColor.green, currentColor.blue));
 }
 
 void Display::drawRectangle(int width, int height)
 {
-  myGLCD.Draw_Rectangle(x,y,x+width,y+height);
+  myGLCD->drawRect(x,y,width,height,RGB565(currentColor.red, currentColor.green, currentColor.blue));
 }
 
 void Display::fillRoundRectangle(int width, int height)
 {
-  myGLCD.Fill_Round_Rectangle(x,y,x+width,y+height,ROUND_RECT_RADIUS);
+  myGLCD->fillRoundRect(x,y,width,height,ROUND_RECT_RADIUS,RGB565(currentColor.red, currentColor.green, currentColor.blue));
 }
 
 void Display::drawRoundRectangle(int width, int height)
 {
-  myGLCD.Draw_Round_Rectangle(x,y,x+width,y+height,ROUND_RECT_RADIUS);
+  myGLCD->drawRoundRect(x,y,width,height,ROUND_RECT_RADIUS,RGB565(currentColor.red, currentColor.green, currentColor.blue));
 }
 
 void Display::setup()
 {
     // Initial setup
-  myGLCD.Init_LCD();
-  myGLCD.Set_Rotation(1);
+  myGLCD->begin();
+  //myGLCD.Set_Rotation(1);
   myTouch.TP_Set_Rotation(3);
-  myTouch.TP_Init(myGLCD.Get_Rotation(),myGLCD.Get_Display_Width(),myGLCD.Get_Display_Height()); 
-  myGLCD.Fill_Screen(0,0,0);
+  myTouch.TP_Init(1,DISPLAY_WIDTH,DISPLAY_HEIGHT); 
+  myGLCD->fillScreen(BLACK);
 
   setFontSize(FontSize::SMALL);
-  setColor(Color::BLACK);
-  setBackgroundColor(Color::WHITE);
+  setColor(Color::Black);
+  setBackgroundColor(Color::White);
 }
 
 void Display::setFontSize(FontSize fontSize)
@@ -84,13 +83,13 @@ void Display::setFontSize(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      myGLCD.Set_Text_Size(4);
+      myGLCD->setTextSize(4);
       break;
     case FontSize::MEDIUM :
-      myGLCD.Set_Text_Size(3);
+      myGLCD->setTextSize(3);
       break;
     case FontSize::SMALL :
-      myGLCD.Set_Text_Size(2);
+      myGLCD->setTextSize(2);
       break;  
   }
 }
@@ -125,6 +124,7 @@ void Display::setCursor(int x, int y)
 {
     Display::x = x;
     Display::y = y;
+    myGLCD->setCursor(x,y);
 }
 
 void Display::println(String s)
@@ -133,13 +133,13 @@ void Display::println(String s)
     // Font adaptation for ° sign
     displayBuffer.replace("°","^");
     // Actually display the string
-    myGLCD.Print_String(displayBuffer, x, y);
+    myGLCD->println(displayBuffer);
     displayBuffer = "";
 }
 
 void Display::println()
 {
-    myGLCD.Print_String(displayBuffer, x, y);
+    myGLCD->println(displayBuffer);
     displayBuffer = "";
 }
 
@@ -162,7 +162,7 @@ void Display::printHex(byte value)
 
 void Display::clearDisplay()
 {
-    myGLCD.Fill_Screen(0,0,0);
+    myGLCD->fillScreen(BLACK);
     displayBuffer = "";
 }
 
@@ -246,15 +246,15 @@ Display::Colors Display::getColorsForButton(Display::Button button)
   switch (button.style)
   {
     case ButtonStyle::SMALL :
-      result.foreground = &(button.pressed ? Color::GREY : button.enabled ? Color::LIGHT_BLUE : Color::GREY);
-      result.background = &(button.pressed ? Color::LIGHT_BLUE : button.enabled ? Color::GREY : Color::DARK_GREY);
-      result.border = &Color::PURPLE;
+      result.foreground = &(button.pressed ? Color::Grey : button.enabled ? Color::LightBlue : Color::Grey);
+      result.background = &(button.pressed ? Color::LightBlue : button.enabled ? Color::Grey : Color::DarkGrey);
+      result.border = &Color::Purple;
       break;
     case ButtonStyle::NORMAL :
     default :
-      result.foreground = &(button.pressed ? Color::YELLOW : button.enabled ? Color::BLACK :Color::BEIGE);
-      result.background = &(button.pressed ? Color::BLACK : button.enabled ? Color::YELLOW : Color::GREY);
-      result.border = &Color::ORANGE;
+      result.foreground = &(button.pressed ? Color::Yellow : button.enabled ? Color::Black :Color::Beige);
+      result.background = &(button.pressed ? Color::Black : button.enabled ? Color::Yellow : Color::Grey);
+      result.border = &Color::Orange;
       break;
   }
   return result;
@@ -265,18 +265,18 @@ Display::Colors Display::getColorsForLed(Display::Led led)
   Colors result;
   switch (led.color)
   {
-    case LedColor::RED :
-      result.foreground = &(led.on ? Color::RED : Color::GREY);
-      result.border = &Color::ORANGE;
+    case LedColor::Red :
+      result.foreground = &(led.on ? Color::Red : Color::Grey);
+      result.border = &Color::Orange;
       break;
-    case LedColor::BLUE :
-      result.foreground = &(led.on ? Color::BLUE : Color::GREY);
-      result.border = &Color::LIGHT_BLUE;
+    case LedColor::Blue :
+      result.foreground = &(led.on ? Color::Blue : Color::Grey);
+      result.border = &Color::LightBlue;
       break;
-    case LedColor::GREEN :
+    case LedColor::Green :
     default :
-      result.foreground = &(led.on ? Color::GREEN : Color::GREY);
-      result.border = &Color::LIGHT_GREEN;
+      result.foreground = &(led.on ? Color::Green : Color::Grey);
+      result.border = &Color::LightGreen;
       break;
   }
   return result;
@@ -292,15 +292,14 @@ void Display::drawButton(Button button)
   // Store font size
   FontSize backupFontSize = fontSize;
   setFontSize(FontSize::MEDIUM);
-  int xx = button.x+button.getWidth();
-  int yy = button.y+button.getHeight();
   setBackgroundColor(*colors.background);
   setColor(*colors.background);
-  myGLCD.Fill_Round_Rectangle(button.x, button.y, xx, yy, ROUND_RECT_RADIUS);
+  myGLCD->fillRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(currentColor.red, currentColor.green, currentColor.blue));
   setColor(*colors.foreground);
-  myGLCD.Print_String(button.caption, button.x+((button.getWidth()-16*captionSize)/2), button.y+((button.getHeight()-16)/2));
+  myGLCD->setCursor(button.x+((button.getWidth()-16*captionSize)/2), button.y+((button.getHeight()-16)/2));
+  myGLCD->println(button.caption);
   setColor(*colors.border);
-  myGLCD.Draw_Round_Rectangle(button.x, button.y, xx, yy, ROUND_RECT_RADIUS);
+  myGLCD->drawRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(currentColor.red, currentColor.green, currentColor.blue));
   // Restore color
   setColor(backupColor);
   setBackgroundColor(backupBackColor);
@@ -314,9 +313,9 @@ void Display::drawLed(Led led)
   Colors colors = getColorsForLed(led);
   Color backupColor = currentColor;
   setColor(*colors.foreground);
-  myGLCD.Fill_Circle(led.x, led.y,LED_RADIUS);
+  myGLCD->fillCircle(led.x, led.y,LED_RADIUS,RGB565(currentColor.red, currentColor.green, currentColor.blue));
   setColor(*colors.border);
-  myGLCD.Draw_Circle(led.x, led.y,LED_RADIUS);
+  myGLCD->drawCircle(led.x, led.y,LED_RADIUS,RGB565(currentColor.red, currentColor.green, currentColor.blue));
   // Restore color
   setColor(backupColor);
 }
@@ -325,10 +324,10 @@ void Display::drawQrCode (QRCode* qrcode, int moduleSize)
 {
   int xPos = x;
   int yPos = y;
-  setColor(Display::Color::WHITE);
+  setColor(Display::Color::White);
   // Add a padding around the QR code
   fillRectangle((qrcode->size+2)*moduleSize,(qrcode->size+2)*moduleSize);
-  setColor(Display::Color::BLACK);
+  setColor(Display::Color::Black);
   xPos += moduleSize;
   yPos += moduleSize;
   for (int iY = 0; iY < qrcode->size; iY++) 

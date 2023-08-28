@@ -49,16 +49,16 @@
 // Header LEDS
 #define LED_SIG_1_X       DISPLAY_WIDTH-(4*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_1_Y       HEADER_HEIGHT/2
-Display::Led ledSig1 =    Display::Led(LED_SIG_1_X,LED_SIG_1_Y,Display::LedColor::GREEN);
+Display::Led ledSig1 =    Display::Led(LED_SIG_1_X,LED_SIG_1_Y,Display::LedColor::Green);
 #define LED_SIG_2_X       DISPLAY_WIDTH-(3*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_2_Y       LED_SIG_1_Y
-Display::Led ledSig2 =    Display::Led(LED_SIG_2_X,LED_SIG_2_Y,Display::LedColor::GREEN);
+Display::Led ledSig2 =    Display::Led(LED_SIG_2_X,LED_SIG_2_Y,Display::LedColor::Green);
 #define LED_SIG_IN_FRAME_X      DISPLAY_WIDTH-(2*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_IN_FRAME_Y      LED_SIG_1_Y
-Display::Led ledInFrame =       Display::Led(LED_SIG_IN_FRAME_X,LED_SIG_IN_FRAME_Y,Display::LedColor::RED);
+Display::Led ledInFrame =       Display::Led(LED_SIG_IN_FRAME_X,LED_SIG_IN_FRAME_Y,Display::LedColor::Red);
 #define LED_SIG_FRAME_R_X       DISPLAY_WIDTH-(1*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_FRAME_R_Y       LED_SIG_1_Y
-Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y,Display::LedColor::BLUE);
+Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y,Display::LedColor::Blue);
 // Power
 #define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
 #define HEADER_POWER_X    LED_SIG_1_X-100
@@ -230,9 +230,9 @@ float powerValue = 0;
 
 void updatePowerValueHeader()
 {  // Power header
-  display.setBackgroundColor(Display::Color::GREY);
+  display.setBackgroundColor(Display::Color::Grey);
   display.setFontSize(Display::FontSize::SMALL);
-  display.setColor(Display::Color::LIGHT_GREEN);
+  display.setColor(Display::Color::LightGreen);
   display.setCursor(HEADER_POWER_X, HEADER_POWER_Y);
   char powerString[8];
   getVccStringValue(powerString);
@@ -304,19 +304,19 @@ void updateDisplay()
   Serial.println(freeRam());
 #endif
   // Refresh screen
-  display.setBackgroundColor(Display::Color::DARK_GREY);
+  display.setBackgroundColor(Display::Color::DarkGrey);
   display.clearDisplay();
 
   // Header
   display.setCursor(0, 0);
   // Draw header background
-  display.setColor(Display::Color::GREY);
-  display.setBackgroundColor(Display::Color::GREY);
+  display.setColor(Display::Color::Grey);
+  display.setBackgroundColor(Display::Color::Grey);
   display.fillRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
-  display.setColor(Display::Color::PURPLE);
+  display.setColor(Display::Color::Purple);
   display.drawRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
   // Header text
-  display.setColor(Display::Color::LIGHT_BLUE);
+  display.setColor(Display::Color::LightBlue);
   display.setCursor(0, 3);
   display.setFontSize(Display::FontSize::LARGE);
   display.centerText(HEADER_TEXT,display.getWidth());
@@ -326,7 +326,7 @@ void updateDisplay()
 #endif  
   // Header pages
   display.setFontSize(Display::FontSize::SMALL);
-  display.setColor(Display::Color::LIGHT_GREEN);
+  display.setColor(Display::Color::LightGreen);
   display.setCursor(HEADER_PAGES_X, HEADER_PAGES_Y);
   char buffer[32];
   // Rotating index based on beacon list max size and position of last read frame
@@ -344,8 +344,8 @@ void updateDisplay()
 
   int currentY = HEADER_BOTTOM;
   // For the rest of the screen
-  display.setColor(Display::Color::BEIGE);
-  display.setBackgroundColor(Display::Color::DARK_GREY);
+  display.setColor(Display::Color::Beige);
+  display.setBackgroundColor(Display::Color::DarkGrey);
 
   if(beaconsReadIndex<0)
   { // Nothing to display
@@ -368,9 +368,9 @@ void updateDisplay()
     frameMode = F("Unknown 406");
   }
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::LIGHT_GREEN);
+  display.setColor(Display::Color::LightGreen);
   display.println(FRAME_MODE_LABEL);
-  display.setColor(Display::Color::BEIGE);
+  display.setColor(Display::Color::Beige);
   display.setCursor(FRAME_MODE_WIDTH, currentY);
   display.println(frameMode);
 #ifdef SERIAL_OUT 
@@ -380,9 +380,9 @@ void updateDisplay()
 
   // Info           
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::LIGHT_GREEN);
+  display.setColor(Display::Color::LightGreen);
   display.println(INFO_LABEL);
-  display.setColor(Display::Color::BEIGE);
+  display.setColor(Display::Color::Beige);
   // Protocol name
   display.setCursor(INFO_LABEL_WIDTH, currentY);
   if(beacon->protocol->isUnknown())
@@ -412,9 +412,9 @@ void updateDisplay()
 
   // Location
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::LIGHT_GREEN);
+  display.setColor(Display::Color::LightGreen);
   display.println(LOCATION_LABEL);
-  display.setColor(Display::Color::BEIGE);
+  display.setColor(Display::Color::Beige);
   currentY+=LINE_HEIGHT;
   // Country
   display.setCursor(0, currentY);
@@ -456,9 +456,9 @@ void updateDisplay()
 
   // Hex ID
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::LIGHT_GREEN);
+  display.setColor(Display::Color::LightGreen);
   display.println(HEX_ID_LABEL);
-  display.setColor(Display::Color::BEIGE);
+  display.setColor(Display::Color::Beige);
   display.setCursor(HEX_ID_WIDTH, currentY);
   // "Id = 0x1122334455667788"
   uint32_t msb = beacon->identifier >> 32;
@@ -472,15 +472,15 @@ void updateDisplay()
 
   // Data
   display.setCursor(0, currentY);
-  display.setColor(Display::Color::LIGHT_GREEN);
+  display.setColor(Display::Color::LightGreen);
   display.println(DATA_LABEL);
   // Append BCH values before frame data
-  display.setColor(beacon->isBch1Valid() ? Display::Color::GREEN : Display::Color::RED);
+  display.setColor(beacon->isBch1Valid() ? Display::Color::Green : Display::Color::Red);
   display.setCursor(DATA_LABEL_WIDTH, currentY);
   display.println(beacon->isBch1Valid() ? BCH1_OK_LABEL : BCH1_KO_LABEL);
   if(beacon->longFrame) 
   { // No second proteced field in short frames
-    display.setColor(beacon->isBch2Valid() ? Display::Color::GREEN : Display::Color::RED);
+    display.setColor(beacon->isBch2Valid() ? Display::Color::Green : Display::Color::Red);
     display.setCursor(DATA_LABEL_WIDTH+BCH_LABEL_WIDTH, currentY);
     display.println(beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
   }
@@ -503,7 +503,7 @@ void updateDisplay()
   }
 #endif
 
-  display.setColor(Display::Color::BEIGE);
+  display.setColor(Display::Color::Beige);
   currentY+=LINE_HEIGHT;
   if (beacon->longFrame) 
   { // Long frame

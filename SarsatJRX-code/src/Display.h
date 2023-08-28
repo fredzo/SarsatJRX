@@ -2,8 +2,7 @@
 #define DISPLAY_H
 
 #include <Arduino.h>
-#include <LCDWIKI_GUI.h> //Core graphics library
-#include <LCDWIKI_KBV.h> //Hardware-specific library
+#include <Arduino_GFX_Library.h>
 #include <LCDWIKI_TOUCH.h> //touch screen library
 #include <qrcode.h>
 
@@ -31,7 +30,7 @@ class Display
             byte green = 0;
             byte blue = 0;
             Color(byte red, byte green, byte blue);
-            static const Color WHITE, BLACK, RED, LIGHT_GREEN, GREEN, DARK_GREEN, BLUE, YELLOW, MAGENTA, BEIGE, GREY, DARK_GREY, LIGHT_BLUE, PURPLE, ORANGE;
+            static const Color White, Black, Red, LightGreen, Green, DarkGreen, Blue, Yellow, Magenta, Beige, Grey, DarkGrey, LightBlue, Purple, Orange;
         };
         class Button
         {
@@ -47,7 +46,7 @@ class Display
             int getWidth();
             int getHeight();
         };
-        enum class LedColor {RED,GREEN,BLUE};
+        enum class LedColor {Red,Green,Blue};
         class Led
         {
             public:
@@ -89,12 +88,13 @@ class Display
 
     private : 
         // Init display and touch screen
-        LCDWIKI_KBV myGLCD = LCDWIKI_KBV(NT35510,40,38,39,43,41); //model,cs,cd,wr,rd,reset
+        Arduino_DataBus *bus = new Arduino_AVRPAR16(38 /* DC */, 40 /* CS */, 39 /* WR */, 43 /* RD */, 3 /* PORT LOW */, 1 /* PORT HIGH */);
+        Arduino_GFX *myGLCD = new Arduino_NT35510(bus, 41, 1 /* rotation */);
         LCDWIKI_TOUCH myTouch = LCDWIKI_TOUCH(53,52,50,51,44); //tcs,tclk,tdout,tdin,tirq
         int x, y;
         String displayBuffer;
-        Color currentColor = Color::WHITE;
-        Color currentBackColor = Color::BLACK;
+        Color currentColor = Color::White;
+        Color currentBackColor = Color::Black;
         int touchX, touchY;
         FontSize fontSize = FontSize::SMALL;
         class Colors {
