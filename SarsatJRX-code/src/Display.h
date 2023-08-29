@@ -2,8 +2,6 @@
 #define DISPLAY_H
 
 #include <Arduino.h>
-#include <U8g2lib.h>
-#include <Arduino_GFX_Library.h>
 #include <qrcode.h>
 
 // Enable touch calibration
@@ -95,9 +93,6 @@ class Display
         int getFontHeight(FontSize fontSize);
 
     private : 
-        // Init display and touch screen
-        Arduino_DataBus *bus = new Arduino_AVRPAR16(38 /* DC */, 40 /* CS */, 39 /* WR */, 43 /* RD */, 3 /* PORT LOW */, 1 /* PORT HIGH */);
-        Arduino_GFX *myGLCD = new Arduino_NT35510(bus, 41, 1 /* rotation */);
         int x, y, headerHeight;
         String displayBuffer;
         Color currentColor = Color::White;

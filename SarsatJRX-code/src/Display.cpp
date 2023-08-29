@@ -1,5 +1,32 @@
 #include <Display.h>
 #include <touch.h>
+//#include <lvgl.h>
+#include <U8g2lib.h>
+#include <Arduino_GFX_Library.h>
+
+// Init display and touch screen
+Arduino_DataBus *bus = new Arduino_AVRPAR16(38 /* DC */, 40 /* CS */, 39 /* WR */, 43 /* RD */, 3 /* PORT LOW */, 1 /* PORT HIGH */);
+Arduino_GFX *myGLCD = new Arduino_NT35510(bus, 41, 1 /* rotation */);
+
+
+// For LVGL ///////////////////////////////////////////////////////////////////////
+
+/* Display flushing */
+/*void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
+{
+  uint32_t w = (area->x2 - area->x1 + 1);
+  uint32_t h = (area->y2 - area->y1 + 1);
+
+#if (LV_COLOR_16_SWAP != 0)
+  gfx->draw16bitBeRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
+#else
+  myGLCD->draw16bitRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
+#endif
+
+  lv_disp_flush_ready(disp);
+}*/
+
+//////////////////////////////////////////////////////////////////////////////////
 
 Display::Display()
 { 
