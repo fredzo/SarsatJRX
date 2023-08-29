@@ -300,13 +300,13 @@ String Beacon::getAuxLocatingDeviceName()
     switch (auxLocatingDevice)
     {
         case AuxLocatingDevice::NONE :
-            return F("No auxiliary radio locating device");
+            return F("No device");
             break;
         case AuxLocatingDevice::NONE_OR_OTHER :
-            return F("Other or no auxiliary radio locating devices");
+            return F("Other or no device");
             break;
         case AuxLocatingDevice::OTHER :
-            return F("Other auxiliary radio-locating device(s)");
+            return F("Other device");
             break;
         case AuxLocatingDevice::MHZ121_5 :
             return F("121.5 MHz");
@@ -419,23 +419,35 @@ void Beacon::parseProtocol()
     }
 }
 
+void Beacon::setSerialNumber(uint32_t serial)
+{
+        serialNumber  = String(serial, HEX);
+        serialNumber.toUpperCase();
+        serialNumber = String(serial,DEC) + " (0x" + serialNumber + ")";
+}
+
 void Beacon::parseAdditionalData()
 {
     hasAdditionalData = false;
     hasSerialNumber = false;
     if(protocolFlag)
     {   // User protocols
-        byte serialUserProtocol = getBits(frame,40, 42);
-        hasAdditionalData = true;
-        switch(serialUserProtocol)
-        {
-          case 0b000: *additionalData  = F("ELTs with serial identification number"); break;
-          case 0b001: *additionalData  = F("ELTs with aircraft operator designator & serial number"); break;
-          case 0b010: *additionalData  = F("Float free EPIRBs with serial identification number"); break;
-          case 0b011: *additionalData  = F("ELTs with aircraft 24-bit address"); break;
-          case 0b100: *additionalData  = F("Non float free EPIRBs with serial identification number"); break;
-          case 0b110: *additionalData  = F("PLBs with serial identification number"); break;
-          default : hasAdditionalData = false;
+        if(protocolCode == 0b011)
+        {   // Serial user
+            byte serialUserProtocol = getBits(frame,40, 42);
+            hasAdditionalData = true;
+            switch(serialUserProtocol)
+            {
+                case 0b000: additionalData  = F("ELTs/serial identification number"); break;
+                case 0b001: additionalData  = F("ELTs/aircraft operator & serial #"); break;
+                case 0b010: additionalData  = F("Float free EPIRBs/serial #"); break;
+                case 0b011: additionalData  = F("ELTs with aircraft 24-bit address"); break;
+                case 0b100: additionalData  = F("Non float free EPIRBs/serial #"); break;
+                case 0b110: additionalData  = F("PLBs/serial identification #"); break;
+                default : hasAdditionalData = false;
+            }
+            hasSerialNumber = true;
+            setSerialNumber(getBits(frame,44, 67));
         }
     }
     else if (longFrame)
@@ -445,24 +457,22 @@ void Beacon::parseAdditionalData()
             case 0b0010 :
                 {
                 hasSerialNumber = true;
-                byte serial = getBits(frame,61,64);
-                *serialNumber = String(serial,DEC);
+                setSerialNumber(getBits(frame,61,64));
                 }
             case 0b1100 :
                 {
                 hasAdditionalData = true;
                 uint32_t mmsi = getBits(frame,41,60);
-                *additionalData = "MMSI=" + String(mmsi, HEX) + " MID=" + mmsi;
-                additionalData->toUpperCase();
+                additionalData = "MMSI=" + String(mmsi, HEX) + " MID=" + mmsi;
+                additionalData.toUpperCase();
                 }
                 break;
             case 0b0011 :
                 {
                 hasAdditionalData = true;
                 hasSerialNumber = true;
-                uint32_t acAddress = getBits(frame,41,64);
-                *additionalData = "24 bits A/C addr. : " + String(acAddress,HEX);
-                *serialNumber = String(acAddress,DEC);
+                setSerialNumber(getBits(frame,41,64));
+                additionalData = "24 bits aircraft address";
                 }
                 break;
             case 0b0100 :
@@ -472,10 +482,8 @@ void Beacon::parseAdditionalData()
                 hasAdditionalData = true;
                 hasSerialNumber = true;
                 uint32_t csTaNumber = getBits(frame,41, 50);
-                *additionalData = "C/S TA # : " + String(csTaNumber, DEC);
-                uint32_t serial = getBits(frame,51, 64);
-                *serialNumber  = String(serial, HEX);
-                serialNumber->toUpperCase();
+                additionalData = "C/S TA # = " + String(csTaNumber, DEC);
+                setSerialNumber(getBits(frame,51, 64));
                 }
                 break;
             case 0b0101 :
@@ -484,21 +492,19 @@ void Beacon::parseAdditionalData()
                 hasSerialNumber = true;
                 uint32_t data = getBits(frame,41, 45); // 1st char
                 data = data + 32;
-                *additionalData = BAUDOT_CODE[data];
+                additionalData = BAUDOT_CODE[data];
 
                 data = getBits(frame,46, 50); // 2nd char
                 data = data + 32;
-                *additionalData = *additionalData + BAUDOT_CODE[data];
+                additionalData = additionalData + BAUDOT_CODE[data];
 
                 data = getBits(frame,51, 55); // 3rd char
                 data = data + 32;
-                *additionalData = *additionalData + BAUDOT_CODE[data];
+                additionalData = additionalData + BAUDOT_CODE[data];
 
-                *additionalData = "Op Design. : " + *additionalData;
+                additionalData = "Op Design. = " + additionalData;
 
-                data = getBits(frame,56, 64);
-                *serialNumber  = String(data, HEX);
-                serialNumber->toUpperCase();
+                setSerialNumber(getBits(frame,56, 64));
                 }
                 break;
             case 0b1000 :
@@ -508,10 +514,9 @@ void Beacon::parseAdditionalData()
                 {
                 hasSerialNumber = true;
                 hasAdditionalData = true;
-                uint32_t serial = getBits(frame,41, 58);
-                *serialNumber = String(serial, DEC);
+                setSerialNumber(getBits(frame,41, 58));
                 uint32_t natNum = getBits(frame,127, 132);
-                *additionalData = "National data : " + String(natNum, DEC);
+                additionalData = "National data = " + String(natNum, DEC);
                 }
                 break;
         }

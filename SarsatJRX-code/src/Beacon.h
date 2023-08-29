@@ -57,9 +57,9 @@ class Beacon
         bool hasAuxLocatingDevice();
         String getAuxLocatingDeviceName();
         bool hasAdditionalData;
-        String* additionalData;
+        String additionalData;
         bool hasSerialNumber;
-        String* serialNumber;
+        String serialNumber;
         uint32_t bch1;
         uint32_t computedBch1;
         bool isBch1Valid();
@@ -71,5 +71,6 @@ class Beacon
         void parseProtocol();
         void parseAdditionalData();
         void parseLocatingDevices();
+        void setSerialNumber(uint32_t serial);
 };
 #endif 

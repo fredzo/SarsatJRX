@@ -71,15 +71,15 @@ Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y
 // Beacon info
 #define LINE_HEIGHT         22
 #define FRAME_MODE_LABEL    F("Frame mode :")
-#define FRAME_MODE_WIDTH    160
+#define FRAME_MODE_WIDTH    180
 #define INFO_LABEL          F("Info :")
 #define INFO_LABEL_WIDTH    100
 #define SERIAL_LABEL        F("Serial # :")
-#define SERIAL_LABEL_WIDTH  160
+#define SERIAL_LABEL_WIDTH  150
 #define MAIN_LABEL          F("Main loc. device :")
-#define MAIN_LABEL_WIDTH    160
+#define MAIN_LABEL_WIDTH    260
 #define AUX_LABEL           F("Aux. loc. device :")
-#define AUX_LABEL_WIDTH     160
+#define AUX_LABEL_WIDTH     260
 #define LOCATION_LABEL      F("Location :")
 #define HEX_ID_LABEL        F("Hex ID:")
 #define HEX_ID_WIDTH        120
@@ -421,9 +421,9 @@ void updateDisplay()
   if(beacon->hasAdditionalData)
   { // Additionnal protocol data
     display.setCursor(0, currentY);
-    display.println(*beacon->additionalData);
+    display.println(beacon->additionalData);
   #ifdef SERIAL_OUT 
-    Serial.println(*beacon->additionalData);   
+    Serial.println(beacon->additionalData);   
   #endif
     currentY+=LINE_HEIGHT;
   }
@@ -435,10 +435,10 @@ void updateDisplay()
     display.println(SERIAL_LABEL);
     display.setTextColor(Display::Color::Beige);
     display.setCursor(SERIAL_LABEL_WIDTH, currentY);
-    display.println(*beacon->serialNumber);
+    display.println(beacon->serialNumber);
   #ifdef SERIAL_OUT 
     Serial.print(SERIAL_LABEL);   
-    Serial.println(*beacon->serialNumber);   
+    Serial.println(beacon->serialNumber);   
   #endif
     currentY+=LINE_HEIGHT;
   }
