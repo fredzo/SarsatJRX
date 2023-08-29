@@ -22,5 +22,9 @@ String toHexString(byte* frame, bool withSpace, int start, int end);
  */
 void readHexString(byte* buffer, String hexString);
 
+/* Baudot code matrix */
+extern char BAUDOT_CODE[64];
+
+
 
 #endif 

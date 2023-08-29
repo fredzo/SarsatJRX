@@ -41,7 +41,7 @@
 
 // Header
 #define HEADER_HEIGHT     40
-#define HEADER_TEXT       "- SarsatJRX -"
+#define HEADER_TEXT       F("- SarsatJRX -")
 #define HEADER_BOTTOM     HEADER_HEIGHT+8
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
 #define HEADER_PAGES_X    6
@@ -69,21 +69,27 @@ Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y
 
 
 // Beacon info
-#define LINE_HEIGHT       22
-#define FRAME_MODE_LABEL  "Frame mode :"
-#define FRAME_MODE_WIDTH  200
-#define INFO_LABEL        "Info :"
-#define INFO_LABEL_WIDTH  100
-#define LOCATION_LABEL    "Location :"
-#define HEX_ID_LABEL      "Hex ID:"
-#define HEX_ID_WIDTH      120
-#define DATA_LABEL        "Data :"
-#define DATA_LABEL_WIDTH  100
-#define BCH1_OK_LABEL     "BCH1-OK"
-#define BCH1_KO_LABEL     "BCH1-KO"
-#define BCH2_OK_LABEL     "BCH2-OK"
-#define BCH2_KO_LABEL     "BCH2-KO"
-#define BCH_LABEL_WIDTH   120
+#define LINE_HEIGHT         22
+#define FRAME_MODE_LABEL    F("Frame mode :")
+#define FRAME_MODE_WIDTH    160
+#define INFO_LABEL          F("Info :")
+#define INFO_LABEL_WIDTH    100
+#define SERIAL_LABEL        F("Serial # :")
+#define SERIAL_LABEL_WIDTH  160
+#define MAIN_LABEL          F("Main loc. device :")
+#define MAIN_LABEL_WIDTH    160
+#define AUX_LABEL           F("Aux. loc. device :")
+#define AUX_LABEL_WIDTH     160
+#define LOCATION_LABEL      F("Location :")
+#define HEX_ID_LABEL        F("Hex ID:")
+#define HEX_ID_WIDTH        120
+#define DATA_LABEL          F("Data :")
+#define DATA_LABEL_WIDTH    100
+#define BCH1_OK_LABEL       F("BCH1-OK")
+#define BCH1_KO_LABEL       F("BCH1-KO")
+#define BCH2_OK_LABEL       F("BCH2-OK")
+#define BCH2_KO_LABEL       F("BCH2-KO")
+#define BCH_LABEL_WIDTH     120
 // MAPS and BEACON buttons
 #define MAPS_BUTTON_X     DISPLAY_WIDTH-BUTTON_WIDTH
 #define MAPS_BUTTON_Y     HEADER_BOTTOM-1
@@ -413,11 +419,26 @@ void updateDisplay()
 #endif
   currentY+=LINE_HEIGHT;
   if(beacon->hasAdditionalData)
-  {
+  { // Additionnal protocol data
     display.setCursor(0, currentY);
     display.println(*beacon->additionalData);
   #ifdef SERIAL_OUT 
     Serial.println(*beacon->additionalData);   
+  #endif
+    currentY+=LINE_HEIGHT;
+  }
+
+  if(beacon->hasSerialNumber)
+  { // Serial number
+    display.setCursor(0, currentY);
+    display.setTextColor(Display::Color::LightGreen);
+    display.println(SERIAL_LABEL);
+    display.setTextColor(Display::Color::Beige);
+    display.setCursor(SERIAL_LABEL_WIDTH, currentY);
+    display.println(*beacon->serialNumber);
+  #ifdef SERIAL_OUT 
+    Serial.print(SERIAL_LABEL);   
+    Serial.println(*beacon->serialNumber);   
   #endif
     currentY+=LINE_HEIGHT;
   }
@@ -463,6 +484,36 @@ void updateDisplay()
   { // Short frame
     display.setCursor(5, currentY);
     display.println("22 HEX. No location");
+    currentY+=LINE_HEIGHT;
+  }
+
+  if(beacon->hasMainLocatingDevice())
+  { // Main locating device
+    display.setCursor(0, currentY);
+    display.setTextColor(Display::Color::LightGreen);
+    display.println(MAIN_LABEL);
+    display.setTextColor(Display::Color::Beige);
+    display.setCursor(MAIN_LABEL_WIDTH, currentY);
+    display.println(beacon->getMainLocatingDeviceName());
+  #ifdef SERIAL_OUT 
+    Serial.print(MAIN_LABEL);   
+    Serial.println(beacon->getMainLocatingDeviceName());   
+  #endif
+    currentY+=LINE_HEIGHT;
+  }
+
+  if(beacon->hasAuxLocatingDevice())
+  { // Auxiliary locating device
+    display.setCursor(0, currentY);
+    display.setTextColor(Display::Color::LightGreen);
+    display.println(AUX_LABEL);
+    display.setTextColor(Display::Color::Beige);
+    display.setCursor(AUX_LABEL_WIDTH, currentY);
+    display.println(beacon->getAuxLocatingDeviceName());
+  #ifdef SERIAL_OUT 
+    Serial.print(AUX_LABEL);   
+    Serial.println(beacon->getAuxLocatingDeviceName());   
+  #endif
     currentY+=LINE_HEIGHT;
   }
 
