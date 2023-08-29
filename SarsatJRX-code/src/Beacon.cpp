@@ -482,7 +482,7 @@ void Beacon::parseAdditionalData()
                 hasAdditionalData = true;
                 hasSerialNumber = true;
                 uint32_t csTaNumber = getBits(frame,41, 50);
-                additionalData = "C/S TA # = " + String(csTaNumber, DEC);
+                additionalData = "C/S TA #=" + String(csTaNumber, DEC);
                 setSerialNumber(getBits(frame,51, 64));
                 }
                 break;
@@ -502,7 +502,7 @@ void Beacon::parseAdditionalData()
                 data = data + 32;
                 additionalData = additionalData + BAUDOT_CODE[data];
 
-                additionalData = "Op Design. = " + additionalData;
+                additionalData = "Op Design.=" + additionalData;
 
                 setSerialNumber(getBits(frame,56, 64));
                 }
@@ -516,7 +516,7 @@ void Beacon::parseAdditionalData()
                 hasAdditionalData = true;
                 setSerialNumber(getBits(frame,41, 58));
                 uint32_t natNum = getBits(frame,127, 132);
-                additionalData = "National data = " + String(natNum, DEC);
+                additionalData = "National data=" + String(natNum, DEC);
                 }
                 break;
         }
