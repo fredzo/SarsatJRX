@@ -163,8 +163,8 @@ void drawQrCode(bool isMaps)
 {
     QRCode qrCode;
     generateQrCode(&qrCode,beacons[beaconsReadIndex],isMaps);
-    int xPos = display.getWidth()-((qrCode.size+3)*MODULE_SIZE);
-    int yPos = display.getHeight()-((qrCode.size+3)*MODULE_SIZE);
+    int xPos = DISPLAY_WIDTH-((qrCode.size+3)*MODULE_SIZE);
+    int yPos = DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT-((qrCode.size+3)*MODULE_SIZE);
     display.setCursor(xPos,yPos);
     display.drawQrCode(&qrCode,MODULE_SIZE);
 }
@@ -433,7 +433,7 @@ void updateDisplay()
   Serial.println(freeRam());
 #endif
   // Refresh screen
-  display.clearDisplay(true);
+  display.clearDisplay(true,true);
 
 #ifdef SERIAL_OUT 
   Serial.print(HEADER_TEXT);
@@ -762,7 +762,7 @@ void setup()
   display.setFontSize(Display::FontSize::LARGE);
   display.println("Touch Calibration");
 #else
-  display.setHeaderHeight(HEADER_HEIGHT);
+  display.setHeaderAndFooter(HEADER_HEIGHT,SMALL_BUTTON_HEIGHT);
   drawHeader();
   previousButton.enabled = true;
   nextButton.enabled = true;

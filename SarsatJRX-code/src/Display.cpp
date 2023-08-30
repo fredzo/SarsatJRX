@@ -121,7 +121,7 @@ void Display::setup(Color bgColor)
   currentColor = Color::White;
   currentTextBackColor = bgColor;
   currentTextColor = Color::White;
-  clearDisplay(false);
+  clearDisplay(false,false);
 }
 
 void Display::setFontSize(FontSize fontSize)
@@ -179,9 +179,10 @@ void Display::setCursor(int x, int y)
     myGLCD->setCursor(x,y);
 }
 
-void Display::setHeaderHeight(int headerHeight)
+void Display::setHeaderAndFooter(int headerHeight, int footerHeight)
 {
     Display::headerHeight = headerHeight;
+    Display::footerHeight = footerHeight;
 }
 
 void Display::println(String s)
@@ -221,11 +222,14 @@ void Display::printHex(byte value)
     displayBuffer += buffer;
 }
 
-void Display::clearDisplay(bool noHeader)
+void Display::clearDisplay(bool noHeader, bool noFooter)
 {
   if(noHeader)
   {
-    myGLCD->fillRect(0,headerHeight,DISPLAY_WIDTH,DISPLAY_HEIGHT,RGB565(currentBackColor.red, currentBackColor.green, currentBackColor.blue));
+    int heigth = DISPLAY_HEIGHT;
+    if(noHeader) heigth-=headerHeight;
+    if(noFooter) heigth-=footerHeight;
+    myGLCD->fillRect(0,noHeader ? headerHeight : 0,DISPLAY_WIDTH,heigth,RGB565(currentBackColor.red, currentBackColor.green, currentBackColor.blue));
   }
   else
   {

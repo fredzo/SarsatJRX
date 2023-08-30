@@ -60,8 +60,8 @@ class Display
         };
         Display();
         void setup(Color bgColor);
-        void clearDisplay(bool noHeader);
-        void setHeaderHeight(int headerHeight);
+        void clearDisplay(bool noHeader, bool noFooter);
+        void setHeaderAndFooter(int headerHeight, int footerHeight);
         void setCursor(int x, int y);
         void setColor(Color color);
         void setBackgroundColor(Color bgColor);
@@ -100,7 +100,7 @@ class Display
         int getFontHeight(FontSize fontSize);
 
     private : 
-        int x, y, headerHeight;
+        int x, y, headerHeight, footerHeight;
         String displayBuffer;
         Color currentColor = Color::White;
         Color currentBackColor = Color::White;
