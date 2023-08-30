@@ -96,6 +96,11 @@ void Display::fillRoundRectangle(int width, int height)
   myGLCD->fillRoundRect(x,y,width,height,ROUND_RECT_RADIUS,RGB565(currentColor.red, currentColor.green, currentColor.blue));
 }
 
+void Display::fillArc(int oradius, int iradius, float start, float end)
+{
+  myGLCD->fillArc(x,y,oradius,iradius,start,end,RGB565(currentColor.red, currentColor.green, currentColor.blue));
+}
+
 void Display::drawRoundRectangle(int width, int height)
 {
   myGLCD->drawRoundRect(x,y,width,height,ROUND_RECT_RADIUS,RGB565(currentColor.red, currentColor.green, currentColor.blue));
@@ -268,9 +273,9 @@ int Display::getTouchY()
     return touchY;
 }
 
-void Display::centerText(String text, int width)
+void Display::centerText(String text)
 {
-  x += (width-((getFontWidth(fontSize))*text.length()))/2;
+  x -= ((getFontWidth(fontSize))*text.length())/2;
   myGLCD->setCursor(x,y);
 }
 

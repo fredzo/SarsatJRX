@@ -67,6 +67,15 @@ Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y
 #define HEADER_POWER_X    LED_SIG_1_X-100
 #define HEADER_POWER_Y    (HEADER_HEIGHT-12)/2
 
+// Footer
+#define FOOTER_LABEL_X      DISPLAY_WIDTH/2
+#define FOOTER_LABEL_Y      DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT+24
+#define FOOTER_WAIT_LABEL   F("Waiting for the wave...")
+#define FOOTER_FRAME_LABEL  F("Frame reveived !")
+#define FOOTER_SPINNER_X    SMALL_BUTTON_WIDTH*1.5
+#define FOOTER_SPINNER_Y    DISPLAY_HEIGHT-(SMALL_BUTTON_HEIGHT/2)
+#define FOOTER_RADIUS_MAX   SMALL_BUTTON_HEIGHT/2-20
+#define FOOTER_RADIUS_MIN   FOOTER_RADIUS_MAX-5
 
 // Beacon info
 #define LINE_HEIGHT         22
@@ -317,10 +326,105 @@ void drawHeader()
   display.drawRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
   // Header text
   display.setTextColors(Display::Color::LightBlue,Display::Color::Grey);
-  display.setCursor(0, 3);
+  display.setCursor(DISPLAY_WIDTH/2, 3);
   display.setFontSize(Display::FontSize::LARGE);
-  display.centerText(HEADER_TEXT,display.getWidth());
+  display.centerText(HEADER_TEXT);
   display.println(HEADER_TEXT);
+}
+
+// Footer management
+unsigned long lastFooterUpdateTime;
+bool footerShowingFrameReceived = false;
+bool footerShowingWait = false;
+bool footerShowingSpinner = false;
+int spinnerPosition = 0;
+#define FOOTER_UPDATE_TIME 10
+#define FOOTER_FRAME_RECEIVED_TIME 2000
+
+void updateSpinner(bool show)
+{
+  if(show)
+  {
+    if(spinnerPosition < 360)
+    {
+      display.setCursor(FOOTER_SPINNER_X,FOOTER_SPINNER_Y);
+      display.setColor(Display::Color::LightBlue);
+      display.fillArc(FOOTER_RADIUS_MIN,FOOTER_RADIUS_MAX,0,spinnerPosition);
+    }
+    else if(spinnerPosition < 360*2)
+    {
+      display.setCursor(FOOTER_SPINNER_X,FOOTER_SPINNER_Y);
+      display.setColor(Display::Color::DarkGrey);
+      display.fillArc(FOOTER_RADIUS_MIN,FOOTER_RADIUS_MAX,0,spinnerPosition-360);
+    }
+    else
+    {
+      spinnerPosition = 0;
+    }
+    spinnerPosition+=4;
+  }
+  else
+  {
+    spinnerPosition = 0;
+    display.setCursor(FOOTER_SPINNER_X,FOOTER_SPINNER_Y);
+    display.setColor(Display::Color::DarkGrey);
+    display.fillArc(FOOTER_RADIUS_MAX,FOOTER_RADIUS_MIN,0,360);
+  }
+  footerShowingSpinner = show;
+}
+
+void showWaiting(bool show)
+{
+    display.setTextColors(show ? Display::Color::LightBlue : Display::Color::DarkGrey,Display::Color::DarkGrey);
+    display.setFontSize(Display::FontSize::LARGE);
+    // Center not working with large font (not fixed with)
+    display.setCursor(SMALL_BUTTON_WIDTH*2, FOOTER_LABEL_Y);
+    //display.centerText(FOOTER_WAIT_LABEL);
+    display.println(FOOTER_WAIT_LABEL);
+    footerShowingWait = show;
+}
+
+void showFrameReceived(bool show)
+{
+    display.setTextColors(show ? Display::Color::Red : Display::Color::DarkGrey,Display::Color::DarkGrey);
+    display.setFontSize(Display::FontSize::LARGE);
+    display.setCursor(FOOTER_LABEL_X, FOOTER_LABEL_Y);
+    display.centerText(FOOTER_FRAME_LABEL);
+    display.println(FOOTER_FRAME_LABEL);
+    footerShowingFrameReceived = show;
+}
+
+void updateFooter(bool frameReceived)
+{  
+  unsigned long now = millis();
+  if(footerShowingFrameReceived)
+  {
+    if((now - lastFooterUpdateTime) > FOOTER_FRAME_RECEIVED_TIME)
+    {
+      lastFooterUpdateTime = now;
+      showFrameReceived(false);
+      showWaiting(true);
+    }
+  }
+  else
+  {
+    if(frameReceived)
+    {
+      lastFooterUpdateTime = now;
+      showWaiting(false);
+      updateSpinner(false);
+      showFrameReceived(true);
+    }
+    else if ((now - lastFooterUpdateTime) > FOOTER_UPDATE_TIME)
+    {
+      lastFooterUpdateTime = now;
+      if(!footerShowingWait)
+      {
+        showWaiting(true);
+      }
+      updateSpinner(true);
+    }
+  }
 }
 
 void updateDisplay()
@@ -349,8 +453,6 @@ void updateDisplay()
   // Header power and leds
   updatePowerValueHeader();
   updateLedHeader(true);
-
-
 
   int currentY = HEADER_BOTTOM;
   // For the rest of the screen
@@ -665,7 +767,7 @@ void setup()
   previousButton.enabled = true;
   nextButton.enabled = true;
 
-  readNextSampleFrame();
+  //readNextSampleFrame();
 #ifdef SERIAL_OUT 
   Serial.println("### Boot complete !");
 #endif
@@ -790,7 +892,12 @@ void loop()
       updateDisplay();
     } 
     // Reset frame decoding
+    updateFooter(true);
     resetFrameReading();
+  }
+  else
+  {
+    updateFooter(false);
   }
   updateLeds();
   updateHeader();

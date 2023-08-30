@@ -74,6 +74,13 @@ class Display
         void fillCircle(int width, int height);
         void drawCircle(int width, int height);
         void drawLine(int x1,int y1,int x2,int y2);
+        /*!
+        @param  oradius Outer radius of arc
+        @param  iradius Inner radius of arc
+        @param  start   degree of arc start
+        @param  end     degree of arc end
+        */
+        void fillArc(int oradius, int iradius, float start, float end);
         void println(String s);
         void println();
         void print(String s);
@@ -87,7 +94,7 @@ class Display
         void drawButton(Button button);
         void drawLed(Led led);
         void setFontSize(FontSize fontSize);
-        void centerText(String text, int width);
+        void centerText(String text);
         void drawQrCode (QRCode* qrcode,int moduleSize);
         int getFontWidth(FontSize fontSize);
         int getFontHeight(FontSize fontSize);
