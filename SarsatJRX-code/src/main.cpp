@@ -307,7 +307,7 @@ void updateLedHeader(bool force)
 void updateHeader()
 { // Check for power value update
   float newValue = getVccValue();
-  if(abs(newValue - powerValue) > 0.07)
+  if(abs(newValue - powerValue) > 0.05)
   {
     powerValue = newValue;
     updatePowerValueHeader();
@@ -330,6 +330,8 @@ void drawHeader()
   display.setFontSize(Display::FontSize::LARGE);
   display.centerText(HEADER_TEXT);
   display.println(HEADER_TEXT);
+  // Draw leds
+  updateLedHeader(true);
 }
 
 // Footer management
@@ -450,8 +452,7 @@ void updateDisplay()
 #ifdef SERIAL_OUT 
   Serial.println(buffer);
 #endif
-  // Header power and leds
-  updatePowerValueHeader();
+  // Force led header update
   updateLedHeader(true);
 
   int currentY = HEADER_BOTTOM;
