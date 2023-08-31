@@ -2,11 +2,21 @@
 #include <touch.h>
 //#include <lvgl.h>
 #include <U8g2lib.h>
+#include <SPI.h>
 #include <Arduino_GFX_Library.h>
 
+#define LILYPI_TFT_MISO            23
+#define LILYPI_TFT_MOSI            19
+#define LILYPI_TFT_SCLK            18
+#define LILYPI_TFT_CS              5
+#define LILYPI_TFT_DC              27
+#define LILYPI_TFT_RST             GFX_NOT_DEFINED
+#define LILYPI_TFT_BL              12
+
+
 // Init display and touch screen
-Arduino_DataBus *bus = new Arduino_AVRPAR16(38 /* DC */, 40 /* CS */, 39 /* WR */, 43 /* RD */, 3 /* PORT LOW */, 1 /* PORT HIGH */);
-Arduino_GFX *myGLCD = new Arduino_NT35510(bus, 41, 1 /* rotation */);
+Arduino_DataBus *bus = new Arduino_ESP32SPI(LILYPI_TFT_DC, LILYPI_TFT_CS, LILYPI_TFT_SCLK, LILYPI_TFT_MOSI, LILYPI_TFT_MISO);
+Arduino_GFX *myGLCD = new Arduino_ILI9481_18bit(bus, GFX_NOT_DEFINED, 1 /* rotation */, false /* IPS */);
 
 
 // For LVGL ///////////////////////////////////////////////////////////////////////

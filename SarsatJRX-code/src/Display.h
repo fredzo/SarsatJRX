@@ -8,8 +8,8 @@
 //#define TOUCH_CAL
 
 
-#define DISPLAY_WIDTH   800
-#define DISPLAY_HEIGHT  480
+#define DISPLAY_WIDTH   480
+#define DISPLAY_HEIGHT  320
 
 #define BUTTON_WIDTH  140
 #define BUTTON_HEIGHT 80
