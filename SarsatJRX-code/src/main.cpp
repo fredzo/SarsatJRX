@@ -32,6 +32,7 @@
 #include <Util.h>
 #include <Samples.h>
 #include <Decoder.h>
+#include <i2c_bus.h>
 
 // Enable RAM debuging
 #define DEBUG_RAM
@@ -135,8 +136,11 @@ int beaconsReadIndex = -1;
 int beaconsSize = 0;
 bool beaconsFull = false;
 
+I2CBus *i2c = nullptr;
 
 Display display;
+
+
 
 static const int QR_VERSION = 6;
 void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
@@ -721,6 +725,8 @@ void setup()
   
   Serial.begin(115200);
   attachInterrupt(digitalPinToInterrupt(receiverPin), analyze, CHANGE);  // interruption sur Rise et Fall
+
+  i2c = new I2CBus();
 
   display.setup(Display::Color::DarkGrey);
 

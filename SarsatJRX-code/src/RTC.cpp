@@ -3,12 +3,12 @@
 
 #define RTC_INT_PIN         36
 
-I2CBus *i2c = nullptr; 
+I2CBus *rtcI2c = nullptr; 
 PCF8563_Class *rtc = nullptr;
 
-void rtcInit()
+void rtcInit(I2CBus* i2c)
 {
-    i2c = new I2CBus();
+    rtcI2c = i2c;
     rtc = new PCF8563_Class(*i2c);
 }
 

@@ -135,12 +135,13 @@ void Display::setup(Color bgColor)
   currentTextColor = Color::White;
   clearDisplay(false,false);
   // Init touch screen
-  if(!touch.begin())
+  //if(!touch.begin())
   {
     Serial.println("Could not initialize I2C communication with touch screen.");
   }
   // Init backlight
   bl->begin();
+  bl->on();
 }
 
 void Display::setFontSize(FontSize fontSize)
@@ -270,7 +271,7 @@ int Display::getHeight()
 boolean Display::touchAvailable()
 {
   uint16_t x = 0,y = 0;
-  if (touch.scanPoint() > 0)
+  /*if (touch.scanPoint() > 0)
   {
     touch.getPoint(x,y,0);
     // Handle rotation (cf. TTGO.h l. 299)
@@ -278,7 +279,7 @@ boolean Display::touchAvailable()
     touchY = DISPLAY_HEIGHT - x;
     return true;
   }
-  else
+  else*/
   {
     return false;
   }
