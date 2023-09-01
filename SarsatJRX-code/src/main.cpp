@@ -713,21 +713,6 @@ void readNextSampleFrame()
   setFrameComplete(true);
 }
 
-#ifdef TOUCH_CAL
-int16_t w = -1, h = -1;
-int16_t point_x[4] = {-1};
-int16_t point_y[4] = {-1};
-int16_t current_point = -1, next_point = 0;
-int16_t touched_x[4] = {-1};
-int16_t touched_y[4] = {-1};
-bool ctouch_swap_xy = false;
-int16_t ctouch_map_x1 = -1;
-int16_t ctouch_map_x2 = -1;
-int16_t ctouch_map_y1 = -1;
-int16_t ctouch_map_y2 = -1;
-#endif
-
-
 void setup()
 {
   pinMode(receiverPin, INPUT);          // Detection stage inpit
@@ -739,27 +724,6 @@ void setup()
 
   display.setup(Display::Color::DarkGrey);
 
-#ifdef TOUCH_CAL
-  w = display.getWidth();
-  h = display.getHeight();
-  // Top left
-  point_x[0] = w / 8;
-  point_y[0] = h / 8;
-  // Top right
-  point_x[1] = point_x[0] * 7;
-  point_y[1] = point_y[0];
-  // Bottom left
-  point_x[2] = point_x[0];
-  point_y[2] = point_y[0] * 7;
-  // Bottom right
-  point_x[3] = point_x[1];
-  point_y[3] = point_y[2];
-
-  display.setCursor(100, 100);
-  display.setTextColor(Display::Color::Red);
-  display.setFontSize(Display::FontSize::LARGE);
-  display.println("Touch Calibration");
-#else
   display.setHeaderAndFooter(HEADER_HEIGHT,SMALL_BUTTON_HEIGHT);
   drawHeader();
   previousButton.enabled = true;
@@ -769,12 +733,10 @@ void setup()
 #ifdef SERIAL_OUT 
   Serial.println("### Boot complete !");
 #endif
-#endif
 }
 
 void loop()
 {
-  #ifndef TOUCH_CAL
   //Serial.print(".");
   if(display.touchAvailable())
   {
@@ -899,113 +861,5 @@ void loop()
   }
   updateLeds();
   updateHeader();
-  #else  // Touch screen calibration
-  if (current_point != next_point)
-  {
-    current_point = next_point;
-    display.setColor(Display::Color::Red);
-    display.drawLine(
-        point_x[current_point] - 5,
-        point_y[current_point] - 5,
-        point_x[current_point] + 5,
-        point_y[current_point] + 5
-        );
-    display.drawLine(
-        point_x[current_point] + 5,
-        point_y[current_point] - 5,
-        point_x[current_point] - 5,
-        point_y[current_point] + 5
-        );
-  }
-
-  if (display.touchAvailable())
-  {
-    int32_t total_x = display.getTouchX(), total_y = display.getTouchY();
-    int count = 1;
-    while (display.touchAvailable())
-    {
-      total_x += display.getTouchX();
-      total_y += display.getTouchY();
-      count++;
-      // Serial.printf("ctouch_raw_x: %d, ctouch_raw_y: %d, count: %d\n", ctouch_raw_x, ctouch_raw_y, count);
-    }
-    touched_x[current_point] = total_x / count;
-    touched_y[current_point] = total_y / count;
-    // Serial.printf("touched_x: %d, touched_y: %d\n", touched_x[current_point], touched_y[current_point]);
-
-    if (current_point == 3)
-    {
-      Serial.print("touched_x[0]: ");Serial.print(touched_x[0]);Serial.print(" touched_y[0]: ");Serial.println(touched_y[0]);
-      Serial.print("touched_x[1]: ");Serial.print(touched_x[1]);Serial.print(" touched_y[1]: ");Serial.println(touched_y[1]);
-      Serial.print("touched_x[2]: ");Serial.print(touched_x[2]);Serial.print(" touched_y[2]: ");Serial.println(touched_y[2]);
-      Serial.print("touched_x[3]: ");Serial.print(touched_x[3]);Serial.print(" touched_y[3]: ");Serial.println(touched_y[3]);
-      uint16_t delta_x = (touched_x[0] > touched_x[1]) ? (touched_x[0] - touched_x[1]) : (touched_x[1] - touched_x[0]);
-      uint16_t delta_y = (touched_y[0] > touched_y[1]) ? (touched_y[0] - touched_y[1]) : (touched_y[1] - touched_y[0]);
-
-      if (delta_x > delta_y)
-      {
-        ctouch_swap_xy = false;
-        ctouch_map_x1 = (touched_x[0] + touched_x[2]) / 2;
-        ctouch_map_x2 = (touched_x[1] + touched_x[3]) / 2;
-        ctouch_map_y1 = (touched_y[0] + touched_y[1]) / 2;
-        ctouch_map_y2 = (touched_y[2] + touched_y[3]) / 2;
-      }
-      else
-      {
-        ctouch_swap_xy = true;
-        ctouch_map_x1 = (touched_y[0] + touched_y[2]) / 2;
-        ctouch_map_x2 = (touched_y[1] + touched_y[3]) / 2;
-        ctouch_map_y1 = (touched_x[0] + touched_x[1]) / 2;
-        ctouch_map_y2 = (touched_x[2] + touched_x[3]) / 2;
-      }
-
-      if (ctouch_map_x1 > ctouch_map_x2)
-      {
-        delta_x = (ctouch_map_x1 - ctouch_map_x2) / 6;
-        ctouch_map_x1 += delta_x;
-        ctouch_map_x2 -= delta_x;
-      }
-      else
-      {
-        delta_x = (ctouch_map_x2 - ctouch_map_x1) / 6;
-        ctouch_map_x1 -= delta_x;
-        ctouch_map_x2 += delta_x;
-      }
-
-      if (ctouch_map_y1 > ctouch_map_y2)
-      {
-        delta_y = (ctouch_map_y1 - ctouch_map_y2) / 6;
-        ctouch_map_y1 += delta_y;
-        ctouch_map_y2 -= delta_y;
-      }
-      else
-      {
-        delta_y = (ctouch_map_y2 - ctouch_map_y1) / 6;
-        ctouch_map_y1 -= delta_y;
-        ctouch_map_y2 += delta_y;
-      }
-
-      Serial.print("bool ctouch_swap_xy = ");Serial.println(ctouch_swap_xy ? "true" : "false");
-      Serial.print("int16_t ctouch_map_x1 = ");Serial.println(ctouch_map_x1);
-      Serial.print("int16_t ctouch_map_x2 = ");Serial.println(ctouch_map_x2);
-      Serial.print("int16_t ctouch_map_y1 = ");Serial.println(ctouch_map_y1);
-      Serial.print("int16_t ctouch_map_y2 = ");Serial.println(ctouch_map_y2);
-
-      // wait next touch to continue
-      while (display.touchAvailable())
-        ;
-
-      display.clearDisplay(false);
-      display.setCursor(100, 100);
-      display.setTextColor(Display::Color::Red);
-      display.setFontSize(Display::FontSize::LARGE);
-      display.println("Touch Calibration");
-    }
-
-    next_point = (current_point == 3) ? 0 : (current_point + 1);
-  }
-
-  delay(100);  
-  #endif
 }
 

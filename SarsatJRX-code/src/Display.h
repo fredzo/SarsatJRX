@@ -4,10 +4,6 @@
 #include <Arduino.h>
 #include <qrcode.h>
 
-// Enable touch calibration
-//#define TOUCH_CAL
-
-
 #define DISPLAY_WIDTH   480
 #define DISPLAY_HEIGHT  320
 
@@ -106,7 +102,7 @@ class Display
         Color currentBackColor = Color::White;
         Color currentTextColor = Color::White;
         Color currentTextBackColor = Color::Black;
-        int touchX, touchY;
+        int touchX = 0, touchY = 0;
         FontSize fontSize = FontSize::SMALL;
         class Colors {
             public:

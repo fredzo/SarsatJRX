@@ -1,9 +1,10 @@
 #include <Display.h>
-#include <touch.h>
 //#include <lvgl.h>
 #include <U8g2lib.h>
 #include <SPI.h>
 #include <Arduino_GFX_Library.h>
+#include <gt911.h>
+
 
 #define LILYPI_TFT_MISO            23
 #define LILYPI_TFT_MOSI            19
@@ -17,7 +18,7 @@
 // Init display and touch screen
 Arduino_DataBus *bus = new Arduino_ESP32SPI(LILYPI_TFT_DC, LILYPI_TFT_CS, LILYPI_TFT_SCLK, LILYPI_TFT_MOSI, LILYPI_TFT_MISO);
 Arduino_GFX *myGLCD = new Arduino_ILI9481_18bit(bus, GFX_NOT_DEFINED, 1 /* rotation */, false /* IPS */);
-
+GT9xx_Class touch;
 
 // For LVGL ///////////////////////////////////////////////////////////////////////
 
@@ -125,13 +126,18 @@ void Display::setup(Color bgColor)
 {
   // Initial setup
   myGLCD->begin();
-  touch_init(DISPLAY_WIDTH,DISPLAY_HEIGHT,1);
   setFontSize(FontSize::SMALL);
   currentBackColor = bgColor;
   currentColor = Color::White;
   currentTextBackColor = bgColor;
   currentTextColor = Color::White;
   clearDisplay(false,false);
+  // Init touch screen
+  if(!touch.begin())
+  {
+    Serial.println("Could not initialize I2C communication with touch screen.");
+  }
+
 }
 
 void Display::setFontSize(FontSize fontSize)
@@ -260,21 +266,19 @@ int Display::getHeight()
 
 boolean Display::touchAvailable()
 {
-    if(touch_touched())
-    {
-      #ifdef TOUCH_CAL
-        touchX = touch_raw_x;
-        touchY = touch_raw_y;
-      #else
-        touchX = touch_last_x;
-        touchY = touch_last_y;
-      #endif
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+  uint16_t x = 0,y = 0;
+  if (touch.scanPoint() > 0)
+  {
+    touch.getPoint(x,y,0);
+    // Handle rotation (cf. TTGO.h l. 299)
+    touchX = y;
+    touchY = DISPLAY_HEIGHT - x;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 int Display::getTouchX()
