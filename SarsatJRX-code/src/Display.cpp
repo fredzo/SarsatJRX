@@ -4,6 +4,7 @@
 #include <SPI.h>
 #include <Arduino_GFX_Library.h>
 #include <gt911.h>
+#include <ledc.h>
 
 
 #define LILYPI_TFT_MISO            23
@@ -18,6 +19,7 @@
 // Init display and touch screen
 Arduino_DataBus *bus = new Arduino_ESP32SPI(LILYPI_TFT_DC, LILYPI_TFT_CS, LILYPI_TFT_SCLK, LILYPI_TFT_MOSI, LILYPI_TFT_MISO);
 Arduino_GFX *myGLCD = new Arduino_ILI9481_18bit(bus, GFX_NOT_DEFINED, 1 /* rotation */, false /* IPS */);
+BackLight *bl = new BackLight(LILYPI_TFT_BL);
 GT9xx_Class touch;
 
 // For LVGL ///////////////////////////////////////////////////////////////////////
@@ -137,7 +139,8 @@ void Display::setup(Color bgColor)
   {
     Serial.println("Could not initialize I2C communication with touch screen.");
   }
-
+  // Init backlight
+  bl->begin();
 }
 
 void Display::setFontSize(FontSize fontSize)
@@ -429,4 +432,22 @@ void Display::drawQrCode (QRCode* qrcode, int moduleSize)
           }
       }
   }
+}
+
+/******************************************
+ *              BACKLIGHT
+ * ***************************************/
+void Display::backlightOn()
+{
+    bl->on();
+}
+
+void Display::backlightOff()
+{
+    bl->off();
+}
+
+void Display::setBrightness(uint8_t level)
+{
+    bl->adjust(level);
 }

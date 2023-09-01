@@ -94,6 +94,10 @@ class Display
         void drawQrCode (QRCode* qrcode,int moduleSize);
         int getFontWidth(FontSize fontSize);
         int getFontHeight(FontSize fontSize);
+        void backlightOn();
+        void backlightOff();
+        void setBrightness(uint8_t level);
+
 
     private : 
         int x, y, headerHeight, footerHeight;
