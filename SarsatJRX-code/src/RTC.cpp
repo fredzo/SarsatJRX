@@ -17,7 +17,7 @@ void rtcInterruptCallack(void)
     // TODO
 }
 
-void rtcInitInterrupt()
+void rtcRegisterInterrupt()
 {
     pinMode(RTC_INT_PIN, INPUT_PULLUP); //need change to rtc_pin
     attachInterrupt(RTC_INT_PIN, rtcInterruptCallack, FALLING);

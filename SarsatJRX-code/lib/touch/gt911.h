@@ -29,13 +29,8 @@ github:https://github.com/lewisxhe/FocalTech_Library
 /////////////////////////////////////////////////////////////////
 #pragma once
 
-#ifdef ARDUINO
 #include <Arduino.h>
 #include <Wire.h>
-#else
-#include <stdint.h>
-#include <string.h>
-#endif
 
 #define GT9XX_SLAVE_ADDRESS        (0x14)
 

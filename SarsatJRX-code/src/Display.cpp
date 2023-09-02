@@ -7,6 +7,7 @@
 #include <ledc.h>
 
 
+
 #define LILYPI_TFT_MISO            23
 #define LILYPI_TFT_MOSI            19
 #define LILYPI_TFT_SCLK            18
@@ -20,7 +21,7 @@
 Arduino_DataBus *bus = new Arduino_ESP32SPI(LILYPI_TFT_DC, LILYPI_TFT_CS, LILYPI_TFT_SCLK, LILYPI_TFT_MOSI, LILYPI_TFT_MISO);
 Arduino_GFX *myGLCD = new Arduino_ILI9481_18bit(bus, GFX_NOT_DEFINED, 1 /* rotation */, false /* IPS */);
 BackLight *bl = new BackLight(LILYPI_TFT_BL);
-GT9xx_Class touch;
+GT9xx_Class *touch = new GT9xx_Class();
 
 // For LVGL ///////////////////////////////////////////////////////////////////////
 
@@ -47,6 +48,32 @@ Display::Display()
     y = 0;
     displayBuffer = "";
 }
+
+void Display::setup(Color bgColor, I2CBus *i2c)
+{
+  // Initial setup
+  myGLCD->begin();
+  setFontSize(FontSize::SMALL);
+  currentBackColor = bgColor;
+  currentColor = Color::White;
+  currentTextBackColor = bgColor;
+  currentTextColor = Color::White;
+  clearDisplay(false,false);
+  // Init touch screen
+  uint8_t address = 0x5D;
+  if (i2c->deviceProbe(0x5D)) {
+      address = 0x5D;
+  } else if (i2c->deviceProbe(0x14)) {
+      address = 0x14;
+  }
+  if (!touch->begin(Wire, address)) {
+      Serial.println("Begin touch FAIL");
+  }
+  // Init backlight
+  bl->begin();
+  bl->on();
+}
+
 
 Display::Color::Color(byte red, byte green, byte blue)
 {
@@ -122,26 +149,6 @@ void Display::drawRoundRectangle(int width, int height)
 void Display::drawLine(int x1,int y1,int x2,int y2)
 {
   myGLCD->drawLine(x1,y1,x2,y2,RGB565(currentColor.red, currentColor.green, currentColor.blue));
-}
-
-void Display::setup(Color bgColor)
-{
-  // Initial setup
-  myGLCD->begin();
-  setFontSize(FontSize::SMALL);
-  currentBackColor = bgColor;
-  currentColor = Color::White;
-  currentTextBackColor = bgColor;
-  currentTextColor = Color::White;
-  clearDisplay(false,false);
-  // Init touch screen
-  //if(!touch.begin())
-  {
-    Serial.println("Could not initialize I2C communication with touch screen.");
-  }
-  // Init backlight
-  bl->begin();
-  bl->on();
 }
 
 void Display::setFontSize(FontSize fontSize)

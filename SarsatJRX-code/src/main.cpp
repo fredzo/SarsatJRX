@@ -23,16 +23,14 @@
 
 #include <Arduino.h>
 
-#include <Display.h>
+#include <Hardware.h>
 #include <Location.h>
 #include <Country.h>
 #include <qrcode.h>
 #include <Beacon.h>
-#include <Power.h>
 #include <Util.h>
 #include <Samples.h>
 #include <Decoder.h>
-#include <i2c_bus.h>
 
 // Enable RAM debuging
 #define DEBUG_RAM
@@ -136,11 +134,8 @@ int beaconsReadIndex = -1;
 int beaconsSize = 0;
 bool beaconsFull = false;
 
-I2CBus *i2c = nullptr;
-
-Display display;
-
-
+Hardware* hardware = nullptr; 
+Display *display = nullptr;
 
 static const int QR_VERSION = 6;
 void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
@@ -169,8 +164,8 @@ void drawQrCode(bool isMaps)
     generateQrCode(&qrCode,beacons[beaconsReadIndex],isMaps);
     int xPos = DISPLAY_WIDTH-((qrCode.size+3)*MODULE_SIZE);
     int yPos = DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT-((qrCode.size+3)*MODULE_SIZE);
-    display.setCursor(xPos,yPos);
-    display.drawQrCode(&qrCode,MODULE_SIZE);
+    display->setCursor(xPos,yPos);
+    display->drawQrCode(&qrCode,MODULE_SIZE);
 }
 
 #ifdef DEBUG_RAM
@@ -249,14 +244,14 @@ float powerValue = 0;
 
 void updatePowerValueHeader()
 {  // Power header
-  display.setTextColors(Display::Color::LightGreen,Display::Color::Grey);
-  display.setFontSize(Display::FontSize::SMALL);
-  display.setCursor(HEADER_POWER_X, HEADER_POWER_Y);
+  display->setTextColors(Display::Color::LightGreen,Display::Color::Grey);
+  display->setFontSize(Display::FontSize::SMALL);
+  display->setCursor(HEADER_POWER_X, HEADER_POWER_Y);
   char powerString[8];
-  getVccStringValue(powerString);
+  hardware->getVccStringValue(powerString);
   char buffer[8];
   sprintf(buffer,HEADER_POWER_TEMPLATE,powerString);
-  display.println(buffer);
+  display->println(buffer);
 }
 void updateLedHeader(bool force)
 { // Led header
@@ -299,15 +294,15 @@ void updateLedHeader(bool force)
     ledFrameReceived.on = ledFrameReceivedOn;
     drawledFrameReceived = true;
   }
-  if(drawledSig1) display.drawLed(ledSig1);
-  if(drawledSig2) display.drawLed(ledSig2);
-  if(drawledInFrame) display.drawLed(ledInFrame);
-  if(drawledFrameReceived) display.drawLed(ledFrameReceived);
+  if(drawledSig1) display->drawLed(ledSig1);
+  if(drawledSig2) display->drawLed(ledSig2);
+  if(drawledInFrame) display->drawLed(ledInFrame);
+  if(drawledFrameReceived) display->drawLed(ledFrameReceived);
 }
 
 void updateHeader()
 { // Check for power value update
-  float newValue = getVccValue();
+  float newValue = hardware->getVccValue();
   if(abs(newValue - powerValue) > 0.05)
   {
     powerValue = newValue;
@@ -319,18 +314,18 @@ void updateHeader()
 void drawHeader()
 {
   // Header
-  display.setCursor(0, 0);
+  display->setCursor(0, 0);
   // Draw header background
-  display.setColor(Display::Color::Grey);
-  display.fillRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
-  display.setColor(Display::Color::Purple);
-  display.drawRoundRectangle(display.getWidth()-1,HEADER_HEIGHT);
+  display->setColor(Display::Color::Grey);
+  display->fillRoundRectangle(display->getWidth()-1,HEADER_HEIGHT);
+  display->setColor(Display::Color::Purple);
+  display->drawRoundRectangle(display->getWidth()-1,HEADER_HEIGHT);
   // Header text
-  display.setTextColors(Display::Color::LightBlue,Display::Color::Grey);
-  display.setCursor(DISPLAY_WIDTH/2, 3);
-  display.setFontSize(Display::FontSize::LARGE);
-  display.centerText(HEADER_TEXT);
-  display.println(HEADER_TEXT);
+  display->setTextColors(Display::Color::LightBlue,Display::Color::Grey);
+  display->setCursor(DISPLAY_WIDTH/2, 3);
+  display->setFontSize(Display::FontSize::LARGE);
+  display->centerText(HEADER_TEXT);
+  display->println(HEADER_TEXT);
   // Draw leds
   updateLedHeader(true);
 }
@@ -350,15 +345,15 @@ void updateSpinner(bool show)
   {
     if(spinnerPosition < 360)
     {
-      display.setCursor(FOOTER_SPINNER_X,FOOTER_SPINNER_Y);
-      display.setColor(Display::Color::LightBlue);
-      display.fillArc(FOOTER_RADIUS_MIN,FOOTER_RADIUS_MAX,0,spinnerPosition);
+      display->setCursor(FOOTER_SPINNER_X,FOOTER_SPINNER_Y);
+      display->setColor(Display::Color::LightBlue);
+      display->fillArc(FOOTER_RADIUS_MIN,FOOTER_RADIUS_MAX,0,spinnerPosition);
     }
     else if(spinnerPosition < 360*2)
     {
-      display.setCursor(FOOTER_SPINNER_X,FOOTER_SPINNER_Y);
-      display.setColor(Display::Color::DarkGrey);
-      display.fillArc(FOOTER_RADIUS_MIN,FOOTER_RADIUS_MAX,0,spinnerPosition-360);
+      display->setCursor(FOOTER_SPINNER_X,FOOTER_SPINNER_Y);
+      display->setColor(Display::Color::DarkGrey);
+      display->fillArc(FOOTER_RADIUS_MIN,FOOTER_RADIUS_MAX,0,spinnerPosition-360);
     }
     else
     {
@@ -369,31 +364,31 @@ void updateSpinner(bool show)
   else
   {
     spinnerPosition = 0;
-    display.setCursor(FOOTER_SPINNER_X,FOOTER_SPINNER_Y);
-    display.setColor(Display::Color::DarkGrey);
-    display.fillArc(FOOTER_RADIUS_MAX,FOOTER_RADIUS_MIN,0,360);
+    display->setCursor(FOOTER_SPINNER_X,FOOTER_SPINNER_Y);
+    display->setColor(Display::Color::DarkGrey);
+    display->fillArc(FOOTER_RADIUS_MAX,FOOTER_RADIUS_MIN,0,360);
   }
   footerShowingSpinner = show;
 }
 
 void showWaiting(bool show)
 {
-    display.setTextColors(show ? Display::Color::LightBlue : Display::Color::DarkGrey,Display::Color::DarkGrey);
-    display.setFontSize(Display::FontSize::LARGE);
+    display->setTextColors(show ? Display::Color::LightBlue : Display::Color::DarkGrey,Display::Color::DarkGrey);
+    display->setFontSize(Display::FontSize::LARGE);
     // Center not working with large font (not fixed with)
-    display.setCursor(SMALL_BUTTON_WIDTH*2, FOOTER_LABEL_Y);
-    //display.centerText(FOOTER_WAIT_LABEL);
-    display.println(FOOTER_WAIT_LABEL);
+    display->setCursor(SMALL_BUTTON_WIDTH*2, FOOTER_LABEL_Y);
+    //display->centerText(FOOTER_WAIT_LABEL);
+    display->println(FOOTER_WAIT_LABEL);
     footerShowingWait = show;
 }
 
 void showFrameReceived(bool show)
 {
-    display.setTextColors(show ? Display::Color::Red : Display::Color::DarkGrey,Display::Color::DarkGrey);
-    display.setFontSize(Display::FontSize::LARGE);
-    display.setCursor(FOOTER_LABEL_X, FOOTER_LABEL_Y);
-    display.centerText(FOOTER_FRAME_LABEL);
-    display.println(FOOTER_FRAME_LABEL);
+    display->setTextColors(show ? Display::Color::Red : Display::Color::DarkGrey,Display::Color::DarkGrey);
+    display->setFontSize(Display::FontSize::LARGE);
+    display->setCursor(FOOTER_LABEL_X, FOOTER_LABEL_Y);
+    display->centerText(FOOTER_FRAME_LABEL);
+    display->println(FOOTER_FRAME_LABEL);
     footerShowingFrameReceived = show;
 }
 
@@ -436,20 +431,20 @@ void updateDisplay()
   Serial.println(freeRam());
 #endif
   // Refresh screen
-  display.clearDisplay(true,true);
+  display->clearDisplay(true,true);
 
 #ifdef SERIAL_OUT 
   Serial.print(HEADER_TEXT);
 #endif  
   // Header pages
-  display.setFontSize(Display::FontSize::SMALL);
-  display.setTextColors(Display::Color::LightGreen,Display::Color::Grey);
-  display.setCursor(HEADER_PAGES_X, HEADER_PAGES_Y);
+  display->setFontSize(Display::FontSize::SMALL);
+  display->setTextColors(Display::Color::LightGreen,Display::Color::Grey);
+  display->setCursor(HEADER_PAGES_X, HEADER_PAGES_Y);
   char buffer[32];
   // Rotating index based on beacon list max size and position of last read frame
   int displayIndex = ((beaconsSize-1 + beaconsReadIndex - beaconsWriteIndex) % BEACON_LIST_MAX_SIZE)+1;
   sprintf(buffer,HEADER_PAGES_TEMPLATE,displayIndex,beaconsSize);
-  display.println(buffer);
+  display->println(buffer);
 #ifdef SERIAL_OUT 
   Serial.println(buffer);
 #endif
@@ -458,7 +453,7 @@ void updateDisplay()
 
   int currentY = HEADER_BOTTOM;
   // For the rest of the screen
-  display.setTextColors(Display::Color::Beige,Display::Color::DarkGrey);
+  display->setTextColors(Display::Color::Beige,Display::Color::DarkGrey);
 
   if(beaconsReadIndex<0)
   { // Nothing to display
@@ -480,52 +475,52 @@ void updateDisplay()
   { // Unknown fram format
     frameMode = F("Unknown 406");
   }
-  display.setCursor(0, currentY);
-  display.setTextColor(Display::Color::LightGreen);
-  display.println(FRAME_MODE_LABEL);
-  display.setTextColor(Display::Color::Beige);
-  display.setCursor(FRAME_MODE_WIDTH, currentY);
-  display.println(frameMode);
+  display->setCursor(0, currentY);
+  display->setTextColor(Display::Color::LightGreen);
+  display->println(FRAME_MODE_LABEL);
+  display->setTextColor(Display::Color::Beige);
+  display->setCursor(FRAME_MODE_WIDTH, currentY);
+  display->println(frameMode);
 #ifdef SERIAL_OUT 
   Serial.println(frameMode);
 #endif
   currentY+=LINE_HEIGHT;
 
   // Info           
-  display.setCursor(0, currentY);
-  display.setTextColor(Display::Color::LightGreen);
-  display.println(INFO_LABEL);
-  display.setTextColor(Display::Color::Beige);
+  display->setCursor(0, currentY);
+  display->setTextColor(Display::Color::LightGreen);
+  display->println(INFO_LABEL);
+  display->setTextColor(Display::Color::Beige);
   // Protocol name
-  display.setCursor(INFO_LABEL_WIDTH, currentY);
+  display->setCursor(INFO_LABEL_WIDTH, currentY);
   if(beacon->protocol->isUnknown())
   {
     // Unknwon protocol (xxxx)
     sprintf(buffer,"%s (%lu)",beacon->getProtocolName().c_str(),beacon->protocolCode);
-    display.println(buffer);
+    display->println(buffer);
   #ifdef SERIAL_OUT 
     Serial.println(buffer);   
   #endif
   }
   else
   {
-    display.println(beacon->getProtocolName());
+    display->println(beacon->getProtocolName());
   #ifdef SERIAL_OUT 
     Serial.println(beacon->getProtocolName());   
   #endif
   }
   // Protocol desciption
   currentY+=LINE_HEIGHT;
-  display.setCursor(0, currentY);
-  display.println(beacon->getProtocolDesciption());
+  display->setCursor(0, currentY);
+  display->println(beacon->getProtocolDesciption());
 #ifdef SERIAL_OUT 
   Serial.println(beacon->getProtocolDesciption());   
 #endif
   currentY+=LINE_HEIGHT;
   if(beacon->hasAdditionalData)
   { // Additionnal protocol data
-    display.setCursor(0, currentY);
-    display.println(beacon->additionalData);
+    display->setCursor(0, currentY);
+    display->println(beacon->additionalData);
   #ifdef SERIAL_OUT 
     Serial.println(beacon->additionalData);   
   #endif
@@ -534,12 +529,12 @@ void updateDisplay()
 
   if(beacon->hasSerialNumber)
   { // Serial number
-    display.setCursor(0, currentY);
-    display.setTextColor(Display::Color::LightGreen);
-    display.println(SERIAL_LABEL);
-    display.setTextColor(Display::Color::Beige);
-    display.setCursor(SERIAL_LABEL_WIDTH, currentY);
-    display.println(beacon->serialNumber);
+    display->setCursor(0, currentY);
+    display->setTextColor(Display::Color::LightGreen);
+    display->println(SERIAL_LABEL);
+    display->setTextColor(Display::Color::Beige);
+    display->setCursor(SERIAL_LABEL_WIDTH, currentY);
+    display->println(beacon->serialNumber);
   #ifdef SERIAL_OUT 
     Serial.print(SERIAL_LABEL);   
     Serial.println(beacon->serialNumber);   
@@ -548,15 +543,15 @@ void updateDisplay()
   }
 
   // Location
-  display.setCursor(0, currentY);
-  display.setTextColor(Display::Color::LightGreen);
-  display.println(LOCATION_LABEL);
-  display.setTextColor(Display::Color::Beige);
+  display->setCursor(0, currentY);
+  display->setTextColor(Display::Color::LightGreen);
+  display->println(LOCATION_LABEL);
+  display->setTextColor(Display::Color::Beige);
   currentY+=LINE_HEIGHT;
   // Country
-  display.setCursor(0, currentY);
+  display->setCursor(0, currentY);
   String country = beacon->country.toString();
-  display.println(country);
+  display->println(country);
 #ifdef SERIAL_OUT 
   Serial.println(country);
 #endif
@@ -566,18 +561,18 @@ void updateDisplay()
   bool locationKnown = !beacon->location.isUnknown(); 
   if (beacon->longFrame) 
   { // Long frame
-    display.setCursor(0, currentY); 
+    display->setCursor(0, currentY); 
     String locationSexa = beacon->location.toString(true);
     String locationDeci = beacon->location.toString(false);
-    display.println(locationSexa);
+    display->println(locationSexa);
   #ifdef SERIAL_OUT 
     Serial.println(locationSexa);
   #endif
     currentY+=LINE_HEIGHT;
     if(locationKnown)
     {
-      display.setCursor(0, currentY); 
-      display.println(locationDeci);
+      display->setCursor(0, currentY); 
+      display->println(locationDeci);
     #ifdef SERIAL_OUT 
       Serial.println(locationDeci);
     #endif
@@ -586,19 +581,19 @@ void updateDisplay()
   }
   else 
   { // Short frame
-    display.setCursor(5, currentY);
-    display.println("22 HEX. No location");
+    display->setCursor(5, currentY);
+    display->println("22 HEX. No location");
     currentY+=LINE_HEIGHT;
   }
 
   if(beacon->hasMainLocatingDevice())
   { // Main locating device
-    display.setCursor(0, currentY);
-    display.setTextColor(Display::Color::LightGreen);
-    display.println(MAIN_LABEL);
-    display.setTextColor(Display::Color::Beige);
-    display.setCursor(MAIN_LABEL_WIDTH, currentY);
-    display.println(beacon->getMainLocatingDeviceName());
+    display->setCursor(0, currentY);
+    display->setTextColor(Display::Color::LightGreen);
+    display->println(MAIN_LABEL);
+    display->setTextColor(Display::Color::Beige);
+    display->setCursor(MAIN_LABEL_WIDTH, currentY);
+    display->println(beacon->getMainLocatingDeviceName());
   #ifdef SERIAL_OUT 
     Serial.print(MAIN_LABEL);   
     Serial.println(beacon->getMainLocatingDeviceName());   
@@ -608,12 +603,12 @@ void updateDisplay()
 
   if(beacon->hasAuxLocatingDevice())
   { // Auxiliary locating device
-    display.setCursor(0, currentY);
-    display.setTextColor(Display::Color::LightGreen);
-    display.println(AUX_LABEL);
-    display.setTextColor(Display::Color::Beige);
-    display.setCursor(AUX_LABEL_WIDTH, currentY);
-    display.println(beacon->getAuxLocatingDeviceName());
+    display->setCursor(0, currentY);
+    display->setTextColor(Display::Color::LightGreen);
+    display->println(AUX_LABEL);
+    display->setTextColor(Display::Color::Beige);
+    display->setCursor(AUX_LABEL_WIDTH, currentY);
+    display->println(beacon->getAuxLocatingDeviceName());
   #ifdef SERIAL_OUT 
     Serial.print(AUX_LABEL);   
     Serial.println(beacon->getAuxLocatingDeviceName());   
@@ -622,34 +617,34 @@ void updateDisplay()
   }
 
   // Hex ID
-  display.setCursor(0, currentY);
-  display.setTextColor(Display::Color::LightGreen);
-  display.println(HEX_ID_LABEL);
-  display.setTextColor(Display::Color::Beige);
-  display.setCursor(HEX_ID_WIDTH, currentY);
+  display->setCursor(0, currentY);
+  display->setTextColor(Display::Color::LightGreen);
+  display->println(HEX_ID_LABEL);
+  display->setTextColor(Display::Color::Beige);
+  display->setCursor(HEX_ID_WIDTH, currentY);
   // "Id = 0x1122334455667788"
   uint32_t msb = beacon->identifier >> 32;
   uint32_t lsb = beacon->identifier;
   sprintf(buffer,"%07lX%08lX",msb,lsb);
-  display.println(buffer);
+  display->println(buffer);
 #ifdef SERIAL_OUT 
   Serial.println(buffer);   
 #endif  
   currentY+=LINE_HEIGHT;
 
   // Data
-  display.setCursor(0, currentY);
-  display.setTextColor(Display::Color::LightGreen);
-  display.println(DATA_LABEL);
+  display->setCursor(0, currentY);
+  display->setTextColor(Display::Color::LightGreen);
+  display->println(DATA_LABEL);
   // Append BCH values before frame data
-  display.setTextColor(beacon->isBch1Valid() ? Display::Color::Green : Display::Color::Red);
-  display.setCursor(DATA_LABEL_WIDTH, currentY);
-  display.println(beacon->isBch1Valid() ? BCH1_OK_LABEL : BCH1_KO_LABEL);
+  display->setTextColor(beacon->isBch1Valid() ? Display::Color::Green : Display::Color::Red);
+  display->setCursor(DATA_LABEL_WIDTH, currentY);
+  display->println(beacon->isBch1Valid() ? BCH1_OK_LABEL : BCH1_KO_LABEL);
   if(beacon->longFrame) 
   { // No second proteced field in short frames
-    display.setTextColor(beacon->isBch2Valid() ? Display::Color::Green : Display::Color::Red);
-    display.setCursor(DATA_LABEL_WIDTH+BCH_LABEL_WIDTH, currentY);
-    display.println(beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
+    display->setTextColor(beacon->isBch2Valid() ? Display::Color::Green : Display::Color::Red);
+    display->setCursor(DATA_LABEL_WIDTH+BCH_LABEL_WIDTH, currentY);
+    display->println(beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
   }
 #ifdef SERIAL_OUT 
   if(!beacon->isBch1Valid())
@@ -670,38 +665,38 @@ void updateDisplay()
   }
 #endif
 
-  display.setTextColor(Display::Color::Beige);
+  display->setTextColor(Display::Color::Beige);
   currentY+=LINE_HEIGHT;
   if (beacon->longFrame) 
   { // Long frame
     // HEX ID 30 Hexa
-    display.setCursor(0, currentY);
-    display.println(toHexString(beacon->frame,true,3,11));
+    display->setCursor(0, currentY);
+    display->println(toHexString(beacon->frame,true,3,11));
     currentY+=LINE_HEIGHT;
-    display.setCursor(0, currentY);
-    display.println(toHexString(beacon->frame,true,11,18));
+    display->setCursor(0, currentY);
+    display->println(toHexString(beacon->frame,true,11,18));
   }
   else 
   { // Short frame
-    display.setCursor(0, currentY);  
+    display->setCursor(0, currentY);  
     // HEX ID 22 Hexa bit 26 to 112
-    display.println(toHexString(beacon->frame,true,3,11));
+    display->println(toHexString(beacon->frame,true,3,11));
     currentY+=LINE_HEIGHT;
-    display.setCursor(0, currentY);
-    display.println(toHexString(beacon->frame,true,11,14));
+    display->setCursor(0, currentY);
+    display->println(toHexString(beacon->frame,true,11,14));
   }
 
   // Maps button
   mapsButton.enabled = locationKnown;
-  display.drawButton(mapsButton);
+  display->drawButton(mapsButton);
 
   // Beacon button
   beaconButton.enabled = true;
-  display.drawButton(beaconButton);
+  display->drawButton(beaconButton);
 
   // Navigation buttons
-  display.drawButton(previousButton);
-  display.drawButton(nextButton);
+  display->drawButton(previousButton);
+  display->drawButton(nextButton);
 
 #ifdef DEBUG_RAM
   Serial.println(freeRam());
@@ -726,11 +721,10 @@ void setup()
   Serial.begin(115200);
   attachInterrupt(digitalPinToInterrupt(receiverPin), analyze, CHANGE);  // interruption sur Rise et Fall
 
-  i2c = new I2CBus();
-
-  display.setup(Display::Color::DarkGrey);
-
-  display.setHeaderAndFooter(HEADER_HEIGHT,SMALL_BUTTON_HEIGHT);
+  hardware = Hardware::getHardware();
+  hardware->init();
+  display = hardware->getDisplay();
+  display->setHeaderAndFooter(HEADER_HEIGHT,SMALL_BUTTON_HEIGHT);
   drawHeader();
   previousButton.enabled = true;
   nextButton.enabled = true;
@@ -744,10 +738,10 @@ void setup()
 void loop()
 {
   //Serial.print(".");
-  if(display.touchAvailable())
+  if(display->touchAvailable())
   {
-    int x = display.getTouchX();
-    int y = display.getTouchY();
+    int x = display->getTouchX();
+    int y = display->getTouchY();
     if(x>=0 && y>=0)
     {
       //Serial.println(x);
@@ -757,10 +751,10 @@ void loop()
         if(mapsButton.enabled)
         {
           mapsButton.pressed = true;
-          display.drawButton(mapsButton);
+          display->drawButton(mapsButton);
           drawQrCode(true);
           mapsButton.pressed = false;
-          display.drawButton(mapsButton);
+          display->drawButton(mapsButton);
         }
       }
       else if(beaconButton.contains(x,y))
@@ -768,10 +762,10 @@ void loop()
         if(beaconButton.enabled)
         {
           beaconButton.pressed = true;
-          display.drawButton(beaconButton);
+          display->drawButton(beaconButton);
           drawQrCode(false);
           beaconButton.pressed = false;
-          display.drawButton(beaconButton);
+          display->drawButton(beaconButton);
         }
       }
       else if(previousButton.contains(x,y))
@@ -779,7 +773,7 @@ void loop()
         if(previousButton.enabled)
         {
           previousButton.pressed = true;
-          display.drawButton(previousButton);
+          display->drawButton(previousButton);
           beaconsReadIndex--;
           if(beaconsReadIndex<0)
           {
@@ -787,7 +781,7 @@ void loop()
           }
           updateDisplay();
           previousButton.pressed = false;
-          display.drawButton(previousButton);
+          display->drawButton(previousButton);
         }
       }
       else if(nextButton.contains(x,y))
@@ -795,7 +789,7 @@ void loop()
         if(nextButton.enabled)
         {
           nextButton.pressed = true;
-          display.drawButton(nextButton);
+          display->drawButton(nextButton);
           beaconsReadIndex++;
           if(beaconsReadIndex>=beaconsSize)
           {
@@ -803,7 +797,7 @@ void loop()
           }
           updateDisplay();
           nextButton.pressed = false;
-          display.drawButton(nextButton);
+          display->drawButton(nextButton);
         }
       }
       else if((y <= HEADER_BUTTON_BOTTOM)&&(x >= HEADER_BUTTON_LEFT)&&(x <= HEADER_BUTTON_RIGHT))

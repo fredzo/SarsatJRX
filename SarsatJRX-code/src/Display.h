@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <qrcode.h>
+#include <i2c_bus.h>
 
 #define DISPLAY_WIDTH   480
 #define DISPLAY_HEIGHT  320
@@ -55,7 +56,7 @@ class Display
             Led(int x,int y,LedColor color) : x(x), y(y), color(color) {}
         };
         Display();
-        void setup(Color bgColor);
+        void setup(Color bgColor, I2CBus *i2c);
         void clearDisplay(bool noHeader, bool noFooter);
         void setHeaderAndFooter(int headerHeight, int footerHeight);
         void setCursor(int x, int y);
