@@ -70,7 +70,7 @@ Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y
 #define FOOTER_LABEL_X      DISPLAY_WIDTH/2
 #define FOOTER_LABEL_Y      DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT+18
 #define FOOTER_WAIT_LABEL   F("Waiting for the wave...")
-#define FOOTER_FRAME_LABEL  F("Frame reveived !")
+#define FOOTER_FRAME_LABEL  F("Frame received !")
 #define FOOTER_SPINNER_X    SMALL_BUTTON_WIDTH+10
 #define FOOTER_SPINNER_Y    DISPLAY_HEIGHT-(SMALL_BUTTON_HEIGHT/2)
 #define FOOTER_RADIUS_MAX   SMALL_BUTTON_HEIGHT/2-5
@@ -140,7 +140,7 @@ Display *display = nullptr;
 static const int QR_VERSION = 6;
 void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
 { // Version 6 (41x41) allows 154 alphanumeric characters with medium error correcion
-  // For some reason, to have the qr code library work properly, the version passed to getBufferSize needs to be one step ahed the actual version...
+  // For some reason, to have the qr code library work properly, the buffer size needs to be much bigger than the actual version...
   uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+10)];
   char buffer[128];
   if(isMaps)
