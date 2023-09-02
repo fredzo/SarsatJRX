@@ -141,7 +141,7 @@ static const int QR_VERSION = 6;
 void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
 { // Version 6 (41x41) allows 154 alphanumeric characters with medium error correcion
   // For some reason, to have the qr code library work properly, the version passed to getBufferSize needs to be one step ahed the actual version...
-  uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+2)];
+  uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+10)];
   char buffer[128];
   if(isMaps)
   {
@@ -157,7 +157,7 @@ void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
 	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_MEDIUM, buffer);
 }
 
-static const int MODULE_SIZE = 4;
+static const int MODULE_SIZE = 3;
 void drawQrCode(bool isMaps)
 {
     QRCode qrCode;
