@@ -39,11 +39,11 @@
 #define SERIAL_OUT
 
 // Header
-#define HEADER_HEIGHT     40
+#define HEADER_HEIGHT     30
 #define HEADER_TEXT       F("- SarsatJRX -")
 #define HEADER_BOTTOM     HEADER_HEIGHT+8
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
-#define HEADER_PAGES_X    6
+#define HEADER_PAGES_X    4
 #define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
 #define HEADER_BUTTON_LEFT    DISPLAY_WIDTH/3
 #define HEADER_BUTTON_RIGHT   (2*DISPLAY_WIDTH)/3
@@ -63,41 +63,41 @@ Display::Led ledInFrame =       Display::Led(LED_SIG_IN_FRAME_X,LED_SIG_IN_FRAME
 Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y,Display::LedColor::Blue);
 // Power
 #define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
-#define HEADER_POWER_X    LED_SIG_1_X-100
+#define HEADER_POWER_X    LED_SIG_1_X-60
 #define HEADER_POWER_Y    (HEADER_HEIGHT-12)/2
 
 // Footer
 #define FOOTER_LABEL_X      DISPLAY_WIDTH/2
-#define FOOTER_LABEL_Y      DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT+24
+#define FOOTER_LABEL_Y      DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT+18
 #define FOOTER_WAIT_LABEL   F("Waiting for the wave...")
 #define FOOTER_FRAME_LABEL  F("Frame reveived !")
-#define FOOTER_SPINNER_X    SMALL_BUTTON_WIDTH*1.5
+#define FOOTER_SPINNER_X    SMALL_BUTTON_WIDTH+10
 #define FOOTER_SPINNER_Y    DISPLAY_HEIGHT-(SMALL_BUTTON_HEIGHT/2)
-#define FOOTER_RADIUS_MAX   SMALL_BUTTON_HEIGHT/2-20
-#define FOOTER_RADIUS_MIN   FOOTER_RADIUS_MAX-5
+#define FOOTER_RADIUS_MAX   SMALL_BUTTON_HEIGHT/2-5
+#define FOOTER_RADIUS_MIN   FOOTER_RADIUS_MAX-4
 
 // Beacon info
-#define LINE_HEIGHT         22
+#define LINE_HEIGHT         16
 #define FRAME_MODE_LABEL    F("Frame mode :")
-#define FRAME_MODE_WIDTH    180
+#define FRAME_MODE_WIDTH    120
 #define INFO_LABEL          F("Info :")
-#define INFO_LABEL_WIDTH    100
+#define INFO_LABEL_WIDTH    80
 #define SERIAL_LABEL        F("Serial # :")
-#define SERIAL_LABEL_WIDTH  150
+#define SERIAL_LABEL_WIDTH  100
 #define MAIN_LABEL          F("Main loc. device :")
-#define MAIN_LABEL_WIDTH    260
+#define MAIN_LABEL_WIDTH    200
 #define AUX_LABEL           F("Aux. loc. device :")
-#define AUX_LABEL_WIDTH     260
+#define AUX_LABEL_WIDTH     200
 #define LOCATION_LABEL      F("Location :")
 #define HEX_ID_LABEL        F("Hex ID:")
-#define HEX_ID_WIDTH        120
+#define HEX_ID_WIDTH        90
 #define DATA_LABEL          F("Data :")
-#define DATA_LABEL_WIDTH    100
+#define DATA_LABEL_WIDTH    70
 #define BCH1_OK_LABEL       F("BCH1-OK")
 #define BCH1_KO_LABEL       F("BCH1-KO")
 #define BCH2_OK_LABEL       F("BCH2-OK")
 #define BCH2_KO_LABEL       F("BCH2-KO")
-#define BCH_LABEL_WIDTH     120
+#define BCH_LABEL_WIDTH     90
 // MAPS and BEACON buttons
 #define MAPS_BUTTON_X     DISPLAY_WIDTH-BUTTON_WIDTH
 #define MAPS_BUTTON_Y     HEADER_BOTTOM-1
@@ -121,9 +121,9 @@ Display::Button nextButton = Display::Button(NEXT_BUTTON_X,NEXT_BUTTON_Y,NEXT_BU
 #define BEACON_URL_TEMPALTE "https://cryptic-earth-89063heroku-20.herokuapp.com/decoded/%s"
 
 // Interupt pin : use digital pin 18
-const int receiverPin = 18;
+const int receiverPin = 21;
 // Notification led : use digital pin 19
-const int notificationPin = 19;
+const int notificationPin = 22;
 
 // Beacon list
 #define BEACON_LIST_MAX_SIZE  20
@@ -719,7 +719,7 @@ void setup()
   // pinMode(16, OUTPUT);                  // Buzzer output
   
   Serial.begin(115200);
-  attachInterrupt(digitalPinToInterrupt(receiverPin), analyze, CHANGE);  // interruption sur Rise et Fall
+  //attachInterrupt(digitalPinToInterrupt(receiverPin), analyze, CHANGE);  // interruption sur Rise et Fall
 
   hardware = Hardware::getHardware();
   hardware->init();
@@ -729,7 +729,7 @@ void setup()
   previousButton.enabled = true;
   nextButton.enabled = true;
 
-  //readNextSampleFrame();
+  readNextSampleFrame();
 #ifdef SERIAL_OUT 
   Serial.println("### Boot complete !");
 #endif
@@ -744,8 +744,8 @@ void loop()
     int y = display->getTouchY();
     if(x>=0 && y>=0)
     {
-      //Serial.println(x);
-      //Serial.println(y);
+      Serial.println(x);
+      Serial.println(y);
       if(mapsButton.contains(x,y))
       {
         if(mapsButton.enabled)

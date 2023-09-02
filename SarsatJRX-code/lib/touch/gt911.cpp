@@ -91,7 +91,7 @@ bool GT9xx_Class::probe(void)
     uint8_t buffer[5] = {0};
     readBytes(GT9XX_PRODUCT_ID, buffer, 3);
     buffer[3] = readRegister(GT9XX_CONFIG_VERSION);
-    // Serial.printf("TouchPad_ID:%c,%c,%c\r\nTouchPad_Config_Version:%2x\r\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+    //Serial.printf("TouchPad_ID:%c,%c,%c\r\nTouchPad_Config_Version:%2x\r\n", buffer[0], buffer[1], buffer[2], buffer[3]);
     if(buffer[0] == '9'){
         initialization = true;
     }else{
@@ -190,11 +190,13 @@ uint8_t GT9xx_Class::scanPoint()
     uint8_t point = 0;
     uint8_t buffer[40] = {0};
     if (!readBytes(GT9XX_COORDINATE, buffer, 40)) {
+        //Serial.printf("Read bytes KO scanpoint:%c,%c,%c\r\nTouchPad_Config_Version:%2x\r\n", buffer[0], buffer[1], buffer[2], buffer[3]);
         return false;
     }
     writeRegister(GT9XX_CLEARBUF, 0);
 
     point = buffer[0] & 0xF;
+    //Serial.printf("Read bytes OK point:%d\r\n", point);
 
     if (point == 0) {
         return 0;

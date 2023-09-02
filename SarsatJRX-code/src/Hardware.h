@@ -4,7 +4,6 @@
 #include <RTC.h>
 #include <Display.h>
 
-
 class Hardware
 {
 public:
@@ -25,20 +24,14 @@ public:
      * 
      * @return VCC value
      */
-    float getVccValue()
-    {
-        return getVccValue();
-    }
+    float getVccValue();
 
     /**
      * @brief Read VCC value into the provided char* with the format "x.xx"
      * 
      * @param vccString the char* to store the VCC string value in
      */
-    void getVccStringValue(char* vccString)
-    {
-        return getVccStringValue(vccString);
-    }
+    void getVccStringValue(char* vccString);
 
 private:
     Hardware()

@@ -8,13 +8,13 @@
  * 
  * @return VCC value
  */
-float getVccValue();
+float getPowerVccValue();
 
 /**
  * @brief Read VCC value into the provided char* with the format "x.xx"
  * 
  * @param vccString the char* to store the VCC string value in
  */
-void getVccStringValue(char* vccString);
+void getPowerVccStringValue(char* vccString);
 
 #endif 

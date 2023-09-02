@@ -8,14 +8,14 @@
 
 
 
-#define LILYPI_TFT_MISO            23
-#define LILYPI_TFT_MOSI            19
-#define LILYPI_TFT_SCLK            18
-#define LILYPI_TFT_CS              5
-#define LILYPI_TFT_DC              27
-#define LILYPI_TFT_RST             GFX_NOT_DEFINED
-#define LILYPI_TFT_BL              12
-
+#define LILYPI_TFT_MISO             23
+#define LILYPI_TFT_MOSI             19
+#define LILYPI_TFT_SCLK             18
+#define LILYPI_TFT_CS               5
+#define LILYPI_TFT_DC               27
+#define LILYPI_TFT_RST              GFX_NOT_DEFINED
+#define LILYPI_TFT_BL               12
+#define GT911_ADDRESS               0x5D
 
 // Init display and touch screen
 Arduino_DataBus *bus = new Arduino_ESP32SPI(LILYPI_TFT_DC, LILYPI_TFT_CS, LILYPI_TFT_SCLK, LILYPI_TFT_MOSI, LILYPI_TFT_MISO);
@@ -60,14 +60,12 @@ void Display::setup(Color bgColor, I2CBus *i2c)
   currentTextColor = Color::White;
   clearDisplay(false,false);
   // Init touch screen
-  uint8_t address = 0x5D;
-  if (i2c->deviceProbe(0x5D)) {
-      address = 0x5D;
-  } else if (i2c->deviceProbe(0x14)) {
-      address = 0x14;
-  }
-  if (!touch->begin(Wire, address)) {
+  if (!touch->begin(Wire, GT911_ADDRESS)) {
       Serial.println("Begin touch FAIL");
+  }
+  else
+  {
+      Serial.println("Begin touch OK !");
   }
   // Init backlight
   bl->begin();
@@ -157,16 +155,16 @@ void Display::setFontSize(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      //myGLCD->setTextSize(4); // 24x32
-      myGLCD->setFont(u8g2_font_logisoso32_tf);
+      //myGLCD->setTextSize(4); // 18x24
+      myGLCD->setFont(u8g2_font_logisoso24_tf);
       break;
     case FontSize::MEDIUM :
-      //myGLCD->setTextSize(3); // 18x24
-      myGLCD->setFont( u8g2_font_inr24_mf );
+      //myGLCD->setTextSize(3); // 12x16
+      myGLCD->setFont( u8g2_font_inr16_mf );
       break;
     case FontSize::SMALL :
-      //myGLCD->setTextSize(2); // 12x16
-      myGLCD->setFont(u8g2_font_inr16_mf);
+      //myGLCD->setTextSize(2); // 8x12
+      myGLCD->setFont(u8g2_font_crox2c_mf);
       break;  // 1 = 6x8
   }
 }
@@ -176,11 +174,11 @@ int Display::getFontWidth(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      return 24; // 4*6
+      return 18; // 4*6
     case FontSize::MEDIUM :
-      return 18; // 3*6
+      return 12; // 3*6
     case FontSize::SMALL :
-      return 12; // 2*6
+      return 8; // 2*6
   }
   return 18;
 }
@@ -190,11 +188,11 @@ int Display::getFontHeight(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      return 32; // 4*8
+      return 24; // 4*8
     case FontSize::MEDIUM :
-      return 24; // 3*8
+      return 16; // 3*8
     case FontSize::SMALL :
-      return 16; // 2*8
+      return 10; // 2*8
   }
   return 24;
 }
@@ -278,15 +276,15 @@ int Display::getHeight()
 boolean Display::touchAvailable()
 {
   uint16_t x = 0,y = 0;
-  /*if (touch.scanPoint() > 0)
+  if (touch->scanPoint() > 0)
   {
-    touch.getPoint(x,y,0);
+    touch->getPoint(x,y,0);
     // Handle rotation (cf. TTGO.h l. 299)
-    touchX = y;
-    touchY = DISPLAY_HEIGHT - x;
+    touchX = DISPLAY_WIDTH - y;
+    touchY = x;
     return true;
   }
-  else*/
+  else
   {
     return false;
   }

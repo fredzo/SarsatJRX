@@ -9,7 +9,7 @@ uint16_t adc_vref = 1100;
  * 
  * @return VCC value
  */
-float getVccValue() {
+float getPowerVccValue() {
         uint16_t v = analogRead(ADC_PIN);
         return  ((float)v / 4095.0) * 2.0 * 3.3 * (adc_vref / 1000.0);
 }
@@ -19,8 +19,8 @@ float getVccValue() {
  * 
  * @param vccString the char* to store the VCC string value in
  */
-void getVccStringValue(char* vccString)
+void getPowerVccStringValue(char* vccString)
 {   /* 6 is mininum width, 4 is precision; float value is copied onto angleStr */
-    dtostrf(getVccValue(), 3, 2, vccString);
+    dtostrf(getPowerVccValue(), 3, 2, vccString);
 }
 
