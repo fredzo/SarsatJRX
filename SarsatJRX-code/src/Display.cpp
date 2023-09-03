@@ -1,7 +1,6 @@
 #include <Display.h>
 //#include <lvgl.h>
 #include <SPI.h>
-#include <tft_setup.h>
 #include <TFT_eSPI.h>
 #include <gt911.h>
 #include <ledc.h>
@@ -23,7 +22,7 @@
 #define RGB565(r, g, b) ((((r)&0xF8) << 8) | (((g)&0xFC) << 3) | ((b) >> 3))
 
 // Init display and touch screen
-TFT_eSPI *myGLCD = nullptr;
+TFT_eSPI *myGLCD = new TFT_eSPI(DISPLAY_HEIGHT,DISPLAY_WIDTH);
 BackLight *bl = new BackLight(LILYPI_TFT_BL);
 GT9xx_Class *touch = new GT9xx_Class();
 
@@ -56,10 +55,6 @@ Display::Display()
 void Display::setup(Color bgColor, I2CBus *i2c)
 {
   // Initial setup
-  //myGLCD->init();
-  myGLCD = new TFT_eSPI(DISPLAY_HEIGHT,DISPLAY_WIDTH);
-  myGLCD->setDriver(TFT_ESPI_DRIVER, TFT_ESPI_FREQ);
-  myGLCD->setPins(LILYPI_TFT_MOSI, LILYPI_TFT_MISO, LILYPI_TFT_SCLK, LILYPI_TFT_CS, LILYPI_TFT_DC);
   myGLCD->init();
   myGLCD->setRotation(3);
   setFontSize(FontSize::SMALL);
@@ -145,7 +140,7 @@ void Display::fillRoundRectangle(int width, int height)
 
 void Display::fillArc(int oradius, int iradius, float start, float end)
 {
-  //myGLCD->drawSmoothArc(x,y,oradius,iradius,start,end,RGB565(currentColor.red, currentColor.green, currentColor.blue),true);
+  myGLCD->drawSmoothArc(x,y,oradius,iradius,start,end,RGB565(currentColor.red, currentColor.green, currentColor.blue),true);
 }
 
 void Display::drawRoundRectangle(int width, int height)
@@ -407,7 +402,7 @@ void Display::drawButton(Button button)
   myGLCD->fillRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(color.red, color.green, color.blue));
   color = *colors.foreground;
   myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+button.getHeight()-((button.getHeight()-getFontHeight(buttonFontSize))/2));
-  myGLCD->println(button.caption);
+  //myGLCD->println(button.caption);
   color = *colors.border;
   myGLCD->drawRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(color.red, color.green, color.blue));
   // Restore text colors
