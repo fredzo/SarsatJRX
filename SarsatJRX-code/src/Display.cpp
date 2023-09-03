@@ -23,7 +23,7 @@
 #define RGB565(r, g, b) ((((r)&0xF8) << 8) | (((g)&0xFC) << 3) | ((b) >> 3))
 
 // Init display and touch screen
-TFT_eSPI *myGLCD = new TFT_eSPI(DISPLAY_WIDTH,DISPLAY_HEIGHT);
+TFT_eSPI *myGLCD = nullptr;
 BackLight *bl = new BackLight(LILYPI_TFT_BL);
 GT9xx_Class *touch = new GT9xx_Class();
 
@@ -56,10 +56,12 @@ Display::Display()
 void Display::setup(Color bgColor, I2CBus *i2c)
 {
   // Initial setup
+  //myGLCD->init();
+  myGLCD = new TFT_eSPI(DISPLAY_HEIGHT,DISPLAY_WIDTH);
+  myGLCD->setDriver(TFT_ESPI_DRIVER, TFT_ESPI_FREQ);
+  myGLCD->setPins(LILYPI_TFT_MOSI, LILYPI_TFT_MISO, LILYPI_TFT_SCLK, LILYPI_TFT_CS, LILYPI_TFT_DC);
   myGLCD->init();
-  //myGLCD->setDriver(drv, freq);
-  //myGLCD->setPins(LILYPI_TFT_MOSI, LILYPI_TFT_MISO, LILYPI_TFT_SCLK, LILYPI_TFT_CS, LILYPI_TFT_DC);
-  myGLCD->setRotation(2);
+  myGLCD->setRotation(3);
   setFontSize(FontSize::SMALL);
   currentBackColor = bgColor;
   currentColor = Color::White;
@@ -143,7 +145,7 @@ void Display::fillRoundRectangle(int width, int height)
 
 void Display::fillArc(int oradius, int iradius, float start, float end)
 {
-  myGLCD->drawSmoothArc(x,y,oradius,iradius,start,end,RGB565(currentColor.red, currentColor.green, currentColor.blue),true);
+  //myGLCD->drawSmoothArc(x,y,oradius,iradius,start,end,RGB565(currentColor.red, currentColor.green, currentColor.blue),true);
 }
 
 void Display::drawRoundRectangle(int width, int height)
@@ -162,15 +164,15 @@ void Display::setFontSize(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      myGLCD->setTextSize(4); // 18x24
+      myGLCD->setTextSize(3); // 18x24
       //myGLCD->setFont(u8g2_font_logisoso24_tf);
       break;
     case FontSize::MEDIUM :
-      myGLCD->setTextSize(3); // 12x16
+      myGLCD->setTextSize(2); // 12x16
       //myGLCD->setFont( u8g2_font_inr16_mf );
       break;
     case FontSize::SMALL :
-      myGLCD->setTextSize(2); // 8x12
+      myGLCD->setTextSize(1); // 8x12
       //myGLCD->setFont(u8g2_font_crox2c_mf);
       break;  // 1 = 6x8
   }

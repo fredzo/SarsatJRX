@@ -725,7 +725,7 @@ void setup()
   hardware->init();
   display = hardware->getDisplay();
   display->setHeaderAndFooter(HEADER_HEIGHT,SMALL_BUTTON_HEIGHT);
-  //drawHeader();
+  drawHeader();
   previousButton.enabled = true;
   nextButton.enabled = true;
 
