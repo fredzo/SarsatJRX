@@ -1,8 +1,8 @@
 #include <Display.h>
 //#include <lvgl.h>
-#include <U8g2lib.h>
 #include <SPI.h>
-#include <Arduino_GFX_Library.h>
+#include <tft_setup.h>
+#include <TFT_eSPI.h>
 #include <gt911.h>
 #include <ledc.h>
 
@@ -13,13 +13,17 @@
 #define LILYPI_TFT_SCLK             18
 #define LILYPI_TFT_CS               5
 #define LILYPI_TFT_DC               27
-#define LILYPI_TFT_RST              GFX_NOT_DEFINED
+#define LILYPI_TFT_RST              -1
 #define LILYPI_TFT_BL               12
 #define GT911_ADDRESS               0x5D
 
+#define TFT_ESPI_DRIVER             0x9481
+#define TFT_ESPI_FREQ               27000000
+
+#define RGB565(r, g, b) ((((r)&0xF8) << 8) | (((g)&0xFC) << 3) | ((b) >> 3))
+
 // Init display and touch screen
-Arduino_DataBus *bus = new Arduino_ESP32SPI(LILYPI_TFT_DC, LILYPI_TFT_CS, LILYPI_TFT_SCLK, LILYPI_TFT_MOSI, LILYPI_TFT_MISO);
-Arduino_GFX *myGLCD = new Arduino_ILI9481_18bit(bus, GFX_NOT_DEFINED, 1 /* rotation */, false /* IPS */);
+TFT_eSPI *myGLCD = new TFT_eSPI(DISPLAY_WIDTH,DISPLAY_HEIGHT);
 BackLight *bl = new BackLight(LILYPI_TFT_BL);
 GT9xx_Class *touch = new GT9xx_Class();
 
@@ -52,7 +56,10 @@ Display::Display()
 void Display::setup(Color bgColor, I2CBus *i2c)
 {
   // Initial setup
-  myGLCD->begin();
+  myGLCD->init();
+  //myGLCD->setDriver(drv, freq);
+  //myGLCD->setPins(LILYPI_TFT_MOSI, LILYPI_TFT_MISO, LILYPI_TFT_SCLK, LILYPI_TFT_CS, LILYPI_TFT_DC);
+  myGLCD->setRotation(2);
   setFontSize(FontSize::SMALL);
   currentBackColor = bgColor;
   currentColor = Color::White;
@@ -136,7 +143,7 @@ void Display::fillRoundRectangle(int width, int height)
 
 void Display::fillArc(int oradius, int iradius, float start, float end)
 {
-  myGLCD->fillArc(x,y,oradius,iradius,start,end,RGB565(currentColor.red, currentColor.green, currentColor.blue));
+  myGLCD->drawSmoothArc(x,y,oradius,iradius,start,end,RGB565(currentColor.red, currentColor.green, currentColor.blue),true);
 }
 
 void Display::drawRoundRectangle(int width, int height)
@@ -155,16 +162,16 @@ void Display::setFontSize(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      //myGLCD->setTextSize(4); // 18x24
-      myGLCD->setFont(u8g2_font_logisoso24_tf);
+      myGLCD->setTextSize(4); // 18x24
+      //myGLCD->setFont(u8g2_font_logisoso24_tf);
       break;
     case FontSize::MEDIUM :
-      //myGLCD->setTextSize(3); // 12x16
-      myGLCD->setFont( u8g2_font_inr16_mf );
+      myGLCD->setTextSize(3); // 12x16
+      //myGLCD->setFont( u8g2_font_inr16_mf );
       break;
     case FontSize::SMALL :
-      //myGLCD->setTextSize(2); // 8x12
-      myGLCD->setFont(u8g2_font_crox2c_mf);
+      myGLCD->setTextSize(2); // 8x12
+      //myGLCD->setFont(u8g2_font_crox2c_mf);
       break;  // 1 = 6x8
   }
 }
