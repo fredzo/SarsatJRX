@@ -159,15 +159,18 @@ void Display::setFontSize(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      myGLCD->setTextSize(3); // 18x24
+      myGLCD->setTextFont(4); // 18x24
+      myGLCD->setTextSize(1);
       //myGLCD->setFont(u8g2_font_logisoso24_tf);
       break;
     case FontSize::MEDIUM :
-      myGLCD->setTextSize(2); // 12x16
+      myGLCD->setTextFont(2); // 12x16
+      myGLCD->setTextSize(2);
       //myGLCD->setFont( u8g2_font_inr16_mf );
       break;
     case FontSize::SMALL :
-      myGLCD->setTextSize(1); // 8x12
+      myGLCD->setTextFont(2); // 8x12
+      myGLCD->setTextSize(1);
       //myGLCD->setFont(u8g2_font_crox2c_mf);
       break;  // 1 = 6x8
   }
@@ -221,7 +224,7 @@ void Display::println(String s)
     displayBuffer.replace("°","\xB0");
 
     // u8g2 fonts are printend with bottom left position instead of top left...
-    setCursor(x,y+getFontHeight(fontSize));
+    // setCursor(x,y+getFontHeight(fontSize));
     // Actually display the string
     myGLCD->println(displayBuffer);
     // Restpre original position
@@ -401,8 +404,9 @@ void Display::drawButton(Button button)
   Color color = *colors.background;
   myGLCD->fillRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(color.red, color.green, color.blue));
   color = *colors.foreground;
-  myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+button.getHeight()-((button.getHeight()-getFontHeight(buttonFontSize))/2));
-  //myGLCD->println(button.caption);
+  //myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+button.getHeight()-((button.getHeight()-getFontHeight(buttonFontSize))/2));
+  myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+((button.getHeight()-getFontHeight(buttonFontSize))/2));
+  myGLCD->println(button.caption);
   color = *colors.border;
   myGLCD->drawRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(color.red, color.green, color.blue));
   // Restore text colors
