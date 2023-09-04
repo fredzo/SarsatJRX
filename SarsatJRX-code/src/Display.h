@@ -11,7 +11,7 @@
 #define BUTTON_WIDTH  100
 #define BUTTON_HEIGHT 50
 #define SMALL_BUTTON_WIDTH  80
-#define SMALL_BUTTON_HEIGHT 50
+#define SMALL_BUTTON_HEIGHT 45
 
 #define LED_RADIUS 8
 
@@ -55,6 +55,7 @@ class Display
             LedColor color;
             Led(int x,int y,LedColor color) : x(x), y(y), color(color) {}
         };
+        enum class TouchType {NONE,PRESS,HOLD,RELEASE};
         Display();
         void setup(Color bgColor, I2CBus *i2c);
         void clearDisplay(bool noHeader, bool noFooter);
@@ -83,7 +84,7 @@ class Display
         void print(String s);
         void print(long value);
         void printHex(byte value);
-        bool touchAvailable();
+        TouchType touchAvailable();
         int getTouchX();
         int getTouchY();
         int getWidth();
@@ -108,6 +109,8 @@ class Display
         Color currentTextColor = Color::White;
         Color currentTextBackColor = Color::Black;
         int touchX = 0, touchY = 0;
+        TouchType touchType = TouchType::NONE;
+        unsigned long lastTouchReadTime = 0;
         FontSize fontSize = FontSize::SMALL;
         class Colors {
             public:

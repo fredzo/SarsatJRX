@@ -4,6 +4,7 @@
 #include <TFT_eSPI.h>
 #include <gt911.h>
 #include <ledc.h>
+#include <Free_Fonts.h>
 
 
 
@@ -140,7 +141,7 @@ void Display::fillRoundRectangle(int width, int height)
 
 void Display::fillArc(int oradius, int iradius, float start, float end)
 {
-  myGLCD->drawSmoothArc(x,y,oradius,iradius,start,end,RGB565(currentColor.red, currentColor.green, currentColor.blue),true);
+  myGLCD->drawArc(x,y,oradius,iradius,start,end,RGB565(currentColor.red, currentColor.green, currentColor.blue),RGB565(currentBackColor.red, currentBackColor.green, currentBackColor.blue),true);
 }
 
 void Display::drawRoundRectangle(int width, int height)
@@ -159,18 +160,16 @@ void Display::setFontSize(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      myGLCD->setTextFont(4); // 18x24
-      myGLCD->setTextSize(1);
+      myGLCD->setFreeFont(FSSB12); // 18x24
       //myGLCD->setFont(u8g2_font_logisoso24_tf);
       break;
     case FontSize::MEDIUM :
-      myGLCD->setTextFont(2); // 12x16
-      myGLCD->setTextSize(2);
+      myGLCD->setFreeFont(FSSB9); // 12x16
       //myGLCD->setFont( u8g2_font_inr16_mf );
       break;
     case FontSize::SMALL :
-      myGLCD->setTextFont(2); // 8x12
-      myGLCD->setTextSize(1);
+      //myGLCD->setTextFont(2); // 8x12
+      myGLCD->setFreeFont(FM9);
       //myGLCD->setFont(u8g2_font_crox2c_mf);
       break;  // 1 = 6x8
   }
@@ -181,13 +180,12 @@ int Display::getFontWidth(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      return 18; // 4*6
+      return 14; // 4*6
     case FontSize::MEDIUM :
-      return 12; // 3*6
+      return 14; // 3*6
     case FontSize::SMALL :
-      return 8; // 2*6
+      return 7; // 2*6
   }
-  return 18;
 }
 
 int Display::getFontHeight(FontSize fontSize)
@@ -195,13 +193,12 @@ int Display::getFontHeight(FontSize fontSize)
   switch(fontSize)
   {
     case FontSize::LARGE :
-      return 24; // 4*8
+      return 16; // 4*8
     case FontSize::MEDIUM :
-      return 16; // 3*8
+      return 9; // 3*8
     case FontSize::SMALL :
-      return 10; // 2*8
+      return 9; // 2*8
   }
-  return 24;
 }
 
 void Display::setCursor(int x, int y)
@@ -221,12 +218,13 @@ void Display::println(String s)
 {   
     displayBuffer+=s;
     // Font adaptation for ° sign
-    displayBuffer.replace("°","\xB0");
+    //displayBuffer.replace("°","\xB0");
+    displayBuffer.replace("°","'");
 
     // u8g2 fonts are printend with bottom left position instead of top left...
-    // setCursor(x,y+getFontHeight(fontSize));
+    //setCursor(x,y+getFontHeight(fontSize));
     // Actually display the string
-    myGLCD->println(displayBuffer);
+    myGLCD->drawString(displayBuffer,x,y);
     // Restpre original position
     setCursor(x,y);
     displayBuffer = "";
@@ -280,8 +278,16 @@ int Display::getHeight()
   return DISPLAY_HEIGHT;
 }
 
-boolean Display::touchAvailable()
+#define FOOTER_READ_PERIOD 50
+
+Display::TouchType Display::touchAvailable()
 {
+  unsigned long now = millis();
+  if((now - lastTouchReadTime) < FOOTER_READ_PERIOD)
+  {
+    return touchType;
+  }
+  lastTouchReadTime = now;
   uint16_t x = 0,y = 0;
   if (touch->scanPoint() > 0)
   {
@@ -289,11 +295,31 @@ boolean Display::touchAvailable()
     // Handle rotation (cf. TTGO.h l. 299)
     touchX = DISPLAY_WIDTH - y;
     touchY = x;
-    return true;
+    if(touchType == TouchType::NONE)
+    {
+      touchType = TouchType::PRESS;
+      Serial.println("Press");
+    }
+    else
+    {
+      touchType = TouchType::HOLD;
+      Serial.println("Hold");
+    }
+    return touchType;
   }
   else
   {
-    return false;
+    if(touchType == TouchType::PRESS || touchType == TouchType::HOLD)
+    {
+      touchType = TouchType::RELEASE;
+      Serial.println("Release");
+    }
+    else if(touchType != TouchType::NONE)
+    {
+      touchType = TouchType::NONE;
+      Serial.println("NONE");
+    }
+    return touchType;
   }
 }
 
@@ -398,14 +424,14 @@ void Display::drawButton(Button button)
   Color backupTextBackColor = currentTextBackColor;
   // Store font size
   FontSize backupFontSize = fontSize;
-  FontSize buttonFontSize = (button.style == ButtonStyle::SMALL) ? FontSize::MEDIUM : FontSize::SMALL;
+  FontSize buttonFontSize = (button.style == ButtonStyle::SMALL) ? FontSize::LARGE : FontSize::MEDIUM;
   setFontSize(buttonFontSize);
   setTextColors(*colors.foreground,*colors.background);
   Color color = *colors.background;
   myGLCD->fillRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(color.red, color.green, color.blue));
   color = *colors.foreground;
-  //myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+button.getHeight()-((button.getHeight()-getFontHeight(buttonFontSize))/2));
-  myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+((button.getHeight()-getFontHeight(buttonFontSize))/2));
+  myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+button.getHeight()-((button.getHeight()-getFontHeight(buttonFontSize))/2));
+  //myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+((button.getHeight()-getFontHeight(buttonFontSize))/2));
   myGLCD->println(button.caption);
   color = *colors.border;
   myGLCD->drawRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(color.red, color.green, color.blue));

@@ -10,8 +10,8 @@ uint16_t adc_vref = 1100;
  * @return VCC value
  */
 float getPowerVccValue() {
-        uint16_t v = analogRead(ADC_PIN);
-        return  ((float)v / 4095.0) * 2.0 * 3.3 * (adc_vref / 1000.0);
+    uint16_t v = analogRead(ADC_PIN);
+    return  ((float)v / 4095.0) * 2.0 * 3.3 * (adc_vref / 1000.0);
 }
 
 /**

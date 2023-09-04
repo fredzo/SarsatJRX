@@ -201,6 +201,7 @@ uint8_t GT9xx_Class::scanPoint()
     if (point == 0) {
         return 0;
     }
+    //Serial.printf("Read OK scanpoint:%02x-%02x\r\n", buffer[0], buffer[1]);
 
     data[0].x = ((uint16_t)buffer[3] << 8) + buffer[2];
     data[0].y = ((uint16_t)buffer[5] << 8) + buffer[4];

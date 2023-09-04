@@ -41,7 +41,7 @@
 // Header
 #define HEADER_HEIGHT     30
 #define HEADER_TEXT       F("- SarsatJRX -")
-#define HEADER_BOTTOM     HEADER_HEIGHT+8
+#define HEADER_BOTTOM     HEADER_HEIGHT+4
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
 #define HEADER_PAGES_X    4
 #define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
@@ -63,27 +63,27 @@ Display::Led ledInFrame =       Display::Led(LED_SIG_IN_FRAME_X,LED_SIG_IN_FRAME
 Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y,Display::LedColor::Blue);
 // Power
 #define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
-#define HEADER_POWER_X    LED_SIG_1_X-60
+#define HEADER_POWER_X    LED_SIG_1_X-70
 #define HEADER_POWER_Y    (HEADER_HEIGHT-12)/2
 
 // Footer
 #define FOOTER_LABEL_X      DISPLAY_WIDTH/2
-#define FOOTER_LABEL_Y      DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT+18
+#define FOOTER_LABEL_Y      DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT+16
 #define FOOTER_WAIT_LABEL   F("Waiting for the wave...")
 #define FOOTER_FRAME_LABEL  F("Frame received !")
-#define FOOTER_SPINNER_X    SMALL_BUTTON_WIDTH+10
-#define FOOTER_SPINNER_Y    DISPLAY_HEIGHT-(SMALL_BUTTON_HEIGHT/2)
 #define FOOTER_RADIUS_MAX   SMALL_BUTTON_HEIGHT/2-5
 #define FOOTER_RADIUS_MIN   FOOTER_RADIUS_MAX-4
+#define FOOTER_SPINNER_X    SMALL_BUTTON_WIDTH+FOOTER_RADIUS_MAX+5
+#define FOOTER_SPINNER_Y    DISPLAY_HEIGHT-(SMALL_BUTTON_HEIGHT/2)
 
 // Beacon info
 #define LINE_HEIGHT         16
 #define FRAME_MODE_LABEL    F("Frame mode :")
-#define FRAME_MODE_WIDTH    120
+#define FRAME_MODE_WIDTH    140
 #define INFO_LABEL          F("Info :")
 #define INFO_LABEL_WIDTH    80
 #define SERIAL_LABEL        F("Serial # :")
-#define SERIAL_LABEL_WIDTH  100
+#define SERIAL_LABEL_WIDTH  120
 #define MAIN_LABEL          F("Main loc. device :")
 #define MAIN_LABEL_WIDTH    200
 #define AUX_LABEL           F("Aux. loc. device :")
@@ -104,7 +104,7 @@ Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y
 #define MAPS_BUTTON_CAPTION "MAPS"
 Display::Button mapsButton = Display::Button(MAPS_BUTTON_X,MAPS_BUTTON_Y,MAPS_BUTTON_CAPTION,Display::ButtonStyle::NORMAL);
 #define BEACON_BUTTON_X   MAPS_BUTTON_X
-#define BEACON_BUTTON_Y   HEADER_BOTTOM+BUTTON_HEIGHT+4
+#define BEACON_BUTTON_Y   HEADER_BOTTOM+BUTTON_HEIGHT+2
 #define BEACON_BUTTON_CAPTION "BEACON"
 Display::Button beaconButton = Display::Button(BEACON_BUTTON_X,BEACON_BUTTON_Y,BEACON_BUTTON_CAPTION,Display::ButtonStyle::NORMAL);
 // Navigation BUTTONS
@@ -240,7 +240,9 @@ void frameReceivedLedBlink()
 }
 
 // Store last displayed power value
+unsigned long lastPowerDisplayTime;
 float powerValue = 0;
+#define POWER_DISPLAY_PERIOD 2000
 
 void updatePowerValueHeader()
 {  // Power header
@@ -302,13 +304,18 @@ void updateLedHeader(bool force)
 
 void updateHeader()
 { // Check for power value update
-  float newValue = hardware->getVccValue();
-  if(abs(newValue - powerValue) > 0.05)
+  unsigned long now = millis();
+  if(now - lastPowerDisplayTime > POWER_DISPLAY_PERIOD)
   {
-    powerValue = newValue;
-    updatePowerValueHeader();
+    lastPowerDisplayTime = now;
+    float newValue = hardware->getVccValue();
+    if(abs(newValue - powerValue) > 0.01)
+    {
+      powerValue = newValue;
+      updatePowerValueHeader();
+    }
+    updateLedHeader(false);
   }
-  updateLedHeader(false);
 }
 
 void drawHeader()
@@ -322,7 +329,7 @@ void drawHeader()
   display->drawRoundRectangle(display->getWidth()-1,HEADER_HEIGHT);
   // Header text
   display->setTextColors(Display::Color::LightBlue,Display::Color::Grey);
-  display->setCursor(DISPLAY_WIDTH/2, 3);
+  display->setCursor(DISPLAY_WIDTH/2, (HEADER_HEIGHT-display->getFontHeight(Display::FontSize::LARGE))/2);
   display->setFontSize(Display::FontSize::LARGE);
   display->centerText(HEADER_TEXT);
   display->println(HEADER_TEXT);
@@ -376,7 +383,7 @@ void showWaiting(bool show)
     display->setTextColors(show ? Display::Color::LightBlue : Display::Color::DarkGrey,Display::Color::DarkGrey);
     display->setFontSize(Display::FontSize::LARGE);
     // Center not working with large font (not fixed with)
-    display->setCursor(SMALL_BUTTON_WIDTH*2, FOOTER_LABEL_Y);
+    display->setCursor(SMALL_BUTTON_WIDTH*1.6, FOOTER_LABEL_Y);
     //display->centerText(FOOTER_WAIT_LABEL);
     display->println(FOOTER_WAIT_LABEL);
     footerShowingWait = show;
@@ -637,6 +644,7 @@ void updateDisplay()
   display->setTextColor(Display::Color::LightGreen);
   display->println(DATA_LABEL);
   // Append BCH values before frame data
+  display->setFontSize(Display::FontSize::MEDIUM);
   display->setTextColor(beacon->isBch1Valid() ? Display::Color::Green : Display::Color::Red);
   display->setCursor(DATA_LABEL_WIDTH, currentY);
   display->println(beacon->isBch1Valid() ? BCH1_OK_LABEL : BCH1_KO_LABEL);
@@ -646,6 +654,7 @@ void updateDisplay()
     display->setCursor(DATA_LABEL_WIDTH+BCH_LABEL_WIDTH, currentY);
     display->println(beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
   }
+  display->setFontSize(Display::FontSize::SMALL);
 #ifdef SERIAL_OUT 
   if(!beacon->isBch1Valid())
   {
@@ -738,7 +747,7 @@ void setup()
 void loop()
 {
   //Serial.print(".");
-  if(display->touchAvailable())
+  if(display->touchAvailable() == Display::TouchType::PRESS)
   {
     int x = display->getTouchX();
     int y = display->getTouchY();
