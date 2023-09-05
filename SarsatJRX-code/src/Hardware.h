@@ -19,6 +19,8 @@ public:
 
     Display* getDisplay();
 
+    Rtc* getRtc();
+
     /**
      * @brief Returns actual VCC value
      * 
@@ -44,6 +46,7 @@ private:
 
     I2CBus *i2c = nullptr;
     Display *display = nullptr;
+    Rtc *rtc = nullptr;
 
     static Hardware *hardware;
 

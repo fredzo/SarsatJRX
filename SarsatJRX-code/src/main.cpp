@@ -45,6 +45,8 @@
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
 #define HEADER_PAGES_X    4
 #define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
+#define HEADER_TIME_X     50
+#define HEADER_TIME_Y     HEADER_PAGES_Y
 #define HEADER_BUTTON_LEFT    DISPLAY_WIDTH/3
 #define HEADER_BUTTON_RIGHT   (2*DISPLAY_WIDTH)/3
 #define HEADER_BUTTON_BOTTOM  2*HEADER_HEIGHT
@@ -255,6 +257,15 @@ void updatePowerValueHeader()
   sprintf(buffer,HEADER_POWER_TEMPLATE,powerString);
   display->println(buffer);
 }
+
+void updateTimeHeader()
+{  // Power header
+  display->setTextColors(Display::Color::LightGreen,Display::Color::Grey);
+  display->setFontSize(Display::FontSize::SMALL);
+  display->setCursor(HEADER_TIME_X, HEADER_TIME_Y);
+  display->println(hardware->getRtc()->getDateString());
+}
+
 void updateLedHeader(bool force)
 { // Led header
   bool newInputState = getInputState();
@@ -303,7 +314,12 @@ void updateLedHeader(bool force)
 }
 
 void updateHeader()
-{ // Check for power value update
+{ // Check for time update
+  if(hardware->getRtc()->hasChanged())
+  {
+    updateTimeHeader();
+  }
+  // Check for power value update
   unsigned long now = millis();
   if(now - lastPowerDisplayTime > POWER_DISPLAY_PERIOD)
   {
@@ -314,8 +330,8 @@ void updateHeader()
       powerValue = newValue;
       updatePowerValueHeader();
     }
-    updateLedHeader(false);
   }
+  updateLedHeader(false);
 }
 
 void drawHeader()
@@ -333,6 +349,8 @@ void drawHeader()
   display->setFontSize(Display::FontSize::LARGE);
   display->centerText(HEADER_TEXT);
   display->println(HEADER_TEXT);
+  // Time
+  updateTimeHeader();
   // Draw leds
   updateLedHeader(true);
 }

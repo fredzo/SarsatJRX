@@ -6,7 +6,8 @@ Hardware *Hardware::hardware = nullptr;
 void Hardware::init()
 {
     i2c = new I2CBus();
-    rtcInit(i2c);
+    rtc = Rtc::getRtc();
+    rtc->rtcInit(i2c);
     display = new Display();
     display->setup(Display::Color::DarkGrey,i2c);
 }
@@ -14,6 +15,11 @@ void Hardware::init()
 Display* Hardware::getDisplay()
 {
     return display;
+}
+
+Rtc* Hardware::getRtc()
+{
+    return rtc;
 }
 
 /**
