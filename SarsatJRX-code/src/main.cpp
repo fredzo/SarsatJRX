@@ -752,11 +752,11 @@ void setup()
   hardware->init();
   display = hardware->getDisplay();
   display->setHeaderAndFooter(HEADER_HEIGHT,SMALL_BUTTON_HEIGHT);
-  drawHeader();
+  //drawHeader();
   previousButton.enabled = true;
   nextButton.enabled = true;
 
-  readNextSampleFrame();
+  //readNextSampleFrame();
 #ifdef SERIAL_OUT 
   Serial.println("### Boot complete !");
 #endif
@@ -764,6 +764,9 @@ void setup()
 
 void loop()
 {
+  display->handleTimer();
+  delay(5);
+  /*
   //Serial.print(".");
   if(display->touchAvailable() == Display::TouchType::PRESS)
   {
@@ -887,6 +890,6 @@ void loop()
     updateFooter(false);
   }
   updateLeds();
-  updateHeader();
+  updateHeader();*/
 }
 

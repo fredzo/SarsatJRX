@@ -1,5 +1,5 @@
 #include <Display.h>
-//#include <lvgl.h>
+#include <lvgl.h>
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include <gt911.h>
@@ -29,20 +29,38 @@ GT9xx_Class *touch = new GT9xx_Class();
 
 // For LVGL ///////////////////////////////////////////////////////////////////////
 
-/* Display flushing */
-/*void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
+static lv_disp_draw_buf_t draw_buf;
+static lv_color_t buf[ DISPLAY_WIDTH * DISPLAY_HEIGHT / 10 ];
+
+static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 {
-  uint32_t w = (area->x2 - area->x1 + 1);
-  uint32_t h = (area->y2 - area->y1 + 1);
+    uint32_t w = ( area->x2 - area->x1 + 1 );
+    uint32_t h = ( area->y2 - area->y1 + 1 );
 
-#if (LV_COLOR_16_SWAP != 0)
-  gfx->draw16bitBeRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
-#else
-  myGLCD->draw16bitRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
-#endif
+    myGLCD->setAddrWindow( area->x1, area->y1, w, h );
+    myGLCD->pushColors( ( uint16_t * )&color_p->full, w * h, true );
 
-  lv_disp_flush_ready(disp);
-}*/
+    lv_disp_flush_ready(disp_drv);
+    /*uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) ;
+    myGLCD->setAddrWindow(area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1));
+    myGLCD->pushColors(( uint16_t *)color_p, size, false);
+    lv_disp_flush_ready(disp_drv);*/
+}
+
+static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
+{
+    //data->state = myGLCD->getTouch(data->point.x, data->point.y) ?  LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+    bool touched = (touch->scanPoint() > 0);
+    data->state = touched ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+    if(touched)
+    {
+      uint16_t x = 0,y = 0;
+      touch->getPoint(x,y,0);
+      data->point.x = x;
+      data->point.y = y;
+    }
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -55,6 +73,8 @@ Display::Display()
 
 void Display::setup(Color bgColor, I2CBus *i2c)
 {
+  // Lvgl init
+  lv_init();
   // Initial setup
   myGLCD->init();
   myGLCD->setRotation(3);
@@ -75,6 +95,35 @@ void Display::setup(Color bgColor, I2CBus *i2c)
   // Init backlight
   bl->begin();
   bl->on();
+  
+  lv_disp_draw_buf_init( &draw_buf, buf, NULL, DISPLAY_WIDTH * DISPLAY_HEIGHT / 10 );
+
+  /*Initialize the display*/
+  static lv_disp_drv_t disp_drv;
+  lv_disp_drv_init( &disp_drv );
+  disp_drv.hor_res = DISPLAY_WIDTH;
+  disp_drv.ver_res = DISPLAY_HEIGHT;
+  disp_drv.flush_cb = disp_flush;
+  disp_drv.draw_buf = &draw_buf;
+  lv_disp_drv_register(&disp_drv);
+
+  /*Initialize the (dummy) input device driver*/
+  static lv_indev_drv_t indev_drv;
+  lv_indev_drv_init(&indev_drv);
+  indev_drv.type = LV_INDEV_TYPE_POINTER;
+  indev_drv.read_cb = touchpad_read;
+  lv_indev_drv_register(&indev_drv);
+
+  /* Create simple label */
+  lv_obj_t *label = lv_label_create( lv_scr_act() );
+  lv_label_set_text( label, "Hello Ardino and LVGL!");
+  lv_obj_align( label, LV_ALIGN_CENTER, 0, 0 );
+
+}
+
+void Display::handleTimer()
+{
+    lv_timer_handler(); /* let the GUI do its work */
 }
 
 
