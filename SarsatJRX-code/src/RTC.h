@@ -33,13 +33,13 @@ class Rtc
         Date getDate();
         String getDateString();
         String getTimeString();
-        bool hasChanged() {return changed;};
+        bool hasChanged() { return changed;};
 
     private :
         I2CBus *rtcI2c = nullptr; 
         PCF8563_Class *rtc = nullptr;
         void rtcRegisterInterrupt();
-        bool changed;
+        bool changed = true;
         Date currentDate;
 
         Rtc()

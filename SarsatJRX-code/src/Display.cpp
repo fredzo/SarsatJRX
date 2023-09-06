@@ -298,12 +298,12 @@ Display::TouchType Display::touchAvailable()
     if(touchType == TouchType::NONE)
     {
       touchType = TouchType::PRESS;
-      Serial.println("Press");
+      //Serial.println("Press");
     }
     else
     {
       touchType = TouchType::HOLD;
-      Serial.println("Hold");
+      //Serial.println("Hold");
     }
     return touchType;
   }
@@ -312,12 +312,12 @@ Display::TouchType Display::touchAvailable()
     if(touchType == TouchType::PRESS || touchType == TouchType::HOLD)
     {
       touchType = TouchType::RELEASE;
-      Serial.println("Release");
+      //Serial.println("Release");
     }
     else if(touchType != TouchType::NONE)
     {
       touchType = TouchType::NONE;
-      Serial.println("NONE");
+      //Serial.println("NONE");
     }
     return touchType;
   }

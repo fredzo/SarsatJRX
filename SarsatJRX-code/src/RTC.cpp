@@ -8,6 +8,9 @@ void Rtc::rtcInit(I2CBus* i2c)
 {
     rtcI2c = i2c;
     rtc = new PCF8563_Class(*i2c);
+    rtcRegisterInterrupt();
+    rtc->enableTimer();
+    rtc->setTimer(1 /* 1 tick */ ,0b10 /* 1Hz frequecy for timer source */,true /* enable interrupt timer */);
 }
 
 Rtc::Date Rtc::getDate()
@@ -30,7 +33,7 @@ String Rtc::getDateString()
 {
     Date date = getDate();
     char buffer[16];
-    sprintf(buffer,"%2d/%2d/%4d", date.day,date.month,date.year);
+    sprintf(buffer,"%02d/%02d/%04d", date.day,date.month,date.year);
     return String(buffer);
 }
 
@@ -38,7 +41,7 @@ String Rtc::getTimeString()
 {
     Date date = getDate();
     char buffer[16];
-    sprintf(buffer,"%2d:%2d:%2d", date.hour,date.minute,date.second);
+    sprintf(buffer,"%02d:%02d:%02d", date.hour,date.minute,date.second);
     return String(buffer);
 }
 
@@ -49,8 +52,7 @@ void rtcInterruptCallack(void)
 
 void Rtc::rtcRegisterInterrupt()
 {
-    pinMode(RTC_INT_PIN, INPUT_PULLUP); //need change to rtc_pin
+    pinMode(RTC_INT_PIN, INPUT);
     attachInterrupt(RTC_INT_PIN, rtcInterruptCallack, FALLING);
 }
 
-// TODO

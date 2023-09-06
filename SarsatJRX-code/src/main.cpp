@@ -33,7 +33,7 @@
 #include <Decoder.h>
 
 // Enable RAM debuging
-#define DEBUG_RAM
+// #define DEBUG_RAM
 
 // Enable serial out
 #define SERIAL_OUT
@@ -45,7 +45,7 @@
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
 #define HEADER_PAGES_X    4
 #define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
-#define HEADER_TIME_X     50
+#define HEADER_TIME_X     56
 #define HEADER_TIME_Y     HEADER_PAGES_Y
 #define HEADER_BUTTON_LEFT    DISPLAY_WIDTH/3
 #define HEADER_BUTTON_RIGHT   (2*DISPLAY_WIDTH)/3
@@ -263,7 +263,7 @@ void updateTimeHeader()
   display->setTextColors(Display::Color::LightGreen,Display::Color::Grey);
   display->setFontSize(Display::FontSize::SMALL);
   display->setCursor(HEADER_TIME_X, HEADER_TIME_Y);
-  display->println(hardware->getRtc()->getDateString());
+  display->println(hardware->getRtc()->getTimeString());
 }
 
 void updateLedHeader(bool force)
@@ -771,8 +771,8 @@ void loop()
     int y = display->getTouchY();
     if(x>=0 && y>=0)
     {
-      Serial.println(x);
-      Serial.println(y);
+      //Serial.println(x);
+      //Serial.println(y);
       if(mapsButton.contains(x,y))
       {
         if(mapsButton.enabled)
