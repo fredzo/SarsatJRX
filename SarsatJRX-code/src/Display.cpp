@@ -41,23 +41,23 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
     myGLCD->pushColors( ( uint16_t * )&color_p->full, w * h, true );
 
     lv_disp_flush_ready(disp_drv);
-    /*uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) ;
-    myGLCD->setAddrWindow(area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1));
-    myGLCD->pushColors(( uint16_t *)color_p, size, false);
-    lv_disp_flush_ready(disp_drv);*/
 }
 
-static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
+void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
 {
-    //data->state = myGLCD->getTouch(data->point.x, data->point.y) ?  LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
     bool touched = (touch->scanPoint() > 0);
     data->state = touched ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
     if(touched)
     {
       uint16_t x = 0,y = 0;
       touch->getPoint(x,y,0);
-      data->point.x = x;
-      data->point.y = y;
+      // Handle rotation (cf. TTGO.h l. 299)
+      data->point.x = DISPLAY_WIDTH - y;
+      data->point.y = x;
+      /*Serial.print( "Data x " );
+      Serial.println( x );
+      Serial.print( "Data y " );
+      Serial.println( y );*/
     }
 }
 
@@ -113,12 +113,6 @@ void Display::setup(Color bgColor, I2CBus *i2c)
   indev_drv.type = LV_INDEV_TYPE_POINTER;
   indev_drv.read_cb = touchpad_read;
   lv_indev_drv_register(&indev_drv);
-
-  /* Create simple label */
-  lv_obj_t *label = lv_label_create( lv_scr_act() );
-  lv_label_set_text( label, "Hello Ardino and LVGL!");
-  lv_obj_align( label, LV_ALIGN_CENTER, 0, 0 );
-
 }
 
 void Display::handleTimer()

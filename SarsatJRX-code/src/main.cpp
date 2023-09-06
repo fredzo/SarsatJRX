@@ -31,6 +31,7 @@
 #include <Util.h>
 #include <Samples.h>
 #include <Decoder.h>
+#include <Ui.h>
 
 // Enable RAM debuging
 // #define DEBUG_RAM
@@ -756,6 +757,9 @@ void setup()
   previousButton.enabled = true;
   nextButton.enabled = true;
 
+  // Build the UI
+  createUi();
+
   //readNextSampleFrame();
 #ifdef SERIAL_OUT 
   Serial.println("### Boot complete !");
@@ -766,6 +770,16 @@ void loop()
 {
   display->handleTimer();
   delay(5);
+/*  if(display->touchAvailable() == Display::TouchType::PRESS)
+  {
+    int x = display->getTouchX();
+    int y = display->getTouchY();
+    if(x>=0 && y>=0)
+    {
+      Serial.println(x);
+      Serial.println(y);
+    }
+  }*/
   /*
   //Serial.print(".");
   if(display->touchAvailable() == Display::TouchType::PRESS)
