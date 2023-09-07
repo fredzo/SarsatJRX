@@ -33,9 +33,6 @@
 #include <Decoder.h>
 #include <Ui.h>
 
-// Enable RAM debuging
-// #define DEBUG_RAM
-
 // Enable serial out
 #define SERIAL_OUT
 
@@ -52,18 +49,18 @@
 #define HEADER_BUTTON_RIGHT   (2*DISPLAY_WIDTH)/3
 #define HEADER_BUTTON_BOTTOM  2*HEADER_HEIGHT
 // Header LEDS
+bool ledSig1State = false;
+bool ledSig2State = false;
+bool ledInFrameState = false;
+bool ledFrameReceivedState = false;
 #define LED_SIG_1_X       DISPLAY_WIDTH-(4*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_1_Y       HEADER_HEIGHT/2
-Display::Led ledSig1 =    Display::Led(LED_SIG_1_X,LED_SIG_1_Y,Display::LedColor::Green);
 #define LED_SIG_2_X       DISPLAY_WIDTH-(3*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_2_Y       LED_SIG_1_Y
-Display::Led ledSig2 =    Display::Led(LED_SIG_2_X,LED_SIG_2_Y,Display::LedColor::Green);
 #define LED_SIG_IN_FRAME_X      DISPLAY_WIDTH-(2*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_IN_FRAME_Y      LED_SIG_1_Y
-Display::Led ledInFrame =       Display::Led(LED_SIG_IN_FRAME_X,LED_SIG_IN_FRAME_Y,Display::LedColor::Red);
 #define LED_SIG_FRAME_R_X       DISPLAY_WIDTH-(1*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_FRAME_R_Y       LED_SIG_1_Y
-Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y,Display::LedColor::Blue);
 // Power
 #define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
 #define HEADER_POWER_X    LED_SIG_1_X-70
@@ -72,8 +69,8 @@ Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y
 // Footer
 #define FOOTER_LABEL_X      DISPLAY_WIDTH/2
 #define FOOTER_LABEL_Y      DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT+16
-#define FOOTER_WAIT_LABEL   F("Waiting for the wave...")
-#define FOOTER_FRAME_LABEL  F("Frame received !")
+#define FOOTER_WAIT_LABEL   "Waiting for the wave..."
+#define FOOTER_FRAME_LABEL  "Frame received !"
 #define FOOTER_RADIUS_MAX   SMALL_BUTTON_HEIGHT/2-5
 #define FOOTER_RADIUS_MIN   FOOTER_RADIUS_MAX-4
 #define FOOTER_SPINNER_X    SMALL_BUTTON_WIDTH+FOOTER_RADIUS_MAX+5
@@ -171,12 +168,6 @@ void drawQrCode(bool isMaps)
     display->drawQrCode(&qrCode,MODULE_SIZE);
 }
 
-#ifdef DEBUG_RAM
-uint32_t freeRam() {
-  return ESP.getFreeHeap();
-}
-#endif
-
 void readBeacon()
 {
 #ifdef DEBUG_RAM
@@ -216,7 +207,7 @@ void readBeacon()
 }
 
 // Leds management (header + physical led)
-#define LED_BLINK_TIME 100 // 100 ms
+#define LED_BLINK_TIME 500 // 500 ms
 unsigned long ledFrameReceivedStartBlinkTime;
 unsigned long ledSig1StartBlinkTime;
 unsigned long ledSig2StartBlinkTime;
@@ -249,22 +240,16 @@ float powerValue = 0;
 
 void updatePowerValueHeader()
 {  // Power header
-  display->setTextColors(Display::Color::LightGreen,Display::Color::Grey);
-  display->setFontSize(Display::FontSize::SMALL);
-  display->setCursor(HEADER_POWER_X, HEADER_POWER_Y);
   char powerString[8];
   hardware->getVccStringValue(powerString);
   char buffer[8];
   sprintf(buffer,HEADER_POWER_TEMPLATE,powerString);
-  display->println(buffer);
+  uiSetPower(buffer);
 }
 
 void updateTimeHeader()
-{  // Power header
-  display->setTextColors(Display::Color::LightGreen,Display::Color::Grey);
-  display->setFontSize(Display::FontSize::SMALL);
-  display->setCursor(HEADER_TIME_X, HEADER_TIME_Y);
-  display->println(hardware->getRtc()->getTimeString());
+{  // Time header
+  uiSetTime(hardware->getRtc()->getTimeString().c_str());
 }
 
 void updateLedHeader(bool force)
@@ -276,42 +261,42 @@ void updateLedHeader(bool force)
   bool drawledFrameReceived = force;
   unsigned long now = millis();
   if(newInputState != lastInputState)
-  { // Flip ledSig1 and ledSig2 according to decoder input stage state
+  { // Flip headerLedSig1 and headerLedSig2 according to decoder input stage state
     lastInputState = newInputState;
-    ledSig1.on = newInputState;
-    ledSig2.on = !newInputState;
+    ledSig1State = newInputState;
+    ledSig2State = !newInputState;
     drawledSig1 = true;
     drawledSig2 = true;
-    if(ledSig1.on) ledSig1StartBlinkTime = now;
-    if(ledSig2.on) ledSig2StartBlinkTime = now;
+    if(ledSig1State) ledSig1StartBlinkTime = now;
+    if(ledSig2State) ledSig2StartBlinkTime = now;
   }
   else
   { // Check if we have to turn decoder input leds off
-    if(ledSig1.on && ((now - ledSig1StartBlinkTime) > LED_BLINK_TIME))
+    if(ledSig1State && ((now - ledSig1StartBlinkTime) > LED_BLINK_TIME))
     {
-      ledSig1.on = false;
+      ledSig1State = false;
       drawledSig1 = true;
     }
-    if(ledSig2.on && ((now - ledSig2StartBlinkTime) > LED_BLINK_TIME))
+    if(ledSig2State && ((now - ledSig2StartBlinkTime) > LED_BLINK_TIME))
     {
-      ledSig2.on = false;
+      ledSig2State = false;
       drawledSig2 = true;
     }
   }
-  if(ledInFrame.on != isFrameStarted())
+  if(ledInFrameState != isFrameStarted())
   { // Check if frame started state changed
-    ledInFrame.on = isFrameStarted();
+    ledInFrameState = isFrameStarted();
     drawledInFrame = true;
   }
-  if(ledFrameReceived.on != ledFrameReceivedOn)
+  if(ledFrameReceivedState != ledFrameReceivedOn)
   { // Check if frame received state changed
-    ledFrameReceived.on = ledFrameReceivedOn;
+    ledFrameReceivedState = ledFrameReceivedOn;
     drawledFrameReceived = true;
   }
-  if(drawledSig1) display->drawLed(ledSig1);
-  if(drawledSig2) display->drawLed(ledSig2);
-  if(drawledInFrame) display->drawLed(ledInFrame);
-  if(drawledFrameReceived) display->drawLed(ledFrameReceived);
+  if(drawledSig1) uiSetLedSig1State(ledSig1State);
+  if(drawledSig2) uiSetLedSig2State(ledSig2State);
+  if(drawledInFrame) uiSetLedInFrameState(ledInFrameState);
+  if(drawledFrameReceived) uiSetLedFrameReceivedState(ledFrameReceivedState);
 }
 
 void updateHeader()
@@ -335,21 +320,8 @@ void updateHeader()
   updateLedHeader(false);
 }
 
-void drawHeader()
+void initHeader()
 {
-  // Header
-  display->setCursor(0, 0);
-  // Draw header background
-  display->setColor(Display::Color::Grey);
-  display->fillRoundRectangle(display->getWidth()-1,HEADER_HEIGHT);
-  display->setColor(Display::Color::Purple);
-  display->drawRoundRectangle(display->getWidth()-1,HEADER_HEIGHT);
-  // Header text
-  display->setTextColors(Display::Color::LightBlue,Display::Color::Grey);
-  display->setCursor(DISPLAY_WIDTH/2, (HEADER_HEIGHT-display->getFontHeight(Display::FontSize::LARGE))/2);
-  display->setFontSize(Display::FontSize::LARGE);
-  display->centerText(HEADER_TEXT);
-  display->println(HEADER_TEXT);
   // Time
   updateTimeHeader();
   // Draw leds
@@ -367,54 +339,18 @@ int spinnerPosition = 0;
 
 void updateSpinner(bool show)
 {
-  if(show)
-  {
-    if(spinnerPosition < 360)
-    {
-      display->setCursor(FOOTER_SPINNER_X,FOOTER_SPINNER_Y);
-      display->setColor(Display::Color::LightBlue);
-      display->fillArc(FOOTER_RADIUS_MIN,FOOTER_RADIUS_MAX,0,spinnerPosition);
-    }
-    else if(spinnerPosition < 360*2)
-    {
-      display->setCursor(FOOTER_SPINNER_X,FOOTER_SPINNER_Y);
-      display->setColor(Display::Color::DarkGrey);
-      display->fillArc(FOOTER_RADIUS_MIN,FOOTER_RADIUS_MAX,0,spinnerPosition-360);
-    }
-    else
-    {
-      spinnerPosition = 0;
-    }
-    spinnerPosition+=4;
-  }
-  else
-  {
-    spinnerPosition = 0;
-    display->setCursor(FOOTER_SPINNER_X,FOOTER_SPINNER_Y);
-    display->setColor(Display::Color::DarkGrey);
-    display->fillArc(FOOTER_RADIUS_MAX,FOOTER_RADIUS_MIN,0,360);
-  }
-  footerShowingSpinner = show;
+  uiSetSpinnerVisible(show);
 }
 
 void showWaiting(bool show)
 {
-    display->setTextColors(show ? Display::Color::LightBlue : Display::Color::DarkGrey,Display::Color::DarkGrey);
-    display->setFontSize(Display::FontSize::LARGE);
-    // Center not working with large font (not fixed with)
-    display->setCursor(SMALL_BUTTON_WIDTH*1.6, FOOTER_LABEL_Y);
-    //display->centerText(FOOTER_WAIT_LABEL);
-    display->println(FOOTER_WAIT_LABEL);
+    uiSetFooter(FOOTER_WAIT_LABEL);
     footerShowingWait = show;
 }
 
 void showFrameReceived(bool show)
 {
-    display->setTextColors(show ? Display::Color::Red : Display::Color::DarkGrey,Display::Color::DarkGrey);
-    display->setFontSize(Display::FontSize::LARGE);
-    display->setCursor(FOOTER_LABEL_X, FOOTER_LABEL_Y);
-    display->centerText(FOOTER_FRAME_LABEL);
-    display->println(FOOTER_FRAME_LABEL);
+    uiSetFooter(FOOTER_FRAME_LABEL);
     footerShowingFrameReceived = show;
 }
 
@@ -753,12 +689,12 @@ void setup()
   hardware->init();
   display = hardware->getDisplay();
   display->setHeaderAndFooter(HEADER_HEIGHT,SMALL_BUTTON_HEIGHT);
-  //drawHeader();
   previousButton.enabled = true;
   nextButton.enabled = true;
 
   // Build the UI
   createUi();
+  initHeader();
 
   //readNextSampleFrame();
 #ifdef SERIAL_OUT 
@@ -768,8 +704,6 @@ void setup()
 
 void loop()
 {
-  display->handleTimer();
-  delay(5);
 /*  if(display->touchAvailable() == Display::TouchType::PRESS)
   {
     int x = display->getTouchX();
@@ -852,6 +786,7 @@ void loop()
       }
     }
   }
+  */
   // If frameParseState > 0, we are reading an frame, if more thant 500ms elapsed (a frame should be 144x2.5ms = 360 ms max)
   bool frameTimeout = (isFrameStarted() && ((millis()-getFrameStartTime()) > 500 ));
   if (isFrameComplete() || frameTimeout)
@@ -893,7 +828,7 @@ void loop()
     {
       frameReceivedLedBlink();
       readBeacon();
-      updateDisplay();
+      //updateDisplay();
     } 
     // Reset frame decoding
     updateFooter(true);
@@ -904,6 +839,8 @@ void loop()
     updateFooter(false);
   }
   updateLeds();
-  updateHeader();*/
+  updateHeader();
+  display->handleTimer();
+  delay(5);
 }
 

@@ -1,14 +1,14 @@
 #include <Util.h>
 #include <lvgl.h>
 #include <Display.h>
-#include <lv_qrcode.h>
+#include <extra/libs/qrcode/lv_qrcode.h>
 
 // Defines
 // Enable serial out
 #define SERIAL_OUT
 
 // Header
-#define HEADER_HEIGHT     60
+#define HEADER_HEIGHT     30
 #define HEADER_TEXT       "- SarsatJRX -"
 #define HEADER_BOTTOM     HEADER_HEIGHT+4
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
@@ -124,11 +124,24 @@ static const lv_font_t * font_medium;
 static const lv_font_t * font_normal;
 static const lv_font_t * font_mono;
 
+lv_obj_t * timeLabel;
+lv_obj_t * powerLabel;
+lv_obj_t * headerledSig2;
+lv_obj_t * ledSig1;
+lv_obj_t * ledSig2;
+lv_obj_t * ledInFrame;
+lv_obj_t * ledFrameReceived;
+lv_obj_t * footerLabel;
+lv_obj_t * spinner;
+
+extern void readNextSampleFrame();
+
 static void event_handler(lv_event_t * e)
 {
     lv_obj_t * obj = lv_event_get_target(e);
     LV_UNUSED(obj);
     Serial.printf("Button %d clicked ! \n",((int)lv_obj_get_index(obj)));
+    readNextSampleFrame();
 }
 
 void createUi()
@@ -142,7 +155,8 @@ void createUi()
 
     lv_style_init(&style_text_mono);
     lv_style_set_text_font(&style_text_mono, font_mono);
-    // lv_style_set_size()
+    lv_style_set_text_align(&style_text_mono, LV_TEXT_ALIGN_CENTER);
+
 
     lv_style_init(&style_title);
     lv_style_set_text_font(&style_title, font_large);
@@ -158,25 +172,45 @@ void createUi()
     lv_style_set_pad_column(&styles_pad_tiny, 1);
 
 
-    lv_obj_t * win = lv_win_create(lv_scr_act(),HEADER_HEIGHT);
     lv_obj_t * btn;
-    btn = lv_win_add_btn(win, LV_SYMBOL_LEFT, 70);
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    // Header
+    lv_obj_t * win = lv_win_create(lv_scr_act(),HEADER_HEIGHT);
+    lv_obj_t * header = lv_win_get_header(win);
+    lv_obj_add_style(header, &styles_pad_tiny, 0);
+    // Time
+    timeLabel = lv_label_create(header);
+    lv_label_set_long_mode(timeLabel, LV_LABEL_LONG_DOT);
+    lv_obj_add_style(timeLabel,&style_text_mono,0);
+    lv_obj_set_size(timeLabel, 80, LV_PCT(100));
 
+    // Title
     lv_obj_t * title = lv_win_add_title(win, HEADER_TEXT);
     lv_obj_add_style(title,&style_title,0);
+    // Power
+    powerLabel = lv_label_create(header);
+    lv_label_set_long_mode(powerLabel, LV_LABEL_LONG_DOT);
+    lv_obj_add_style(powerLabel,&style_text_mono,0);
+    lv_obj_set_size(powerLabel, 60, LV_PCT(100));
     
+    // Leds
+    ledSig1 = lv_led_create(header);
+    lv_led_set_color(ledSig1,lv_palette_main(LV_PALETTE_GREEN));
+    lv_obj_set_size(ledSig1, LED_RADIUS*2, LED_RADIUS*2);
 
+    ledSig2 = lv_led_create(header);
+    lv_led_set_color(ledSig2,lv_palette_main(LV_PALETTE_GREEN));
+    lv_obj_set_size(ledSig2, LED_RADIUS*2, LED_RADIUS*2);
 
-    lv_obj_t * header = title->parent;
-    //lv_obj_add_style(header, &styles_pad_tiny, 0);
+    ledInFrame = lv_led_create(header);
+    lv_led_set_color(ledInFrame,lv_palette_main(LV_PALETTE_ORANGE));
+    lv_obj_set_size(ledInFrame, LED_RADIUS*2, LED_RADIUS*2);
 
-    lv_obj_t * led = lv_led_create(header);
+    ledFrameReceived = lv_led_create(header);
+    lv_led_set_color(ledFrameReceived,lv_palette_main(LV_PALETTE_BLUE));
+    lv_obj_set_size(ledFrameReceived, LED_RADIUS*2, LED_RADIUS*2);
 
+    // Settigns button
     btn = lv_win_add_btn(win, LV_SYMBOL_SETTINGS, 40);
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-
-    btn = lv_win_add_btn(win, LV_SYMBOL_RIGHT, 70);
     lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t * cont = lv_win_get_content(win);  /*Content can be added here*/
@@ -195,14 +229,20 @@ void createUi()
 
     
     // Test QR Code
+#ifdef DEBUG_RAM
+logFreeRam();
+#endif
     lv_obj_t * qr = lv_qrcode_create(lv_scr_act(), 150, lv_color_black(), lv_color_white());
     /*Set data*/
-    const char * data = "https://lvgl.io";
+    const char * data = BEACON_URL_TEMPALTE;
     lv_qrcode_update(qr, data, strlen(data));
     lv_obj_center(qr);
     /*Add a border with bg_color*/
     lv_obj_set_style_border_color(qr, lv_color_white(), 0);
     lv_obj_set_style_border_width(qr, 5, 0);
+#ifdef DEBUG_RAM
+logFreeRam();
+#endif
 
 
 
@@ -220,11 +260,13 @@ void createUi()
     lv_img_set_src(img, LV_SYMBOL_LEFT);
     lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
 
-    lv_obj_t * spinner = lv_spinner_create(footer,1000,60);
+    spinner = lv_spinner_create(footer,2000,60);
     lv_obj_set_size(spinner, 40, LV_PCT(100));
-    lv_obj_align(spinner, LV_ALIGN_OUT_TOP_MID, 10, 10);
+    //lv_obj_align(spinner, LV_ALIGN_OUT_TOP_MID, 10, 10);
+    lv_obj_center(spinner);
 
-    lv_obj_t * footerLabel = lv_label_create(footer);
+
+    footerLabel = lv_label_create(footer);
     lv_label_set_long_mode(footerLabel, LV_LABEL_LONG_DOT);
     lv_label_set_text(footerLabel, FOOTER_WAIT_LABEL);
     lv_obj_set_flex_grow(footerLabel, 1);
@@ -239,4 +281,48 @@ void createUi()
     lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
 
 }
+
+void uiSetTime(const char* time)
+{
+    lv_label_set_text(timeLabel, time);
+}
+    
+
+void uiSetPower(const char* time)
+{
+    lv_label_set_text(powerLabel, time);
+}
+
+void uiSetSpinnerVisible(bool visible)
+{
+    visible ? lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN) : lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+}
+
+void uiSetFooter(const char* footer)
+{
+    lv_label_set_text(footerLabel, footer);
+}
+
+
+void uiSetLedSig1State(bool on)
+{
+    on ? lv_led_on(ledSig1) : lv_led_off(ledSig1);
+}
+
+void uiSetLedSig2State(bool on)
+{
+    on ? lv_led_on(ledSig2) : lv_led_off(ledSig2);
+}
+
+void uiSetLedInFrameState(bool on)
+{
+    on ? lv_led_on(ledInFrame) : lv_led_off(ledInFrame);
+}
+
+void uiSetLedFrameReceivedState(bool on)
+{
+    on ? lv_led_on(ledFrameReceived) : lv_led_off(ledFrameReceived);
+}
+
+
 

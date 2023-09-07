@@ -3,6 +3,15 @@
 
 #include <Arduino.h>
 
+// Enable RAM debuging
+// #define DEBUG_RAM
+
+#ifdef DEBUG_RAM
+uint32_t freeRam();
+void logFreeRam();
+#endif
+
+
 /**
  * @brief Convert the provided frame to it's Hex String representation
  * 

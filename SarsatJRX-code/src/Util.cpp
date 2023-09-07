@@ -1,5 +1,18 @@
 #include "Util.h"
 
+
+#ifdef DEBUG_RAM
+uint32_t freeRam()
+{
+  return ESP.getFreeHeap();
+}
+void logFreeRam()
+{
+   Serial.printf("Free ram : %d\n",ESP.getFreeHeap());
+}
+#endif
+
+
 /**
  * @brief Convert the provided frame to it's Hex String representation
  * 
