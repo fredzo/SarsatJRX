@@ -1,6 +1,7 @@
 #include <Util.h>
 #include <lvgl.h>
 #include <Display.h>
+#include <lv_qrcode.h>
 
 // Defines
 // Enable serial out
@@ -191,6 +192,18 @@ void createUi()
                       "text to be\n"
                       "sure it\n"
                       "overflows. :)");    
+
+    
+    // Test QR Code
+    lv_obj_t * qr = lv_qrcode_create(lv_scr_act(), 150, lv_color_black(), lv_color_white());
+    /*Set data*/
+    const char * data = "https://lvgl.io";
+    lv_qrcode_update(qr, data, strlen(data));
+    lv_obj_center(qr);
+    /*Add a border with bg_color*/
+    lv_obj_set_style_border_color(qr, lv_color_white(), 0);
+    lv_obj_set_style_border_width(qr, 5, 0);
+
 
 
     lv_obj_t * footer = lv_obj_create(win);
