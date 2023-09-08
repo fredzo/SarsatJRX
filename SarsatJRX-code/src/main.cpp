@@ -392,6 +392,10 @@ void updateDisplay()
 #ifdef DEBUG_RAM
   Serial.println(freeRam());
 #endif
+  // Rotating index based on beacon list max size and position of last read frame
+  int displayIndex = ((beaconsSize-1 + beaconsReadIndex - beaconsWriteIndex) % BEACON_LIST_MAX_SIZE)+1;
+  uiSetBeacon(beacons[beaconsReadIndex],displayIndex,beaconsSize);
+/*
   // Refresh screen
   display->clearDisplay(true,true);
 
@@ -661,7 +665,7 @@ void updateDisplay()
   // Navigation buttons
   display->drawButton(previousButton);
   display->drawButton(nextButton);
-
+*/
 #ifdef DEBUG_RAM
   Serial.println(freeRam());
 #endif
@@ -702,91 +706,28 @@ void setup()
 #endif
 }
 
+void previousFrame()
+{
+    beaconsReadIndex--;
+    if(beaconsReadIndex<0)
+    {
+      beaconsReadIndex = beaconsSize-1;
+    }
+    updateDisplay();
+}
+
+void nextFrame()
+{
+    beaconsReadIndex++;
+    if(beaconsReadIndex>=beaconsSize)
+    {
+      beaconsReadIndex = 0;
+    }
+    updateDisplay();
+}
+
 void loop()
 {
-/*  if(display->touchAvailable() == Display::TouchType::PRESS)
-  {
-    int x = display->getTouchX();
-    int y = display->getTouchY();
-    if(x>=0 && y>=0)
-    {
-      Serial.println(x);
-      Serial.println(y);
-    }
-  }*/
-  /*
-  //Serial.print(".");
-  if(display->touchAvailable() == Display::TouchType::PRESS)
-  {
-    int x = display->getTouchX();
-    int y = display->getTouchY();
-    if(x>=0 && y>=0)
-    {
-      //Serial.println(x);
-      //Serial.println(y);
-      if(mapsButton.contains(x,y))
-      {
-        if(mapsButton.enabled)
-        {
-          mapsButton.pressed = true;
-          display->drawButton(mapsButton);
-          drawQrCode(true);
-          mapsButton.pressed = false;
-          display->drawButton(mapsButton);
-        }
-      }
-      else if(beaconButton.contains(x,y))
-      {
-        if(beaconButton.enabled)
-        {
-          beaconButton.pressed = true;
-          display->drawButton(beaconButton);
-          drawQrCode(false);
-          beaconButton.pressed = false;
-          display->drawButton(beaconButton);
-        }
-      }
-      else if(previousButton.contains(x,y))
-      {
-        if(previousButton.enabled)
-        {
-          previousButton.pressed = true;
-          display->drawButton(previousButton);
-          beaconsReadIndex--;
-          if(beaconsReadIndex<0)
-          {
-            beaconsReadIndex = beaconsSize-1;
-          }
-          updateDisplay();
-          previousButton.pressed = false;
-          display->drawButton(previousButton);
-        }
-      }
-      else if(nextButton.contains(x,y))
-      {
-        if(nextButton.enabled)
-        {
-          nextButton.pressed = true;
-          display->drawButton(nextButton);
-          beaconsReadIndex++;
-          if(beaconsReadIndex>=beaconsSize)
-          {
-            beaconsReadIndex = 0;
-          }
-          updateDisplay();
-          nextButton.pressed = false;
-          display->drawButton(nextButton);
-        }
-      }
-      else if((y <= HEADER_BUTTON_BOTTOM)&&(x >= HEADER_BUTTON_LEFT)&&(x <= HEADER_BUTTON_RIGHT))
-      {
-        //Serial.print("Read frame #");
-        //Serial.println(curFrame);
-        readNextSampleFrame();
-      }
-    }
-  }
-  */
   // If frameParseState > 0, we are reading an frame, if more thant 500ms elapsed (a frame should be 144x2.5ms = 360 ms max)
   bool frameTimeout = (isFrameStarted() && ((millis()-getFrameStartTime()) > 500 ));
   if (isFrameComplete() || frameTimeout)
@@ -828,7 +769,7 @@ void loop()
     {
       frameReceivedLedBlink();
       readBeacon();
-      //updateDisplay();
+      updateDisplay();
     } 
     // Reset frame decoding
     updateFooter(true);

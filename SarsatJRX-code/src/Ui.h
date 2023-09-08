@@ -2,10 +2,11 @@
 #define UI_H
 
 #include <Arduino.h>
+#include <Beacon.h>
 
 void createUi();
 
-void updateFrame();
+void uiSetBeacon(Beacon* beacon, int curPage, int pageCount);
 
 void uiSetTime(const char* time);
 

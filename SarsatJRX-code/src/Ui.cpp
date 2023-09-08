@@ -1,3 +1,4 @@
+#include <Ui.h>
 #include <Util.h>
 #include <lvgl.h>
 #include <Display.h>
@@ -71,6 +72,7 @@
 #define BCH2_KO_LABEL       F("BCH2-KO")
 #define BCH_LABEL_WIDTH     90
 // MAPS and BEACON buttons
+#define QR_SIZE             100
 #define MAPS_BUTTON_X     DISPLAY_WIDTH-BUTTON_WIDTH
 #define MAPS_BUTTON_Y     HEADER_BOTTOM-1
 #define MAPS_BUTTON_CAPTION "MAPS"
@@ -133,15 +135,27 @@ lv_obj_t * ledInFrame;
 lv_obj_t * ledFrameReceived;
 lv_obj_t * footerLabel;
 lv_obj_t * spinner;
+lv_obj_t * tabview;
+lv_obj_t * mapQr;
+lv_obj_t * beaconQr;
 
 extern void readNextSampleFrame();
+extern void previousFrame();
+extern void nextFrame();
 
-static void event_handler(lv_event_t * e)
+static void settings_handler(lv_event_t * e)
 {
-    lv_obj_t * obj = lv_event_get_target(e);
-    LV_UNUSED(obj);
-    Serial.printf("Button %d clicked ! \n",((int)lv_obj_get_index(obj)));
     readNextSampleFrame();
+}
+
+static void previous_handler(lv_event_t * e)
+{
+    previousFrame();
+}
+
+static void next_handler(lv_event_t * e)
+{
+    nextFrame();
 }
 
 void createUi()
@@ -211,41 +225,58 @@ void createUi()
 
     // Settigns button
     btn = lv_win_add_btn(win, LV_SYMBOL_SETTINGS, 40);
-    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn, settings_handler, LV_EVENT_CLICKED, NULL);
 
+    // Window container
     lv_obj_t * cont = lv_win_get_content(win);  /*Content can be added here*/
-    lv_obj_t * label = lv_label_create(cont);
-    lv_label_set_text(label, "This is\n"
-                      "a pretty\n"
-                      "long text\n"
-                      "to see how\n"
-                      "the window\n"
-                      "becomes\n"
-                      "scrollable.\n"
-                      "Some more\n"
-                      "text to be\n"
-                      "sure it\n"
-                      "overflows. :)");    
+
+    tabview = lv_tabview_create(lv_scr_act(), LV_DIR_LEFT, 40);
+
+    // lv_obj_set_style_bg_color(tabview, lv_palette_lighten(LV_PALETTE_RED, 2), 0);
+
+    lv_obj_t * tab_btns = lv_tabview_get_tab_btns(tabview);
+    //lv_obj_set_style_bg_color(tab_btns, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
+    //lv_obj_set_style_text_color(tab_btns, lv_palette_lighten(LV_PALETTE_GREY, 5), 0);
+    lv_obj_set_style_border_side(tab_btns, LV_BORDER_SIDE_RIGHT, LV_PART_ITEMS | LV_STATE_CHECKED);
+
+    /*Add 3 tabs (the tabs are page (lv_page) and can be scrolled*/
+    lv_obj_t * tab1 = lv_tabview_add_tab(tabview, "Info");
+    lv_obj_t * tab2 = lv_tabview_add_tab(tabview, "Map");
+    lv_obj_t * tab3 = lv_tabview_add_tab(tabview, "Bcn.");
+    lv_obj_t * tab4 = lv_tabview_add_tab(tabview, "Data");
+
+    //lv_obj_set_style_bg_color(tab2, lv_palette_lighten(LV_PALETTE_AMBER, 3), 0);
+    //lv_obj_set_style_bg_opa(tab2, LV_OPA_COVER, 0);
+
+    /*Add content to the tabs*/
+    lv_obj_t * label = lv_label_create(tab1);
+    lv_label_set_text(label, "First tab");
+
+    label = lv_label_create(tab2);
+    int tabWidth = lv_obj_get_width(tab2);
+    lv_label_set_text(label, "Location");
+    // Map QR Code
+    mapQr = lv_qrcode_create(lv_scr_act(), QR_SIZE, lv_color_black(), lv_color_white());
+    // Add a border with bg_color
+    lv_obj_set_style_border_color(mapQr, lv_color_white(), 0);
+    lv_obj_set_style_border_width(mapQr, 5, 0);
+    lv_obj_set_pos(mapQr,tabWidth-QR_SIZE-10,10);
+
+    label = lv_label_create(tab3);
+    lv_label_set_text(label, "Beacon");
+    // Map QR Code
+    beaconQr = lv_qrcode_create(lv_scr_act(), QR_SIZE, lv_color_black(), lv_color_white());
+    // Add a border with bg_color
+    lv_obj_set_style_border_color(beaconQr, lv_color_white(), 0);
+    lv_obj_set_style_border_width(beaconQr, 5, 0);
+    lv_obj_set_pos(beaconQr,tabWidth-QR_SIZE-10,10);
+
+    label = lv_label_create(tab4);
+    lv_label_set_text(label, "Data");
+
+    lv_obj_clear_flag(lv_tabview_get_content(tabview), LV_OBJ_FLAG_SCROLLABLE);
 
     
-    // Test QR Code
-#ifdef DEBUG_RAM
-logFreeRam();
-#endif
-    lv_obj_t * qr = lv_qrcode_create(lv_scr_act(), 150, lv_color_black(), lv_color_white());
-    /*Set data*/
-    const char * data = BEACON_URL_TEMPALTE;
-    lv_qrcode_update(qr, data, strlen(data));
-    lv_obj_center(qr);
-    /*Add a border with bg_color*/
-    lv_obj_set_style_border_color(qr, lv_color_white(), 0);
-    lv_obj_set_style_border_width(qr, 5, 0);
-#ifdef DEBUG_RAM
-logFreeRam();
-#endif
-
-
-
     lv_obj_t * footer = lv_obj_create(win);
     lv_obj_set_size(footer, LV_PCT(100), FOOTER_HEIGHT);
     lv_obj_set_flex_flow(footer, LV_FLEX_FLOW_ROW);
@@ -255,6 +286,7 @@ logFreeRam();
 
     btn = lv_btn_create(footer);
     lv_obj_set_size(btn, 70, LV_PCT(100));
+    lv_obj_add_event_cb(btn, previous_handler, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t * img = lv_img_create(btn);
     lv_img_set_src(img, LV_SYMBOL_LEFT);
@@ -275,12 +307,32 @@ logFreeRam();
 
     btn = lv_btn_create(footer);
     lv_obj_set_size(btn, 70, LV_PCT(100));
+    lv_obj_add_event_cb(btn, next_handler, LV_EVENT_CLICKED, NULL);
 
     img = lv_img_create(btn);
     lv_img_set_src(img, LV_SYMBOL_RIGHT);
     lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
 
 }
+
+void uiSetBeacon(Beacon* beacon, int curPage, int pageCount)
+{
+    char buffer[128];
+    // Set map QR data
+    beacon->location.formatFloatLocation(buffer,MAPS_URL_TEMPLATE);
+    #ifdef SERIAL_OUT 
+    Serial.println(buffer); 
+    #endif
+    const char * data = BEACON_URL_TEMPALTE;
+    lv_qrcode_update(mapQr, buffer, strlen(buffer));
+    // Set beacon QR data
+    sprintf(buffer,BEACON_URL_TEMPALTE, toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14).c_str());
+    #ifdef SERIAL_OUT 
+    Serial.println(buffer); 
+    #endif
+    lv_qrcode_update(beaconQr, buffer, strlen(buffer));
+}
+
 
 void uiSetTime(const char* time)
 {
