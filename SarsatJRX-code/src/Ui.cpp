@@ -11,12 +11,10 @@
 // Header
 #define HEADER_HEIGHT     30
 #define HEADER_TEXT       "- SarsatJRX -"
-#define HEADER_BOTTOM     HEADER_HEIGHT+4
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
 #define HEADER_PAGES_X    4
 #define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
 #define HEADER_TIME_X     56
-#define HEADER_TIME_Y     HEADER_PAGES_Y
 #define HEADER_BUTTON_LEFT    DISPLAY_WIDTH/3
 #define HEADER_BUTTON_RIGHT   (2*DISPLAY_WIDTH)/3
 #define HEADER_BUTTON_BOTTOM  2*HEADER_HEIGHT
@@ -33,10 +31,10 @@
 #define LED_SIG_FRAME_R_X       DISPLAY_WIDTH-(1*(2*LED_RADIUS+6))+LED_RADIUS
 #define LED_SIG_FRAME_R_Y       LED_SIG_1_Y
 //Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y,Display::LedColor::Blue);
-// Power
+// Power and time
 #define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
-#define HEADER_POWER_X    LED_SIG_1_X-70
-#define HEADER_POWER_Y    (HEADER_HEIGHT-12)/2
+#define HEADER_POWER_Y    (HEADER_HEIGHT-8)/2
+#define HEADER_TIME_Y     HEADER_POWER_Y
 
 // Footer
 #define FOOTER_HEIGHT       60
@@ -72,7 +70,7 @@
 #define BCH2_KO_LABEL       F("BCH2-KO")
 #define BCH_LABEL_WIDTH     90
 // MAPS and BEACON buttons
-#define QR_SIZE             100
+#define QR_SIZE             130
 #define MAPS_BUTTON_X     DISPLAY_WIDTH-BUTTON_WIDTH
 #define MAPS_BUTTON_Y     HEADER_BOTTOM-1
 #define MAPS_BUTTON_CAPTION "MAPS"
@@ -107,6 +105,7 @@ static lv_style_t style_footer;
 static lv_style_t style_icon;
 static lv_style_t style_bullet;
 static lv_style_t styles_pad_tiny;
+static lv_style_t styles_pad_none;
 
 static lv_obj_t * meter1;
 static lv_obj_t * meter2;
@@ -185,6 +184,11 @@ void createUi()
     lv_style_set_pad_row(&styles_pad_tiny, 1);
     lv_style_set_pad_column(&styles_pad_tiny, 1);
 
+    lv_style_init(&styles_pad_none);
+    lv_style_set_pad_all(&styles_pad_none, 0);
+    lv_style_set_pad_row(&styles_pad_none, 0);
+    lv_style_set_pad_column(&styles_pad_none, 0);
+
 
     lv_obj_t * btn;
     // Header
@@ -196,6 +200,7 @@ void createUi()
     lv_label_set_long_mode(timeLabel, LV_LABEL_LONG_DOT);
     lv_obj_add_style(timeLabel,&style_text_mono,0);
     lv_obj_set_size(timeLabel, 80, LV_PCT(100));
+    lv_obj_set_style_pad_top(timeLabel,HEADER_TIME_Y,0);
 
     // Title
     lv_obj_t * title = lv_win_add_title(win, HEADER_TEXT);
@@ -205,6 +210,7 @@ void createUi()
     lv_label_set_long_mode(powerLabel, LV_LABEL_LONG_DOT);
     lv_obj_add_style(powerLabel,&style_text_mono,0);
     lv_obj_set_size(powerLabel, 60, LV_PCT(100));
+    lv_obj_set_y(powerLabel,HEADER_POWER_Y);
     
     // Leds
     ledSig1 = lv_led_create(header);
@@ -229,8 +235,9 @@ void createUi()
 
     // Window container
     lv_obj_t * cont = lv_win_get_content(win);  /*Content can be added here*/
+    lv_obj_add_style(cont, &styles_pad_none, 0);
 
-    tabview = lv_tabview_create(lv_scr_act(), LV_DIR_LEFT, 40);
+    tabview = lv_tabview_create(cont, LV_DIR_LEFT, 40);
 
     // lv_obj_set_style_bg_color(tabview, lv_palette_lighten(LV_PALETTE_RED, 2), 0);
 
@@ -256,20 +263,22 @@ void createUi()
     int tabWidth = lv_obj_get_width(tab2);
     lv_label_set_text(label, "Location");
     // Map QR Code
-    mapQr = lv_qrcode_create(lv_scr_act(), QR_SIZE, lv_color_black(), lv_color_white());
+    mapQr = lv_qrcode_create(tab2, QR_SIZE, lv_color_black(), lv_color_white());
     // Add a border with bg_color
     lv_obj_set_style_border_color(mapQr, lv_color_white(), 0);
     lv_obj_set_style_border_width(mapQr, 5, 0);
-    lv_obj_set_pos(mapQr,tabWidth-QR_SIZE-10,10);
+    lv_obj_align(mapQr,LV_ALIGN_RIGHT_MID,-5,0);
+    //lv_obj_set_pos(mapQr,tabWidth-QR_SIZE-10,10);
 
     label = lv_label_create(tab3);
     lv_label_set_text(label, "Beacon");
     // Map QR Code
-    beaconQr = lv_qrcode_create(lv_scr_act(), QR_SIZE, lv_color_black(), lv_color_white());
+    beaconQr = lv_qrcode_create(tab3, QR_SIZE, lv_color_black(), lv_color_white());
     // Add a border with bg_color
     lv_obj_set_style_border_color(beaconQr, lv_color_white(), 0);
     lv_obj_set_style_border_width(beaconQr, 5, 0);
-    lv_obj_set_pos(beaconQr,tabWidth-QR_SIZE-10,10);
+    lv_obj_center(beaconQr);
+    //lv_obj_set_pos(beaconQr,tabWidth-QR_SIZE-10,10);
 
     label = lv_label_create(tab4);
     lv_label_set_text(label, "Data");

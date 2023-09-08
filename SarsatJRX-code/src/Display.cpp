@@ -493,30 +493,6 @@ void Display::drawLed(Led led)
   myGLCD->drawCircle(led.x, led.y,LED_RADIUS,RGB565(color.red, color.green, color.blue));
 }
 
-void Display::drawQrCode (QRCode* qrcode, int moduleSize)
-{
-  int xPos = x;
-  int yPos = y;
-  setColor(Display::Color::White);
-  // Add a padding around the QR code
-  fillRectangle((qrcode->size+2)*moduleSize,(qrcode->size+2)*moduleSize);
-  setColor(Display::Color::Black);
-  xPos += moduleSize;
-  yPos += moduleSize;
-  for (int iY = 0; iY < qrcode->size; iY++) 
-  {
-      for (int iX = 0; iX < qrcode->size; iX++) 
-      {
-          if (qrcode_getModule(qrcode, iX, iY)) 
-          {
-              x = xPos + (iX * moduleSize);
-              y = yPos + (iY * moduleSize);
-							fillRectangle(moduleSize, moduleSize);
-          }
-      }
-  }
-}
-
 /******************************************
  *              BACKLIGHT
  * ***************************************/

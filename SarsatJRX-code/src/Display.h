@@ -2,7 +2,6 @@
 #define DISPLAY_H
 
 #include <Arduino.h>
-#include <qrcode.h>
 #include <i2c_bus.h>
 
 #define DISPLAY_WIDTH   480
@@ -93,7 +92,6 @@ class Display
         void drawLed(Led led);
         void setFontSize(FontSize fontSize);
         void centerText(String text);
-        void drawQrCode (QRCode* qrcode,int moduleSize);
         int getFontWidth(FontSize fontSize);
         int getFontHeight(FontSize fontSize);
         void backlightOn();

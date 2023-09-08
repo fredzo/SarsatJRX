@@ -26,7 +26,6 @@
 #include <Hardware.h>
 #include <Location.h>
 #include <Country.h>
-#include <qrcode.h>
 #include <Beacon.h>
 #include <Util.h>
 #include <Samples.h>
@@ -136,37 +135,6 @@ bool beaconsFull = false;
 
 Hardware* hardware = nullptr; 
 Display *display = nullptr;
-
-static const int QR_VERSION = 6;
-void generateQrCode(QRCode* qrcode, Beacon* beacon, bool isMaps)
-{ // Version 6 (41x41) allows 154 alphanumeric characters with medium error correcion
-  // For some reason, to have the qr code library work properly, the buffer size needs to be much bigger than the actual version...
-  uint8_t qrcodeData[qrcode_getBufferSize(QR_VERSION+10)];
-  char buffer[128];
-  if(isMaps)
-  {
-    beacon->location.formatFloatLocation(buffer,MAPS_URL_TEMPLATE);
-  }
-  else
-  {
-    sprintf(buffer,BEACON_URL_TEMPALTE, toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14).c_str());
-  }
-  #ifdef SERIAL_OUT 
-  Serial.println(buffer); 
-  #endif
-	qrcode_initText(qrcode, qrcodeData, QR_VERSION, ECC_MEDIUM, buffer);
-}
-
-static const int MODULE_SIZE = 3;
-void drawQrCode(bool isMaps)
-{
-    QRCode qrCode;
-    generateQrCode(&qrCode,beacons[beaconsReadIndex],isMaps);
-    int xPos = DISPLAY_WIDTH-((qrCode.size+3)*MODULE_SIZE);
-    int yPos = DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT-((qrCode.size+3)*MODULE_SIZE);
-    display->setCursor(xPos,yPos);
-    display->drawQrCode(&qrCode,MODULE_SIZE);
-}
 
 void readBeacon()
 {
