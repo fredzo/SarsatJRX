@@ -285,6 +285,7 @@ void uiSetSpinnerVisible(bool visible)
 
 void uiSetFooter(const char* footer, bool highlight)
 {
+    lv_label_set_text(footerLabel, footer);
     if(highlight)
     {
         lv_obj_add_style(footerLabel,&style_footer_highlight,0);
