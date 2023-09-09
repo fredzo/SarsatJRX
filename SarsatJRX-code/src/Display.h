@@ -12,15 +12,11 @@
 #define SMALL_BUTTON_WIDTH  80
 #define SMALL_BUTTON_HEIGHT 45
 
-#define LED_RADIUS 8
-
 #define ROUND_RECT_RADIUS 6
 
 class Display
 {
     public :
-        enum class FontSize {SMALL,MEDIUM,LARGE};
-        enum class ButtonStyle {NORMAL,SMALL};
         class Color
         {
             public :
@@ -30,35 +26,10 @@ class Display
             Color(byte red, byte green, byte blue);
             static const Color White, Black, Red, LightGreen, Green, DarkGreen, Blue, Yellow, Magenta, Beige, Grey, DarkGrey, LightBlue, Purple, Orange;
         };
-        class Button
-        {
-            public:
-            int x;
-            int y;
-            const char* caption;
-            ButtonStyle style;
-            bool enabled = false;
-            bool pressed = false;
-            Button(int x,int y,const char* caption, ButtonStyle style) : x(x), y(y), caption(caption), style(style) {}
-            bool contains(int xPos, int yPos);
-            int getWidth();
-            int getHeight();
-        };
-        enum class LedColor {Red,Green,Blue};
-        class Led
-        {
-            public:
-            int x;
-            int y;
-            bool on = false;
-            LedColor color;
-            Led(int x,int y,LedColor color) : x(x), y(y), color(color) {}
-        };
         enum class TouchType {NONE,PRESS,HOLD,RELEASE};
         Display();
-        void setup(Color bgColor, I2CBus *i2c);
-        void clearDisplay(bool noHeader, bool noFooter);
-        void setHeaderAndFooter(int headerHeight, int footerHeight);
+        void setup(I2CBus *i2c);
+        void clearDisplay();
         void setCursor(int x, int y);
         void setColor(Color color);
         void setBackgroundColor(Color bgColor);
@@ -88,20 +59,14 @@ class Display
         int getTouchY();
         int getWidth();
         int getHeight();
-        void drawButton(Button button);
-        void drawLed(Led led);
-        void setFontSize(FontSize fontSize);
-        void centerText(String text);
-        int getFontWidth(FontSize fontSize);
-        int getFontHeight(FontSize fontSize);
         void backlightOn();
         void backlightOff();
         void setBrightness(uint8_t level);
-        void  handleTimer();
+        void handleTimer();
 
 
     private : 
-        int x, y, headerHeight, footerHeight;
+        int x, y;
         String displayBuffer;
         Color currentColor = Color::White;
         Color currentBackColor = Color::White;
@@ -110,16 +75,12 @@ class Display
         int touchX = 0, touchY = 0;
         TouchType touchType = TouchType::NONE;
         unsigned long lastTouchReadTime = 0;
-        FontSize fontSize = FontSize::SMALL;
         class Colors {
             public:
             const Color* foreground;
             const Color* background;
             const Color* border;
         };
-        Colors getColorsForButton(Button button);
-        Colors getColorsForLed(Led led);
-
 };
 
 #endif // DISPLAY_H

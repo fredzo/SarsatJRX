@@ -10,27 +10,14 @@
 
 // Header
 #define HEADER_HEIGHT     30
-#define HEADER_TEXT       "- SarsatJRX -"
-#define HEADER_PAGES_TEMPLATE "%02d/%02d°"
-#define HEADER_PAGES_X    4
-#define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
-#define HEADER_TIME_X     56
-#define HEADER_BUTTON_LEFT    DISPLAY_WIDTH/3
-#define HEADER_BUTTON_RIGHT   (2*DISPLAY_WIDTH)/3
-#define HEADER_BUTTON_BOTTOM  2*HEADER_HEIGHT
+#define HEADER_TEXT       "- SarsatJRX - "
+#define HEADER_PAGES_TEMPLATE "%02d/%02d"
 // Header LEDS
-#define LED_SIG_1_X       DISPLAY_WIDTH-(4*(2*LED_RADIUS+6))+LED_RADIUS
-#define LED_SIG_1_Y       HEADER_HEIGHT/2
-//Display::Led ledSig1 =    Display::Led(LED_SIG_1_X,LED_SIG_1_Y,Display::LedColor::Green);
-#define LED_SIG_2_X       DISPLAY_WIDTH-(3*(2*LED_RADIUS+6))+LED_RADIUS
-#define LED_SIG_2_Y       LED_SIG_1_Y
-//Display::Led ledSig2 =    Display::Led(LED_SIG_2_X,LED_SIG_2_Y,Display::LedColor::Green);
-#define LED_SIG_IN_FRAME_X      DISPLAY_WIDTH-(2*(2*LED_RADIUS+6))+LED_RADIUS
-#define LED_SIG_IN_FRAME_Y      LED_SIG_1_Y
-//Display::Led ledInFrame =       Display::Led(LED_SIG_IN_FRAME_X,LED_SIG_IN_FRAME_Y,Display::LedColor::Red);
-#define LED_SIG_FRAME_R_X       DISPLAY_WIDTH-(1*(2*LED_RADIUS+6))+LED_RADIUS
-#define LED_SIG_FRAME_R_Y       LED_SIG_1_Y
-//Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y,Display::LedColor::Blue);
+#define LED_RADIUS          7
+#define LED_SIZE            2*LED_RADIUS
+#define LED_SPACING         4
+#define LED_SPACE           LED_SIZE+LED_SPACING
+#define LED_CONTAINER_SIZE  4*LED_SIZE+6*LED_SPACING
 // Power and time
 #define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
 #define HEADER_POWER_Y    (HEADER_HEIGHT-16)/2
@@ -178,7 +165,7 @@ void createUi()
 
     lv_style_init(&style_title);
     lv_style_set_text_font(&style_title, font_large);
-    lv_style_set_text_align(&style_title, LV_TEXT_ALIGN_CENTER);
+    lv_style_set_text_align(&style_title, LV_TEXT_ALIGN_RIGHT);
 
     lv_style_init(&style_footer);
     lv_style_set_text_font(&style_footer, font_medium);
@@ -208,6 +195,7 @@ void createUi()
     lv_style_set_border_color(&style_tag, lv_palette_main(LV_PALETTE_BLUE));
     lv_style_set_pad_all(&style_tag, 10);
     lv_style_set_text_align(&style_tag,LV_TEXT_ALIGN_CENTER);
+    lv_style_set_pad_all(&style_tag,4);
     //lv_style_set_text_color(&style_tag, lv_palette_main(LV_PALETTE_BLUE));
     
     lv_obj_t * btn;
@@ -225,6 +213,7 @@ void createUi()
     // Title
     lv_obj_t * title = lv_win_add_title(win, HEADER_TEXT);
     lv_obj_add_style(title,&style_title,0);
+    lv_obj_get_style_translate_x(title,20);
     // Power
     powerLabel = lv_label_create(header);
     lv_label_set_long_mode(powerLabel, LV_LABEL_LONG_DOT);
@@ -233,26 +222,31 @@ void createUi()
     lv_obj_set_style_pad_top(powerLabel,HEADER_TIME_Y,0);
     
     // Leds
-    ledSig1 = lv_led_create(header);
+    // Led container
+    lv_obj_t * ledContainer = lv_obj_create(header);
+    lv_obj_set_size(ledContainer, LED_CONTAINER_SIZE, LV_PCT(100));
+    lv_obj_add_style(ledContainer, &style_pad_none, 0);
+    lv_obj_set_style_bg_color(ledContainer,lv_obj_get_style_bg_color(header,0),0);
+    // Led sig1
+    ledSig1 = lv_led_create(ledContainer);
     lv_led_set_color(ledSig1,lv_palette_main(LV_PALETTE_GREEN));
-    lv_obj_set_size(ledSig1, LED_RADIUS*2, LED_RADIUS*2);
-    //lv_obj_add_style(ledSig1,&style_pad_small,0);
-
-    ledSig2 = lv_led_create(header);
+    lv_obj_set_size(ledSig1, LED_SIZE, LED_SIZE);
+    lv_obj_align(ledSig1, LV_ALIGN_LEFT_MID, LED_SPACING, 0);
+    // Led sig2
+    ledSig2 = lv_led_create(ledContainer);
     lv_led_set_color(ledSig2,lv_palette_main(LV_PALETTE_GREEN));
-    lv_obj_set_size(ledSig2, LED_RADIUS*2, LED_RADIUS*2);
-    lv_obj_add_style(ledSig2,&style_pad_small,0);
-
-    ledInFrame = lv_led_create(header);
+    lv_obj_set_size(ledSig2, LED_SIZE, LED_SIZE);
+    lv_obj_align(ledSig2, LV_ALIGN_CENTER, -LED_SPACE, 0);
+    // Led In Frame
+    ledInFrame = lv_led_create(ledContainer);
     lv_led_set_color(ledInFrame,lv_palette_main(LV_PALETTE_ORANGE));
-    lv_obj_set_size(ledInFrame, LED_RADIUS*2, LED_RADIUS*2);
-    lv_obj_add_style(ledInFrame,&style_pad_small,0);
-
-    ledFrameReceived = lv_led_create(header);
+    lv_obj_set_size(ledInFrame, LED_SIZE, LED_SIZE);
+    lv_obj_align(ledInFrame, LV_ALIGN_CENTER, LED_RADIUS+2, 0);
+    // Led Frame received
+    ledFrameReceived = lv_led_create(ledContainer);
     lv_led_set_color(ledFrameReceived,lv_palette_main(LV_PALETTE_BLUE));
-    lv_obj_set_size(ledFrameReceived, LED_RADIUS*2, LED_RADIUS*2);
-    lv_obj_add_style(ledFrameReceived,&style_pad_small,0);
-    lv_obj_set_style_pad_all(ledFrameReceived,10,LV_PART_MAIN);
+    lv_obj_set_size(ledFrameReceived, LED_SIZE, LED_SIZE);
+    lv_obj_align(ledFrameReceived, LV_ALIGN_RIGHT_MID, -LED_SPACING, 0);
 
     // Settigns button
     btn = lv_win_add_btn(win, LV_SYMBOL_SETTINGS, 40);
@@ -317,7 +311,7 @@ void createUi()
     pagesLabel = lv_label_create(cont);
     lv_obj_align(pagesLabel,LV_ALIGN_TOP_RIGHT,0,0);
     lv_obj_add_style(pagesLabel, &style_tag, 0);
-    lv_obj_set_width(pagesLabel,100);
+    lv_obj_set_width(pagesLabel,70);
     
     lv_obj_t * footer = lv_obj_create(win);
     lv_obj_set_size(footer, LV_PCT(100), FOOTER_HEIGHT);

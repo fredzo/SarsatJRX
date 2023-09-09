@@ -101,20 +101,16 @@ bool ledFrameReceivedState = false;
 #define MAPS_BUTTON_X     DISPLAY_WIDTH-BUTTON_WIDTH
 #define MAPS_BUTTON_Y     HEADER_BOTTOM-1
 #define MAPS_BUTTON_CAPTION "MAPS"
-Display::Button mapsButton = Display::Button(MAPS_BUTTON_X,MAPS_BUTTON_Y,MAPS_BUTTON_CAPTION,Display::ButtonStyle::NORMAL);
 #define BEACON_BUTTON_X   MAPS_BUTTON_X
 #define BEACON_BUTTON_Y   HEADER_BOTTOM+BUTTON_HEIGHT+2
 #define BEACON_BUTTON_CAPTION "BEACON"
-Display::Button beaconButton = Display::Button(BEACON_BUTTON_X,BEACON_BUTTON_Y,BEACON_BUTTON_CAPTION,Display::ButtonStyle::NORMAL);
 // Navigation BUTTONS
 #define PREVIONS_BUTTON_X   0
 #define PREVIONS_BUTTON_Y   DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT-1
 #define PREVIONS_BUTTON_CAPTION "<"
-Display::Button previousButton = Display::Button(PREVIONS_BUTTON_X,PREVIONS_BUTTON_Y,PREVIONS_BUTTON_CAPTION,Display::ButtonStyle::SMALL);
 #define NEXT_BUTTON_X   DISPLAY_WIDTH-SMALL_BUTTON_WIDTH-1
 #define NEXT_BUTTON_Y   DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT-1
 #define NEXT_BUTTON_CAPTION ">"
-Display::Button nextButton = Display::Button(NEXT_BUTTON_X,NEXT_BUTTON_Y,NEXT_BUTTON_CAPTION,Display::ButtonStyle::SMALL);
 // URL templates
 #define MAPS_URL_TEMPLATE   "https://www.google.com/maps/search/?api=1&query=%s%%2C%s"
 #define BEACON_URL_TEMPALTE "https://cryptic-earth-89063heroku-20.herokuapp.com/decoded/%s"
@@ -660,9 +656,6 @@ void setup()
   hardware = Hardware::getHardware();
   hardware->init();
   display = hardware->getDisplay();
-  display->setHeaderAndFooter(HEADER_HEIGHT,SMALL_BUTTON_HEIGHT);
-  previousButton.enabled = true;
-  nextButton.enabled = true;
 
   // Build the UI
   createUi();

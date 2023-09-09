@@ -71,19 +71,16 @@ Display::Display()
     displayBuffer = "";
 }
 
-void Display::setup(Color bgColor, I2CBus *i2c)
+void Display::setup(I2CBus *i2c)
 {
   // Lvgl init
   lv_init();
   // Initial setup
   myGLCD->init();
   myGLCD->setRotation(3);
-  setFontSize(FontSize::SMALL);
-  currentBackColor = bgColor;
   currentColor = Color::White;
-  currentTextBackColor = bgColor;
   currentTextColor = Color::White;
-  clearDisplay(false,false);
+  //clearDisplay();
   // Init touch screen
   if (!touch->begin(Wire, GT911_ADDRESS)) {
       Serial.println("Begin touch FAIL");
@@ -197,64 +194,11 @@ void Display::drawLine(int x1,int y1,int x2,int y2)
   myGLCD->drawLine(x1,y1,x2,y2,RGB565(currentColor.red, currentColor.green, currentColor.blue));
 }
 
-void Display::setFontSize(FontSize fontSize)
-{
-  this->fontSize = fontSize;
-  switch(fontSize)
-  {
-    case FontSize::LARGE :
-      myGLCD->setFreeFont(FSSB12); // 18x24
-      //myGLCD->setFont(u8g2_font_logisoso24_tf);
-      break;
-    case FontSize::MEDIUM :
-      myGLCD->setFreeFont(FSSB9); // 12x16
-      //myGLCD->setFont( u8g2_font_inr16_mf );
-      break;
-    case FontSize::SMALL :
-      //myGLCD->setTextFont(2); // 8x12
-      myGLCD->setFreeFont(FM9);
-      //myGLCD->setFont(u8g2_font_crox2c_mf);
-      break;  // 1 = 6x8
-  }
-}
-
-int Display::getFontWidth(FontSize fontSize)
-{
-  switch(fontSize)
-  {
-    case FontSize::LARGE :
-      return 14; // 4*6
-    case FontSize::MEDIUM :
-      return 14; // 3*6
-    case FontSize::SMALL :
-      return 7; // 2*6
-  }
-}
-
-int Display::getFontHeight(FontSize fontSize)
-{
-  switch(fontSize)
-  {
-    case FontSize::LARGE :
-      return 16; // 4*8
-    case FontSize::MEDIUM :
-      return 9; // 3*8
-    case FontSize::SMALL :
-      return 9; // 2*8
-  }
-}
-
 void Display::setCursor(int x, int y)
 {
     Display::x = x;
     Display::y = y;
     myGLCD->setCursor(x,y);
-}
-
-void Display::setHeaderAndFooter(int headerHeight, int footerHeight)
-{
-    Display::headerHeight = headerHeight;
-    Display::footerHeight = footerHeight;
 }
 
 void Display::println(String s)
@@ -295,19 +239,9 @@ void Display::printHex(byte value)
     displayBuffer += buffer;
 }
 
-void Display::clearDisplay(bool noHeader, bool noFooter)
+void Display::clearDisplay()
 {
-  if(noHeader)
-  {
-    int heigth = DISPLAY_HEIGHT;
-    if(noHeader) heigth-=headerHeight;
-    if(noFooter) heigth-=footerHeight;
-    myGLCD->fillRect(0,noHeader ? headerHeight : 0,DISPLAY_WIDTH,heigth,RGB565(currentBackColor.red, currentBackColor.green, currentBackColor.blue));
-  }
-  else
-  {
-    myGLCD->fillScreen(RGB565(currentBackColor.red, currentBackColor.green, currentBackColor.blue));
-  }
+  myGLCD->fillScreen(RGB565(currentBackColor.red, currentBackColor.green, currentBackColor.blue));
   displayBuffer = "";
 }
 
@@ -374,123 +308,6 @@ int Display::getTouchX()
 int Display::getTouchY()
 {
     return touchY;
-}
-
-void Display::centerText(String text)
-{
-  x -= ((getFontWidth(fontSize))*text.length())/2;
-  myGLCD->setCursor(x,y);
-}
-
-int Display::Button::getWidth()
-{
-  switch (style)
-  {
-    case ButtonStyle::SMALL:
-      return SMALL_BUTTON_WIDTH;
-      break;
-    case ButtonStyle::NORMAL:
-    default:
-      return BUTTON_WIDTH;
-      break;
-  }
-}
-
-int Display::Button::getHeight()
-{
-  switch (style)
-  {
-    case ButtonStyle::SMALL:
-      return SMALL_BUTTON_HEIGHT;
-      break;
-    case ButtonStyle::NORMAL:
-    default:
-      return BUTTON_HEIGHT;
-      break;
-  }
-}
-
-bool Display::Button::contains(int xPos, int yPos)
-{
-  int margin = (style == ButtonStyle::SMALL) ? 80 : 5; // Use large margin of error for small buttons to compensate resistive screen innacurracy
-  return (xPos >= x-margin && xPos <= (x+getWidth()+margin) && yPos >= y-margin && yPos <= (y+getHeight()+margin));
-}
-
-Display::Colors Display::getColorsForButton(Display::Button button)
-{
-  Colors result;
-  switch (button.style)
-  {
-    case ButtonStyle::SMALL :
-      result.foreground = &(button.pressed ? Color::Grey : button.enabled ? Color::LightBlue : Color::Grey);
-      result.background = &(button.pressed ? Color::LightBlue : button.enabled ? Color::Grey : Color::DarkGrey);
-      result.border = &Color::Purple;
-      break;
-    case ButtonStyle::NORMAL :
-    default :
-      result.foreground = &(button.pressed ? Color::Yellow : button.enabled ? Color::Black :Color::Beige);
-      result.background = &(button.pressed ? Color::Black : button.enabled ? Color::Yellow : Color::Grey);
-      result.border = &Color::Orange;
-      break;
-  }
-  return result;
-}
-
-Display::Colors Display::getColorsForLed(Display::Led led)
-{
-  Colors result;
-  switch (led.color)
-  {
-    case LedColor::Red :
-      result.foreground = &(led.on ? Color::Red : Color::Grey);
-      result.border = &Color::Orange;
-      break;
-    case LedColor::Blue :
-      result.foreground = &(led.on ? Color::Blue : Color::Grey);
-      result.border = &Color::LightBlue;
-      break;
-    case LedColor::Green :
-    default :
-      result.foreground = &(led.on ? Color::Green : Color::Grey);
-      result.border = &Color::LightGreen;
-      break;
-  }
-  return result;
-}
-
-void Display::drawButton(Button button)
-{ 
-  int captionSize = strlen(button.caption);
-  // Store current color
-  Colors colors = getColorsForButton(button);
-  Color backupTextColor = currentTextColor;
-  Color backupTextBackColor = currentTextBackColor;
-  // Store font size
-  FontSize backupFontSize = fontSize;
-  FontSize buttonFontSize = (button.style == ButtonStyle::SMALL) ? FontSize::LARGE : FontSize::MEDIUM;
-  setFontSize(buttonFontSize);
-  setTextColors(*colors.foreground,*colors.background);
-  Color color = *colors.background;
-  myGLCD->fillRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(color.red, color.green, color.blue));
-  color = *colors.foreground;
-  myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+button.getHeight()-((button.getHeight()-getFontHeight(buttonFontSize))/2));
-  //myGLCD->setCursor(button.x+((button.getWidth()-getFontWidth(buttonFontSize)*captionSize)/2), button.y+((button.getHeight()-getFontHeight(buttonFontSize))/2));
-  myGLCD->println(button.caption);
-  color = *colors.border;
-  myGLCD->drawRoundRect(button.x, button.y, button.getWidth(), button.getHeight(), ROUND_RECT_RADIUS,RGB565(color.red, color.green, color.blue));
-  // Restore text colors
-  setTextColors(backupTextColor,backupTextBackColor);
-  // Restore font size
-  setFontSize(backupFontSize);
-}
-
-void Display::drawLed(Led led)
-{ 
-  Colors colors = getColorsForLed(led);
-  Color color = *colors.foreground;
-  myGLCD->fillCircle(led.x, led.y,LED_RADIUS,RGB565(color.red, color.green, color.blue));
-  color = *colors.border;
-  myGLCD->drawCircle(led.x, led.y,LED_RADIUS,RGB565(color.red, color.green, color.blue));
 }
 
 /******************************************

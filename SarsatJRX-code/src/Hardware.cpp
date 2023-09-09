@@ -9,7 +9,7 @@ void Hardware::init()
     rtc = Rtc::getRtc();
     rtc->rtcInit(i2c);
     display = new Display();
-    display->setup(Display::Color::DarkGrey,i2c);
+    display->setup(i2c);
 }
 
 Display* Hardware::getDisplay()
