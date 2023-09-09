@@ -11,7 +11,7 @@
 // Header
 #define HEADER_HEIGHT     30
 #define HEADER_TEXT       "- SarsatJRX -"
-#define HEADER_PAGES_TEMPLATE "%02d/%02d"
+#define HEADER_PAGES_TEMPLATE "%02d/%02d°"
 #define HEADER_PAGES_X    4
 #define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
 #define HEADER_TIME_X     56
@@ -33,7 +33,7 @@
 //Display::Led ledFrameReceived = Display::Led(LED_SIG_FRAME_R_X,LED_SIG_FRAME_R_Y,Display::LedColor::Blue);
 // Power and time
 #define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
-#define HEADER_POWER_Y    (HEADER_HEIGHT-10)/2
+#define HEADER_POWER_Y    (HEADER_HEIGHT-16)/2
 #define HEADER_TIME_Y     HEADER_POWER_Y
 
 // Footer
@@ -141,6 +141,8 @@ lv_obj_t * tabview;
 lv_obj_t * mapQr;
 lv_obj_t * beaconQr;
 
+extern const lv_font_t cascadica_mono;
+
 extern void readNextSampleFrame();
 extern void previousFrame();
 extern void nextFrame();
@@ -165,7 +167,7 @@ void createUi()
     font_medium = &lv_font_montserrat_18;
     font_normal = &lv_font_montserrat_12;
     font_large = &lv_font_montserrat_24;
-    font_mono = &lv_font_unscii_8;
+    font_mono = &cascadica_mono;
 
     lv_theme_default_init(NULL, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), LV_THEME_DEFAULT_DARK, LV_FONT_DEFAULT);
 
@@ -200,11 +202,12 @@ void createUi()
     lv_style_init(&style_tag);
     lv_style_set_text_font(&style_tag, font_mono);
     lv_style_set_radius(&style_tag, 5);
-    lv_style_set_bg_opa(&style_tag, LV_OPA_COVER);
-    lv_style_set_bg_color(&style_tag, lv_palette_main(LV_PALETTE_GREY));
+    //lv_style_set_bg_opa(&style_tag, LV_OPA_COVER);
+    //lv_style_set_bg_color(&style_tag, lv_palette_darken(LV_PALETTE_GREY,2));
     lv_style_set_border_width(&style_tag, 2);
     lv_style_set_border_color(&style_tag, lv_palette_main(LV_PALETTE_BLUE));
     lv_style_set_pad_all(&style_tag, 10);
+    lv_style_set_text_align(&style_tag,LV_TEXT_ALIGN_CENTER);
     //lv_style_set_text_color(&style_tag, lv_palette_main(LV_PALETTE_BLUE));
     
     lv_obj_t * btn;
@@ -233,7 +236,7 @@ void createUi()
     ledSig1 = lv_led_create(header);
     lv_led_set_color(ledSig1,lv_palette_main(LV_PALETTE_GREEN));
     lv_obj_set_size(ledSig1, LED_RADIUS*2, LED_RADIUS*2);
-    lv_obj_add_style(ledSig1,&style_pad_small,0);
+    //lv_obj_add_style(ledSig1,&style_pad_small,0);
 
     ledSig2 = lv_led_create(header);
     lv_led_set_color(ledSig2,lv_palette_main(LV_PALETTE_GREEN));
@@ -249,6 +252,7 @@ void createUi()
     lv_led_set_color(ledFrameReceived,lv_palette_main(LV_PALETTE_BLUE));
     lv_obj_set_size(ledFrameReceived, LED_RADIUS*2, LED_RADIUS*2);
     lv_obj_add_style(ledFrameReceived,&style_pad_small,0);
+    lv_obj_set_style_pad_all(ledFrameReceived,10,LV_PART_MAIN);
 
     // Settigns button
     btn = lv_win_add_btn(win, LV_SYMBOL_SETTINGS, 40);
