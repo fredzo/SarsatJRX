@@ -14,7 +14,7 @@ void uiSetPower(const char* time);
 
 void uiSetSpinnerVisible(bool visible);
 
-void uiSetFooter(const char* footer);
+void uiSetFooter(const char* footer, bool highlight);
 
 void uiSetLedSig1State(bool on);
 

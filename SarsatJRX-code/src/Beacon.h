@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <Country.h>
 #include <Location.h>
+#include <RTC.h>
 
 // Enable BCH debuging
 // #define DEBUG_BCH
@@ -50,6 +51,7 @@ class Beacon
         Location location;
         uint64_t identifier;
         Beacon(byte frameBuffer[]);
+        Rtc::Date date;
         String getProtocolName();
         String getProtocolDesciption();
         bool hasMainLocatingDevice();

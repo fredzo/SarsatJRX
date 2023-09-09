@@ -199,7 +199,7 @@ void frameReceivedLedBlink()
 
 // Store last displayed power value
 unsigned long lastPowerDisplayTime;
-float powerValue = 0;
+float powerValue = -1;
 #define POWER_DISPLAY_PERIOD 2000
 
 void updatePowerValueHeader()
@@ -301,20 +301,15 @@ int spinnerPosition = 0;
 #define FOOTER_UPDATE_TIME 10
 #define FOOTER_FRAME_RECEIVED_TIME 2000
 
-void updateSpinner(bool show)
-{
-  uiSetSpinnerVisible(show);
-}
-
 void showWaiting(bool show)
 {
-    uiSetFooter(FOOTER_WAIT_LABEL);
+    uiSetFooter(FOOTER_WAIT_LABEL,false);
     footerShowingWait = show;
 }
 
 void showFrameReceived(bool show)
 {
-    uiSetFooter(FOOTER_FRAME_LABEL);
+    uiSetFooter(FOOTER_FRAME_LABEL,true);
     footerShowingFrameReceived = show;
 }
 
@@ -336,17 +331,17 @@ void updateFooter(bool frameReceived)
     {
       lastFooterUpdateTime = now;
       showWaiting(false);
-      updateSpinner(false);
+      uiSetSpinnerVisible(false);
       showFrameReceived(true);
     }
     else if ((now - lastFooterUpdateTime) > FOOTER_UPDATE_TIME)
     {
       lastFooterUpdateTime = now;
+      uiSetSpinnerVisible(true);
       if(!footerShowingWait)
       {
         showWaiting(true);
       }
-      updateSpinner(true);
     }
   }
 }

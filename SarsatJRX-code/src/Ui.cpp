@@ -80,39 +80,36 @@
 #define BEACON_URL_TEMPALTE "https://cryptic-earth-89063heroku-20.herokuapp.com/decoded/%s"
 
 
+// Externs
+extern const lv_font_t cascadica_mono;
+
+extern void readNextSampleFrame();
+extern void previousFrame();
+extern void nextFrame();
+
+
 
 /**********************
  *  STATIC VARIABLES
  **********************/
-static lv_obj_t * tv;
-static lv_obj_t * calendar;
 static lv_style_t style_text_mono;
 static lv_style_t style_title;
 static lv_style_t style_footer;
+static lv_style_t style_footer_highlight;
 static lv_style_t style_icon;
 static lv_style_t style_bullet;
 static lv_style_t style_pad_small;
 static lv_style_t style_pad_tiny;
 static lv_style_t style_pad_none;
 static lv_style_t style_tag;
+static lv_style_t style_section_title;
+static lv_style_t style_section_text;
+static lv_style_t style_footer_text;
 
-static lv_obj_t * meter1;
-static lv_obj_t * meter2;
-static lv_obj_t * meter3;
-
-static lv_obj_t * chart1;
-static lv_obj_t * chart2;
-static lv_obj_t * chart3;
-
-static lv_chart_series_t * ser1;
-static lv_chart_series_t * ser2;
-static lv_chart_series_t * ser3;
-static lv_chart_series_t * ser4;
-
-static const lv_font_t * font_large;
-static const lv_font_t * font_medium;
-static const lv_font_t * font_normal;
-static const lv_font_t * font_mono;
+static const lv_font_t * font_large = &lv_font_montserrat_24;
+static const lv_font_t * font_medium = &lv_font_montserrat_18;
+static const lv_font_t * font_normal = &lv_font_montserrat_12;;
+static const lv_font_t * font_mono = &cascadica_mono;
 
 lv_obj_t * timeLabel;
 lv_obj_t * powerLabel;
@@ -127,14 +124,17 @@ lv_obj_t * spinner;
 lv_obj_t * tabview;
 lv_obj_t * mapQr;
 lv_obj_t * beaconQr;
+lv_obj_t * previousButton;
+lv_obj_t * nextButton;
 
-extern const lv_font_t cascadica_mono;
-
-extern void readNextSampleFrame();
-extern void previousFrame();
-extern void nextFrame();
+bool uiBeaconVisible = false;
 
 static void settings_handler(lv_event_t * e)
+{
+    // TODO : settings screen
+}
+
+static void settings_long_press_handler(lv_event_t * e)
 {
     readNextSampleFrame();
 }
@@ -150,42 +150,43 @@ static void next_handler(lv_event_t * e)
 }
 
 void createUi()
-{
-    font_medium = &lv_font_montserrat_18;
-    font_normal = &lv_font_montserrat_12;
-    font_large = &lv_font_montserrat_24;
-    font_mono = &cascadica_mono;
-
+{   // Load default theme in dark mode
     lv_theme_default_init(NULL, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), LV_THEME_DEFAULT_DARK, LV_FONT_DEFAULT);
 
+    // Styles
+    // Text mono
     lv_style_init(&style_text_mono);
     lv_style_set_text_font(&style_text_mono, font_mono);
     lv_style_set_text_align(&style_text_mono, LV_TEXT_ALIGN_CENTER);
-
-
+    // Text title
     lv_style_init(&style_title);
     lv_style_set_text_font(&style_title, font_large);
     lv_style_set_text_align(&style_title, LV_TEXT_ALIGN_RIGHT);
-
+    // Footer
     lv_style_init(&style_footer);
     lv_style_set_text_font(&style_footer, font_medium);
     lv_style_set_text_align(&style_footer, LV_TEXT_ALIGN_CENTER);
-
+    lv_style_set_text_color(&style_footer, lv_color_white());
+    lv_style_init(&style_footer_highlight);
+    lv_style_set_text_font(&style_footer_highlight, font_large);
+    lv_style_set_text_align(&style_footer_highlight, LV_TEXT_ALIGN_CENTER);
+    lv_style_set_text_color(&style_footer_highlight, lv_palette_lighten(LV_PALETTE_RED,1));
+    // Small padding
     lv_style_init(&style_pad_small);
     lv_style_set_pad_all(&style_pad_small, 4);
     lv_style_set_pad_row(&style_pad_small, 4);
     lv_style_set_pad_column(&style_pad_small, 4);
-
+    // Tiny padding
     lv_style_init(&style_pad_tiny);
     lv_style_set_pad_all(&style_pad_tiny, 1);
     lv_style_set_pad_row(&style_pad_tiny, 1);
     lv_style_set_pad_column(&style_pad_tiny, 1);
-
+    // No padding
     lv_style_init(&style_pad_none);
     lv_style_set_pad_all(&style_pad_none, 0);
     lv_style_set_pad_row(&style_pad_none, 0);
     lv_style_set_pad_column(&style_pad_none, 0);
-
+    // Tag content
     lv_style_init(&style_tag);
     lv_style_set_text_font(&style_tag, font_mono);
     lv_style_set_radius(&style_tag, 5);
@@ -193,18 +194,17 @@ void createUi()
     //lv_style_set_bg_color(&style_tag, lv_palette_darken(LV_PALETTE_GREY,2));
     lv_style_set_border_width(&style_tag, 2);
     lv_style_set_border_color(&style_tag, lv_palette_main(LV_PALETTE_BLUE));
-    lv_style_set_pad_all(&style_tag, 10);
     lv_style_set_text_align(&style_tag,LV_TEXT_ALIGN_CENTER);
     lv_style_set_pad_all(&style_tag,4);
     //lv_style_set_text_color(&style_tag, lv_palette_main(LV_PALETTE_BLUE));
     
-    lv_obj_t * btn;
     // Header
     lv_obj_t * win = lv_win_create(lv_scr_act(),HEADER_HEIGHT);
     lv_obj_t * header = lv_win_get_header(win);
     lv_obj_add_style(header, &style_pad_tiny, 0);
     // Time
     timeLabel = lv_label_create(header);
+    lv_label_set_text(timeLabel,"");
     lv_label_set_long_mode(timeLabel, LV_LABEL_LONG_DOT);
     lv_obj_add_style(timeLabel,&style_text_mono,0);
     lv_obj_set_size(timeLabel, 80, LV_PCT(100));
@@ -216,6 +216,7 @@ void createUi()
     lv_obj_get_style_translate_x(title,20);
     // Power
     powerLabel = lv_label_create(header);
+    lv_label_set_text(powerLabel,"");
     lv_label_set_long_mode(powerLabel, LV_LABEL_LONG_DOT);
     lv_obj_add_style(powerLabel,&style_text_mono,0);
     lv_obj_set_size(powerLabel, 60, LV_PCT(100));
@@ -249,16 +250,17 @@ void createUi()
     lv_obj_align(ledFrameReceived, LV_ALIGN_RIGHT_MID, -LED_SPACING, 0);
 
     // Settigns button
-    btn = lv_win_add_btn(win, LV_SYMBOL_SETTINGS, 40);
+    lv_obj_t * btn = lv_win_add_btn(win, LV_SYMBOL_SETTINGS, 40);
     lv_obj_add_event_cb(btn, settings_handler, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn, settings_long_press_handler, LV_EVENT_LONG_PRESSED, NULL);
 
     // Window container
     lv_obj_t * cont = lv_win_get_content(win);  /*Content can be added here*/
     lv_obj_add_style(cont, &style_pad_none, 0);
 
+    // Tab view
     tabview = lv_tabview_create(cont, LV_DIR_LEFT, 50);
-
-    // lv_obj_set_style_bg_color(tabview, lv_palette_lighten(LV_PALETTE_RED, 2), 0);
+    lv_obj_add_flag(tabview, LV_OBJ_FLAG_HIDDEN);
 
     lv_obj_t * tab_btns = lv_tabview_get_tab_btns(tabview);
     //lv_obj_set_style_bg_color(tab_btns, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
@@ -309,46 +311,47 @@ void createUi()
 
     // Pages label
     pagesLabel = lv_label_create(cont);
+    lv_obj_add_flag(pagesLabel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_align(pagesLabel,LV_ALIGN_TOP_RIGHT,0,0);
     lv_obj_add_style(pagesLabel, &style_tag, 0);
     lv_obj_set_width(pagesLabel,70);
     
+    // Footer
     lv_obj_t * footer = lv_obj_create(win);
     lv_obj_set_size(footer, LV_PCT(100), FOOTER_HEIGHT);
     lv_obj_set_flex_flow(footer, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(footer, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_scrollbar_mode(footer,LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_style(footer, &style_pad_tiny, 0);
-
-    btn = lv_btn_create(footer);
-    lv_obj_set_size(btn, 70, LV_PCT(100));
-    lv_obj_add_event_cb(btn, previous_handler, LV_EVENT_CLICKED, NULL);
-
-    lv_obj_t * img = lv_img_create(btn);
+    // Previous button
+    previousButton = lv_btn_create(footer);
+    lv_obj_set_size(previousButton, 70, LV_PCT(100));
+    lv_obj_add_event_cb(previousButton, previous_handler, LV_EVENT_CLICKED, NULL);
+    lv_obj_clear_flag(previousButton, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_t * img = lv_img_create(previousButton);
     lv_img_set_src(img, LV_SYMBOL_LEFT);
     lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-
+    // Spinner
     spinner = lv_spinner_create(footer,2000,60);
     lv_obj_set_size(spinner, 56, LV_PCT(100));
     lv_obj_set_style_arc_width(spinner,6,LV_PART_INDICATOR);
     lv_obj_set_style_pad_top(spinner,4,0);
     lv_obj_set_style_pad_left(spinner,10,0);
-
+    // Footer label
     footerLabel = lv_label_create(footer);
     lv_label_set_long_mode(footerLabel, LV_LABEL_LONG_DOT);
     lv_label_set_text(footerLabel, FOOTER_WAIT_LABEL);
     lv_obj_set_flex_grow(footerLabel, 1);
     lv_obj_add_style(footerLabel,&style_footer,0);
     lv_obj_set_style_text_align(footerLabel,LV_TEXT_ALIGN_CENTER,0);
-
-    btn = lv_btn_create(footer);
-    lv_obj_set_size(btn, 70, LV_PCT(100));
-    lv_obj_add_event_cb(btn, next_handler, LV_EVENT_CLICKED, NULL);
-
-    img = lv_img_create(btn);
+    // Next button
+    nextButton = lv_btn_create(footer);
+    lv_obj_set_size(nextButton, 70, LV_PCT(100));
+    lv_obj_add_event_cb(nextButton, next_handler, LV_EVENT_CLICKED, NULL);
+    lv_obj_clear_flag(nextButton, LV_OBJ_FLAG_CLICKABLE);
+    img = lv_img_create(nextButton);
     lv_img_set_src(img, LV_SYMBOL_RIGHT);
     lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
-
 }
 
 void uiSetBeacon(Beacon* beacon, int curPage, int pageCount)
@@ -369,6 +372,14 @@ void uiSetBeacon(Beacon* beacon, int curPage, int pageCount)
     lv_qrcode_update(beaconQr, buffer, strlen(buffer));
     // Set pages
     lv_label_set_text_fmt(pagesLabel,HEADER_PAGES_TEMPLATE,curPage,pageCount);
+    if(!uiBeaconVisible)
+    {
+        lv_obj_clear_flag(tabview, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(pagesLabel, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(previousButton, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_flag(nextButton, LV_OBJ_FLAG_CLICKABLE);
+        uiBeaconVisible = true;
+    }
 }
 
 
@@ -388,9 +399,17 @@ void uiSetSpinnerVisible(bool visible)
     visible ? lv_obj_clear_flag(spinner, LV_OBJ_FLAG_HIDDEN) : lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
 }
 
-void uiSetFooter(const char* footer)
+void uiSetFooter(const char* footer, bool highlight)
 {
     lv_label_set_text(footerLabel, footer);
+    if(highlight)
+    {
+        lv_obj_add_style(footerLabel,&style_footer_highlight,0);
+    }
+    else
+    {
+        lv_obj_add_style(footerLabel,&style_footer,0);
+    }
 }
 
 

@@ -158,6 +158,7 @@ uint64_t computeBCH2(byte* frame)
 Beacon::Beacon(byte frameBuffer[])
 {   // Get a local copy of the original frame
     memcpy(frame,frameBuffer,SIZE);
+    date = Rtc::getRtc()->getDate();
     parseFrame();
 }
 
