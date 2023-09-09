@@ -30,7 +30,7 @@
 #include <Util.h>
 #include <Samples.h>
 #include <Decoder.h>
-#include <Ui.h>
+#include <ui/Ui.h>
 
 // Enable serial out
 #define SERIAL_OUT
