@@ -35,75 +35,14 @@
 // Enable serial out
 #define SERIAL_OUT
 
-// Header
-#define HEADER_HEIGHT     30
-#define HEADER_TEXT       F("- SarsatJRX -")
-#define HEADER_BOTTOM     HEADER_HEIGHT+4
-#define HEADER_PAGES_TEMPLATE "%02d/%02d"
-#define HEADER_PAGES_X    4
-#define HEADER_PAGES_Y    (HEADER_HEIGHT-12)/2
-#define HEADER_TIME_X     56
-#define HEADER_TIME_Y     HEADER_PAGES_Y
-#define HEADER_BUTTON_LEFT    DISPLAY_WIDTH/3
-#define HEADER_BUTTON_RIGHT   (2*DISPLAY_WIDTH)/3
-#define HEADER_BUTTON_BOTTOM  2*HEADER_HEIGHT
 // Header LEDS
 bool ledSig1State = false;
 bool ledSig2State = false;
 bool ledInFrameState = false;
 bool ledFrameReceivedState = false;
-#define LED_SIG_1_X       DISPLAY_WIDTH-(4*(2*LED_RADIUS+6))+LED_RADIUS
-#define LED_SIG_1_Y       HEADER_HEIGHT/2
-#define LED_SIG_2_X       DISPLAY_WIDTH-(3*(2*LED_RADIUS+6))+LED_RADIUS
-#define LED_SIG_2_Y       LED_SIG_1_Y
-#define LED_SIG_IN_FRAME_X      DISPLAY_WIDTH-(2*(2*LED_RADIUS+6))+LED_RADIUS
-#define LED_SIG_IN_FRAME_Y      LED_SIG_1_Y
-#define LED_SIG_FRAME_R_X       DISPLAY_WIDTH-(1*(2*LED_RADIUS+6))+LED_RADIUS
-#define LED_SIG_FRAME_R_Y       LED_SIG_1_Y
 // Power
 #define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
-#define HEADER_POWER_X    LED_SIG_1_X-70
-#define HEADER_POWER_Y    (HEADER_HEIGHT-12)/2
 
-// Beacon info
-#define LINE_HEIGHT         16
-#define FRAME_MODE_LABEL    F("Frame mode :")
-#define FRAME_MODE_WIDTH    140
-#define INFO_LABEL          F("Info :")
-#define INFO_LABEL_WIDTH    80
-#define SERIAL_LABEL        F("Serial # :")
-#define SERIAL_LABEL_WIDTH  120
-#define MAIN_LABEL          F("Main loc. device :")
-#define MAIN_LABEL_WIDTH    200
-#define AUX_LABEL           F("Aux. loc. device :")
-#define AUX_LABEL_WIDTH     200
-#define LOCATION_LABEL      F("Location :")
-#define HEX_ID_LABEL        F("Hex ID:")
-#define HEX_ID_WIDTH        90
-#define DATA_LABEL          F("Data :")
-#define DATA_LABEL_WIDTH    70
-#define BCH1_OK_LABEL       F("BCH1-OK")
-#define BCH1_KO_LABEL       F("BCH1-KO")
-#define BCH2_OK_LABEL       F("BCH2-OK")
-#define BCH2_KO_LABEL       F("BCH2-KO")
-#define BCH_LABEL_WIDTH     90
-// MAPS and BEACON buttons
-#define MAPS_BUTTON_X     DISPLAY_WIDTH-BUTTON_WIDTH
-#define MAPS_BUTTON_Y     HEADER_BOTTOM-1
-#define MAPS_BUTTON_CAPTION "MAPS"
-#define BEACON_BUTTON_X   MAPS_BUTTON_X
-#define BEACON_BUTTON_Y   HEADER_BOTTOM+BUTTON_HEIGHT+2
-#define BEACON_BUTTON_CAPTION "BEACON"
-// Navigation BUTTONS
-#define PREVIONS_BUTTON_X   0
-#define PREVIONS_BUTTON_Y   DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT-1
-#define PREVIONS_BUTTON_CAPTION "<"
-#define NEXT_BUTTON_X   DISPLAY_WIDTH-SMALL_BUTTON_WIDTH-1
-#define NEXT_BUTTON_Y   DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT-1
-#define NEXT_BUTTON_CAPTION ">"
-// URL templates
-#define MAPS_URL_TEMPLATE   "https://www.google.com/maps/search/?api=1&query=%s%%2C%s"
-#define BEACON_URL_TEMPALTE "https://cryptic-earth-89063heroku-20.herokuapp.com/decoded/%s"
 
 // Interupt pin : use digital pin 18
 const int receiverPin = 21;
@@ -320,127 +259,6 @@ void updateDisplay()
   // Rotating index based on beacon list max size and position of last read frame
   int displayIndex = ((beaconsSize-1 + beaconsReadIndex - beaconsWriteIndex) % BEACON_LIST_MAX_SIZE)+1;
   uiSetBeacon(beacons[beaconsReadIndex],displayIndex,beaconsSize);
-
-#ifdef SERIAL_OUT 
-  Serial.print(HEADER_TEXT);
-#endif  
-/*
-
- 
-  if(beacon->hasMainLocatingDevice())
-  { // Main locating device
-    display->setCursor(0, currentY);
-    display->setTextColor(Display::Color::LightGreen);
-    display->println(MAIN_LABEL);
-    display->setTextColor(Display::Color::Beige);
-    display->setCursor(MAIN_LABEL_WIDTH, currentY);
-    display->println(beacon->getMainLocatingDeviceName());
-  #ifdef SERIAL_OUT 
-    Serial.print(MAIN_LABEL);   
-    Serial.println(beacon->getMainLocatingDeviceName());   
-  #endif
-    currentY+=LINE_HEIGHT;
-  }
-
-  if(beacon->hasAuxLocatingDevice())
-  { // Auxiliary locating device
-    display->setCursor(0, currentY);
-    display->setTextColor(Display::Color::LightGreen);
-    display->println(AUX_LABEL);
-    display->setTextColor(Display::Color::Beige);
-    display->setCursor(AUX_LABEL_WIDTH, currentY);
-    display->println(beacon->getAuxLocatingDeviceName());
-  #ifdef SERIAL_OUT 
-    Serial.print(AUX_LABEL);   
-    Serial.println(beacon->getAuxLocatingDeviceName());   
-  #endif
-    currentY+=LINE_HEIGHT;
-  }
-
-  // Hex ID
-  display->setCursor(0, currentY);
-  display->setTextColor(Display::Color::LightGreen);
-  display->println(HEX_ID_LABEL);
-  display->setTextColor(Display::Color::Beige);
-  display->setCursor(HEX_ID_WIDTH, currentY);
-  // "Id = 0x1122334455667788"
-  uint32_t msb = beacon->identifier >> 32;
-  uint32_t lsb = beacon->identifier;
-  sprintf(buffer,"%07lX%08lX",msb,lsb);
-  display->println(buffer);
-#ifdef SERIAL_OUT 
-  Serial.println(buffer);   
-#endif  
-  currentY+=LINE_HEIGHT;
-
-  // Data
-  display->setCursor(0, currentY);
-  display->setTextColor(Display::Color::LightGreen);
-  display->println(DATA_LABEL);
-  // Append BCH values before frame data
-  display->setFontSize(Display::FontSize::MEDIUM);
-  display->setTextColor(beacon->isBch1Valid() ? Display::Color::Green : Display::Color::Red);
-  display->setCursor(DATA_LABEL_WIDTH, currentY);
-  display->println(beacon->isBch1Valid() ? BCH1_OK_LABEL : BCH1_KO_LABEL);
-  if(beacon->longFrame) 
-  { // No second proteced field in short frames
-    display->setTextColor(beacon->isBch2Valid() ? Display::Color::Green : Display::Color::Red);
-    display->setCursor(DATA_LABEL_WIDTH+BCH_LABEL_WIDTH, currentY);
-    display->println(beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
-  }
-  display->setFontSize(Display::FontSize::SMALL);
-#ifdef SERIAL_OUT 
-  if(!beacon->isBch1Valid())
-  {
-    Serial.println("Wrong BCH1 value :");
-    Serial.print("Found    :");
-    Serial.println(beacon->bch1,2);
-    Serial.print("Expected :");
-    Serial.println(beacon->computedBch1,2);
-  }
-  if(beacon->longFrame && !beacon->isBch2Valid())
-  {
-    Serial.println("Wrong BCH2 value :");
-    Serial.print("Found    :");
-    Serial.println(beacon->bch2,2);
-    Serial.print("Expected :");
-    Serial.println(beacon->computedBch2,2);
-  }
-#endif
-
-  display->setTextColor(Display::Color::Beige);
-  currentY+=LINE_HEIGHT;
-  if (beacon->longFrame) 
-  { // Long frame
-    // HEX ID 30 Hexa
-    display->setCursor(0, currentY);
-    display->println(toHexString(beacon->frame,true,3,11));
-    currentY+=LINE_HEIGHT;
-    display->setCursor(0, currentY);
-    display->println(toHexString(beacon->frame,true,11,18));
-  }
-  else 
-  { // Short frame
-    display->setCursor(0, currentY);  
-    // HEX ID 22 Hexa bit 26 to 112
-    display->println(toHexString(beacon->frame,true,3,11));
-    currentY+=LINE_HEIGHT;
-    display->setCursor(0, currentY);
-    display->println(toHexString(beacon->frame,true,11,14));
-  }
-
-  // Maps button
-  mapsButton.enabled = locationKnown;
-  display->drawButton(mapsButton);
-
-  // Beacon button
-  beaconButton.enabled = true;
-  display->drawButton(beaconButton);
-
-  // Navigation buttons
-  display->drawButton(previousButton);
-  display->drawButton(nextButton);
-*/
 #ifdef DEBUG_RAM
   Serial.println(freeRam());
 #endif

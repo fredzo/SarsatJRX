@@ -63,6 +63,21 @@ lv_obj_t * infoMldTitle;
 lv_obj_t * infoMldLabel;
 lv_obj_t * infoSldTitle;
 lv_obj_t * infoSldLabel;
+// Map
+lv_obj_t * mapSerialTitle;
+lv_obj_t * mapSerialLabel;
+lv_obj_t * mapMldTitle;
+lv_obj_t * mapMldLabel;
+lv_obj_t * mapSldTitle;
+lv_obj_t * mapSldLabel;
+// Beacon
+lv_obj_t * beaconDataTitle;
+lv_obj_t * beaconDataLabel1;
+lv_obj_t * beaconDataLabel2;
+// Data
+lv_obj_t * dataDataTitle;
+lv_obj_t * dataDataLabel1;
+lv_obj_t * dataDataLabel2;
 
 
 void createMainBloc(lv_obj_t * bloc, int tabWidth)
@@ -126,6 +141,19 @@ void createInfoTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 void createMapTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
+    // Serial #
+    mapSerialTitle =  uiCreateLabel(tab,&style_section_title,SERIAL_LABEL,0,currentY,SERIAL_LABEL_WIDTH,LINE_HEIGHT);
+    mapSerialLabel = uiCreateLabel(tab,&style_section_text,"",SERIAL_LABEL_WIDTH,currentY,tabWidth-SERIAL_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // Main location deveice
+    mapMldTitle =  uiCreateLabel(tab,&style_section_title,MAIN_LABEL,0,currentY,MAIN_LABEL_WIDTH,LINE_HEIGHT);
+    mapMldLabel = uiCreateLabel(tab,&style_section_text,"",MAIN_LABEL_WIDTH,currentY,tabWidth-MAIN_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // Secondary location device
+    mapSldTitle =  uiCreateLabel(tab,&style_section_title,AUX_LABEL,0,currentY,AUX_LABEL_WIDTH,LINE_HEIGHT);
+    mapSldLabel = uiCreateLabel(tab,&style_section_text,"",AUX_LABEL_WIDTH,currentY,tabWidth-AUX_LABEL_WIDTH,LINE_HEIGHT);
+    //currentY+=LINE_HEIGHT;
+
     lv_obj_t * label = lv_label_create(tab);
     lv_label_set_text(label, "Location");
     // Map QR Code
@@ -138,6 +166,13 @@ void createMapTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 void createBeaconTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
+    // Data
+    beaconDataTitle =  uiCreateLabel(tab,&style_section_title,DATA_LABEL,0,currentY,LV_PCT(100),LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    beaconDataLabel1 = uiCreateLabel(tab,&style_section_text,"",0,currentY,LV_PCT(100),LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    beaconDataLabel2 = uiCreateLabel(tab,&style_section_text,"",0,currentY,LV_PCT(100),LINE_HEIGHT);
+
     lv_obj_t * label = lv_label_create(tab);
     lv_label_set_text(label, "Beacon");
     // Map QR Code
@@ -151,8 +186,12 @@ void createBeaconTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 void createDataTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
-    lv_obj_t * label = lv_label_create(tab);
-    lv_label_set_text(label, "Data");
+    // Data
+    dataDataTitle =  uiCreateLabel(tab,&style_section_title,DATA_LABEL,0,currentY,LV_PCT(100),LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    dataDataLabel1 = uiCreateLabel(tab,&style_section_text,"",0,currentY,LV_PCT(100),LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    dataDataLabel2 = uiCreateLabel(tab,&style_section_text,"",0,currentY,LV_PCT(100),LINE_HEIGHT);
 }
 
 void uiBeaconCreateView(lv_obj_t * cont)
@@ -336,8 +375,11 @@ void uiBeaconSetBeacon(Beacon* beacon)
     // Serial #
     if(beacon->hasSerialNumber)
     { // Serial number
+        const char* serial = beacon->serialNumber.c_str();
         lv_label_set_text(infoSerialTitle,SERIAL_LABEL);
-        lv_label_set_text(infoSerialLabel,beacon->serialNumber.c_str());
+        lv_label_set_text(infoSerialLabel,serial);
+        lv_label_set_text(mapSerialTitle,SERIAL_LABEL);
+        lv_label_set_text(mapSerialLabel,serial);
         #ifdef SERIAL_OUT 
         Serial.print(SERIAL_LABEL);   
         Serial.println(beacon->serialNumber);   
@@ -347,12 +389,16 @@ void uiBeaconSetBeacon(Beacon* beacon)
     {
         lv_label_set_text(infoSerialTitle,"");
         lv_label_set_text(infoSerialLabel,"");
+        lv_label_set_text(mapSerialTitle,"");
+        lv_label_set_text(mapSerialLabel,"");
     }
 
     // Location devices
     if(beacon->hasMainLocatingDevice())
     { // Main locating device
-        lv_label_set_text(infoMldLabel,beacon->getMainLocatingDeviceName().c_str());
+        const char* mld = beacon->getMainLocatingDeviceName().c_str();
+        lv_label_set_text(infoMldLabel, beacon->getMainLocatingDeviceName().c_str());
+        lv_label_set_text(mapMldLabel, beacon->getMainLocatingDeviceName().c_str());
         #ifdef SERIAL_OUT 
         Serial.print(MAIN_LABEL);   
         Serial.println(beacon->getMainLocatingDeviceName());   
@@ -361,11 +407,14 @@ void uiBeaconSetBeacon(Beacon* beacon)
     else
     {
         lv_label_set_text(infoMldLabel,"");
+        lv_label_set_text(mapMldLabel,"");
     }
 
     if(beacon->hasAuxLocatingDevice())
     { // Auxiliary locating device
+        const char* sld = beacon->getAuxLocatingDeviceName().c_str();
         lv_label_set_text(infoSldLabel,beacon->getAuxLocatingDeviceName().c_str());
+        lv_label_set_text(mapSldLabel,beacon->getAuxLocatingDeviceName().c_str());
         #ifdef SERIAL_OUT 
         Serial.print(AUX_LABEL);   
         Serial.println(beacon->getAuxLocatingDeviceName());   
@@ -374,7 +423,17 @@ void uiBeaconSetBeacon(Beacon* beacon)
     else
     {
         lv_label_set_text(infoSldLabel,"");
+        lv_label_set_text(mapSldLabel,"");
     }
+
+    // Data
+    const char* line1 = toHexString(beacon->frame,true,3,11).c_str();
+    // HEX ID 30 Hexa or HEX ID 22 Hexa bit 26 to 112
+    const char* line2 = beacon->longFrame ? toHexString(beacon->frame,true,11,18).c_str() : toHexString(beacon->frame,true,11,14).c_str();
+    lv_label_set_text(beaconDataLabel1,toHexString(beacon->frame,true,3,11).c_str());
+    lv_label_set_text(beaconDataLabel2,line2);
+    lv_label_set_text(dataDataLabel1,toHexString(beacon->frame,true,3,11).c_str());
+    lv_label_set_text(dataDataLabel2,line2);
 
     // Set map QR data
     beacon->location.formatFloatLocation(buffer,MAPS_URL_TEMPLATE);
