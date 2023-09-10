@@ -160,6 +160,7 @@ void uiBeaconCreateView(lv_obj_t * cont)
     tabview = lv_tabview_create(cont, LV_DIR_LEFT, 50);
     // Hide tab view for now
     lv_obj_add_flag(tabview, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_style_bg_color(tabview,uiBackgroundColor,0);
 
     lv_obj_t * tab_btns = lv_tabview_get_tab_btns(tabview);
     //lv_obj_set_style_bg_color(tab_btns, lv_palette_darken(LV_PALETTE_GREY, 3), 0);

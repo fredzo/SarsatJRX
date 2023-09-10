@@ -48,6 +48,8 @@ lv_style_t style_section_title;
 lv_style_t style_section_text;
 lv_style_t style_footer_text;
 
+lv_color_t uiBackgroundColor;
+
 const lv_font_t * font_large = &lv_font_montserrat_24;
 const lv_font_t * font_medium = &lv_font_montserrat_18;
 const lv_font_t * font_normal = &lv_font_montserrat_16;
@@ -253,6 +255,9 @@ void createUi()
     lv_style_set_text_align(&style_tag,LV_TEXT_ALIGN_CENTER);
     lv_style_set_pad_all(&style_tag,4);
     //lv_style_set_text_color(&style_tag, lv_palette_main(LV_PALETTE_BLUE));
+
+    // BG color
+    uiBackgroundColor = lv_color_make(7, 7, 7);
     
     lv_obj_t * win = lv_win_create(lv_scr_act(),HEADER_HEIGHT);
     createHeader(win);

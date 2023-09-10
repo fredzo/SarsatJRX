@@ -25,6 +25,8 @@ extern lv_style_t style_section_title;
 extern lv_style_t style_section_text;
 extern lv_style_t style_footer_text;
 
+extern lv_color_t uiBackgroundColor;
+
 extern const lv_font_t * font_large;
 extern const lv_font_t * font_medium;
 extern const lv_font_t * font_normal;
