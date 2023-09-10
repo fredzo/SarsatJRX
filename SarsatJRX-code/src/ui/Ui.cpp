@@ -32,8 +32,28 @@ extern void previousFrame();
 extern void nextFrame();
 
 /**********************
- *  STATIC VARIABLES
+ *  VARIABLES
  **********************/
+
+lv_style_t style_text_mono;
+lv_style_t style_title;
+lv_style_t style_footer;
+lv_style_t style_footer_highlight;
+lv_style_t style_pad_small;
+lv_style_t style_pad_tiny;
+lv_style_t style_pad_none;
+lv_style_t style_tag;
+lv_style_t style_header;
+lv_style_t style_section_title;
+lv_style_t style_section_text;
+lv_style_t style_footer_text;
+
+const lv_font_t * font_large = &lv_font_montserrat_24;
+const lv_font_t * font_medium = &lv_font_montserrat_18;
+const lv_font_t * font_normal = &lv_font_montserrat_16;
+const lv_font_t * font_mono_medium = &casscadia_mono_16;
+const lv_font_t * font_mono = &casscadia_mono;
+
 lv_obj_t * timeLabel;
 lv_obj_t * powerLabel;
 lv_obj_t * headerledSig2;
@@ -171,7 +191,7 @@ void createFooter(lv_obj_t * win)
 
 void createUi()
 {   // Load default theme in dark mode
-    lv_theme_default_init(NULL, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), LV_THEME_DEFAULT_DARK, LV_FONT_DEFAULT);
+    lv_theme_t * theme = lv_theme_default_init(NULL, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), LV_THEME_DEFAULT_DARK, LV_FONT_DEFAULT);
 
     // Styles
     // Text mono
@@ -182,12 +202,19 @@ void createUi()
     lv_style_init(&style_title);
     lv_style_set_text_font(&style_title, font_large);
     lv_style_set_text_align(&style_title, LV_TEXT_ALIGN_RIGHT);
+    // Header
+    lv_style_init(&style_header);
+    lv_style_set_text_font(&style_header, font_large);
+    lv_style_set_text_align(&style_header, LV_TEXT_ALIGN_CENTER);
+    lv_style_set_text_color(&style_header, lv_palette_lighten(LV_PALETTE_CYAN,1));
     // Section title / text
     lv_style_init(&style_section_title);
     lv_style_set_text_font(&style_section_title, font_normal);
-    lv_style_set_text_color(&style_section_title, lv_palette_lighten(LV_PALETTE_AMBER,1));
+    lv_style_set_text_color(&style_section_title, lv_palette_lighten(LV_PALETTE_CYAN,1));
     lv_style_init(&style_section_text);
-    lv_style_set_text_font(&style_section_text, font_normal);
+    lv_style_set_text_font(&style_section_text, font_mono_medium);
+    lv_style_set_text_color(&style_section_text, lv_palette_lighten(LV_PALETTE_YELLOW,4));
+    lv_style_set_pad_top(&style_section_text, 2);
     // Footer
     lv_style_init(&style_footer);
     lv_style_set_text_font(&style_footer, font_medium);
@@ -198,7 +225,7 @@ void createUi()
     lv_style_set_text_font(&style_footer_highlight, font_large);
     lv_style_set_text_align(&style_footer_highlight, LV_TEXT_ALIGN_CENTER);
     lv_style_set_pad_left(&style_footer_highlight, 0);
-    lv_style_set_text_color(&style_footer_highlight, lv_palette_lighten(LV_PALETTE_RED,1));
+    lv_style_set_text_color(&style_footer_highlight, lv_palette_lighten(LV_PALETTE_RED,2));
     // Small padding
     lv_style_init(&style_pad_small);
     lv_style_set_pad_all(&style_pad_small, 4);
@@ -234,7 +261,7 @@ void createUi()
     lv_obj_t * cont = lv_win_get_content(win);  /*Content can be added here*/
     lv_obj_add_style(cont, &style_pad_none, 0);
 
-    uiBeaconCreateTabView(cont);
+    uiBeaconCreateView(cont);
 
     // Pages label
     pagesLabel = lv_label_create(cont);
@@ -254,6 +281,7 @@ void uiSetBeacon(Beacon* beacon, int curPage, int pageCount)
     lv_label_set_text_fmt(pagesLabel,HEADER_PAGES_TEMPLATE,curPage,pageCount);
     if(!uiBeaconVisible)
     {
+        lv_obj_clear_flag(mainBloc, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(tabview, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(pagesLabel, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(previousButton, LV_OBJ_FLAG_CLICKABLE);
@@ -310,5 +338,13 @@ void uiSetLedFrameReceivedState(bool on)
     on ? lv_led_on(ledFrameReceived) : lv_led_off(ledFrameReceived);
 }
 
-
+lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text, int x, int y, int width, int height)
+{
+    lv_obj_t *  result = lv_label_create(parent);
+    lv_label_set_text(result, text);
+    lv_obj_add_style(result,style,0);
+    lv_obj_set_size(result,width,height);
+    lv_obj_set_pos(result,x,y);
+    return result;
+}
 

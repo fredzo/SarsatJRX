@@ -9,28 +9,29 @@
 #define SERIAL_OUT
 
 
-extern const lv_font_t cascadica_mono;
+extern const lv_font_t casscadia_mono;
+extern const lv_font_t casscadia_mono_16;
 
-static lv_style_t style_text_mono;
-static lv_style_t style_title;
-static lv_style_t style_footer;
-static lv_style_t style_footer_highlight;
-static lv_style_t style_icon;
-static lv_style_t style_bullet;
-static lv_style_t style_pad_small;
-static lv_style_t style_pad_tiny;
-static lv_style_t style_pad_none;
-static lv_style_t style_tag;
-static lv_style_t style_section_title;
-static lv_style_t style_section_text;
-static lv_style_t style_footer_text;
+extern lv_style_t style_text_mono;
+extern lv_style_t style_title;
+extern lv_style_t style_footer;
+extern lv_style_t style_footer_highlight;
+extern lv_style_t style_pad_small;
+extern lv_style_t style_pad_tiny;
+extern lv_style_t style_pad_none;
+extern lv_style_t style_tag;
+extern lv_style_t style_header;
+extern lv_style_t style_section_title;
+extern lv_style_t style_section_text;
+extern lv_style_t style_footer_text;
 
-static const lv_font_t * font_large = &lv_font_montserrat_24;
-static const lv_font_t * font_medium = &lv_font_montserrat_18;
-static const lv_font_t * font_normal = &lv_font_montserrat_12;
-static const lv_font_t * font_mono = &cascadica_mono;
+extern const lv_font_t * font_large;
+extern const lv_font_t * font_medium;
+extern const lv_font_t * font_normal;
+extern const lv_font_t * font_mono;
 
 extern lv_obj_t * tabview;
+extern lv_obj_t * mainBloc;
 
 // Methods
 void createUi();
@@ -50,5 +51,7 @@ void uiSetLedSig2State(bool on);
 void uiSetLedInFrameState(bool on);
 
 void uiSetLedFrameReceivedState(bool on);
+
+lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text, int x, int y, int width, int height);
 
 #endif 

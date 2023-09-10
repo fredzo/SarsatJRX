@@ -6,11 +6,11 @@
 
 #include <lvgl.h>
 
-#ifndef CASCADICA_MONO
-#define CASCADICA_MONO 1
+#ifndef CASSCADIA_MONO
+#define CASSCADIA_MONO 1
 #endif
 
-#if CASCADICA_MONO
+#if CASSCADIA_MONO
 
 /*-----------------
  *    BITMAPS
@@ -798,9 +798,9 @@ static lv_font_fmt_txt_dsc_t font_dsc = {
 
 /*Initialize a public general font descriptor*/
 #if LV_VERSION_CHECK(8, 0, 0)
-const lv_font_t cascadica_mono = {
+const lv_font_t casscadia_mono = {
 #else
-lv_font_t cascadica_mono = {
+lv_font_t casscadia_mono = {
 #endif
     .get_glyph_dsc = lv_font_get_glyph_dsc_fmt_txt,    /*Function pointer to get glyph's data*/
     .get_glyph_bitmap = lv_font_get_bitmap_fmt_txt,    /*Function pointer to get glyph's bitmap*/
@@ -818,5 +818,5 @@ lv_font_t cascadica_mono = {
 
 
 
-#endif /*#if CASCADICA_MONO*/
+#endif /*#if CASSCADIA_MONO*/
 

@@ -7,6 +7,6 @@
 
 void uiBeaconSetBeacon(Beacon* beacon);
 
-void uiBeaconCreateTabView(lv_obj_t * cont);
+void uiBeaconCreateView(lv_obj_t * cont);
 
 #endif 
