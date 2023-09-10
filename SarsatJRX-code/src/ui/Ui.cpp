@@ -20,16 +20,11 @@
 #define HEADER_TIME_Y     HEADER_POWER_Y
 
 // Footer
-#define FOOTER_HEIGHT       60
+#define FOOTER_HEIGHT       50
 #define FOOTER_LABEL_X      DISPLAY_WIDTH/2
 #define FOOTER_LABEL_Y      DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT+16
 #define FOOTER_WAIT_LABEL   "Waiting for the wave..."
 #define FOOTER_FRAME_LABEL  "Frame received !"
-#define FOOTER_RADIUS_MAX   SMALL_BUTTON_HEIGHT/2-5
-#define FOOTER_RADIUS_MIN   FOOTER_RADIUS_MAX-4
-#define FOOTER_SPINNER_X    SMALL_BUTTON_WIDTH+FOOTER_RADIUS_MAX+5
-#define FOOTER_SPINNER_Y    DISPLAY_HEIGHT-(SMALL_BUTTON_HEIGHT/2)
-
 
 // Externs
 extern void readNextSampleFrame();
@@ -153,7 +148,7 @@ void createFooter(lv_obj_t * win)
     lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
     // Spinner
     spinner = lv_spinner_create(footer,2000,60);
-    lv_obj_set_size(spinner, 56, LV_PCT(100));
+    lv_obj_set_size(spinner, 46, LV_PCT(100));
     lv_obj_set_style_arc_width(spinner,6,LV_PART_INDICATOR);
     lv_obj_set_style_pad_top(spinner,4,0);
     lv_obj_set_style_pad_left(spinner,10,0);
@@ -278,20 +273,18 @@ void uiSetPower(const char* time)
     lv_label_set_text(powerLabel, time);
 }
 
-void uiSetSpinnerVisible(bool visible)
+void uiShowFrameReceived(bool show)
 {
-    visible ? lv_obj_clear_flag(spinner, LV_OBJ_FLAG_HIDDEN) : lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
-}
-
-void uiSetFooter(const char* footer, bool highlight)
-{
-    lv_label_set_text(footerLabel, footer);
-    if(highlight)
+    if(show)
     {
+        lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+        lv_label_set_text(footerLabel, FOOTER_FRAME_LABEL);
         lv_obj_add_style(footerLabel,&style_footer_highlight,0);
     }
     else
     {
+        lv_obj_clear_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+        lv_label_set_text(footerLabel, FOOTER_WAIT_LABEL);
         lv_obj_add_style(footerLabel,&style_footer,0);
     }
 }

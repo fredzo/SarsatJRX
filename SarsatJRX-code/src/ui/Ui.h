@@ -41,9 +41,7 @@ void uiSetTime(const char* time);
 
 void uiSetPower(const char* time);
 
-void uiSetSpinnerVisible(bool visible);
-
-void uiSetFooter(const char* footer, bool highlight);
+void uiShowFrameReceived(bool show);
 
 void uiSetLedSig1State(bool on);
 

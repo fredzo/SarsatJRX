@@ -79,6 +79,7 @@ void uiBeaconCreateTabView(lv_obj_t * cont)
 {
     // Tab view
     tabview = lv_tabview_create(cont, LV_DIR_LEFT, 50);
+    // Hide tab view for now
     lv_obj_add_flag(tabview, LV_OBJ_FLAG_HIDDEN);
 
     lv_obj_t * tab_btns = lv_tabview_get_tab_btns(tabview);
@@ -104,7 +105,6 @@ void uiBeaconCreateTabView(lv_obj_t * cont)
     createMapTab(tab2);
     createBeaconTab(tab3);
     createDataTab(tab4);
-    // Hide tab view for now
     lv_obj_clear_flag(lv_tabview_get_content(tabview), LV_OBJ_FLAG_SCROLLABLE);
 }
 

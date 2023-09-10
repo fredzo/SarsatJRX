@@ -7,11 +7,6 @@
 #define DISPLAY_WIDTH   480
 #define DISPLAY_HEIGHT  320
 
-#define BUTTON_WIDTH  100
-#define BUTTON_HEIGHT 50
-#define SMALL_BUTTON_WIDTH  80
-#define SMALL_BUTTON_HEIGHT 45
-
 #define ROUND_RECT_RADIUS 6
 
 class Display

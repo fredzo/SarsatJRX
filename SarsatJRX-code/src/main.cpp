@@ -65,16 +65,6 @@ bool ledFrameReceivedState = false;
 #define HEADER_POWER_X    LED_SIG_1_X-70
 #define HEADER_POWER_Y    (HEADER_HEIGHT-12)/2
 
-// Footer
-#define FOOTER_LABEL_X      DISPLAY_WIDTH/2
-#define FOOTER_LABEL_Y      DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT+16
-#define FOOTER_WAIT_LABEL   "Waiting for the wave..."
-#define FOOTER_FRAME_LABEL  "Frame received !"
-#define FOOTER_RADIUS_MAX   SMALL_BUTTON_HEIGHT/2-5
-#define FOOTER_RADIUS_MIN   FOOTER_RADIUS_MAX-4
-#define FOOTER_SPINNER_X    SMALL_BUTTON_WIDTH+FOOTER_RADIUS_MAX+5
-#define FOOTER_SPINNER_Y    DISPLAY_HEIGHT-(SMALL_BUTTON_HEIGHT/2)
-
 // Beacon info
 #define LINE_HEIGHT         16
 #define FRAME_MODE_LABEL    F("Frame mode :")
@@ -295,23 +285,9 @@ void initHeader()
 // Footer management
 unsigned long lastFooterUpdateTime;
 bool footerShowingFrameReceived = false;
-bool footerShowingWait = false;
 bool footerShowingSpinner = false;
 int spinnerPosition = 0;
-#define FOOTER_UPDATE_TIME 10
 #define FOOTER_FRAME_RECEIVED_TIME 2000
-
-void showWaiting(bool show)
-{
-    uiSetFooter(FOOTER_WAIT_LABEL,false);
-    footerShowingWait = show;
-}
-
-void showFrameReceived(bool show)
-{
-    uiSetFooter(FOOTER_FRAME_LABEL,true);
-    footerShowingFrameReceived = show;
-}
 
 void updateFooter(bool frameReceived)
 {  
@@ -321,8 +297,8 @@ void updateFooter(bool frameReceived)
     if((now - lastFooterUpdateTime) > FOOTER_FRAME_RECEIVED_TIME)
     {
       lastFooterUpdateTime = now;
-      showFrameReceived(false);
-      showWaiting(true);
+      uiShowFrameReceived(false);
+      footerShowingFrameReceived = false;
     }
   }
   else
@@ -330,18 +306,8 @@ void updateFooter(bool frameReceived)
     if(frameReceived)
     {
       lastFooterUpdateTime = now;
-      showWaiting(false);
-      uiSetSpinnerVisible(false);
-      showFrameReceived(true);
-    }
-    else if ((now - lastFooterUpdateTime) > FOOTER_UPDATE_TIME)
-    {
-      lastFooterUpdateTime = now;
-      uiSetSpinnerVisible(true);
-      if(!footerShowingWait)
-      {
-        showWaiting(true);
-      }
+      uiShowFrameReceived(true);
+      footerShowingFrameReceived = true;
     }
   }
 }
