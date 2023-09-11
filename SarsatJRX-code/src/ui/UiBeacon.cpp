@@ -375,14 +375,14 @@ void uiBeaconSetBeacon(Beacon* beacon)
     // Serial #
     if(beacon->hasSerialNumber)
     { // Serial number
-        const char* serial = beacon->serialNumber.c_str();
+        String serial = beacon->serialNumber;
         lv_label_set_text(infoSerialTitle,SERIAL_LABEL);
-        lv_label_set_text(infoSerialLabel,serial);
+        lv_label_set_text(infoSerialLabel,serial.c_str());
         lv_label_set_text(mapSerialTitle,SERIAL_LABEL);
-        lv_label_set_text(mapSerialLabel,serial);
+        lv_label_set_text(mapSerialLabel,serial.c_str());
         #ifdef SERIAL_OUT 
         Serial.print(SERIAL_LABEL);   
-        Serial.println(beacon->serialNumber);   
+        Serial.println(serial);   
         #endif
     }
     else
@@ -396,12 +396,12 @@ void uiBeaconSetBeacon(Beacon* beacon)
     // Location devices
     if(beacon->hasMainLocatingDevice())
     { // Main locating device
-        const char* mld = beacon->getMainLocatingDeviceName().c_str();
-        lv_label_set_text(infoMldLabel, beacon->getMainLocatingDeviceName().c_str());
-        lv_label_set_text(mapMldLabel, beacon->getMainLocatingDeviceName().c_str());
+        String mld = beacon->getMainLocatingDeviceName();
+        lv_label_set_text(infoMldLabel, mld.c_str());
+        lv_label_set_text(mapMldLabel, mld.c_str());
         #ifdef SERIAL_OUT 
         Serial.print(MAIN_LABEL);   
-        Serial.println(beacon->getMainLocatingDeviceName());   
+        Serial.println(mld);   
         #endif
     }
     else
@@ -411,13 +411,13 @@ void uiBeaconSetBeacon(Beacon* beacon)
     }
 
     if(beacon->hasAuxLocatingDevice())
-    { // Auxiliary locating device
-        const char* sld = beacon->getAuxLocatingDeviceName().c_str();
-        lv_label_set_text(infoSldLabel,beacon->getAuxLocatingDeviceName().c_str());
-        lv_label_set_text(mapSldLabel,beacon->getAuxLocatingDeviceName().c_str());
+    {   // Auxiliary locating device
+        String sld = beacon->getAuxLocatingDeviceName();
+        lv_label_set_text(infoSldLabel,sld.c_str());
+        lv_label_set_text(mapSldLabel,sld.c_str());
         #ifdef SERIAL_OUT 
         Serial.print(AUX_LABEL);   
-        Serial.println(beacon->getAuxLocatingDeviceName());   
+        Serial.println(sld);   
         #endif
     }
     else
@@ -427,13 +427,13 @@ void uiBeaconSetBeacon(Beacon* beacon)
     }
 
     // Data
-    const char* line1 = toHexString(beacon->frame,true,3,11).c_str();
+    String line1 = toHexString(beacon->frame,true,3,11);
     // HEX ID 30 Hexa or HEX ID 22 Hexa bit 26 to 112
-    const char* line2 = beacon->longFrame ? toHexString(beacon->frame,true,11,18).c_str() : toHexString(beacon->frame,true,11,14).c_str();
-    lv_label_set_text(beaconDataLabel1,toHexString(beacon->frame,true,3,11).c_str());
-    lv_label_set_text(beaconDataLabel2,line2);
-    lv_label_set_text(dataDataLabel1,toHexString(beacon->frame,true,3,11).c_str());
-    lv_label_set_text(dataDataLabel2,line2);
+    String line2 = beacon->longFrame ? toHexString(beacon->frame,true,11,18) : toHexString(beacon->frame,true,11,14);
+    lv_label_set_text(beaconDataLabel1,line1.c_str());
+    lv_label_set_text(beaconDataLabel2,line2.c_str());
+    lv_label_set_text(dataDataLabel1,line1.c_str());
+    lv_label_set_text(dataDataLabel2,line2.c_str());
 
     // Set map QR data
     beacon->location.formatFloatLocation(buffer,MAPS_URL_TEMPLATE);
