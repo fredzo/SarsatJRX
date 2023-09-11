@@ -100,7 +100,7 @@ void readBeacon()
 }
 
 // Leds management (header + physical led)
-#define LED_BLINK_TIME 500 // 500 ms
+#define LED_BLINK_TIME 1000 // 1 s
 unsigned long ledFrameReceivedStartBlinkTime;
 unsigned long ledSig1StartBlinkTime;
 unsigned long ledSig2StartBlinkTime;
@@ -127,7 +127,7 @@ void frameReceivedLedBlink()
 }
 
 // Store last displayed power value
-unsigned long lastPowerDisplayTime;
+unsigned long lastPowerDisplayTime = 0;
 float powerValue = -1;
 #define POWER_DISPLAY_PERIOD 2000
 
@@ -356,8 +356,12 @@ void loop()
   #endif    
 
     if (((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
-    {
+    { // First blick leds
       frameReceivedLedBlink();
+      updateLeds();
+      updateHeader();
+      display->handleTimer();
+      // Then read beacon and update beacon display
       readBeacon();
       updateDisplay();
     } 
@@ -372,6 +376,6 @@ void loop()
   updateLeds();
   updateHeader();
   display->handleTimer();
-  delay(5);
+  //delay(5);
 }
 
