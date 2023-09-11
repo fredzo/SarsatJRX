@@ -24,6 +24,7 @@ extern lv_style_t style_header;
 extern lv_style_t style_section_title;
 extern lv_style_t style_section_text;
 extern lv_style_t style_footer_text;
+extern lv_style_t style_time;
 
 extern lv_color_t uiBackgroundColor;
 

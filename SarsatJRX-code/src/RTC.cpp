@@ -4,6 +4,21 @@
 
 Rtc *Rtc::rtcInstance = nullptr;
 
+String Rtc::Date::getDateString()
+{
+    char buffer[16];
+    sprintf(buffer,"%02d/%02d/%04d", day,month,year);
+    return String(buffer);
+}
+
+String Rtc::Date::getTimeString()
+{
+    char buffer[16];
+    sprintf(buffer,"%02d:%02d:%02d", hour,minute,second);
+    return String(buffer);
+}
+
+
 void Rtc::rtcInit(I2CBus* i2c)
 {
     rtcI2c = i2c;
@@ -31,18 +46,12 @@ Rtc::Date Rtc::getDate()
 
 String Rtc::getDateString()
 {
-    Date date = getDate();
-    char buffer[16];
-    sprintf(buffer,"%02d/%02d/%04d", date.day,date.month,date.year);
-    return String(buffer);
+    return getDate().getDateString();
 }
 
 String Rtc::getTimeString()
 {
-    Date date = getDate();
-    char buffer[16];
-    sprintf(buffer,"%02d:%02d:%02d", date.hour,date.minute,date.second);
-    return String(buffer);
+    return getDate().getTimeString();
 }
 
 void rtcInterruptCallack(void)

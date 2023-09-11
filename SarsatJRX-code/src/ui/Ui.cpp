@@ -47,6 +47,7 @@ lv_style_t style_header;
 lv_style_t style_section_title;
 lv_style_t style_section_text;
 lv_style_t style_footer_text;
+lv_style_t style_time;
 
 lv_color_t uiBackgroundColor;
 
@@ -255,6 +256,12 @@ void createUi()
     lv_style_set_text_align(&style_tag,LV_TEXT_ALIGN_CENTER);
     lv_style_set_pad_all(&style_tag,4);
     //lv_style_set_text_color(&style_tag, lv_palette_main(LV_PALETTE_BLUE));
+    // Time text
+    lv_style_init(&style_time);
+    lv_style_set_text_font(&style_time, font_mono);
+    lv_style_set_text_color(&style_time, lv_palette_lighten(LV_PALETTE_CYAN,1));
+    lv_style_set_pad_top(&style_time,4);
+
 
     // BG color
     uiBackgroundColor = lv_color_make(7, 7, 7);

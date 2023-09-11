@@ -26,6 +26,8 @@ class Rtc
                 int hour;
                 int minute;
                 int second;
+                String getDateString();
+                String getTimeString();
         };
         
         void rtcInit(I2CBus* i2c);

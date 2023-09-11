@@ -8,7 +8,7 @@
 // Beacon info
 #define HEADER_HEIGHT       24
 #define LINE_HEIGHT         18
-#define MAIN_BLOC_HEIGHT    HEADER_HEIGHT+9*LINE_HEIGHT
+#define MAIN_BLOC_HEIGHT    HEADER_HEIGHT+8*LINE_HEIGHT
 #define INFO_LABEL          "Info :"
 #define INFO_LABEL_WIDTH    50
 #define SERIAL_LABEL        "Serial # :"
@@ -29,6 +29,8 @@
 #define HEX_ID_WIDTH        75
 #define DATA_LABEL          "Data :"
 #define DATA_LABEL_WIDTH    70
+#define DATE_LABEL          "Date :"
+#define DATE_LABEL_WIDTH    55
 #define BCH_LABEL_WIDTH     90
 // QR code
 #define QR_SIZE             130
@@ -42,6 +44,7 @@ lv_obj_t * mapQr;
 lv_obj_t * beaconQr;
 
 // Main bloc
+lv_obj_t * beaconTimeLabel;
 lv_obj_t * frameModeLabel;
 lv_obj_t * infoTitle;
 lv_obj_t * infoLabel1;
@@ -54,9 +57,9 @@ lv_obj_t * locationLabel3;
 lv_obj_t * controlTitle;
 lv_obj_t * controlLabel1;
 lv_obj_t * controlLabel2;
-lv_obj_t * hexIdTitle;
-lv_obj_t * hexIdLabel;
 // Info
+lv_obj_t * infoDateTitle;
+lv_obj_t * infoDateLabel;
 lv_obj_t * infoSerialTitle;
 lv_obj_t * infoSerialLabel;
 lv_obj_t * infoMldTitle;
@@ -64,6 +67,8 @@ lv_obj_t * infoMldLabel;
 lv_obj_t * infoSldTitle;
 lv_obj_t * infoSldLabel;
 // Map
+lv_obj_t * mapHexIdTitle;
+lv_obj_t * mapHexIdLabel;
 lv_obj_t * mapSerialTitle;
 lv_obj_t * mapSerialLabel;
 lv_obj_t * mapMldTitle;
@@ -71,10 +76,14 @@ lv_obj_t * mapMldLabel;
 lv_obj_t * mapSldTitle;
 lv_obj_t * mapSldLabel;
 // Beacon
+lv_obj_t * beaconHexIdTitle;
+lv_obj_t * beaconHexIdLabel;
 lv_obj_t * beaconDataTitle;
 lv_obj_t * beaconDataLabel1;
 lv_obj_t * beaconDataLabel2;
 // Data
+lv_obj_t * dataHexIdTitle;
+lv_obj_t * dataHexIdLabel;
 lv_obj_t * dataDataTitle;
 lv_obj_t * dataDataLabel1;
 lv_obj_t * dataDataLabel2;
@@ -83,6 +92,9 @@ lv_obj_t * dataDataLabel2;
 void createMainBloc(lv_obj_t * bloc, int tabWidth)
 {   // Frame mode
     int currentY = 0;
+
+    // Time
+    beaconTimeLabel = uiCreateLabel(bloc,&style_time,"",0,currentY,80,HEADER_HEIGHT);
 
     frameModeLabel = uiCreateLabel(bloc,&style_header,"",-20,currentY,LV_PCT(100),HEADER_HEIGHT);
     currentY+=HEADER_HEIGHT;
@@ -115,16 +127,16 @@ void createMainBloc(lv_obj_t * bloc, int tabWidth)
     controlTitle =  uiCreateLabel(bloc,&style_section_title,CONTROL_LABEL,0,currentY,CONTROL_TITLE_WIDTH,LINE_HEIGHT);
     controlLabel1 = uiCreateLabel(bloc,&style_section_text,"",CONTROL_TITLE_WIDTH,currentY,CONTROL_LABEL_WIDTH,LINE_HEIGHT);
     controlLabel2 = uiCreateLabel(bloc,&style_section_text,"",CONTROL_TITLE_WIDTH+CONTROL_LABEL_WIDTH,currentY,CONTROL_LABEL_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
-
-    // Hex ID
-    hexIdTitle =  uiCreateLabel(bloc,&style_section_title,HEX_ID_LABEL,0,currentY,HEX_ID_WIDTH,LINE_HEIGHT);
-    hexIdLabel = uiCreateLabel(bloc,&style_section_text,"",HEX_ID_WIDTH,currentY,tabWidth-HEX_ID_WIDTH,LINE_HEIGHT);
     //currentY+=LINE_HEIGHT;
 }
 
 void createInfoTab(lv_obj_t * tab, int currentY, int tabWidth)
 {  
+    // Date
+    infoDateTitle =  uiCreateLabel(tab,&style_section_title,DATE_LABEL,0,currentY,DATE_LABEL_WIDTH,LINE_HEIGHT);
+    infoDateLabel = uiCreateLabel(tab,&style_section_text,"",DATE_LABEL_WIDTH,currentY,tabWidth-DATE_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+
     // Serial #
     infoSerialTitle =  uiCreateLabel(tab,&style_section_title,SERIAL_LABEL,0,currentY,SERIAL_LABEL_WIDTH,LINE_HEIGHT);
     infoSerialLabel = uiCreateLabel(tab,&style_section_text,"",SERIAL_LABEL_WIDTH,currentY,tabWidth-SERIAL_LABEL_WIDTH,LINE_HEIGHT);
@@ -141,6 +153,10 @@ void createInfoTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 void createMapTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
+    // Hex ID
+    mapHexIdTitle =  uiCreateLabel(tab,&style_section_title,HEX_ID_LABEL,0,currentY,HEX_ID_WIDTH,LINE_HEIGHT);
+    mapHexIdLabel = uiCreateLabel(tab,&style_section_text,"",HEX_ID_WIDTH,currentY,tabWidth-HEX_ID_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
     // Serial #
     mapSerialTitle =  uiCreateLabel(tab,&style_section_title,SERIAL_LABEL,0,currentY,SERIAL_LABEL_WIDTH,LINE_HEIGHT);
     mapSerialLabel = uiCreateLabel(tab,&style_section_text,"",SERIAL_LABEL_WIDTH,currentY,tabWidth-SERIAL_LABEL_WIDTH,LINE_HEIGHT);
@@ -154,8 +170,6 @@ void createMapTab(lv_obj_t * tab, int currentY, int tabWidth)
     mapSldLabel = uiCreateLabel(tab,&style_section_text,"",AUX_LABEL_WIDTH,currentY,tabWidth-AUX_LABEL_WIDTH,LINE_HEIGHT);
     //currentY+=LINE_HEIGHT;
 
-    lv_obj_t * label = lv_label_create(tab);
-    lv_label_set_text(label, "Location");
     // Map QR Code
     mapQr = lv_qrcode_create(tab, QR_SIZE, lv_color_black(), lv_color_white());
     // Add a border with bg_color
@@ -166,6 +180,11 @@ void createMapTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 void createBeaconTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
+    // Hex ID
+    beaconHexIdTitle =  uiCreateLabel(tab,&style_section_title,HEX_ID_LABEL,0,currentY,HEX_ID_WIDTH,LINE_HEIGHT);
+    beaconHexIdLabel = uiCreateLabel(tab,&style_section_text,"",HEX_ID_WIDTH,currentY,tabWidth-HEX_ID_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+
     // Data
     beaconDataTitle =  uiCreateLabel(tab,&style_section_title,DATA_LABEL,0,currentY,LV_PCT(100),LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
@@ -173,8 +192,6 @@ void createBeaconTab(lv_obj_t * tab, int currentY, int tabWidth)
     currentY+=LINE_HEIGHT;
     beaconDataLabel2 = uiCreateLabel(tab,&style_section_text,"",0,currentY,LV_PCT(100),LINE_HEIGHT);
 
-    lv_obj_t * label = lv_label_create(tab);
-    lv_label_set_text(label, "Beacon");
     // Map QR Code
     beaconQr = lv_qrcode_create(tab, QR_SIZE, lv_color_black(), lv_color_white());
     // Add a border with bg_color
@@ -186,6 +203,11 @@ void createBeaconTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 void createDataTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
+    // Hex ID
+    dataHexIdTitle =  uiCreateLabel(tab,&style_section_title,HEX_ID_LABEL,0,currentY,HEX_ID_WIDTH,LINE_HEIGHT);
+    dataHexIdLabel = uiCreateLabel(tab,&style_section_text,"",HEX_ID_WIDTH,currentY,tabWidth-HEX_ID_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+
     // Data
     dataDataTitle =  uiCreateLabel(tab,&style_section_title,DATA_LABEL,0,currentY,LV_PCT(100),LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
@@ -243,6 +265,12 @@ void uiBeaconCreateView(lv_obj_t * cont)
 void uiBeaconSetBeacon(Beacon* beacon)
 {
     char buffer[128];
+    // Date / time
+    String date = beacon->date.getDateString();
+    String time = beacon->date.getTimeString();
+    lv_label_set_text(beaconTimeLabel,time.c_str());
+    sprintf(buffer,"%s - %s",date.c_str(),time.c_str());
+    lv_label_set_text(infoDateLabel,buffer);
     // Frame mode
     const char* frameMode;
     if (beacon->frameMode == Beacon::FrameMode::SELF_TEST) 
@@ -367,7 +395,9 @@ void uiBeaconSetBeacon(Beacon* beacon)
     uint32_t msb = beacon->identifier >> 32;
     uint32_t lsb = beacon->identifier;
     sprintf(buffer,"%07lX%08lX",msb,lsb);
-    lv_label_set_text(hexIdLabel,buffer);
+    lv_label_set_text(mapHexIdLabel,buffer);
+    lv_label_set_text(beaconHexIdLabel,buffer);
+    lv_label_set_text(dataHexIdLabel,buffer);
     #ifdef SERIAL_OUT 
     Serial.println(buffer);   
     #endif  
