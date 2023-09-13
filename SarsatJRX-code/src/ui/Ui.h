@@ -1,13 +1,10 @@
 #ifndef UI_H
 #define UI_H
 
+#include <SarsatJRXConf.h>
 #include <Arduino.h>
 #include <Beacon.h>
 #include <lvgl.h>
-
-// Enable serial out
-#define SERIAL_OUT
-
 
 extern const lv_font_t casscadia_mono;
 extern const lv_font_t casscadia_mono_16;

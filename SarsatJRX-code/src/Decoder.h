@@ -1,12 +1,9 @@
 #ifndef DECODER_H
 #define DECODER_H
 
+#include <SarsatJRXConf.h>
 #include <Arduino.h>
 #include <Beacon.h>
-
-// Enable decode debuging
-//#define DEBUG_DECODE
-
 
 void analyze(void);
 

@@ -1,10 +1,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <SarsatJRXConf.h>
 #include <Arduino.h>
-
-// Enable RAM debuging
-// #define DEBUG_RAM
 
 #ifdef DEBUG_RAM
 uint32_t freeRam();
