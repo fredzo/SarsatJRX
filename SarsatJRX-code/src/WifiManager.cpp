@@ -46,7 +46,7 @@ IPAddress ipAddr;
 long lastStatusCheckTime = 0;
 
 #define WIFI_STATUS_CHECK_PERIOD    500
-#define WIFI_RSSI_CHANGE_THRESHOLD  3
+#define WIFI_RSSI_CHANGE_THRESHOLD  10
 
 bool wifiUpdateStatus()
 {
