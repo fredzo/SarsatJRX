@@ -14,7 +14,15 @@ bool wifiUpdateStatus();
  */
 bool wifiManagerHandleClient();
 
+/**
+ * Returns true if Wifi is connected
+ */
 bool wifiManagerIsConnected();
+
+/**
+ * Returns true if portal is active
+ */
+bool wifiManagerIsPortalActive();
 #endif
 
 #endif 

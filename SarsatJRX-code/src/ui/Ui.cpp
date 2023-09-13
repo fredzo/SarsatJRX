@@ -20,8 +20,8 @@
 #define HEADER_TIME_Y       HEADER_POWER_Y
 // Wifi
 #define HEADER_WIFI_X       100
-#define HEADER_WIFI_Y       2
-#define HEADER_WIFI_SIZE    18
+#define HEADER_WIFI_Y       0
+#define HEADER_WIFI_SIZE    20
 
 // Footer
 #define FOOTER_HEIGHT       46

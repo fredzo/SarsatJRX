@@ -24,7 +24,7 @@ void wifiManagerStart()
   // detect the WiFi connection status in this configuration.
   config.autoReset = false;
   config.portalTimeout = 1;     // Don't block on AP mode
-  config.beginTimeout = 2000;   // Only wait 2s at wifi begin not to block Sarsat JRX setartup
+  config.beginTimeout = 3000;   // Only wait 3s at wifi begin not to block Sarsat JRX setartup
   config.autoReconnect = true;  // Automtic only if we have saved credentials
   config.reconnectInterval = 0; // Only reconnect on 1st connection failure
   config.retainPortal = true;
@@ -85,8 +85,10 @@ bool wifiUpdateStatus()
     if(changed)
     {
   #ifdef SERIAL_OUT
-      Serial.println("Ip address : " + ipAddr.toString());
       WiFi.printDiag(Serial);
+      Serial.println("Ip address : " + ipAddr.toString());
+      Serial.println("Wifi status : " + String(wifiStatus) + (wifiManagerIsConnected() ? " (connected)" : ""));
+      Serial.println("Portal status : " + String(portalStatus) + (wifiManagerIsPortalActive() ? " (active)" : ""));
   #endif
     }
   }
@@ -105,6 +107,11 @@ bool wifiManagerHandleClient()
 bool wifiManagerIsConnected()
 {
   return (wifiStatus == WL_CONNECTED);
+}
+
+bool wifiManagerIsPortalActive()
+{
+  return (portalStatus & AutoConnect::AC_CAPTIVEPORTAL);
 }
 
 #endif
