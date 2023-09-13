@@ -41,9 +41,12 @@ void wifiManagerStart()
 // Wifi status
 int portalStatus = -1;
 int wifiStatus = -1;
+int wifiRssi = 0;
 IPAddress ipAddr;
 long lastStatusCheckTime = 0;
-#define WIFI_STATUS_CHECK_PERIOD  500
+
+#define WIFI_STATUS_CHECK_PERIOD    500
+#define WIFI_RSSI_CHANGE_THRESHOLD  3
 
 bool wifiUpdateStatus()
 {
@@ -54,6 +57,7 @@ bool wifiUpdateStatus()
     int transition = portal.portalStatus();
     int wifi = WiFi.status();
     IPAddress locaIp = WiFi.localIP();
+    int rssi = WiFi.RSSI();
     if (transition != portalStatus) 
     {
       changed = true;
@@ -82,6 +86,12 @@ bool wifiUpdateStatus()
       changed = true;
       ipAddr = locaIp;
     }
+    if(abs(rssi-wifiRssi)>WIFI_RSSI_CHANGE_THRESHOLD)
+    {
+      changed = true;
+    }
+    // Store new value anyway
+    wifiRssi = rssi;
     if(changed)
     {
   #ifdef SERIAL_OUT
@@ -89,6 +99,7 @@ bool wifiUpdateStatus()
       Serial.println("Ip address : " + ipAddr.toString());
       Serial.println("Wifi status : " + String(wifiStatus) + (wifiManagerIsConnected() ? " (connected)" : ""));
       Serial.println("Portal status : " + String(portalStatus) + (wifiManagerIsPortalActive() ? " (active)" : ""));
+      Serial.println("RSSI : "+ String(wifiRssi) + " dBm");
   #endif
     }
   }
