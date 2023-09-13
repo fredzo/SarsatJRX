@@ -10,9 +10,6 @@ WebServer Server;
 AutoConnect portal(Server);
 AutoConnectConfig config;
 
-// Wifi status
-uint8_t wifiStatus = -1;
-
 void rootPage()
 {
   Server.send(200,"text/plain","--- SarsatJRX ---");
@@ -37,45 +34,77 @@ void wifiManagerStart()
   portal.config(config);
   portal.begin();
 #ifdef SERIAL_OUT
-  wifiManagerPrintStatus();
+  wifiUpdateStatus();
 #endif
 }
 
-#ifdef SERIAL_OUT
-void wifiManagerPrintStatus()
+// Wifi status
+int portalStatus = -1;
+int wifiStatus = -1;
+IPAddress ipAddr;
+long lastStatusCheckTime = 0;
+#define WIFI_STATUS_CHECK_PERIOD  500
+
+bool wifiUpdateStatus()
 {
-  uint8_t transition = portal.portalStatus();
-  if (transition != wifiStatus) 
+  bool changed = false;
+  long now = millis();
+  if(now-lastStatusCheckTime >= WIFI_STATUS_CHECK_PERIOD)
   {
-    if (transition & AutoConnect::AC_CAPTIVEPORTAL)
+    int transition = portal.portalStatus();
+    int wifi = WiFi.status();
+    IPAddress locaIp = WiFi.localIP();
+    if (transition != portalStatus) 
     {
-      Serial.println("Captive portal activated");
+      changed = true;
+      portalStatus = transition;
+  #ifdef SERIAL_OUT
+      if (transition & AutoConnect::AC_CAPTIVEPORTAL)
+      {
+        Serial.println("Captive portal activated");
+      }
+      else if (transition & AutoConnect::AC_AUTORECONNECT)
+      {
+        Serial.println("Auto reconnection applied");
+      }
+      else if (!(transition & AutoConnect::AC_ESTABLISHED))
+      {
+        Serial.println("WiFi connection lost");
+      }
     }
-    else if (transition & AutoConnect::AC_AUTORECONNECT)
+    if(wifi != wifiStatus)
     {
-      Serial.println("Auto reconnection applied");
+      changed = true;
+      wifiStatus = wifi;
     }
-    else if (!(transition & AutoConnect::AC_ESTABLISHED))
+    if(locaIp != ipAddr)
     {
-      Serial.println("WiFi connection lost");
+      changed = true;
+      ipAddr = locaIp;
     }
-
-    Serial.printf("Ip address : %s\n",WiFi.localIP().toString());
-    WiFi.printDiag(Serial);
-
-    wifiStatus = transition;
+    if(changed)
+    {
+  #ifdef SERIAL_OUT
+      Serial.println("Ip address : " + ipAddr.toString());
+      WiFi.printDiag(Serial);
+  #endif
+    }
   }
+  return changed;
 }
 #endif
 
-void wifiManagerHandleClient()
+bool wifiManagerHandleClient()
 {
     // Web and wifi
   portal.handleClient();
   //Server.handleClient();
-#ifdef SERIAL_OUT
-  wifiManagerPrintStatus();
-#endif
+  return wifiUpdateStatus();
+}
+
+bool wifiManagerIsConnected()
+{
+  return (wifiStatus == WL_CONNECTED);
 }
 
 #endif

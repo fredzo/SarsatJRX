@@ -40,6 +40,8 @@ void uiSetBeacon(Beacon* beacon, int curPage, int pageCount);
 
 void uiSetTime(const char* time);
 
+void uiSetWifiStatus(bool on);
+
 void uiSetPower(const char* time);
 
 void uiShowFrameReceived(bool show);

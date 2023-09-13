@@ -7,9 +7,14 @@
 #ifdef WIFI
 void wifiManagerStart();
 
-void wifiManagerPrintStatus();
+bool wifiUpdateStatus();
 
-void wifiManagerHandleClient();
+/**
+ * Returns true if wifi status changed
+ */
+bool wifiManagerHandleClient();
+
+bool wifiManagerIsConnected();
 #endif
 
 #endif 

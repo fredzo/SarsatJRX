@@ -16,8 +16,12 @@
 #define LED_CONTAINER_SIZE  4*LED_SIZE+6*LED_SPACING
 // Power and time
 #define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
-#define HEADER_POWER_Y    (HEADER_HEIGHT-16)/2
-#define HEADER_TIME_Y     HEADER_POWER_Y
+#define HEADER_POWER_Y      (HEADER_HEIGHT-16)/2
+#define HEADER_TIME_Y       HEADER_POWER_Y
+// Wifi
+#define HEADER_WIFI_X       100
+#define HEADER_WIFI_Y       2
+#define HEADER_WIFI_SIZE    18
 
 // Footer
 #define FOOTER_HEIGHT       46
@@ -58,6 +62,7 @@ const lv_font_t * font_mono_medium = &casscadia_mono_16;
 const lv_font_t * font_mono = &casscadia_mono;
 
 lv_obj_t * timeLabel;
+lv_obj_t * wifiIndicator;
 lv_obj_t * powerLabel;
 lv_obj_t * headerledSig2;
 lv_obj_t * ledSig1;
@@ -105,6 +110,13 @@ void createHeader(lv_obj_t * win)
     lv_obj_add_style(timeLabel,&style_text_mono,0);
     lv_obj_set_size(timeLabel, 80, LV_PCT(100));
     lv_obj_set_style_pad_top(timeLabel,HEADER_TIME_Y,0);
+
+    // Wifi status
+    wifiIndicator = lv_img_create(header);
+    lv_img_set_src(wifiIndicator, LV_SYMBOL_WIFI);
+    lv_obj_set_size(wifiIndicator, HEADER_WIFI_SIZE, HEADER_WIFI_SIZE);
+    lv_obj_set_pos(wifiIndicator,HEADER_WIFI_X,HEADER_WIFI_Y);
+    lv_obj_add_flag(wifiIndicator, LV_OBJ_FLAG_HIDDEN);
 
     // Title
     lv_obj_t * title = lv_win_add_title(win, HEADER_TEXT);
@@ -308,6 +320,10 @@ void uiSetTime(const char* time)
     lv_label_set_text(timeLabel, time);
 }
     
+void uiSetWifiStatus(bool on)
+{
+    on ? lv_obj_clear_flag(wifiIndicator, LV_OBJ_FLAG_HIDDEN) : lv_obj_add_flag(wifiIndicator, LV_OBJ_FLAG_HIDDEN);
+}
 
 void uiSetPower(const char* time)
 {
