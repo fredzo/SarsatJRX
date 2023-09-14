@@ -35,6 +35,9 @@ void onWifiEvent(WiFiEvent_t event)
 #endif
             break;
         case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+            // Update Wifi status when IP is assigned
+            wifiStatus = WifiStatus::DISCONNECTED;
+            wifiStatusChanged = true;
 #ifdef SERIAL_OUT
             Serial.println("Disconnected from WiFi access point");
 #endif
@@ -49,10 +52,10 @@ void onWifiEvent(WiFiEvent_t event)
 #endif
             break;
         case ARDUINO_EVENT_WIFI_AP_START:
-#ifdef SERIAL_OUT
             // Update Wifi status when Access Point is activated (Portal mode)
             wifiStatus = WifiStatus::PORTAL;
             wifiStatusChanged = true;
+#ifdef SERIAL_OUT
             Serial.println("WiFi access point started");
 #endif
             break;
@@ -73,14 +76,19 @@ void onWifiEvent(WiFiEvent_t event)
 #endif
             break;
         case ARDUINO_EVENT_WIFI_AP_STADISCONNECTED:
-            // Update Wifi status when disconnected form the protal
-            wifiStatus = WifiStatus::PORTAL;
-            wifiStatusChanged = true;
+            if(wifiStatus == WifiStatus::PORTAL_CONNECTED)
+            { // Update Wifi status when disconnected form the protal
+              wifiStatus = WifiStatus::PORTAL;
+              wifiStatusChanged = true;
+            }
 #ifdef SERIAL_OUT
             Serial.println("Client disconnected");
 #endif
             break;
         case ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED:
+            // Update Wifi status when a connection to the protal is made
+            wifiStatus = WifiStatus::PORTAL_CONNECTED;
+            wifiStatusChanged = true;
 #ifdef SERIAL_OUT
             Serial.println("Assigned IP address to client");
 #endif
