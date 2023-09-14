@@ -42,6 +42,8 @@ class Rtc
         PCF8563_Class *rtc = nullptr;
         void rtcRegisterInterrupt();
         bool changed = true;
+        bool ntpStarted = false;
+        bool ntpSynched = false;
         Date currentDate;
 
         Rtc()

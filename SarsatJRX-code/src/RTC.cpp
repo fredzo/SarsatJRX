@@ -1,4 +1,8 @@
-#include "RTC.h"
+#include <RTC.h>
+#include <SarsatJRXConf.h>
+#include <WifiManager.h>
+#include <time.h>
+#include <esp_sntp.h>
 
 #define RTC_INT_PIN         36
 
@@ -40,6 +44,39 @@ Rtc::Date Rtc::getDate()
         currentDate.minute = dt.minute;
         currentDate.second = dt.second;
         changed = false;
+        #ifdef WIFI
+        if(!ntpSynched && wifiManagerIsConnected())
+        {   // Try and get time from NTP server
+            if(!ntpStarted)
+            {   // Start NTP client and specify TZ
+                configTzTime(TIME_ZONE,NTP_SERVER);
+                ntpStarted = true;
+                #ifdef SERIAL_OUT
+                Serial.println("NTP Server started !");
+                #endif
+            }
+            struct tm timeinfo;
+            if(getLocalTime(&timeinfo,0))
+            {   // Update RTC
+                dt.day = timeinfo.tm_mday;
+                dt.month = timeinfo.tm_mon;
+                dt.year = timeinfo.tm_year;
+                dt.hour = timeinfo.tm_hour;
+                dt.minute = timeinfo.tm_min;
+                dt.second = timeinfo.tm_sec;
+                rtc->setDateTime(dt);
+                // Stop ntp service
+                sntp_stop();
+                ntpSynched = true;
+                // Make sure we update time display right away
+                changed = true;
+                #ifdef SERIAL_OUT
+                Serial.println("NTP time received ! :");
+                Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S zone %Z %z ");
+                #endif
+            }
+        }
+        #endif
     }
     return currentDate;
 }

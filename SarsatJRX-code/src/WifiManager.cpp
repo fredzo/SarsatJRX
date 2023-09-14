@@ -142,6 +142,14 @@ WifiStatus wifiManagerGetStatus()
     return wifiStatus;  
 }
 
+/**
+ * Returns true if Wifi is connected
+ */
+bool wifiManagerIsConnected()
+{
+    return (wifiStatus == WifiStatus::CONNECTED);
+}
+
 #define WIFI_STATUS_CHECK_PERIOD    2000 // Check every 2 seconds
 #define WIFI_RSSI_CHANGE_THRESHOLD  10
 
@@ -180,11 +188,6 @@ bool wifiManagerHandleClient()
   }
   wifiStatusChanged = false;
   return changed;
-}
-
-WifiStatus wifiManagerIsConnected()
-{
-  return wifiStatus;
 }
 
 #endif

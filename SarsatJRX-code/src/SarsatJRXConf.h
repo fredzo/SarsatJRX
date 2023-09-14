@@ -13,5 +13,8 @@
 // Enable WIFI
 #define WIFI
 
+// NTP Server and Timezone
+#define NTP_SERVER   "pool.ntp.org"
+#define TIME_ZONE    "CET-1CEST,M3.5.0,M10.5.0/3" // Europe/Paris (See https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv )
 
 #endif

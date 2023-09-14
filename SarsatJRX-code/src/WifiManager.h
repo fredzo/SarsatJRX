@@ -16,9 +16,14 @@ void wifiManagerStart();
 bool wifiManagerHandleClient();
 
 /**
- * Returns true if Wifi is connected
+ * Returns wifi connection status
  */
 WifiStatus wifiManagerGetStatus();
+
+/**
+ * Returns true if Wifi is connected
+ */
+bool wifiManagerIsConnected();
 
 #endif
 
