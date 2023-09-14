@@ -9,10 +9,84 @@
 WebServer Server;
 AutoConnect portal(Server);
 AutoConnectConfig config;
+// Wifi status
+bool wifiStatusChanged = false;
+int portalStatus = -1;
+WifiStatus wifiStatus = WifiStatus::DISCONNECTED;
+int wifiRssi = 0;
+IPAddress ipAddr;
+long lastStatusCheckTime = 0;
 
 void rootPage()
 {
   Server.send(200,"text/plain","--- SarsatJRX ---");
+}
+
+void onWifiEvent(WiFiEvent_t event) 
+{
+#ifdef SERIAL_OUT
+    Serial.printf("[WiFi-event] event: %d\n", event);
+#endif
+    switch (event) 
+    {
+        case ARDUINO_EVENT_WIFI_STA_CONNECTED:
+#ifdef SERIAL_OUT
+            Serial.println("Connected to access point");
+#endif
+            break;
+        case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+#ifdef SERIAL_OUT
+            Serial.println("Disconnected from WiFi access point");
+#endif
+            break;
+        case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+            // Update Wifi status when IP is assigned
+            wifiStatus = WifiStatus::CONNECTED;
+            wifiStatusChanged = true;
+#ifdef SERIAL_OUT
+            Serial.print("Obtained IP address: ");
+            Serial.println(WiFi.localIP());
+#endif
+            break;
+        case ARDUINO_EVENT_WIFI_AP_START:
+#ifdef SERIAL_OUT
+            // Update Wifi status when Access Point is activated (Portal mode)
+            wifiStatus = WifiStatus::PORTAL;
+            wifiStatusChanged = true;
+            Serial.println("WiFi access point started");
+#endif
+            break;
+        case ARDUINO_EVENT_WIFI_AP_STOP:
+            // Update Wifi status when Access Point is desactivated (Portal mode)
+            wifiStatus = WifiStatus::DISCONNECTED;
+            wifiStatusChanged = true;
+#ifdef SERIAL_OUT
+            Serial.println("WiFi access point  stopped");
+#endif
+            break;
+        case ARDUINO_EVENT_WIFI_AP_STACONNECTED:
+            // Update Wifi status when a connection to the protal is made
+            wifiStatus = WifiStatus::PORTAL_CONNECTED;
+            wifiStatusChanged = true;
+#ifdef SERIAL_OUT
+            Serial.println("Client connected");
+#endif
+            break;
+        case ARDUINO_EVENT_WIFI_AP_STADISCONNECTED:
+            // Update Wifi status when disconnected form the protal
+            wifiStatus = WifiStatus::PORTAL;
+            wifiStatusChanged = true;
+#ifdef SERIAL_OUT
+            Serial.println("Client disconnected");
+#endif
+            break;
+        case ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED:
+#ifdef SERIAL_OUT
+            Serial.println("Assigned IP address to client");
+#endif
+            break;
+        default: break;
+    }
 }
 
 void wifiManagerStart()
@@ -32,55 +106,49 @@ void wifiManagerStart()
   config.apid = "SarsatJRX";
   config.psk = "";              // No password in AP mode
   portal.config(config);
+  WiFi.onEvent(onWifiEvent);
   portal.begin();
-#ifdef SERIAL_OUT
-  wifiUpdateStatus();
-#endif
 }
 
-// Wifi status
-int portalStatus = -1;
-int wifiStatus = -1;
-int wifiRssi = 0;
-IPAddress ipAddr;
-long lastStatusCheckTime = 0;
+String wifiManagerGetStatusString()
+{
+  switch(wifiStatus)
+  {
+    case WifiStatus::CONNECTED : 
+      return "Connected to Access Point";
+    case WifiStatus::PORTAL :
+      return "Portal started";
+    case WifiStatus::PORTAL_CONNECTED:
+      return "Portal started + client connected";
+    case WifiStatus::DISCONNECTED:
+    default:
+      return "Disconnected";
+  }
+}
 
-#define WIFI_STATUS_CHECK_PERIOD    500
+/**
+ * Returns true if Wifi is connected
+ */
+WifiStatus wifiManagerGetStatus()
+{
+    return wifiStatus;  
+}
+
+#define WIFI_STATUS_CHECK_PERIOD    2000 // Check every 2 seconds
 #define WIFI_RSSI_CHANGE_THRESHOLD  10
 
-bool wifiUpdateStatus()
+bool wifiManagerHandleClient()
 {
-  bool changed = false;
+  // Web and wifi
+  portal.handleClient();
+  // Check for status change
+  bool changed = wifiStatusChanged;
   long now = millis();
-  if(now-lastStatusCheckTime >= WIFI_STATUS_CHECK_PERIOD)
+  if(wifiStatusChanged || (now-lastStatusCheckTime >= WIFI_STATUS_CHECK_PERIOD))
   {
-    int transition = portal.portalStatus();
-    int wifi = WiFi.status();
+    lastStatusCheckTime = now;
     IPAddress locaIp = WiFi.localIP();
     int rssi = WiFi.RSSI();
-    if (transition != portalStatus) 
-    {
-      changed = true;
-      portalStatus = transition;
-  #ifdef SERIAL_OUT
-      if (transition & AutoConnect::AC_CAPTIVEPORTAL)
-      {
-        Serial.println("Captive portal activated");
-      }
-      else if (transition & AutoConnect::AC_AUTORECONNECT)
-      {
-        Serial.println("Auto reconnection applied");
-      }
-      else if (!(transition & AutoConnect::AC_ESTABLISHED))
-      {
-        Serial.println("WiFi connection lost");
-      }
-    }
-    if(wifi != wifiStatus)
-    {
-      changed = true;
-      wifiStatus = wifi;
-    }
     if(locaIp != ipAddr)
     {
       changed = true;
@@ -97,32 +165,18 @@ bool wifiUpdateStatus()
   #ifdef SERIAL_OUT
       WiFi.printDiag(Serial);
       Serial.println("Ip address : " + ipAddr.toString());
-      Serial.println("Wifi status : " + String(wifiStatus) + (wifiManagerIsConnected() ? " (connected)" : ""));
-      Serial.println("Portal status : " + String(portalStatus) + (wifiManagerIsPortalActive() ? " (active)" : ""));
+      Serial.println("Wifi status : " + wifiManagerGetStatusString());
       Serial.println("RSSI : "+ String(wifiRssi) + " dBm");
   #endif
     }
   }
+  wifiStatusChanged = false;
   return changed;
 }
-#endif
 
-bool wifiManagerHandleClient()
+WifiStatus wifiManagerIsConnected()
 {
-    // Web and wifi
-  portal.handleClient();
-  //Server.handleClient();
-  return wifiUpdateStatus();
-}
-
-bool wifiManagerIsConnected()
-{
-  return (wifiStatus == WL_CONNECTED);
-}
-
-bool wifiManagerIsPortalActive()
-{
-  return (portalStatus & AutoConnect::AC_CAPTIVEPORTAL);
+  return wifiStatus;
 }
 
 #endif

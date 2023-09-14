@@ -112,11 +112,13 @@ void createHeader(lv_obj_t * win)
     lv_obj_set_style_pad_top(timeLabel,HEADER_TIME_Y,0);
 
     // Wifi status
-    wifiIndicator = lv_img_create(header);
-    lv_img_set_src(wifiIndicator, LV_SYMBOL_WIFI);
+    //wifiIndicator = lv_img_create(header);
+    //lv_img_set_src(wifiIndicator, LV_SYMBOL_WIFI);
+    wifiIndicator = lv_label_create(header);
+    lv_label_set_text(wifiIndicator,"");
     lv_obj_set_size(wifiIndicator, HEADER_WIFI_SIZE, HEADER_WIFI_SIZE);
     lv_obj_set_pos(wifiIndicator,HEADER_WIFI_X,HEADER_WIFI_Y);
-    lv_obj_add_flag(wifiIndicator, LV_OBJ_FLAG_HIDDEN);
+    //lv_obj_add_flag(wifiIndicator, LV_OBJ_FLAG_HIDDEN);
 
     // Title
     lv_obj_t * title = lv_win_add_title(win, HEADER_TEXT);
@@ -319,11 +321,28 @@ void uiSetTime(const char* time)
 {
     lv_label_set_text(timeLabel, time);
 }
-    
-void uiSetWifiStatus(bool on)
+
+#ifdef WIFI   
+void uiSetWifiStatus(WifiStatus status)
 {
-    on ? lv_obj_clear_flag(wifiIndicator, LV_OBJ_FLAG_HIDDEN) : lv_obj_add_flag(wifiIndicator, LV_OBJ_FLAG_HIDDEN);
+  switch(status)
+  {
+    case WifiStatus::CONNECTED : 
+        lv_label_set_text(wifiIndicator,LV_SYMBOL_WIFI);
+        break;
+    case WifiStatus::PORTAL :
+        lv_label_set_text(wifiIndicator,LV_SYMBOL_HOME);
+        break;
+    case WifiStatus::PORTAL_CONNECTED:
+        lv_label_set_text(wifiIndicator,LV_SYMBOL_LOOP);
+        break;
+    case WifiStatus::DISCONNECTED:
+    default:
+        lv_label_set_text(wifiIndicator,"");
+        break;
+  }
 }
+#endif
 
 void uiSetPower(const char* time)
 {

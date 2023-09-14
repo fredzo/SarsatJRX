@@ -1,8 +1,9 @@
 #ifndef UI_H
 #define UI_H
 
-#include <SarsatJRXConf.h>
 #include <Arduino.h>
+#include <SarsatJRXConf.h>
+#include <WifiManager.h>
 #include <Beacon.h>
 #include <lvgl.h>
 
@@ -40,7 +41,9 @@ void uiSetBeacon(Beacon* beacon, int curPage, int pageCount);
 
 void uiSetTime(const char* time);
 
-void uiSetWifiStatus(bool on);
+#ifdef WIFI
+void uiSetWifiStatus(WifiStatus status);
+#endif
 
 void uiSetPower(const char* time);
 

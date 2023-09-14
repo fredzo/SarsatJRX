@@ -274,7 +274,7 @@ void setup()
 
 #ifdef WIFI
   wifiManagerStart();
-  uiSetWifiStatus(wifiManagerIsConnected());
+  uiSetWifiStatus(wifiManagerGetStatus());
 #endif
   
   //readNextSampleFrame();
@@ -368,7 +368,7 @@ void loop()
 #ifdef WIFI
     if(wifiManagerHandleClient())
     {
-      uiSetWifiStatus(wifiManagerIsConnected());
+      uiSetWifiStatus(wifiManagerGetStatus());
     }
 #endif
   //delay(5);

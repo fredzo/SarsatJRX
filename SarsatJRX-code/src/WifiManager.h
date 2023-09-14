@@ -5,9 +5,10 @@
 #include <SarsatJRXConf.h>
 
 #ifdef WIFI
-void wifiManagerStart();
 
-bool wifiUpdateStatus();
+enum class WifiStatus { CONNECTED, DISCONNECTED, PORTAL, PORTAL_CONNECTED };
+
+void wifiManagerStart();
 
 /**
  * Returns true if wifi status changed
@@ -17,12 +18,8 @@ bool wifiManagerHandleClient();
 /**
  * Returns true if Wifi is connected
  */
-bool wifiManagerIsConnected();
+WifiStatus wifiManagerGetStatus();
 
-/**
- * Returns true if portal is active
- */
-bool wifiManagerIsPortalActive();
 #endif
 
 #endif 
