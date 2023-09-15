@@ -19,9 +19,9 @@
 
 // Hardware 
 // SD Card
-#define SD_CS               15
+#define SD_CS               13
 #define SD_MISO             2
-#define SD_MOSI             13
+#define SD_MOSI             15
 #define SD_SCLK             14
 
 #endif
