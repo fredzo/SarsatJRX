@@ -4,6 +4,9 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <AutoConnect.h>
+#include <SPIFFS.h>
+
+#define FAVICON_FILE_PATH   "/sarsat-jrx.png"
 
 // Web and Wifi
 WebServer Server;
@@ -16,10 +19,26 @@ WifiStatus wifiStatus = WifiStatus::DISCONNECTED;
 int wifiRssi = 0;
 IPAddress ipAddr;
 long lastStatusCheckTime = 0;
+// Filesystem
+bool filesystemMounted = false;
+FS* fileSystem = &SPIFFS;
 
 void rootPage()
 {
   Server.send(200,"text/plain","--- SarsatJRX ---");
+}
+
+void favicon()
+{
+  if (fileSystem->exists(FAVICON_FILE_PATH)) 
+  {
+    File file = fileSystem->open(FAVICON_FILE_PATH, "r");
+    if (Server.streamFile(file, "image/png") != file.size()) 
+    {
+      Serial.println("Sent less data than expected!");
+    }
+    file.close();
+  }
 }
 
 void onWifiEvent(WiFiEvent_t event) 
@@ -99,8 +118,19 @@ void onWifiEvent(WiFiEvent_t event)
 
 void wifiManagerStart()
 {
+  // Start SPIFSS
+  if(SPIFFS.begin())
+  {
+    filesystemMounted = true;
+  }
+  else
+  {
+    Serial.println("An Error has occurred while mounting SPIFFS");
+    filesystemMounted = false;
+  }
   // Web and Wifi
   Server.on("/",rootPage);
+  Server.on("/favicon.ico",favicon);
   // Configure automatic reconnection and captive portal retention, then start
   // AutoConnect. In subsequent steps, it will use the portalStatus function to
   // detect the WiFi connection status in this configuration.
