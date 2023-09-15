@@ -9,6 +9,7 @@
 
 extern const lv_font_t casscadia_mono;
 extern const lv_font_t casscadia_mono_16;
+extern const lv_font_t additional_symbols;
 
 extern lv_style_t style_text_mono;
 extern lv_style_t style_title;

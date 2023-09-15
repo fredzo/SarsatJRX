@@ -30,6 +30,11 @@
 #define FOOTER_WAIT_LABEL   "Waiting for the wave..."
 #define FOOTER_FRAME_LABEL  "Frame received !"
 
+// Additionnal Symbols
+#define SYMBOL_WIFI_CONNECTED       "\xEF\x87\xAB"
+#define SYMBOL_WIFI_AP              "\xEE\x8E\xB2"
+#define SYMBOL_WIFI_AP_CONNECTED    "\xEE\x94\x91"
+
 // Externs
 extern void readNextSampleFrame();
 extern void previousFrame();
@@ -60,6 +65,7 @@ const lv_font_t * font_medium = &lv_font_montserrat_18;
 const lv_font_t * font_normal = &lv_font_montserrat_16;
 const lv_font_t * font_mono_medium = &casscadia_mono_16;
 const lv_font_t * font_mono = &casscadia_mono;
+const lv_font_t * font_symbols = &additional_symbols;
 
 lv_obj_t * timeLabel;
 lv_obj_t * wifiIndicator;
@@ -112,13 +118,11 @@ void createHeader(lv_obj_t * win)
     lv_obj_set_style_pad_top(timeLabel,HEADER_TIME_Y,0);
 
     // Wifi status
-    //wifiIndicator = lv_img_create(header);
-    //lv_img_set_src(wifiIndicator, LV_SYMBOL_WIFI);
     wifiIndicator = lv_label_create(header);
     lv_label_set_text(wifiIndicator,"");
     lv_obj_set_size(wifiIndicator, HEADER_WIFI_SIZE, HEADER_WIFI_SIZE);
     lv_obj_set_pos(wifiIndicator,HEADER_WIFI_X,HEADER_WIFI_Y);
-    //lv_obj_add_flag(wifiIndicator, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_style_text_font(wifiIndicator,font_symbols,0);
 
     // Title
     lv_obj_t * title = lv_win_add_title(win, HEADER_TEXT);
@@ -328,13 +332,13 @@ void uiSetWifiStatus(WifiStatus status)
   switch(status)
   {
     case WifiStatus::CONNECTED : 
-        lv_label_set_text(wifiIndicator,LV_SYMBOL_WIFI);
+        lv_label_set_text(wifiIndicator,SYMBOL_WIFI_CONNECTED);
         break;
     case WifiStatus::PORTAL :
-        lv_label_set_text(wifiIndicator,LV_SYMBOL_HOME);
+        lv_label_set_text(wifiIndicator,SYMBOL_WIFI_AP);
         break;
     case WifiStatus::PORTAL_CONNECTED:
-        lv_label_set_text(wifiIndicator,LV_SYMBOL_LOOP);
+        lv_label_set_text(wifiIndicator,SYMBOL_WIFI_AP_CONNECTED);
         break;
     case WifiStatus::DISCONNECTED:
     default:
