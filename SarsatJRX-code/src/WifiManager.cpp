@@ -4,7 +4,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <AutoConnect.h>
-#include <SPIFFS.h>
+#include <Hardware.h>
 
 #define FAVICON_FILE_PATH   "/sarsat-jrx.png"
 
@@ -21,7 +21,7 @@ IPAddress ipAddr;
 long lastStatusCheckTime = 0;
 // Filesystem
 bool filesystemMounted = false;
-FS* fileSystem = &SPIFFS;
+static FS* fileSystem = nullptr;
 
 void rootPage()
 {
@@ -30,14 +30,18 @@ void rootPage()
 
 void favicon()
 {
-  if (fileSystem->exists(FAVICON_FILE_PATH)) 
+  if(filesystemMounted && fileSystem->exists(FAVICON_FILE_PATH))
   {
-    File file = fileSystem->open(FAVICON_FILE_PATH, "r");
-    if (Server.streamFile(file, "image/png") != file.size()) 
-    {
-      Serial.println("Sent less data than expected!");
-    }
-    file.close();
+      File file = fileSystem->open(FAVICON_FILE_PATH, "r");
+      if (Server.streamFile(file, "image/png") != file.size()) 
+      {
+        Serial.println("Sent less data than expected!");
+      }
+      file.close();
+  }
+  else
+  {
+    Server.send(404,"text/plain","");
   }
 }
 
@@ -118,16 +122,10 @@ void onWifiEvent(WiFiEvent_t event)
 
 void wifiManagerStart()
 {
-  // Start SPIFSS
-  if(SPIFFS.begin())
-  {
-    filesystemMounted = true;
-  }
-  else
-  {
-    Serial.println("An Error has occurred while mounting SPIFFS");
-    filesystemMounted = false;
-  }
+  // Check SPIFSS
+  Filesystems* filesystems = Hardware::getHardware()->getFilesystems();
+  filesystemMounted = filesystems->isSpiFilesystemMounted();
+  fileSystem = filesystems->getSpiFilesystem();
   // Web and Wifi
   Server.on("/",rootPage);
   Server.on("/favicon.ico",favicon);

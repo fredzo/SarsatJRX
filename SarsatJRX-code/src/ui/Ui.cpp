@@ -3,10 +3,12 @@
 #include <Util.h>
 #include <Display.h>
 #include <extra/libs/qrcode/lv_qrcode.h>
+#include <ui/SpiffsLvgl.h>
+
 
 // Header
-#define HEADER_HEIGHT     30
-#define HEADER_TEXT       "- SarsatJRX - "
+#define HEADER_HEIGHT       30
+#define HEADER_TEXT         "SarsatJRX "
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
 // Header LEDS
 #define LED_RADIUS          7
@@ -22,6 +24,11 @@
 #define HEADER_WIFI_X       100
 #define HEADER_WIFI_Y       0
 #define HEADER_WIFI_SIZE    20
+// Logo
+#define HEADER_LOGO_X       HEADER_WIFI_X+HEADER_WIFI_SIZE
+#define HEADER_LOGO_Y       0
+#define HEADER_LOGO_SIZE    20
+#define HEADER_LOGO_SRC     "J:/sarsat-jrx.bin"
 
 // Footer
 #define FOOTER_HEIGHT       46
@@ -124,6 +131,12 @@ void createHeader(lv_obj_t * win)
     lv_obj_set_pos(wifiIndicator,HEADER_WIFI_X,HEADER_WIFI_Y);
     lv_obj_set_style_text_font(wifiIndicator,font_symbols,0);
 
+    // Logo
+    lv_obj_t * logo = lv_img_create(header);
+    lv_img_set_src(logo,HEADER_LOGO_SRC);
+    lv_obj_set_size(logo,HEADER_LOGO_SIZE,HEADER_LOGO_SIZE);
+    lv_obj_set_pos(logo,HEADER_LOGO_X,HEADER_LOGO_Y);
+    lv_obj_add_event_cb(logo, title_long_press_handler, LV_EVENT_LONG_PRESSED, NULL);
     // Title
     lv_obj_t * title = lv_win_add_title(win, HEADER_TEXT);
     lv_obj_add_style(title,&style_title,0);
@@ -212,7 +225,10 @@ void createFooter(lv_obj_t * win)
 }
 
 void createUi()
-{   // Load default theme in dark mode
+{   // Init SPIFFS driver
+    spiffs_drv_init();                 
+
+    // Load default theme in dark mode
     lv_theme_t * theme = lv_theme_default_init(NULL, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), LV_THEME_DEFAULT_DARK, LV_FONT_DEFAULT);
 
     // Styles

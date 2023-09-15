@@ -8,6 +8,8 @@ void Hardware::init()
     i2c = new I2CBus();
     rtc = Rtc::getRtc();
     rtc->rtcInit(i2c);
+    filesystems = Filesystems::getFilesystems();
+    filesystems->init();
     display = new Display();
     display->setup(i2c);
 }
@@ -41,3 +43,8 @@ void Hardware::getVccStringValue(char* vccString)
 {
     return getPowerVccStringValue(vccString);
 }
+
+ Filesystems* Hardware::getFilesystems()
+ {
+    return filesystems;
+ }

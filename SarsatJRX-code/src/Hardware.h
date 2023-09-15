@@ -3,6 +3,7 @@
 #include <i2c_bus.h>
 #include <RTC.h>
 #include <Display.h>
+#include <Filesystems.h>
 
 class Hardware
 {
@@ -20,6 +21,8 @@ public:
     Display* getDisplay();
 
     Rtc* getRtc();
+
+    Filesystems* getFilesystems();
 
     /**
      * @brief Returns actual VCC value
@@ -47,6 +50,7 @@ private:
     I2CBus *i2c = nullptr;
     Display *display = nullptr;
     Rtc *rtc = nullptr;
+    Filesystems *filesystems = nullptr;
 
     static Hardware *hardware;
 
