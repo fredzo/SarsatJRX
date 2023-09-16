@@ -9,7 +9,7 @@
 // Beacon info
 #define LINE_HEIGHT         18
 #define VERSION_LABEL       "Version :"
-#define VERSION_LABEL_WIDTH 60
+#define VERSION_LABEL_WIDTH 80
 #define VBAT_LABEL          "Vbat :"
 #define VBAT_LABEL_WIDTH    50
 #define DATE_LABEL          "Date :"
@@ -17,13 +17,13 @@
 #define CHIP_LABEL          "Chip :"
 #define CHIP_LABEL_WIDTH    50
 #define CHIPM_LABEL         "- Model ="
-#define CHIPM_LABEL_WIDTH   60
+#define CHIPM_LABEL_WIDTH   80
 #define CHIPR_LABEL         "- Rev. ="
-#define CHIPR_LABEL_WIDTH   60
+#define CHIPR_LABEL_WIDTH   80
 #define CHIPC_LABEL         "- Cores ="
-#define CHIPC_LABEL_WIDTH   60
+#define CHIPC_LABEL_WIDTH   80
 #define CHIPF_LABEL         "- Freq. ="
-#define CHIPF_LABEL_WIDTH   60
+#define CHIPF_LABEL_WIDTH   80
 
 lv_obj_t * settingsTabview;
 
@@ -80,16 +80,16 @@ void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
     // Chip
     chipTitle = uiCreateLabel(tab,&style_section_title,CHIP_LABEL,0,currentY,CHIP_LABEL_WIDTH,LINE_HEIGHT);
     chipModelTitle = uiCreateLabel(tab,&style_section_title,CHIPM_LABEL,CHIP_LABEL_WIDTH,currentY,CHIPM_LABEL_WIDTH,LINE_HEIGHT);
-    chipModelLabel = uiCreateLabel(tab,&style_section_text,ESP.getChipModel(),CHIP_LABEL_WIDTH+CHIPM_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH+CHIPM_LABEL_WIDTH,LINE_HEIGHT);
+    chipModelLabel = uiCreateLabel(tab,&style_section_text,ESP.getChipModel(),CHIP_LABEL_WIDTH+CHIPM_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH-CHIPM_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
     chipRevisionTitle = uiCreateLabel(tab,&style_section_title,CHIPR_LABEL,CHIP_LABEL_WIDTH,currentY,CHIPR_LABEL_WIDTH,LINE_HEIGHT);
-    chipRevisionLabel = uiCreateLabel(tab,&style_section_text,(String(ESP.getChipRevision())).c_str(),CHIP_LABEL_WIDTH+CHIPR_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH+CHIPR_LABEL_WIDTH,LINE_HEIGHT);
+    chipRevisionLabel = uiCreateLabel(tab,&style_section_text,(String(ESP.getChipRevision())).c_str(),CHIP_LABEL_WIDTH+CHIPR_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH-CHIPR_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
     chipCoresTitle = uiCreateLabel(tab,&style_section_title,CHIPC_LABEL,CHIP_LABEL_WIDTH,currentY,CHIPC_LABEL_WIDTH,LINE_HEIGHT);
-    chipCoresLabel = uiCreateLabel(tab,&style_section_text,(String(ESP.getChipCores())).c_str(),CHIP_LABEL_WIDTH+CHIPC_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH+CHIPC_LABEL_WIDTH,LINE_HEIGHT);
+    chipCoresLabel = uiCreateLabel(tab,&style_section_text,(String(ESP.getChipCores())).c_str(),CHIP_LABEL_WIDTH+CHIPC_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH-CHIPC_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
     chipFreqTitle = uiCreateLabel(tab,&style_section_title,CHIPF_LABEL,CHIP_LABEL_WIDTH,currentY,CHIPF_LABEL_WIDTH,LINE_HEIGHT);
-    chipFreqLabel = uiCreateLabel(tab,&style_section_text,(String(ESP.getCpuFreqMHz()) + " Mhz").c_str(),CHIP_LABEL_WIDTH+CHIPF_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH+CHIPF_LABEL_WIDTH,LINE_HEIGHT);
+    chipFreqLabel = uiCreateLabel(tab,&style_section_text,(String(ESP.getCpuFreqMHz()) + " Mhz").c_str(),CHIP_LABEL_WIDTH+CHIPF_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH-CHIPF_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
 
     //currentY+=LINE_HEIGHT;
@@ -152,5 +152,5 @@ void uiSettingsUpdateView()
     // Vbat
     lv_label_set_text(vBatLabel,hardware->getVccStringValue().c_str());
     // Date
-    lv_label_set_text(vBatLabel,(hardware->getRtc()->getDateString() + " - " + hardware->getRtc()->getTimeString()).c_str());
+    lv_label_set_text(dateLabel,(hardware->getRtc()->getDateString() + " - " + hardware->getRtc()->getTimeString()).c_str());
 }
