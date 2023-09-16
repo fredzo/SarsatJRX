@@ -46,8 +46,9 @@ void Filesystems::init()
     }
 }
 
-void Filesystems::saveBeacon(Beacon* beacon)
+bool Filesystems::saveBeacon(Beacon* beacon)
 {
+    bool result = false;
     if(sdFilesystemMounted&&logDirReady)
     {
         char buffer[64];
@@ -56,20 +57,24 @@ void Filesystems::saveBeacon(Beacon* beacon)
         if(file)
         {
             if(!file.print(toHexString(beacon->frame,false,0,beacon->longFrame ? 18 : 14)))
-            {
+            {   // SD card has probably been removed
+                sdFilesystemMounted = false;
                 #ifdef SERIAL_OUT
                 Serial.println("Write failed");
                 #endif
             }
             file.close();
+            result = true;
         }
         else
-        {
+        {   // SD card has probably been removed
+            sdFilesystemMounted = false;
             #ifdef SERIAL_OUT
             Serial.println("Failed to open file for writing");
             #endif
         }
      }
+     return result;
 }
 
 

@@ -355,7 +355,11 @@ void loop()
       updateDisplay();
       display->handleTimer();
       // Finally save beacon to sd card
-      hardware->getFilesystems()->saveBeacon(beacons[beaconsReadIndex]);
+      bool success = hardware->getFilesystems()->saveBeacon(beacons[beaconsReadIndex]);
+      if(!success)
+      { // Update SD Card indicator
+        uiSetSdCardStatus(hardware->getFilesystems()->isSdFilesystemMounted());
+      }
     } 
     // Reset frame decoding
     updateFooter(true);

@@ -21,7 +21,7 @@ class Filesystems
         FS* getSdFilesystem() { return sdFileSystem; }
         bool isSpiFilesystemMounted() { return spiFilesystemMounted ;}
         bool isSdFilesystemMounted() { return sdFilesystemMounted ;}
-        void saveBeacon(Beacon* beacon);
+        boolean saveBeacon(Beacon* beacon);
 
     private :
 
