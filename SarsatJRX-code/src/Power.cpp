@@ -23,6 +23,6 @@ String getPowerVccStringValue()
 {   /* 6 is mininum width, 4 is precision; float value is copied onto angleStr */
     char buffer[8];
     dtostrf(getPowerVccValue(), 3, 2, buffer);
-    return String(buffer);
+    return (String(buffer) + "V");
 }
 
