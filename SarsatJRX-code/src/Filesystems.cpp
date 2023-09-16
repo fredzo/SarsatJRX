@@ -2,6 +2,7 @@
 #include <SarsatJRXConf.h>
 #include <SPIFFS.h>
 #include <SD.h>
+#include <Util.h>
 
 void Filesystems::init()
 {   // SPIFSS filesystem
@@ -24,6 +25,17 @@ void Filesystems::init()
     if(SD.begin(SD_CS, *sdhander))
     {
         sdFilesystemMounted = true;
+        // Create SarsatJRX folder if needed
+        if(SD.mkdir(SARSATJRX_LOG_DIR))
+        {
+            logDirReady = true;
+        }
+        else
+        {
+            #ifdef SERIAL_OUT
+            Serial.println("Could not create log directory.");
+            #endif
+        }
     }
     else
     {
@@ -33,6 +45,33 @@ void Filesystems::init()
         sdFilesystemMounted = false;
     }
 }
+
+void Filesystems::saveBeacon(Beacon* beacon)
+{
+    if(sdFilesystemMounted&&logDirReady)
+    {
+        char buffer[64];
+        sprintf(buffer,LOG_FILENAME_TEMPLATE,SARSATJRX_LOG_DIR,beacon->date.day,beacon->date.month,beacon->date.year,beacon->date.hour,beacon->date.minute,beacon->date.second);
+        File file = sdFileSystem->open(buffer, FILE_WRITE);
+        if(file)
+        {
+            if(!file.print(toHexString(beacon->frame,false,0,beacon->longFrame ? 18 : 14)))
+            {
+                #ifdef SERIAL_OUT
+                Serial.println("Write failed");
+                #endif
+            }
+            file.close();
+        }
+        else
+        {
+            #ifdef SERIAL_OUT
+            Serial.println("Failed to open file for writing");
+            #endif
+        }
+     }
+}
+
 
 FS *Filesystems::spiFileSystem = &SPIFFS;
 

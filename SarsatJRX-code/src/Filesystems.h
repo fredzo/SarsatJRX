@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <FS.h>
+#include <Beacon.h>
 
 class Filesystems
 {
@@ -20,6 +21,7 @@ class Filesystems
         FS* getSdFilesystem() { return sdFileSystem; }
         bool isSpiFilesystemMounted() { return spiFilesystemMounted ;}
         bool isSdFilesystemMounted() { return sdFilesystemMounted ;}
+        void saveBeacon(Beacon* beacon);
 
     private :
 
@@ -36,6 +38,7 @@ class Filesystems
 
         static FS* sdFileSystem;
         bool sdFilesystemMounted = false;
+        bool logDirReady = false;
 
         static Filesystems *filesystemsInstance;
 };

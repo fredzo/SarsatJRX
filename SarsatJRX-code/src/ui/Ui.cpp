@@ -21,9 +21,10 @@
 #define HEADER_POWER_Y      (HEADER_HEIGHT-16)/2
 #define HEADER_TIME_Y       HEADER_POWER_Y
 // Wifi
-#define HEADER_WIFI_X       100
-#define HEADER_WIFI_Y       0
 #define HEADER_WIFI_SIZE    20
+// SD Card
+#define HEADER_SDCARD_WIDTH     16
+#define HEADER_SDCARD_HEIGHT    20
 // Logo
 #define HEADER_LOGO_SIZE    20
 #define HEADER_LOGO_SRC     "J:/sarsat-jrx.bin"
@@ -74,6 +75,7 @@ const lv_font_t * font_symbols = &additional_symbols;
 
 lv_obj_t * timeLabel;
 lv_obj_t * wifiIndicator;
+lv_obj_t * sdCardIndicator;
 lv_obj_t * powerLabel;
 lv_obj_t * headerledSig2;
 lv_obj_t * ledSig1;
@@ -126,20 +128,26 @@ void createHeader(lv_obj_t * win)
     wifiIndicator = lv_label_create(header);
     lv_label_set_text(wifiIndicator,"");
     lv_obj_set_size(wifiIndicator, HEADER_WIFI_SIZE, HEADER_WIFI_SIZE);
-    lv_obj_set_pos(wifiIndicator,HEADER_WIFI_X,HEADER_WIFI_Y);
     lv_obj_set_style_text_font(wifiIndicator,font_symbols,0);
+
+    // SD card indicator
+    sdCardIndicator = lv_label_create(header);
+    lv_label_set_text(sdCardIndicator,"");
+    lv_obj_set_style_pad_left(sdCardIndicator,4,0);
+    lv_obj_set_size(sdCardIndicator, HEADER_SDCARD_WIDTH, HEADER_SDCARD_HEIGHT);
+    //lv_obj_set_style_text_font(sdCardIndicator,font_symbols,0);
 
     // Logo
     lv_obj_t * logo = lv_img_create(header);
     lv_img_set_src(logo,HEADER_LOGO_SRC);
     lv_obj_set_size(logo,HEADER_LOGO_SIZE,HEADER_LOGO_SIZE);
-    lv_obj_set_style_translate_x(logo,25,0);
+    lv_obj_set_style_translate_x(logo,18,0);
     lv_obj_add_flag(logo, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(logo, title_long_press_handler, LV_EVENT_LONG_PRESSED, NULL);
     // Title
     lv_obj_t * title = lv_win_add_title(win, HEADER_TEXT);
     lv_obj_add_style(title,&style_title,0);
-    lv_obj_set_style_translate_x(title,-20,0);
+    lv_obj_set_style_translate_x(title,-15,0);
     lv_obj_add_flag(title, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(title, title_long_press_handler, LV_EVENT_LONG_PRESSED, NULL);
     // Power
@@ -362,6 +370,18 @@ void uiSetWifiStatus(WifiStatus status)
   }
 }
 #endif
+
+void uiSetSdCardStatus(bool mounted)
+{
+    if(mounted)
+    {
+        lv_label_set_text(sdCardIndicator,LV_SYMBOL_SD_CARD);
+    }
+    else
+    {
+        lv_label_set_text(sdCardIndicator,"");
+    }
+}
 
 void uiSetPower(const char* time)
 {

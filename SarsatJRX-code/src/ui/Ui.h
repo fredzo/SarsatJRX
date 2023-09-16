@@ -46,6 +46,8 @@ void uiSetTime(const char* time);
 void uiSetWifiStatus(WifiStatus status);
 #endif
 
+void uiSetSdCardStatus(bool mounted);
+
 void uiSetPower(const char* time);
 
 void uiShowFrameReceived(bool show);

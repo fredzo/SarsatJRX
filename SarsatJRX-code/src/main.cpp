@@ -276,6 +276,8 @@ void setup()
   wifiManagerStart();
   uiSetWifiStatus(wifiManagerGetStatus());
 #endif
+
+  uiSetSdCardStatus(hardware->getFilesystems()->isSdFilesystemMounted());
   
   //readNextSampleFrame();
 #ifdef SERIAL_OUT 
@@ -351,6 +353,9 @@ void loop()
       // Then read beacon and update beacon display
       readBeacon();
       updateDisplay();
+      display->handleTimer();
+      // Finally save beacon to sd card
+      hardware->getFilesystems()->saveBeacon(beacons[beaconsReadIndex]);
     } 
     // Reset frame decoding
     updateFooter(true);
