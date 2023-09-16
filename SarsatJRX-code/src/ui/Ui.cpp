@@ -1,5 +1,6 @@
 #include <ui/Ui.h>
 #include <ui/UiBeacon.h>
+#include <ui/UiSettings.h>
 #include <Util.h>
 #include <Display.h>
 #include <extra/libs/qrcode/lv_qrcode.h>
@@ -88,12 +89,21 @@ lv_obj_t * spinner;
 lv_obj_t * previousButton;
 lv_obj_t * nextButton;
 
-bool uiBeaconVisible = false;
+UiScreen currentScreen = UiScreen::START;
+
+UiScreen previousScreen = UiScreen::START;
 
 static void settings_handler(lv_event_t * e)
 {
-    // TODO : settings screen
-    readNextSampleFrame();
+    if(currentScreen != UiScreen::SETTINGS)
+    {
+        previousScreen = currentScreen;
+        uiShowScreen(UiScreen::SETTINGS);
+    }
+    else
+    {
+        uiShowScreen(previousScreen);
+    }
 }
 
 static void title_long_press_handler(lv_event_t * e)
@@ -317,6 +327,8 @@ void createUi()
 
     uiBeaconCreateView(cont);
 
+    uiSettingsCreateView(cont);
+
     // Pages label
     pagesLabel = lv_label_create(cont);
     lv_obj_add_flag(pagesLabel, LV_OBJ_FLAG_HIDDEN);
@@ -333,14 +345,42 @@ void uiSetBeacon(Beacon* beacon, int curPage, int pageCount)
     uiBeaconSetBeacon(beacon);
     // Set pages
     lv_label_set_text_fmt(pagesLabel,HEADER_PAGES_TEMPLATE,curPage,pageCount);
-    if(!uiBeaconVisible)
+    uiShowScreen(UiScreen::BEACON);
+}
+
+void uiShowScreen(UiScreen screen)
+{
+    if(screen != currentScreen)
     {
-        lv_obj_clear_flag(mainBloc, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(tabview, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(pagesLabel, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(previousButton, LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_add_flag(nextButton, LV_OBJ_FLAG_CLICKABLE);
-        uiBeaconVisible = true;
+        switch(screen)
+        {
+            case UiScreen::BEACON:
+                lv_obj_add_flag(settingsTabview, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(beaconMainBloc, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(beaconTabview, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(pagesLabel, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(previousButton, LV_OBJ_FLAG_CLICKABLE);
+                lv_obj_add_flag(nextButton, LV_OBJ_FLAG_CLICKABLE);
+                break;
+            case UiScreen::SETTINGS:
+                uiSettingsUpdateView();
+                lv_obj_add_flag(pagesLabel, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(previousButton, LV_OBJ_FLAG_CLICKABLE);
+                lv_obj_clear_flag(nextButton, LV_OBJ_FLAG_CLICKABLE);
+                lv_obj_clear_flag(settingsTabview, LV_OBJ_FLAG_HIDDEN);
+                break;
+            case UiScreen::START:
+            default:
+                lv_obj_add_flag(settingsTabview, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(beaconMainBloc, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(beaconTabview, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(pagesLabel, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(previousButton, LV_OBJ_FLAG_CLICKABLE);
+                lv_obj_clear_flag(nextButton, LV_OBJ_FLAG_CLICKABLE);
+                break;
+
+        }
+        currentScreen = screen;
     }
 }
 

@@ -1,6 +1,8 @@
 #ifndef SARSAT_JRX_CONF_H
 #define SARSAT_JRX_CONF_H
 
+#define SARSAT_JRX_VERSION "0.1.0"
+
 // Enable decode debuging
 //#define DEBUG_DECODE
 

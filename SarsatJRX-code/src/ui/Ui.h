@@ -32,13 +32,19 @@ extern const lv_font_t * font_medium;
 extern const lv_font_t * font_normal;
 extern const lv_font_t * font_mono;
 
-extern lv_obj_t * tabview;
-extern lv_obj_t * mainBloc;
+extern lv_obj_t * beaconTabview;
+extern lv_obj_t * beaconMainBloc;
+extern lv_obj_t * settingsTabview;
+
+// Screens
+enum class UiScreen { START, BEACON, SETTINGS};
 
 // Methods
 void createUi();
 
 void uiSetBeacon(Beacon* beacon, int curPage, int pageCount);
+
+void uiShowScreen(UiScreen screen);
 
 void uiSetTime(const char* time);
 

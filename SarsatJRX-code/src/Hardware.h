@@ -34,9 +34,9 @@ public:
     /**
      * @brief Read VCC value into the provided char* with the format "x.xx"
      * 
-     * @param vccString the char* to store the VCC string value in
+     * @return Rhe VCC string value
      */
-    void getVccStringValue(char* vccString);
+    String getVccStringValue();
 
 private:
     Hardware()

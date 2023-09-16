@@ -17,10 +17,12 @@ float getPowerVccValue() {
 /**
  * @brief Read VCC value into the provided char* with the format "x.xx"
  * 
- * @param vccString the char* to store the VCC string value in
+ * @return The VCC string value
  */
-void getPowerVccStringValue(char* vccString)
+String getPowerVccStringValue()
 {   /* 6 is mininum width, 4 is precision; float value is copied onto angleStr */
-    dtostrf(getPowerVccValue(), 3, 2, vccString);
+    char buffer[8];
+    dtostrf(getPowerVccValue(), 3, 2, buffer);
+    return String(buffer);
 }
 

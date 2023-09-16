@@ -39,9 +39,9 @@ float Hardware::getVccValue()
  * 
  * @param vccString the char* to store the VCC string value in
  */
-void Hardware::getVccStringValue(char* vccString)
+String Hardware::getVccStringValue()
 {
-    return getPowerVccStringValue(vccString);
+    return getPowerVccStringValue();
 }
 
  Filesystems* Hardware::getFilesystems()

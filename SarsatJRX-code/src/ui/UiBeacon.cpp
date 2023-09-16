@@ -20,7 +20,7 @@
 #define LOCATION_LABEL      "Location :"
 #define CONTROL_LABEL       "Control :"
 #define CONTROL_TITLE_WIDTH 75
-#define CONTROL_LABEL_WIDTH 75
+#define CONTROL_LABEL_WIDTH 80
 #define BCH1_OK_LABEL       "BCH1-OK"
 #define BCH1_KO_LABEL       "BCH1-KO"
 #define BCH2_OK_LABEL       "BCH2-OK"
@@ -38,8 +38,8 @@
 #define MAPS_URL_TEMPLATE   "https://www.google.com/maps/search/?api=1&query=%s%%2C%s"
 #define BEACON_URL_TEMPALTE "https://cryptic-earth-89063heroku-20.herokuapp.com/decoded/%s"
 
-lv_obj_t * mainBloc;
-lv_obj_t * tabview;
+lv_obj_t * beaconMainBloc;
+lv_obj_t * beaconTabview;
 lv_obj_t * mapQr;
 lv_obj_t * beaconQr;
 
@@ -218,21 +218,21 @@ void createDataTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 void uiBeaconCreateView(lv_obj_t * cont)
 {   // Tab view
-    tabview = lv_tabview_create(cont, LV_DIR_LEFT, 50);
+    beaconTabview = lv_tabview_create(cont, LV_DIR_LEFT, 50);
     // Hide tab view for now
-    lv_obj_add_flag(tabview, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_set_style_bg_color(tabview,uiBackgroundColor,0);
+    lv_obj_add_flag(beaconTabview, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_set_style_bg_color(beaconTabview,uiBackgroundColor,0);
 
-    lv_obj_t * tab_btns = lv_tabview_get_tab_btns(tabview);
+    lv_obj_t * tab_btns = lv_tabview_get_tab_btns(beaconTabview);
     //lv_obj_set_style_bg_color(tab_btns, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
     //lv_obj_set_style_text_color(tab_btns, lv_palette_lighten(LV_PALETTE_GREY, 5), 0);
     lv_obj_set_style_border_side(tab_btns, LV_BORDER_SIDE_RIGHT, LV_PART_ITEMS | LV_STATE_CHECKED);
 
     /*Add 3 tabs (the tabs are page (lv_page) and can be scrolled*/
-    lv_obj_t * tab1 = lv_tabview_add_tab(tabview, "Info");
-    lv_obj_t * tab2 = lv_tabview_add_tab(tabview, "Map");
-    lv_obj_t * tab3 = lv_tabview_add_tab(tabview, "Bcn.");
-    lv_obj_t * tab4 = lv_tabview_add_tab(tabview, "Data");
+    lv_obj_t * tab1 = lv_tabview_add_tab(beaconTabview, "Info");
+    lv_obj_t * tab2 = lv_tabview_add_tab(beaconTabview, "Map");
+    lv_obj_t * tab3 = lv_tabview_add_tab(beaconTabview, "Bcn.");
+    lv_obj_t * tab4 = lv_tabview_add_tab(beaconTabview, "Data");
     lv_obj_add_style(tab1, &style_pad_small, 0);
     lv_obj_add_style(tab2, &style_pad_small, 0);
     lv_obj_add_style(tab3, &style_pad_small, 0);
@@ -243,15 +243,15 @@ void uiBeaconCreateView(lv_obj_t * cont)
     //lv_obj_set_style_bg_opa(tab2, LV_OPA_COVER, 0);
 
     // Main bloc
-    mainBloc = lv_obj_create(cont);
-    lv_obj_add_style(mainBloc,&style_pad_none,0);
-    lv_obj_set_align(mainBloc,LV_ALIGN_TOP_RIGHT);
-    lv_obj_set_size(mainBloc,tabWidth+4,MAIN_BLOC_HEIGHT);
-    lv_obj_set_style_bg_opa(mainBloc,LV_OPA_0,0);
-    lv_obj_set_style_border_width(mainBloc,0,0);
-    createMainBloc(mainBloc,tabWidth);
+    beaconMainBloc = lv_obj_create(cont);
+    lv_obj_add_style(beaconMainBloc,&style_pad_none,0);
+    lv_obj_set_align(beaconMainBloc,LV_ALIGN_TOP_RIGHT);
+    lv_obj_set_size(beaconMainBloc,tabWidth+4,MAIN_BLOC_HEIGHT);
+    lv_obj_set_style_bg_opa(beaconMainBloc,LV_OPA_0,0);
+    lv_obj_set_style_border_width(beaconMainBloc,0,0);
+    createMainBloc(beaconMainBloc,tabWidth);
     // Hide main bloc for now
-    lv_obj_add_flag(mainBloc, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(beaconMainBloc, LV_OBJ_FLAG_HIDDEN);
 
     // Add content to the tabs
     int currentY = MAIN_BLOC_HEIGHT-4; // Remove padding
@@ -259,7 +259,7 @@ void uiBeaconCreateView(lv_obj_t * cont)
     createMapTab(tab2,currentY,tabWidth);
     createBeaconTab(tab3,currentY,tabWidth);
     createDataTab(tab4,currentY,tabWidth);
-    lv_obj_clear_flag(lv_tabview_get_content(tabview), LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(lv_tabview_get_content(beaconTabview), LV_OBJ_FLAG_SCROLLABLE);
 }
 
 void uiBeaconSetBeacon(Beacon* beacon)

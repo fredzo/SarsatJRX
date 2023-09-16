@@ -22,9 +22,6 @@ bool ledSig1State = false;
 bool ledSig2State = false;
 bool ledInFrameState = false;
 bool ledFrameReceivedState = false;
-// Power
-#define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
-
 
 // Interupt pin : use digital pin 18
 const int receiverPin = 21;
@@ -115,11 +112,7 @@ float powerValue = -1;
 
 void updatePowerValueHeader()
 {  // Power header
-  char powerString[8];
-  hardware->getVccStringValue(powerString);
-  char buffer[8];
-  sprintf(buffer,HEADER_POWER_TEMPLATE,powerString);
-  uiSetPower(buffer);
+  uiSetPower(hardware->getVccStringValue().c_str());
 }
 
 void updateTimeHeader()
