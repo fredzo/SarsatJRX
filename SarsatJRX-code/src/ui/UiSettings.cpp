@@ -10,10 +10,10 @@
 #define LINE_HEIGHT         18
 #define VERSION_LABEL       "Version :"
 #define VERSION_LABEL_WIDTH 80
+#define SKETCH_LABEL        "Sketch :"
+#define SKETCH_LABEL_WIDTH  80
 #define VBAT_LABEL          "Vbat :"
 #define VBAT_LABEL_WIDTH    50
-#define DATE_LABEL          "Date :"
-#define DATE_LABEL_WIDTH    50
 
 #define CHIP_LABEL          "Chip :"
 #define CHIP_LABEL_WIDTH    50
@@ -47,15 +47,19 @@
 #define FLASHF_LABEL         "- Speed:"
 #define FLASHF_LABEL_WIDTH   80
 
+// Wifi
+#define DATE_LABEL          "Date :"
+#define DATE_LABEL_WIDTH    50
+
 lv_obj_t * settingsTabview;
 
 // System
 static lv_obj_t * versionTitle;
 static lv_obj_t * versionLabel;
+static lv_obj_t * sketchTitle;
+static lv_obj_t * sketchLabel;
 static lv_obj_t * vBatTitle;
 static lv_obj_t * vBatLabel;
-static lv_obj_t * dateTitle;
-static lv_obj_t * dateLabel;
 static lv_obj_t * chipTitle;
 static lv_obj_t * chipModelTitle;
 static lv_obj_t * chipModelLabel;
@@ -81,6 +85,10 @@ static lv_obj_t * flashSizeLabel;
 static lv_obj_t * flashFreqTitle;
 static lv_obj_t * flashFreqLabel;
 
+// Wifi
+static lv_obj_t * dateTitle;
+static lv_obj_t * dateLabel;
+
 
 void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
 {  
@@ -89,14 +97,14 @@ void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
     versionLabel = uiCreateLabel(tab,&style_section_text,SARSAT_JRX_VERSION,VERSION_LABEL_WIDTH,currentY,tabWidth-VERSION_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
 
+    // Sketch
+    sketchTitle = uiCreateLabel(tab,&style_section_title,SKETCH_LABEL,0,currentY,SKETCH_LABEL_WIDTH,LINE_HEIGHT);
+    sketchLabel = uiCreateLabel(tab,&style_section_text,formatSketchInformation(ESP.getSketchSize(),ESP.getSketchMD5()).c_str(),SKETCH_LABEL_WIDTH,currentY,tabWidth-SKETCH_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+
     // Vbat
     vBatTitle = uiCreateLabel(tab,&style_section_title,VBAT_LABEL,0,currentY,VBAT_LABEL_WIDTH,LINE_HEIGHT);
     vBatLabel = uiCreateLabel(tab,&style_section_text,"",VBAT_LABEL_WIDTH,currentY,tabWidth-VBAT_LABEL_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
-
-    // Date
-    dateTitle = uiCreateLabel(tab,&style_section_title,DATE_LABEL,0,currentY,DATE_LABEL_WIDTH,LINE_HEIGHT);
-    dateLabel = uiCreateLabel(tab,&style_section_text,"",DATE_LABEL_WIDTH,currentY,tabWidth-DATE_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
 
     // Chip
@@ -146,6 +154,11 @@ void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
+    // Date
+    dateTitle = uiCreateLabel(tab,&style_section_title,DATE_LABEL,0,currentY,DATE_LABEL_WIDTH,LINE_HEIGHT);
+    dateLabel = uiCreateLabel(tab,&style_section_text,"",DATE_LABEL_WIDTH,currentY,tabWidth-DATE_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+
     // TODO
 
 }

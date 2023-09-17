@@ -78,6 +78,11 @@ String formatHzFrequencyValue(uint32_t value)
   return (String(value/1000000) + " Mhz");
 }
 
+String formatSketchInformation(uint32_t size, String md5)
+{
+  return formatMemoryValue(size,false) + " (MD5=" + md5 + ")";
+}
+
 
 
 /* Baudot code matrix */

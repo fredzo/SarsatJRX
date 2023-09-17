@@ -35,6 +35,8 @@ String formatFrequencyValue(uint32_t value);
 
 String formatHzFrequencyValue(uint32_t value);
 
+String formatSketchInformation(uint32_t size, String md5);
+
 /* Baudot code matrix */
 extern char BAUDOT_CODE[64];
 
