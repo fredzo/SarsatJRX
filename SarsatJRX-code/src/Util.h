@@ -29,6 +29,12 @@ String toHexString(byte* frame, bool withSpace, int start, int end);
  */
 void readHexString(byte* buffer, String hexString);
 
+String formatMemoryValue(uint32_t value, bool showByteValue);
+
+String formatFrequencyValue(uint32_t value);
+
+String formatHzFrequencyValue(uint32_t value);
+
 /* Baudot code matrix */
 extern char BAUDOT_CODE[64];
 

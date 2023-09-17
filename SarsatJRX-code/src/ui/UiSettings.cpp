@@ -6,7 +6,7 @@
 #include <ui/UiBeacon.h>
 #include <Hardware.h>
 
-// Beacon info
+// System info
 #define LINE_HEIGHT         18
 #define VERSION_LABEL       "Version :"
 #define VERSION_LABEL_WIDTH 80
@@ -14,16 +14,38 @@
 #define VBAT_LABEL_WIDTH    50
 #define DATE_LABEL          "Date :"
 #define DATE_LABEL_WIDTH    50
+
 #define CHIP_LABEL          "Chip :"
 #define CHIP_LABEL_WIDTH    50
-#define CHIPM_LABEL         "- Model ="
+#define CHIPM_LABEL         "- Model:"
 #define CHIPM_LABEL_WIDTH   80
-#define CHIPR_LABEL         "- Rev. ="
+#define CHIPR_LABEL         "- Rev.:"
 #define CHIPR_LABEL_WIDTH   80
-#define CHIPC_LABEL         "- Cores ="
+#define CHIPC_LABEL         "- Cores:"
 #define CHIPC_LABEL_WIDTH   80
-#define CHIPF_LABEL         "- Freq. ="
+#define CHIPF_LABEL         "- Freq.:"
 #define CHIPF_LABEL_WIDTH   80
+
+#define RAM_LABEL          "Ram :"
+#define RAM_LABEL_WIDTH    50
+#define RAMS_LABEL         "- Total:"
+#define RAMS_LABEL_WIDTH   80
+#define RAMF_LABEL         "- Free:"
+#define RAMF_LABEL_WIDTH   80
+
+#define PSRAM_LABEL          "PS-Ram :"
+#define PSRAM_LABEL_WIDTH    60
+#define PSRAMS_LABEL         "- Total:"
+#define PSRAMS_LABEL_WIDTH   80
+#define PSRAMF_LABEL         "- Free:"
+#define PSRAMF_LABEL_WIDTH   80
+
+#define FLASH_LABEL          "Flash :"
+#define FLASH_LABEL_WIDTH    60
+#define FLASHS_LABEL         "- Size:"
+#define FLASHS_LABEL_WIDTH   80
+#define FLASHF_LABEL         "- Speed:"
+#define FLASHF_LABEL_WIDTH   80
 
 lv_obj_t * settingsTabview;
 
@@ -89,7 +111,34 @@ void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
     chipCoresLabel = uiCreateLabel(tab,&style_section_text,(String(ESP.getChipCores())).c_str(),CHIP_LABEL_WIDTH+CHIPC_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH-CHIPC_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
     chipFreqTitle = uiCreateLabel(tab,&style_section_title,CHIPF_LABEL,CHIP_LABEL_WIDTH,currentY,CHIPF_LABEL_WIDTH,LINE_HEIGHT);
-    chipFreqLabel = uiCreateLabel(tab,&style_section_text,(String(ESP.getCpuFreqMHz()) + " Mhz").c_str(),CHIP_LABEL_WIDTH+CHIPF_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH-CHIPF_LABEL_WIDTH,LINE_HEIGHT);
+    chipFreqLabel = uiCreateLabel(tab,&style_section_text,formatFrequencyValue(ESP.getCpuFreqMHz()).c_str(),CHIP_LABEL_WIDTH+CHIPF_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH-CHIPF_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+
+    // Ram
+    ramTitle = uiCreateLabel(tab,&style_section_title,RAM_LABEL,0,currentY,RAM_LABEL_WIDTH,LINE_HEIGHT);
+    ramSizeTitle = uiCreateLabel(tab,&style_section_title,RAMS_LABEL,RAM_LABEL_WIDTH,currentY,RAMS_LABEL_WIDTH,LINE_HEIGHT);
+    ramSizeLabel = uiCreateLabel(tab,&style_section_text,ESP.getChipModel(),RAM_LABEL_WIDTH+RAMS_LABEL_WIDTH,currentY,tabWidth-RAM_LABEL_WIDTH-RAMS_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    ramFreeTitle = uiCreateLabel(tab,&style_section_title,RAMF_LABEL,RAM_LABEL_WIDTH,currentY,RAMF_LABEL_WIDTH,LINE_HEIGHT);
+    ramFreeLabel = uiCreateLabel(tab,&style_section_text,"",RAM_LABEL_WIDTH+RAMF_LABEL_WIDTH,currentY,tabWidth-RAM_LABEL_WIDTH-RAMF_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+
+    // PS-Ram
+    psRamTitle = uiCreateLabel(tab,&style_section_title,PSRAM_LABEL,0,currentY,PSRAM_LABEL_WIDTH,LINE_HEIGHT);
+    psRamSizeTitle = uiCreateLabel(tab,&style_section_title,PSRAMS_LABEL,PSRAM_LABEL_WIDTH,currentY,PSRAMS_LABEL_WIDTH,LINE_HEIGHT);
+    psRamSizeLabel = uiCreateLabel(tab,&style_section_text,"",PSRAM_LABEL_WIDTH+PSRAMS_LABEL_WIDTH,currentY,tabWidth-PSRAM_LABEL_WIDTH-PSRAMS_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    psRamFreeTitle = uiCreateLabel(tab,&style_section_title,PSRAMF_LABEL,PSRAM_LABEL_WIDTH,currentY,PSRAMF_LABEL_WIDTH,LINE_HEIGHT);
+    psRamFreeLabel = uiCreateLabel(tab,&style_section_text,"",PSRAM_LABEL_WIDTH+PSRAMF_LABEL_WIDTH,currentY,tabWidth-PSRAM_LABEL_WIDTH-PSRAMF_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+
+    // Flash
+    flashTitle = uiCreateLabel(tab,&style_section_title,FLASH_LABEL,0,currentY,FLASH_LABEL_WIDTH,LINE_HEIGHT);
+    flashSizeTitle = uiCreateLabel(tab,&style_section_title,FLASHS_LABEL,FLASH_LABEL_WIDTH,currentY,FLASHS_LABEL_WIDTH,LINE_HEIGHT);
+    flashSizeLabel = uiCreateLabel(tab,&style_section_text,"",FLASH_LABEL_WIDTH+FLASHS_LABEL_WIDTH,currentY,tabWidth-FLASH_LABEL_WIDTH-FLASHS_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    flashFreqTitle = uiCreateLabel(tab,&style_section_title,FLASHF_LABEL,FLASH_LABEL_WIDTH,currentY,FLASHF_LABEL_WIDTH,LINE_HEIGHT);
+    flashFreqLabel = uiCreateLabel(tab,&style_section_text,"",FLASH_LABEL_WIDTH+FLASHF_LABEL_WIDTH,currentY,tabWidth-FLASH_LABEL_WIDTH-FLASHF_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
 
     //currentY+=LINE_HEIGHT;
@@ -153,4 +202,13 @@ void uiSettingsUpdateView()
     lv_label_set_text(vBatLabel,hardware->getVccStringValue().c_str());
     // Date
     lv_label_set_text(dateLabel,(hardware->getRtc()->getDateString() + " - " + hardware->getRtc()->getTimeString()).c_str());
+    // Ram
+    lv_label_set_text(ramSizeLabel,formatMemoryValue(ESP.getHeapSize(),true).c_str());
+    lv_label_set_text(ramFreeLabel,formatMemoryValue(ESP.getFreeHeap(),true).c_str());
+    // PS Ram
+    lv_label_set_text(psRamSizeLabel,formatMemoryValue(ESP.getPsramSize(),false).c_str());
+    lv_label_set_text(psRamFreeLabel,formatMemoryValue(ESP.getFreePsram(),false).c_str());
+    // Flash
+    lv_label_set_text(flashSizeLabel,formatMemoryValue(ESP.getFlashChipSize(),false).c_str());
+    lv_label_set_text(flashFreqLabel,formatHzFrequencyValue(ESP.getFlashChipSpeed()).c_str());
 }

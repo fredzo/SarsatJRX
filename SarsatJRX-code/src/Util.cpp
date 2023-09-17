@@ -53,6 +53,33 @@ void readHexString(byte* buffer, String hexString)
   }
 }
 
+String formatMemoryValue(uint32_t value, bool showByteValue)
+{
+  char buffer[64];
+  uint32_t kbValue = value / 1024;
+  if(showByteValue)
+  {
+    sprintf(buffer,"%'d kB (%'d bytes)",kbValue,value);
+  }
+  else
+  {
+    sprintf(buffer,"%'d kB",kbValue);
+  }
+  return String(buffer);
+}
+
+String formatFrequencyValue(uint32_t value)
+{
+  return (String(value) + " Mhz");
+}
+
+String formatHzFrequencyValue(uint32_t value)
+{
+  return (String(value/1000000) + " Mhz");
+}
+
+
+
 /* Baudot code matrix */
 char BAUDOT_CODE[64]   = {' ','5',' ','9',' ',' ',' ',' ',' ',' ','4',' ','8','0',' ',' ',
                           '3',' ',' ',' ',' ','6',' ','/','-','2',' ',' ','7','1',' ',' ',
