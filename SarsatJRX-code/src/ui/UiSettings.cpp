@@ -48,6 +48,21 @@
 #define FLASHF_LABEL_WIDTH   75
 
 // Wifi
+// Wifi On/Off -> save to EEProm
+// Portal On/Off
+// Mode (Station / Acess Point)
+// Status (Connected etc)
+// Signal (RSSI)
+// SSID
+// (Station mode) :
+// Mac @
+// IP @
+// Sunbet mask
+// Gateway IP
+// DNS1
+// DNS2
+// NTP status
+// Date
 #define DATE_LABEL          "Date :"
 #define DATE_LABEL_WIDTH    50
 
@@ -189,12 +204,14 @@ void uiSettingsCreateView(lv_obj_t * cont)
     /*Add 3 tabs (the tabs are page (lv_page) and can be scrolled*/
     lv_obj_t * tab1 = lv_tabview_add_tab(settingsTabview, "Sys.");
     lv_obj_t * tab2 = lv_tabview_add_tab(settingsTabview, "Wifi");
-    lv_obj_t * tab3 = lv_tabview_add_tab(settingsTabview, "SD");
-    lv_obj_t * tab4 = lv_tabview_add_tab(settingsTabview, "Radio");
+    lv_obj_t * tab3 = lv_tabview_add_tab(settingsTabview, "Net.");
+    lv_obj_t * tab4 = lv_tabview_add_tab(settingsTabview, "SD");
+    lv_obj_t * tab5 = lv_tabview_add_tab(settingsTabview, "Radio");
     lv_obj_add_style(tab1, &style_pad_small, 0);
     lv_obj_add_style(tab2, &style_pad_small, 0);
     lv_obj_add_style(tab3, &style_pad_small, 0);
     lv_obj_add_style(tab4, &style_pad_small, 0);
+    lv_obj_add_style(tab5, &style_pad_small, 0);
     int tabWidth = lv_obj_get_width(tab1) - 8; // 2*4 px padding
 
     //lv_obj_set_style_bg_color(tab2, lv_palette_lighten(LV_PALETTE_AMBER, 3), 0);
