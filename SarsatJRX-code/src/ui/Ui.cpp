@@ -62,6 +62,7 @@ lv_style_t style_tag;
 lv_style_t style_header;
 lv_style_t style_section_title;
 lv_style_t style_section_text;
+lv_style_t style_section_toggle;
 lv_style_t style_footer_text;
 lv_style_t style_time;
 
@@ -262,7 +263,7 @@ void createUi()
     lv_style_set_text_font(&style_header, font_large);
     lv_style_set_text_align(&style_header, LV_TEXT_ALIGN_CENTER);
     lv_style_set_text_color(&style_header, lv_palette_lighten(LV_PALETTE_CYAN,1));
-    // Section title / text
+    // Section title / text / toggle
     lv_style_init(&style_section_title);
     lv_style_set_text_font(&style_section_title, font_normal);
     lv_style_set_text_color(&style_section_title, lv_palette_lighten(LV_PALETTE_CYAN,1));
@@ -270,6 +271,8 @@ void createUi()
     lv_style_set_text_font(&style_section_text, font_mono_medium);
     lv_style_set_text_color(&style_section_text, lv_palette_lighten(LV_PALETTE_YELLOW,4));
     lv_style_set_pad_top(&style_section_text, 2);
+    lv_style_init(&style_section_toggle);
+    lv_style_set_pad_top(&style_section_toggle, 2);
     // Footer
     lv_style_init(&style_footer);
     lv_style_set_text_font(&style_footer, font_medium);
@@ -475,3 +478,13 @@ lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text
     return result;
 }
 
+lv_obj_t * uiCreateToggle(lv_obj_t * parent, lv_style_t * style, lv_event_cb_t event_cb, int x, int y, int width, int height)
+{
+    lv_obj_t *  result = lv_switch_create(parent);
+    lv_obj_add_state(result, LV_STATE_CHECKED);
+    lv_obj_add_event_cb(result, event_cb, LV_EVENT_VALUE_CHANGED,nullptr);
+    lv_obj_add_style(result,style,0);
+    lv_obj_set_size(result,width,height);
+    lv_obj_set_pos(result,x,y);
+    return result;
+}

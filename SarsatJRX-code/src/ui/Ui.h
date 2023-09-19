@@ -22,6 +22,7 @@ extern lv_style_t style_tag;
 extern lv_style_t style_header;
 extern lv_style_t style_section_title;
 extern lv_style_t style_section_text;
+extern lv_style_t style_section_toggle;
 extern lv_style_t style_footer_text;
 extern lv_style_t style_time;
 
@@ -67,5 +68,7 @@ void uiSetLedInFrameState(bool on);
 void uiSetLedFrameReceivedState(bool on);
 
 lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text, int x, int y, int width, int height);
+
+lv_obj_t * uiCreateToggle(lv_obj_t * parent, lv_style_t * style, lv_event_cb_t event_cb, int x, int y, int width, int height);
 
 #endif 

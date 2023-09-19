@@ -8,6 +8,10 @@
 
 enum class WifiStatus { CONNECTED, DISCONNECTED, PORTAL, PORTAL_CONNECTED };
 
+String wifiManagerGetStatusString();
+
+const char* wifiManagerGetMode();
+
 void wifiManagerStart();
 
 /**

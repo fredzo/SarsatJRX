@@ -162,6 +162,14 @@ String wifiManagerGetStatusString()
   }
 }
 
+static const char* wifiModes[] = { "NULL", "STA", "AP", "STA+AP" };
+
+const char* wifiManagerGetMode()
+{
+  int mode = WiFi.getMode();
+  return wifiModes[mode];
+}
+
 /**
  * Returns true if Wifi is connected
  */

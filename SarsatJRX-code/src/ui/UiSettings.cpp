@@ -5,6 +5,8 @@
 #include <ui/Ui.h>
 #include <ui/UiBeacon.h>
 #include <Hardware.h>
+#include <WiFi.h>
+#include <WifiManager.h>
 
 // System info
 #define LINE_HEIGHT         18
@@ -48,19 +50,33 @@
 #define FLASHF_LABEL_WIDTH   75
 
 // Wifi
-// Wifi On/Off -> save to EEProm
-// Portal On/Off
-// Mode (Station / Acess Point)
-// Status (Connected etc)
-// Signal (RSSI)
-// SSID
-// (Station mode) :
-// Mac @
-// IP @
-// Sunbet mask
-// Gateway IP
-// DNS1
-// DNS2
+#define TOGGLE_LINE_HEIGHT  24
+#define TOGGLE_X            200
+#define TOGGLE_WIDTH        80
+#define WIFI_LABEL          "Wifi :"
+#define WIFI_LABEL_WIDTH    80
+#define PORTAL_LABEL        "Wifi setup portal :"
+#define PORTAL_LABEL_WIDTH  200
+#define MODE_LABEL          "Mode :"
+#define MODE_LABEL_WIDTH    80
+#define STATUS_LABEL        "Status :"
+#define STATUS_LABEL_WIDTH  80
+#define SIGNAL_LABEL        "Signal :"
+#define SIGNAL_LABEL_WIDTH  80
+#define SSID_LABEL          "SSID :"
+#define SSID_LABEL_WIDTH    80
+#define MAC_LABEL           "MAC :"
+#define MAC_LABEL_WIDTH     80
+#define IP_LABEL            "IP :"
+#define IP_LABEL_WIDTH      80
+#define GATEWAY_LABEL       "Gateway :"
+#define GATEWAY_LABEL_WIDTH 80
+#define DNS1_LABEL          "DNS 1 :"
+#define DNS1_LABEL_WIDTH    80
+#define DNS2_LABEL          "DNS 2 :"
+#define DNS2_LABEL_WIDTH    80
+
+
 // NTP status
 // Date
 #define DATE_LABEL          "Date :"
@@ -101,6 +117,30 @@ static lv_obj_t * flashFreqTitle;
 static lv_obj_t * flashFreqLabel;
 
 // Wifi
+static lv_obj_t * wifiTitle;
+static lv_obj_t * wifiToggle;
+static lv_obj_t * portalTitle;
+static lv_obj_t * portalToggle;
+static lv_obj_t * modeTitle;
+static lv_obj_t * modeLabel;
+static lv_obj_t * statusTitle;
+static lv_obj_t * statusLabel;
+static lv_obj_t * signalTitle;
+static lv_obj_t * signalLabel;
+static lv_obj_t * ssidTitle;
+static lv_obj_t * ssidLabel;
+static lv_obj_t * macTitle;
+static lv_obj_t * macLabel;
+static lv_obj_t * ipTitle;
+static lv_obj_t * ipLabel;
+static lv_obj_t * gatewayTitle;
+static lv_obj_t * gatewayLabel;
+static lv_obj_t * dns1Title;
+static lv_obj_t * dns1Label;
+static lv_obj_t * dns2Title;
+static lv_obj_t * dns2Label;
+
+// Network
 static lv_obj_t * dateTitle;
 static lv_obj_t * dateLabel;
 
@@ -163,13 +203,68 @@ void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
     currentY+=LINE_HEIGHT;
     flashFreqTitle = uiCreateLabel(tab,&style_section_title,FLASHF_LABEL,FLASH_LABEL_WIDTH,currentY,FLASHF_LABEL_WIDTH,LINE_HEIGHT);
     flashFreqLabel = uiCreateLabel(tab,&style_section_text,"",FLASH_LABEL_WIDTH+FLASHF_LABEL_WIDTH,currentY,tabWidth-FLASH_LABEL_WIDTH-FLASHF_LABEL_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
-
     //currentY+=LINE_HEIGHT;
+}
+
+static void toggle_wifi_cb(lv_event_t * e)
+{
+}
+
+static void toggle_portal_cb(lv_event_t * e)
+{
 }
 
 void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
+    // Wifi On/Off -> save to EEProm
+    wifiTitle = uiCreateLabel(tab,&style_section_title,WIFI_LABEL,0,currentY,WIFI_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    wifiToggle = uiCreateToggle(tab,&style_section_text,toggle_wifi_cb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentY+=TOGGLE_LINE_HEIGHT;
+    // Portal On/Off
+    portalTitle = uiCreateLabel(tab,&style_section_title,PORTAL_LABEL,0,currentY,PORTAL_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    portalToggle = uiCreateToggle(tab,&style_section_text,toggle_wifi_cb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentY+=TOGGLE_LINE_HEIGHT;
+    // Mode (Station / Acess Point)
+    modeTitle = uiCreateLabel(tab,&style_section_title,MODE_LABEL,0,currentY,MODE_LABEL_WIDTH,LINE_HEIGHT);
+    modeLabel = uiCreateLabel(tab,&style_section_text,"",MODE_LABEL_WIDTH,currentY,tabWidth-MODE_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // Status (Connected etc)
+    statusTitle = uiCreateLabel(tab,&style_section_title,STATUS_LABEL,0,currentY,STATUS_LABEL_WIDTH,LINE_HEIGHT);
+    statusLabel = uiCreateLabel(tab,&style_section_text,"",STATUS_LABEL_WIDTH,currentY,tabWidth-STATUS_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // Signal (RSSI)
+    signalTitle = uiCreateLabel(tab,&style_section_title,SIGNAL_LABEL,0,currentY,SIGNAL_LABEL_WIDTH,LINE_HEIGHT);
+    signalLabel = uiCreateLabel(tab,&style_section_text,"",SIGNAL_LABEL_WIDTH,currentY,tabWidth-SIGNAL_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // SSID
+    ssidTitle = uiCreateLabel(tab,&style_section_title,SSID_LABEL,0,currentY,SSID_LABEL_WIDTH,LINE_HEIGHT);
+    ssidLabel = uiCreateLabel(tab,&style_section_text,"",SSID_LABEL_WIDTH,currentY,tabWidth-SSID_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // Mac @
+    macTitle = uiCreateLabel(tab,&style_section_title,MAC_LABEL,0,currentY,MAC_LABEL_WIDTH,LINE_HEIGHT);
+    macLabel = uiCreateLabel(tab,&style_section_text,"",MAC_LABEL_WIDTH,currentY,tabWidth-MAC_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // IP @
+    ipTitle = uiCreateLabel(tab,&style_section_title,IP_LABEL,0,currentY,IP_LABEL_WIDTH,LINE_HEIGHT);
+    ipLabel = uiCreateLabel(tab,&style_section_text,"",IP_LABEL_WIDTH,currentY,tabWidth-IP_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // Gateway IP
+    gatewayTitle = uiCreateLabel(tab,&style_section_title,GATEWAY_LABEL,0,currentY,GATEWAY_LABEL_WIDTH,LINE_HEIGHT);
+    gatewayLabel = uiCreateLabel(tab,&style_section_text,"",GATEWAY_LABEL_WIDTH,currentY,tabWidth-GATEWAY_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // DNS1
+    dns1Title = uiCreateLabel(tab,&style_section_title,DNS1_LABEL,0,currentY,DNS1_LABEL_WIDTH,LINE_HEIGHT);
+    dns1Label = uiCreateLabel(tab,&style_section_text,"",DNS1_LABEL_WIDTH,currentY,tabWidth-DNS1_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // DNS2
+    dns2Title = uiCreateLabel(tab,&style_section_title,DNS2_LABEL,0,currentY,DNS2_LABEL_WIDTH,LINE_HEIGHT);
+    dns2Label = uiCreateLabel(tab,&style_section_text,"",DNS2_LABEL_WIDTH,currentY,tabWidth-DNS2_LABEL_WIDTH,LINE_HEIGHT);
+    //currentY+=LINE_HEIGHT;
+}
+
+void createNetworkTab(lv_obj_t * tab, int currentY, int tabWidth)
+{
+// NTP status
     // Date
     dateTitle = uiCreateLabel(tab,&style_section_title,DATE_LABEL,0,currentY,DATE_LABEL_WIDTH,LINE_HEIGHT);
     dateLabel = uiCreateLabel(tab,&style_section_text,"",DATE_LABEL_WIDTH,currentY,tabWidth-DATE_LABEL_WIDTH,LINE_HEIGHT);
@@ -221,14 +316,16 @@ void uiSettingsCreateView(lv_obj_t * cont)
     int currentY = 0;
     createSystemTab(tab1,currentY,tabWidth);
     createWifiTab(tab2,currentY,tabWidth);
-    createSdTab(tab3,currentY,tabWidth);
-    createRadioTab(tab4,currentY,tabWidth);
+    createNetworkTab(tab3,currentY,tabWidth);
+    createSdTab(tab4,currentY,tabWidth);
+    createRadioTab(tab5,currentY,tabWidth);
     lv_obj_clear_flag(lv_tabview_get_content(settingsTabview), LV_OBJ_FLAG_SCROLLABLE);
 }
 
 void uiSettingsUpdateView()
 {
     Hardware* hardware = Hardware::getHardware();
+    // System tab
     // Vbat
     lv_label_set_text(vBatLabel,hardware->getVccStringValue().c_str());
     // Date
@@ -242,4 +339,24 @@ void uiSettingsUpdateView()
     // Flash
     lv_label_set_text(flashSizeLabel,formatMemoryValue(ESP.getFlashChipSize(),false).c_str());
     lv_label_set_text(flashFreqLabel,formatHzFrequencyValue(ESP.getFlashChipSpeed()).c_str());
+
+    // Wifi tab
+    // Mode (Station / Acess Point)
+    lv_label_set_text(modeLabel,wifiManagerGetMode()); // TODO translate into String
+    // Status (Connected etc)
+    lv_label_set_text(statusLabel,wifiManagerGetStatusString().c_str());
+    // Signal (RSSI)
+    lv_label_set_text(signalLabel,String(WiFi.RSSI()).c_str());
+    // SSID
+    lv_label_set_text(ssidLabel,String(WiFi.SSID()).c_str());
+    // Mac @
+    lv_label_set_text(macLabel,WiFi.macAddress().c_str());
+    // IP @
+    lv_label_set_text(ipLabel,WiFi.localIP().toString().c_str());
+    // Gateway IP
+    lv_label_set_text(gatewayLabel,WiFi.gatewayIP().toString().c_str());
+    // DNS1
+    lv_label_set_text(dns1Label,WiFi.dnsIP(0).toString().c_str());
+    // DNS2
+    lv_label_set_text(dns2Label,WiFi.dnsIP(0).toString().c_str());
 }
