@@ -346,7 +346,7 @@ void uiSettingsUpdateView()
     // Status (Connected etc)
     lv_label_set_text(statusLabel,wifiManagerGetStatusString().c_str());
     // Signal (RSSI)
-    lv_label_set_text(signalLabel,String(WiFi.RSSI()).c_str());
+    lv_label_set_text(signalLabel,formatDbmValue(WiFi.RSSI()).c_str());
     // SSID
     lv_label_set_text(ssidLabel,String(WiFi.SSID()).c_str());
     // Mac @

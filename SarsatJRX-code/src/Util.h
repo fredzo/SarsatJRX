@@ -33,6 +33,8 @@ String formatMemoryValue(uint32_t value, bool showByteValue);
 
 String formatFrequencyValue(uint32_t value);
 
+String formatDbmValue(int8_t value);
+
 String formatHzFrequencyValue(uint32_t value);
 
 String formatSketchInformation(uint32_t size, String md5);

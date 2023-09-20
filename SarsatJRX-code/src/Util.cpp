@@ -73,6 +73,11 @@ String formatFrequencyValue(uint32_t value)
   return (String(value) + " Mhz");
 }
 
+String formatDbmValue(int8_t value)
+{
+  return (String(value) + " dBm");
+}
+
 String formatHzFrequencyValue(uint32_t value)
 {
   return (String(value/1000000) + " Mhz");
