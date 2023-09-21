@@ -162,7 +162,7 @@ String wifiManagerGetStatusString()
   }
 }
 
-static const char* wifiModes[] = { "NULL", "STA", "AP", "STA+AP" };
+static const char* wifiModes[] = { "OFF", "STA", "AP", "STA+AP" };
 
 const char* wifiManagerGetMode()
 {
