@@ -14,6 +14,10 @@ const char* wifiManagerGetMode();
 
 void wifiManagerStart();
 
+void wifiManagerStop();
+
+void wifiManagerStartPortal();
+
 /**
  * Returns true if wifi status changed
  */

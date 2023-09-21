@@ -5,7 +5,7 @@
 #include <Display.h>
 #include <extra/libs/qrcode/lv_qrcode.h>
 #include <ui/SpiffsLvgl.h>
-
+#include <Settings.h>
 
 // Header
 #define HEADER_HEIGHT       30
@@ -383,6 +383,11 @@ void uiShowScreen(UiScreen screen)
                 break;
 
         }
+        if(currentScreen == UiScreen::SETTINGS)
+        {   // Save settings on settings screen exit
+            Settings* settings = Settings::getSettings();
+            settings->save();
+        }
         currentScreen = screen;
     }
 }
@@ -411,6 +416,8 @@ void uiSetWifiStatus(WifiStatus status)
         lv_label_set_text(wifiIndicator,"");
         break;
   }
+  // Update settings page
+  uiSettingsUpdateView();
 }
 #endif
 

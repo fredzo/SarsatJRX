@@ -4,6 +4,7 @@
 #include <RTC.h>
 #include <Display.h>
 #include <Filesystems.h>
+#include <Settings.h>
 
 class Hardware
 {
@@ -23,6 +24,8 @@ public:
     Rtc* getRtc();
 
     Filesystems* getFilesystems();
+
+    Settings* getSettings();
 
     /**
      * @brief Returns actual VCC value
@@ -51,6 +54,7 @@ private:
     Display *display = nullptr;
     Rtc *rtc = nullptr;
     Filesystems *filesystems = nullptr;
+    Settings *settings = nullptr;
 
     static Hardware *hardware;
 

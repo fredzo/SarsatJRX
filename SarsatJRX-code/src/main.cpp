@@ -266,8 +266,11 @@ void setup()
   initHeader();
 
 #ifdef WIFI
-  wifiManagerStart();
-  uiSetWifiStatus(wifiManagerGetStatus());
+  if(hardware->getSettings()->getWifiState())
+  {
+    wifiManagerStart();
+    uiSetWifiStatus(wifiManagerGetStatus());
+  }
 #endif
 
   uiSetSdCardStatus(hardware->getFilesystems()->isSdFilesystemMounted());

@@ -178,6 +178,18 @@ WifiStatus wifiManagerGetStatus()
     return wifiStatus;  
 }
 
+void wifiManagerStop()
+{
+    WiFi.disconnect(true);  // Disconnect from the network
+    WiFi.mode(WIFI_OFF);    // Switch WiFi off
+}
+
+void wifiManagerStartPortal()
+{
+
+}
+
+
 /**
  * Returns true if Wifi is connected
  */

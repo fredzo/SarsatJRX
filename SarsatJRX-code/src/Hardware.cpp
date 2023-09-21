@@ -10,6 +10,8 @@ void Hardware::init()
     rtc->rtcInit(i2c);
     filesystems = Filesystems::getFilesystems();
     filesystems->init();
+    settings = Settings::getSettings();
+    settings->init();
     display = new Display();
     display->setup(i2c);
 }
@@ -22,6 +24,11 @@ Display* Hardware::getDisplay()
 Rtc* Hardware::getRtc()
 {
     return rtc;
+}
+
+Settings* Hardware::getSettings()
+{
+    return settings;
 }
 
 /**

@@ -7,6 +7,7 @@
 #include <Hardware.h>
 #include <WiFi.h>
 #include <WifiManager.h>
+#include <Settings.h>
 
 // System info
 #define LINE_HEIGHT         18
@@ -50,9 +51,9 @@
 #define FLASHF_LABEL_WIDTH   75
 
 // Wifi
-#define TOGGLE_LINE_HEIGHT  24
-#define TOGGLE_X            200
-#define TOGGLE_WIDTH        80
+#define TOGGLE_LINE_HEIGHT  28
+#define TOGGLE_X            160
+#define TOGGLE_WIDTH        50
 #define WIFI_LABEL          "Wifi :"
 #define WIFI_LABEL_WIDTH    80
 #define PORTAL_LABEL        "Wifi setup portal :"
@@ -75,6 +76,8 @@
 #define DNS1_LABEL_WIDTH    80
 #define DNS2_LABEL          "DNS 2 :"
 #define DNS2_LABEL_WIDTH    80
+#define MASK_LABEL          "Mask :"
+#define MASK_LABEL_WIDTH    80
 
 
 // NTP status
@@ -139,6 +142,8 @@ static lv_obj_t * dns1Title;
 static lv_obj_t * dns1Label;
 static lv_obj_t * dns2Title;
 static lv_obj_t * dns2Label;
+static lv_obj_t * maskTitle;
+static lv_obj_t * maskLabel;
 
 // Network
 static lv_obj_t * dateTitle;
@@ -208,6 +213,18 @@ void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 static void toggle_wifi_cb(lv_event_t * e)
 {
+    bool state = lv_obj_has_state(wifiToggle, LV_STATE_CHECKED);
+    // Save state to settings
+    Settings* settings = Settings::getSettings();
+    settings->setWifiState(state);
+    if(state)
+    {
+        wifiManagerStart();
+    }
+    else
+    {
+        wifiManagerStop();
+    }
 }
 
 static void toggle_portal_cb(lv_event_t * e)
@@ -259,6 +276,10 @@ void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
     // DNS2
     dns2Title = uiCreateLabel(tab,&style_section_title,DNS2_LABEL,0,currentY,DNS2_LABEL_WIDTH,LINE_HEIGHT);
     dns2Label = uiCreateLabel(tab,&style_section_text,"",DNS2_LABEL_WIDTH,currentY,tabWidth-DNS2_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // Mask
+    maskTitle = uiCreateLabel(tab,&style_section_title,MASK_LABEL,0,currentY,MASK_LABEL_WIDTH,LINE_HEIGHT);
+    maskLabel = uiCreateLabel(tab,&style_section_text,"",MASK_LABEL_WIDTH,currentY,tabWidth-MASK_LABEL_WIDTH,LINE_HEIGHT);
     //currentY+=LINE_HEIGHT;
 }
 
@@ -325,6 +346,7 @@ void uiSettingsCreateView(lv_obj_t * cont)
 void uiSettingsUpdateView()
 {
     Hardware* hardware = Hardware::getHardware();
+    Settings* settings = hardware->getSettings();
     // System tab
     // Vbat
     lv_label_set_text(vBatLabel,hardware->getVccStringValue().c_str());
@@ -341,6 +363,9 @@ void uiSettingsUpdateView()
     lv_label_set_text(flashFreqLabel,formatHzFrequencyValue(ESP.getFlashChipSpeed()).c_str());
 
     // Wifi tab
+    // Wifi state
+    bool state = settings->getWifiState();
+    state ? lv_obj_add_state(wifiToggle, LV_STATE_CHECKED) : lv_obj_clear_state(wifiToggle, LV_STATE_CHECKED);
     // Mode (Station / Acess Point)
     lv_label_set_text(modeLabel,wifiManagerGetMode()); // TODO translate into String
     // Status (Connected etc)
@@ -359,4 +384,6 @@ void uiSettingsUpdateView()
     lv_label_set_text(dns1Label,WiFi.dnsIP(0).toString().c_str());
     // DNS2
     lv_label_set_text(dns2Label,WiFi.dnsIP(0).toString().c_str());
+    // Mask
+    lv_label_set_text(maskLabel,WiFi.subnetMask().toString().c_str());
 }
