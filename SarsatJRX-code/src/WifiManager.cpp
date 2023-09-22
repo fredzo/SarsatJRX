@@ -133,7 +133,9 @@ void wifiManagerStart()
   // Configure automatic reconnection and captive portal retention, then start
   // AutoConnect. In subsequent steps, it will use the portalStatus function to
   // detect the WiFi connection status in this configuration.
+  config.immediateStart = false;
   config.autoReset = false;
+  config.autoRise = true;
   config.portalTimeout = 1;     // Don't block on AP mode
   config.beginTimeout = 3000;   // Only wait 3s at wifi begin not to block Sarsat JRX setartup
   config.autoReconnect = true;  // Automtic only if we have saved credentials
@@ -182,7 +184,9 @@ WifiStatus wifiManagerGetStatus()
 }
 
 void wifiManagerStop()
-{
+{   // Prevent portal from re-activating wifi
+    config.autoRise = false;
+    portal.config(config);
     portal.end();           // Stop AutoConnect portal
     WiFi.disconnect(true);  // Disconnect from the network
     WiFi.mode(WIFI_OFF);    // Switch WiFi off
@@ -195,6 +199,8 @@ void wifiManagerStartPortal()
     if(mode == wifi_mode_t::WIFI_MODE_STA)
     { // Only if we currently are in Station mode => switch to Portal mode
       config.immediateStart= true;
+      config.autoRise = true;
+      config.beginTimeout = 0; // Non blocking start
       portal.config(config);
       portal.begin();
     }

@@ -214,6 +214,7 @@ void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
 static void toggle_wifi_cb(lv_event_t * e)
 {
     bool state = lv_obj_has_state(wifiToggle, LV_STATE_CHECKED);
+    //Serial.println("Toggle wifi :" + String(state));
     // Save state to settings
     Settings* settings = Settings::getSettings();
     settings->setWifiState(state);
@@ -230,6 +231,7 @@ static void toggle_wifi_cb(lv_event_t * e)
 static void toggle_portal_cb(lv_event_t * e)
 {
     bool state = lv_obj_has_state(portalToggle, LV_STATE_CHECKED);
+    //Serial.println("Toggle portal :" + String(state));
     if(state)
     {
         wifiManagerStartPortal();
@@ -248,7 +250,7 @@ void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
     currentY+=TOGGLE_LINE_HEIGHT;
     // Portal On/Off
     portalTitle = uiCreateLabel(tab,&style_section_title,PORTAL_LABEL,0,currentY,PORTAL_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
-    portalToggle = uiCreateToggle(tab,&style_section_text,toggle_wifi_cb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    portalToggle = uiCreateToggle(tab,&style_section_text,toggle_portal_cb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentY+=TOGGLE_LINE_HEIGHT;
     // Mode (Station / Acess Point)
     modeTitle = uiCreateLabel(tab,&style_section_title,MODE_LABEL,0,currentY,MODE_LABEL_WIDTH,LINE_HEIGHT);
