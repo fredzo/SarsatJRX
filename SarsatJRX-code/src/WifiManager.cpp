@@ -83,11 +83,12 @@ void onWifiEvent(WiFiEvent_t event)
 #endif
             break;
         case ARDUINO_EVENT_WIFI_AP_STOP:
-            // Update Wifi status when Access Point is desactivated (Portal mode)
-            wifiStatus = WifiStatus::DISCONNECTED;
+        case ARDUINO_EVENT_WIFI_STA_STOP:
+            // Update Wifi status when wifi is stopped
+            wifiStatus = WifiStatus::OFF;
             wifiStatusChanged = true;
 #ifdef SERIAL_OUT
-            Serial.println("WiFi access point  stopped");
+            Serial.println("WiFi stopped");
 #endif
             break;
         case ARDUINO_EVENT_WIFI_AP_STACONNECTED:
@@ -196,7 +197,7 @@ void wifiManagerStop()
 void wifiManagerStartPortal()
 {
     wifi_mode_t mode = WiFi.getMode();
-    if(mode == wifi_mode_t::WIFI_MODE_STA)
+    if((mode == wifi_mode_t::WIFI_MODE_STA) || (mode == wifi_mode_t::WIFI_MODE_APSTA))
     { // Only if we currently are in Station mode => switch to Portal mode
       config.immediateStart= true;
       config.autoRise = true;
