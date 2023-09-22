@@ -229,6 +229,15 @@ static void toggle_wifi_cb(lv_event_t * e)
 
 static void toggle_portal_cb(lv_event_t * e)
 {
+    bool state = lv_obj_has_state(portalToggle, LV_STATE_CHECKED);
+    if(state)
+    {
+        wifiManagerStartPortal();
+    }
+    else
+    {
+        wifiManagerStart();
+    }
 }
 
 void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
@@ -363,9 +372,30 @@ void uiSettingsUpdateView()
     lv_label_set_text(flashFreqLabel,formatHzFrequencyValue(ESP.getFlashChipSpeed()).c_str());
 
     // Wifi tab
-    // Wifi state
-    bool state = settings->getWifiState();
-    state ? lv_obj_add_state(wifiToggle, LV_STATE_CHECKED) : lv_obj_clear_state(wifiToggle, LV_STATE_CHECKED);
+    // Wifi state and Portal mode
+    WifiStatus status = wifiManagerGetStatus();
+    if(status == WifiStatus::OFF)
+    {   // Wifi toggle off
+        lv_obj_clear_state(wifiToggle, LV_STATE_CHECKED);
+        // Disable portal toggle
+        lv_obj_add_state(portalToggle, LV_STATE_DISABLED);
+        lv_obj_clear_state(portalToggle, LV_STATE_CHECKED);
+    }
+    else
+    {   // Wifi toggle on
+        lv_obj_add_state(wifiToggle, LV_STATE_CHECKED);
+        // Enable portal toggle
+        lv_obj_clear_state(portalToggle, LV_STATE_DISABLED);
+        if((status == WifiStatus::PORTAL) || (status == WifiStatus::PORTAL_CONNECTED))
+        {
+            lv_obj_add_state(portalToggle, LV_STATE_CHECKED);
+        }
+        else
+        {
+            lv_obj_clear_state(portalToggle, LV_STATE_CHECKED);
+        }
+    }
+
     // Mode (Station / Acess Point)
     lv_label_set_text(modeLabel,wifiManagerGetMode()); // TODO translate into String
     // Status (Connected etc)

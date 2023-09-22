@@ -6,7 +6,7 @@
 
 #ifdef WIFI
 
-enum class WifiStatus { CONNECTED, DISCONNECTED, PORTAL, PORTAL_CONNECTED };
+enum class WifiStatus { OFF, CONNECTED, DISCONNECTED, PORTAL, PORTAL_CONNECTED };
 
 String wifiManagerGetStatusString();
 

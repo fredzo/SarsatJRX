@@ -412,6 +412,7 @@ void uiSetWifiStatus(WifiStatus status)
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_AP_CONNECTED);
         break;
     case WifiStatus::DISCONNECTED:
+    case WifiStatus::OFF:
     default:
         lv_label_set_text(wifiIndicator,"");
         break;

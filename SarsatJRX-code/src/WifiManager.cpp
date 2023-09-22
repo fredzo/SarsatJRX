@@ -9,13 +9,13 @@
 #define FAVICON_FILE_PATH   "/sarsat-jrx.png"
 
 // Web and Wifi
-WebServer Server;
-AutoConnect portal(Server);
+WebServer server;
+AutoConnect portal(server);
 AutoConnectConfig config;
 // Wifi status
 bool wifiStatusChanged = false;
 int portalStatus = -1;
-WifiStatus wifiStatus = WifiStatus::DISCONNECTED;
+WifiStatus wifiStatus = WifiStatus::OFF;
 int wifiRssi = 0;
 IPAddress ipAddr;
 long lastStatusCheckTime = 0;
@@ -25,7 +25,7 @@ static FS* fileSystem = nullptr;
 
 void rootPage()
 {
-  Server.send(200,"text/plain","--- SarsatJRX ---");
+  server.send(200,"text/plain","--- SarsatJRX ---");
 }
 
 void favicon()
@@ -33,7 +33,7 @@ void favicon()
   if(filesystemMounted && fileSystem->exists(FAVICON_FILE_PATH))
   {
       File file = fileSystem->open(FAVICON_FILE_PATH, "r");
-      if (Server.streamFile(file, "image/png") != file.size()) 
+      if (server.streamFile(file, "image/png") != file.size()) 
       {
         Serial.println("Sent less data than expected!");
       }
@@ -41,7 +41,7 @@ void favicon()
   }
   else
   {
-    Server.send(404,"text/plain","");
+    server.send(404,"text/plain","");
   }
 }
 
@@ -127,8 +127,9 @@ void wifiManagerStart()
   filesystemMounted = filesystems->isSpiFilesystemMounted();
   fileSystem = filesystems->getSpiFilesystem();
   // Web and Wifi
-  Server.on("/",rootPage);
-  Server.on("/favicon.ico",favicon);
+  wifiStatus = WifiStatus::DISCONNECTED;
+  server.on("/",rootPage);
+  server.on("/favicon.ico",favicon);
   // Configure automatic reconnection and captive portal retention, then start
   // AutoConnect. In subsequent steps, it will use the portalStatus function to
   // detect the WiFi connection status in this configuration.
@@ -156,6 +157,8 @@ String wifiManagerGetStatusString()
       return "Portal started";
     case WifiStatus::PORTAL_CONNECTED:
       return "Portal started + client connected";
+    case WifiStatus::OFF:
+      return "Wifi is off";
     case WifiStatus::DISCONNECTED:
     default:
       return "Disconnected";
@@ -180,13 +183,21 @@ WifiStatus wifiManagerGetStatus()
 
 void wifiManagerStop()
 {
+    portal.end();           // Stop AutoConnect portal
     WiFi.disconnect(true);  // Disconnect from the network
     WiFi.mode(WIFI_OFF);    // Switch WiFi off
+    wifiStatus = WifiStatus::OFF;
 }
 
 void wifiManagerStartPortal()
 {
-
+    wifi_mode_t mode = WiFi.getMode();
+    if(mode == wifi_mode_t::WIFI_MODE_STA)
+    { // Only if we currently are in Station mode => switch to Portal mode
+      config.immediateStart= true;
+      portal.config(config);
+      portal.begin();
+    }
 }
 
 
