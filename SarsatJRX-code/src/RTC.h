@@ -36,6 +36,7 @@ class Rtc
         String getDateString();
         String getTimeString();
         bool hasChanged() { return changed;};
+        bool isNtpSynched() {return ntpSynched;};
 
     private :
         I2CBus *rtcI2c = nullptr; 
