@@ -11,7 +11,7 @@
 
 // System info
 #define LINE_HEIGHT         18
-#define SPACER              14
+#define SPACER              8
 #define VERSION_LABEL       "Version :"
 #define VERSION_LABEL_WIDTH 80
 #define SKETCH_LABEL        "Sketch :"
@@ -264,7 +264,7 @@ void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
     currentY+=SPACER;
     wifiTitle = uiCreateLabel(tab,&style_section_title,WIFI_LABEL,0,currentY,WIFI_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
     wifiToggle = uiCreateToggle(tab,&style_section_text,toggle_wifi_cb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentY+=TOGGLE_LINE_HEIGHT+SPACER;
+    currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
     // Portal On/Off
     portalTitle = uiCreateLabel(tab,&style_section_title,PORTAL_LABEL,0,currentY,PORTAL_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
     portalToggle = uiCreateToggle(tab,&style_section_text,toggle_portal_cb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
