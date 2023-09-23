@@ -59,7 +59,7 @@ Rtc::Date Rtc::getDate()
             if(getLocalTime(&timeinfo,0))
             {   // Update RTC
                 dt.day = timeinfo.tm_mday;
-                dt.month = timeinfo.tm_mon;
+                dt.month = timeinfo.tm_mon+1;
                 dt.year = timeinfo.tm_year;
                 dt.hour = timeinfo.tm_hour;
                 dt.minute = timeinfo.tm_min;
