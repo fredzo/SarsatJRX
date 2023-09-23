@@ -27,6 +27,9 @@ extern lv_style_t style_footer_text;
 extern lv_style_t style_time;
 
 extern lv_color_t uiBackgroundColor;
+extern lv_color_t uiOkColor;
+extern lv_color_t uiKoColor;
+
 
 extern const lv_font_t * font_large;
 extern const lv_font_t * font_medium;

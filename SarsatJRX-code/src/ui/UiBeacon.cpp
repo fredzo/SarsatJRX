@@ -361,11 +361,11 @@ void uiBeaconSetBeacon(Beacon* beacon)
     // Control codes
     // Append BCH values before frame data
     lv_label_set_text(controlLabel1,beacon->isBch1Valid() ? BCH1_OK_LABEL : BCH1_KO_LABEL);
-    lv_obj_set_style_text_color(controlLabel1,beacon->isBch1Valid() ? lv_palette_main(LV_PALETTE_GREEN) : lv_palette_lighten(LV_PALETTE_RED,2),0);
+    lv_obj_set_style_text_color(controlLabel1,beacon->isBch1Valid() ? uiOkColor : uiKoColor,0);
     if(beacon->longFrame) 
     { // No second proteced field in short frames
         lv_label_set_text(controlLabel2,beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
-        lv_obj_set_style_text_color(controlLabel2,beacon->isBch2Valid() ? lv_palette_main(LV_PALETTE_GREEN) : lv_palette_lighten(LV_PALETTE_RED,2),0);
+        lv_obj_set_style_text_color(controlLabel2,beacon->isBch2Valid() ? uiOkColor : uiKoColor,0);
     }
     else
     {

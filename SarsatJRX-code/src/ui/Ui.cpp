@@ -67,6 +67,9 @@ lv_style_t style_footer_text;
 lv_style_t style_time;
 
 lv_color_t uiBackgroundColor;
+lv_color_t uiOkColor;
+lv_color_t uiKoColor;
+
 
 const lv_font_t * font_large = &lv_font_montserrat_24;
 const lv_font_t * font_medium = &lv_font_montserrat_18;
@@ -319,6 +322,9 @@ void createUi()
 
     // BG color
     uiBackgroundColor = lv_color_make(7, 7, 7);
+    // OK  / KO color
+    uiOkColor = lv_palette_main(LV_PALETTE_GREEN);
+    uiKoColor = lv_palette_lighten(LV_PALETTE_RED,2);
     
     lv_obj_t * win = lv_win_create(lv_scr_act(),HEADER_HEIGHT);
     createHeader(win);
