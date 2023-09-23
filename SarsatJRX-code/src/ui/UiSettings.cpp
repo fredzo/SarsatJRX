@@ -261,6 +261,7 @@ static void toggle_portal_cb(lv_event_t * e)
 void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
     // Wifi On/Off -> save to EEProm
+    currentY+=SPACER;
     wifiTitle = uiCreateLabel(tab,&style_section_title,WIFI_LABEL,0,currentY,WIFI_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
     wifiToggle = uiCreateToggle(tab,&style_section_text,toggle_wifi_cb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentY+=TOGGLE_LINE_HEIGHT+SPACER;
@@ -334,7 +335,7 @@ void createNetworkTab(lv_obj_t * tab, int currentY, int tabWidth)
     currentY+=LINE_HEIGHT;
     ntpSyncTitle = uiCreateLabel(tab,&style_section_title,NTP_SYNC_LABEL,NTP_LABEL_WIDTH,currentY,NTP_SYNC_WIDTH,LINE_HEIGHT);
     ntpSyncLabel = uiCreateLabel(tab,&style_section_text,"",NTP_LABEL_WIDTH+NTP_SYNC_WIDTH,currentY,tabWidth-NTP_LABEL_WIDTH-NTP_SYNC_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
+    //currentY+=LINE_HEIGHT;
 
 }
 
