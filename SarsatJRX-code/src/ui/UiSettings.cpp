@@ -145,6 +145,8 @@ static lv_obj_t * gatewayTitle;
 static lv_obj_t * gatewayLabel;
 
 // Network
+static lv_obj_t * netStatusTitle;
+static lv_obj_t * netStatusLabel;
 static lv_obj_t * macTitle;
 static lv_obj_t * macLabel;
 static lv_obj_t * netIpTitle;
@@ -301,6 +303,10 @@ void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 void createNetworkTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
+    // Status (Connected etc)
+    netStatusTitle = uiCreateLabel(tab,&style_section_title,STATUS_LABEL,0,currentY,STATUS_LABEL_WIDTH,LINE_HEIGHT);
+    netStatusLabel = uiCreateLabel(tab,&style_section_text,"",STATUS_LABEL_WIDTH,currentY,tabWidth-STATUS_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
     // Mac @
     macTitle = uiCreateLabel(tab,&style_section_title,MAC_LABEL,0,currentY,MAC_LABEL_WIDTH,LINE_HEIGHT);
     macLabel = uiCreateLabel(tab,&style_section_text,"",MAC_LABEL_WIDTH,currentY,tabWidth-MAC_LABEL_WIDTH,LINE_HEIGHT);
@@ -433,6 +439,7 @@ void uiSettingsUpdateView()
     lv_label_set_text(modeLabel,wifiManagerGetMode()); // TODO translate into String
     // Status (Connected etc)
     lv_label_set_text(statusLabel,wifiManagerGetStatusString().c_str());
+    lv_obj_set_style_text_color(statusLabel, (wifiManagerIsConnected() ? uiOkColor : uiKoColor),0);
     // Signal (RSSI)
     lv_label_set_text(signalLabel,formatDbmValue(WiFi.RSSI()).c_str());
     // SSID
@@ -448,6 +455,8 @@ void uiSettingsUpdateView()
     lv_label_set_text(dnsLabel,dnsString.c_str());
 
     // Net tab
+    lv_label_set_text(netStatusLabel,wifiManagerGetStatusString().c_str());
+    lv_obj_set_style_text_color(netStatusLabel, (wifiManagerIsConnected() ? uiOkColor : uiKoColor),0);
     // Mac @
     lv_label_set_text(macLabel,WiFi.macAddress().c_str());
     // IP @
@@ -465,4 +474,5 @@ void uiSettingsUpdateView()
     lv_label_set_text(ntpDateLabel,(rtc->getDateString() + " - " + rtc->getTimeString()).c_str());
     // NTP
     lv_label_set_text(ntpSyncLabel,(rtc->isNtpSynched() ? "OK" : "KO"));
+    lv_obj_set_style_text_color(ntpSyncLabel, (rtc->isNtpSynched() ? uiOkColor : uiKoColor),0);
 }
