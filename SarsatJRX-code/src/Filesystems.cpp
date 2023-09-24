@@ -1,7 +1,6 @@
 #include <Filesystems.h>
 #include <SarsatJRXConf.h>
 #include <SPIFFS.h>
-#include <SD.h>
 #include <Util.h>
 
 void Filesystems::init()
@@ -77,9 +76,30 @@ bool Filesystems::saveBeacon(Beacon* beacon)
      return result;
 }
 
+uint64_t Filesystems::getSdTotalBytes()
+{
+    return sdFilesystemMounted ? sdFileSystem->totalBytes(): 0;
+}
+
+uint64_t Filesystems::getSdUsedBytes()
+{
+    return sdFilesystemMounted ? sdFileSystem->usedBytes(): 0;
+}
+
+File Filesystems::getLogDir()
+{
+    if(logDirReady)
+    {
+        return sdFileSystem->open(SARSATJRX_LOG_DIR);
+    }
+    else
+    {
+        return File();
+    }
+}
 
 FS *Filesystems::spiFileSystem = &SPIFFS;
 
-FS *Filesystems::sdFileSystem = &SD;
+SDFS *Filesystems::sdFileSystem = &SD;
 
 Filesystems *Filesystems::filesystemsInstance = nullptr;

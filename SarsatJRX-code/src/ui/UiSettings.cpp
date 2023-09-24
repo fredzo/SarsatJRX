@@ -90,6 +90,19 @@
 #define NTP_SYNC_LABEL      "- Sync.:"
 #define NTP_SYNC_WIDTH      70
 
+// SD card
+#define SD_LABEL                "SD card mounted :"
+#define SD_LABEL_WIDTH          100
+#define TOTAL_SIZE_LABEL        "Total size :"
+#define TOTAL_SIZE_LABEL_WIDTH  100
+#define USED_SIZE_LABEL         "Used size :"
+#define USED_SIZE_LABEL_WIDTH   100
+#define SJRX_FOLDER_LABEL       "SarsatJRX folder :"
+#define SJRX_FOLDER_LABEL_WIDTH 100
+#define BEACONS_LABEL           "Beacons :"
+#define BEACONS_LABEL_WIDTH     100
+
+
 lv_obj_t * settingsTabview;
 
 // System
@@ -166,6 +179,19 @@ static lv_obj_t * ntpServerTitle;
 static lv_obj_t * ntpServerLabel;
 static lv_obj_t * ntpSyncTitle;
 static lv_obj_t * ntpSyncLabel;
+
+// SD
+static lv_obj_t * sdTitle;
+static lv_obj_t * sdToggle;
+static lv_obj_t * totalBytesTitle;
+static lv_obj_t * totalBytesLabel;
+static lv_obj_t * usedBytesTitle;
+static lv_obj_t * usedBytesLabel;
+static lv_obj_t * sarsatJrxFolderTitle;
+static lv_obj_t * sarsatJrxFolderLabel;
+static lv_obj_t * beaconsTitle;
+static lv_obj_t * beaconsList;
+
 
 
 void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
@@ -260,6 +286,20 @@ static void toggle_portal_cb(lv_event_t * e)
     }
 }
 
+static void toggle_sd_cb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(sdToggle, LV_STATE_CHECKED);
+    //Serial.println("Toggle sd :" + String(state));
+    if(state)
+    {
+        // TODO
+    }
+    else
+    {
+        // TODO
+    }
+}
+
 void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
     // Wifi On/Off -> save to EEProm
@@ -346,8 +386,30 @@ void createNetworkTab(lv_obj_t * tab, int currentY, int tabWidth)
 }
 
 void createSdTab(lv_obj_t * tab, int currentY, int tabWidth)
-{
-    // TODO
+{   // SD card mounted
+    currentY+=SPACER;
+    sdTitle = uiCreateLabel(tab,&style_section_title,SD_LABEL,0,currentY,SD_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    sdToggle = uiCreateToggle(tab,&style_section_text,toggle_sd_cb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentY+=TOGGLE_LINE_HEIGHT+SPACER;
+    // Total size
+    totalBytesTitle = uiCreateLabel(tab,&style_section_title,TOTAL_SIZE_LABEL,0,currentY,TOTAL_SIZE_LABEL_WIDTH,LINE_HEIGHT);
+    totalBytesLabel = uiCreateLabel(tab,&style_section_text,"",TOTAL_SIZE_LABEL_WIDTH,currentY,tabWidth-TOTAL_SIZE_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // Used size
+    usedBytesTitle = uiCreateLabel(tab,&style_section_title,USED_SIZE_LABEL,0,currentY,USED_SIZE_LABEL_WIDTH,LINE_HEIGHT);
+    usedBytesLabel = uiCreateLabel(tab,&style_section_text,"",USED_SIZE_LABEL_WIDTH,currentY,tabWidth-USED_SIZE_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // SarsatJRX folder
+    sarsatJrxFolderTitle = uiCreateLabel(tab,&style_section_title,SJRX_FOLDER_LABEL,0,currentY,SJRX_FOLDER_LABEL_WIDTH,LINE_HEIGHT);
+    sarsatJrxFolderLabel = uiCreateLabel(tab,&style_section_text,"",SJRX_FOLDER_LABEL_WIDTH,currentY,tabWidth-SJRX_FOLDER_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // Beacons
+    beaconsTitle = uiCreateLabel(tab,&style_section_title,BEACONS_LABEL,0,currentY,BEACONS_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    beaconsList = lv_list_create(tab); 
+    lv_obj_set_pos(beaconsList,0,currentY);
+    lv_obj_set_size(beaconsList, lv_pct(60), lv_pct(100));
+    lv_obj_set_style_pad_row(beaconsList, 5, 0);
 }
 
 void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth)
@@ -475,4 +537,42 @@ void uiSettingsUpdateView()
     // NTP
     lv_label_set_text(ntpSyncLabel,(rtc->isNtpSynched() ? "OK" : "KO"));
     lv_obj_set_style_text_color(ntpSyncLabel, (rtc->isNtpSynched() ? uiOkColor : uiKoColor),0);
+
+    // SD tab
+    Filesystems *filesystems = hardware->getFilesystems();
+    lv_obj_clean(beaconsList);
+    if(filesystems->isSdFilesystemMounted())
+    {   // SD toogle on
+        lv_obj_add_state(sdToggle, LV_STATE_CHECKED);
+        FS* sdfs = filesystems->getSdFilesystem();
+        File logDir = filesystems->getLogDir();
+        if(logDir && logDir.isDirectory())
+        {
+            File beacon = logDir.openNextFile();
+            lv_obj_t * btn;
+            while(beacon)
+            {
+                if(!beacon.isDirectory())
+                {
+                    btn = lv_btn_create(beaconsList);
+                    lv_obj_set_width(btn, lv_pct(50));
+                    //lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+
+                    lv_obj_t *lab = lv_label_create(btn);
+                    lv_label_set_text(lab, beacon.name());
+                }
+                beacon = logDir.openNextFile();
+            }
+        }
+    }
+    else
+    {   // Wifi toggle on
+        lv_obj_clear_state(sdToggle, LV_STATE_CHECKED);
+    }
+    // total size
+    lv_label_set_text(totalBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdTotalBytes(),true).c_str());
+    // total size
+    lv_label_set_text(usedBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdUsedBytes(),true).c_str());
+
+
 }
