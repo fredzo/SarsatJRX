@@ -101,7 +101,7 @@
 #define LOG_FOLDER_LABEL_WIDTH  160
 #define BEACONS_LABEL           "Beacons :"
 #define BEACONS_LABEL_WIDTH     100
-#define BEACON_LIST_WIDT        240
+#define BEACON_LIST_WIDT        260
 
 
 lv_obj_t * settingsTabview;
@@ -573,7 +573,7 @@ void uiSettingsUpdateView()
                         sprintf(buffer,"%s/%s/%s - %s:%s:%s",name.substring(0,2),name.substring(2,4),name.substring(4,8),name.substring(9,11),name.substring(11,13),name.substring(13,15));
                         lv_obj_t *lab = lv_label_create(beaconsList);
                         lv_obj_add_style(lab,&style_section_text,0);
-                        lv_obj_add_style(lab,&style_section_ok,LV_STATE_CHECKED);
+                        lv_obj_set_style_text_color(lab,uiOkColor,LV_STATE_CHECKED);
                         lv_label_set_text(lab, buffer);
                         if(beaconCount == 0)
                         {   // Select first item
