@@ -1,3 +1,4 @@
+#include <ui/UiSettings.h>
 #include <Util.h>
 #include <lvgl.h>
 #include <Display.h>
@@ -97,8 +98,8 @@
 #define TOTAL_SIZE_LABEL_WIDTH  100
 #define USED_SIZE_LABEL         "Used size :"
 #define USED_SIZE_LABEL_WIDTH   100
-#define SJRX_FOLDER_LABEL       "SarsatJRX folder :"
-#define SJRX_FOLDER_LABEL_WIDTH 100
+#define LOG_FOLDER_LABEL        "Beacons folder :"
+#define LOG_FOLDER_LABEL_WIDTH  100
 #define BEACONS_LABEL           "Beacons :"
 #define BEACONS_LABEL_WIDTH     100
 
@@ -187,8 +188,8 @@ static lv_obj_t * totalBytesTitle;
 static lv_obj_t * totalBytesLabel;
 static lv_obj_t * usedBytesTitle;
 static lv_obj_t * usedBytesLabel;
-static lv_obj_t * sarsatJrxFolderTitle;
-static lv_obj_t * sarsatJrxFolderLabel;
+static lv_obj_t * logFolderTitle;
+static lv_obj_t * logFolderLabel;
 static lv_obj_t * beaconsTitle;
 static lv_obj_t * beaconsList;
 
@@ -290,13 +291,18 @@ static void toggle_sd_cb(lv_event_t * e)
 {
     bool state = lv_obj_has_state(sdToggle, LV_STATE_CHECKED);
     //Serial.println("Toggle sd :" + String(state));
+    Filesystems* filesystems = Filesystems::getFilesystems();
     if(state)
     {
-        // TODO
+        filesystems->initSdFs();
+        uiSetSdCardStatus(filesystems->isSdFilesystemMounted());
+        uiSettingsUpdateView();
     }
     else
     {
-        // TODO
+        filesystems->unmountSdFs();
+        uiSetSdCardStatus(filesystems->isSdFilesystemMounted());
+        uiSettingsUpdateView();
     }
 }
 
@@ -400,8 +406,8 @@ void createSdTab(lv_obj_t * tab, int currentY, int tabWidth)
     usedBytesLabel = uiCreateLabel(tab,&style_section_text,"",USED_SIZE_LABEL_WIDTH,currentY,tabWidth-USED_SIZE_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
     // SarsatJRX folder
-    sarsatJrxFolderTitle = uiCreateLabel(tab,&style_section_title,SJRX_FOLDER_LABEL,0,currentY,SJRX_FOLDER_LABEL_WIDTH,LINE_HEIGHT);
-    sarsatJrxFolderLabel = uiCreateLabel(tab,&style_section_text,"",SJRX_FOLDER_LABEL_WIDTH,currentY,tabWidth-SJRX_FOLDER_LABEL_WIDTH,LINE_HEIGHT);
+    logFolderTitle = uiCreateLabel(tab,&style_section_title,LOG_FOLDER_LABEL,0,currentY,LOG_FOLDER_LABEL_WIDTH,LINE_HEIGHT);
+    logFolderLabel = uiCreateLabel(tab,&style_section_text,"",LOG_FOLDER_LABEL_WIDTH,currentY,tabWidth-LOG_FOLDER_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
     // Beacons
     beaconsTitle = uiCreateLabel(tab,&style_section_title,BEACONS_LABEL,0,currentY,BEACONS_LABEL_WIDTH,LINE_HEIGHT);
@@ -573,6 +579,8 @@ void uiSettingsUpdateView()
     lv_label_set_text(totalBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdTotalBytes(),true).c_str());
     // total size
     lv_label_set_text(usedBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdUsedBytes(),true).c_str());
-
+    // Log folder
+    lv_label_set_text(logFolderLabel,(filesystems->isLogDirReady() ? "OK" : "KO"));
+    lv_obj_set_style_text_color(logFolderLabel, (filesystems->isLogDirReady() ? uiOkColor : uiKoColor),0);
 
 }

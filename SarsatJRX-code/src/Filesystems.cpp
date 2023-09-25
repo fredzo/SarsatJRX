@@ -18,29 +18,46 @@ void Filesystems::init()
         spiFilesystemMounted = false;
     }
     // Start SD card
-    SPIClass* sdhander = new SPIClass(HSPI);
+    sdHandler = new SPIClass(HSPI);
     pinMode(SD_MISO, INPUT_PULLUP);
-    sdhander->begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
-    if(SD.begin(SD_CS, *sdhander))
-    {
-        sdFilesystemMounted = true;
-        // Create SarsatJRX folder if needed
-        if(SD.mkdir(SARSATJRX_LOG_DIR))
+    sdHandler->begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
+    initSdFs();
+}
+
+void Filesystems::initSdFs()
+{   // Start SD card
+    if(!sdFilesystemMounted)
+    {   // sdhander->begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
+        if(SD.begin(SD_CS, *sdHandler))
         {
-            logDirReady = true;
+            sdFilesystemMounted = true;
+            // Create SarsatJRX folder if needed
+            if(SD.mkdir(SARSATJRX_LOG_DIR))
+            {
+                logDirReady = true;
+            }
+            else
+            {
+                #ifdef SERIAL_OUT
+                Serial.println("Could not create log directory.");
+                #endif
+            }
         }
         else
         {
             #ifdef SERIAL_OUT
-            Serial.println("Could not create log directory.");
+            Serial.println("Could not  mount SD Card");
             #endif
+            sdFilesystemMounted = false;
         }
     }
-    else
-    {
-        #ifdef SERIAL_OUT
-        Serial.println("Could not  mount SD Card");
-        #endif
+}
+
+void Filesystems::unmountSdFs()
+{   // Start SD card
+    if(sdFilesystemMounted)
+    {   // sdhander->begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
+        SD.end();
         sdFilesystemMounted = false;
     }
 }

@@ -18,6 +18,8 @@ class Filesystems
         }
 
         void init();
+        void initSdFs();
+        void unmountSdFs();
         FS* getSpiFilesystem() { return spiFileSystem; }
         FS* getSdFilesystem() { return sdFileSystem; }
         bool isSpiFilesystemMounted() { return spiFilesystemMounted ;}
@@ -41,6 +43,7 @@ class Filesystems
         static FS* spiFileSystem;
         bool spiFilesystemMounted = false;
 
+        SPIClass* sdHandler;
         static SDFS* sdFileSystem;
         bool sdFilesystemMounted = false;
         bool logDirReady = false;
