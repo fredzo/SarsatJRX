@@ -391,7 +391,7 @@ void createNetworkTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 }
 
-void createSdTab(lv_obj_t * tab, int currentY, int tabWidth)
+void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
 {   // SD card mounted
     currentY+=SPACER;
     sdTitle = uiCreateLabel(tab,&style_section_title,SD_LABEL,0,currentY,SD_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
@@ -414,7 +414,7 @@ void createSdTab(lv_obj_t * tab, int currentY, int tabWidth)
     currentY+=LINE_HEIGHT;
     beaconsList = lv_list_create(tab); 
     lv_obj_set_pos(beaconsList,0,currentY);
-    lv_obj_set_size(beaconsList, lv_pct(60), lv_pct(100));
+    lv_obj_set_size(beaconsList, lv_pct(100), tabHeight-currentY);
     lv_obj_set_style_pad_row(beaconsList, 5, 0);
 }
 
@@ -447,6 +447,7 @@ void uiSettingsCreateView(lv_obj_t * cont)
     lv_obj_add_style(tab4, &style_pad_small, 0);
     lv_obj_add_style(tab5, &style_pad_small, 0);
     int tabWidth = lv_obj_get_width(tab1) - 8; // 2*4 px padding
+    int tabHeight = lv_obj_get_width(tab1) - 8; // 2*4 px padding
 
     //lv_obj_set_style_bg_color(tab2, lv_palette_lighten(LV_PALETTE_AMBER, 3), 0);
     //lv_obj_set_style_bg_opa(tab2, LV_OPA_COVER, 0);
@@ -456,7 +457,7 @@ void uiSettingsCreateView(lv_obj_t * cont)
     createSystemTab(tab1,currentY,tabWidth);
     createWifiTab(tab2,currentY,tabWidth);
     createNetworkTab(tab3,currentY,tabWidth);
-    createSdTab(tab4,currentY,tabWidth);
+    createSdTab(tab4,currentY,tabWidth,tabHeight);
     createRadioTab(tab5,currentY,tabWidth);
     lv_obj_clear_flag(lv_tabview_get_content(settingsTabview), LV_OBJ_FLAG_SCROLLABLE);
 }
