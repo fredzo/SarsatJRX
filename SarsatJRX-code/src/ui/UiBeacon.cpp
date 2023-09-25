@@ -6,8 +6,6 @@
 #include <ui/UiBeacon.h>
 
 // Beacon info
-#define HEADER_HEIGHT       24
-#define LINE_HEIGHT         18
 #define MAIN_BLOC_HEIGHT    HEADER_HEIGHT+8*LINE_HEIGHT
 #define INFO_LABEL          "Info :"
 #define INFO_LABEL_WIDTH    50
@@ -228,7 +226,7 @@ void uiBeaconCreateView(lv_obj_t * cont)
     //lv_obj_set_style_text_color(tab_btns, lv_palette_lighten(LV_PALETTE_GREY, 5), 0);
     lv_obj_set_style_border_side(tab_btns, LV_BORDER_SIDE_RIGHT, LV_PART_ITEMS | LV_STATE_CHECKED);
 
-    /*Add 3 tabs (the tabs are page (lv_page) and can be scrolled*/
+    /*Add 4 tabs */
     lv_obj_t * tab1 = lv_tabview_add_tab(beaconTabview, "Info");
     lv_obj_t * tab2 = lv_tabview_add_tab(beaconTabview, "Map");
     lv_obj_t * tab3 = lv_tabview_add_tab(beaconTabview, "Bcn.");

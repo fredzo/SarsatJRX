@@ -8,7 +8,6 @@
 #include <Settings.h>
 
 // Header
-#define HEADER_HEIGHT       30
 #define HEADER_TEXT         "SarsatJRX"
 #define HEADER_PAGES_TEMPLATE "%02d/%02d"
 // Header LEDS
@@ -31,7 +30,6 @@
 #define HEADER_LOGO_SRC     "J:/sarsat-jrx.bin"
 
 // Footer
-#define FOOTER_HEIGHT       46
 #define FOOTER_LABEL_X      DISPLAY_WIDTH/2
 #define FOOTER_LABEL_Y      DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT+14
 #define FOOTER_WAIT_LABEL   "Waiting for the wave..."

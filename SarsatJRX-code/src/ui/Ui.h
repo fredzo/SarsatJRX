@@ -7,6 +7,11 @@
 #include <Beacon.h>
 #include <lvgl.h>
 
+#define LINE_HEIGHT         18
+#define HEADER_HEIGHT       30
+#define FOOTER_HEIGHT       46
+
+
 extern const lv_font_t casscadia_mono;
 extern const lv_font_t casscadia_mono_16;
 extern const lv_font_t additional_symbols;

@@ -21,6 +21,7 @@
 
 // Filesystem
 #define SARSATJRX_LOG_DIR       "/SarsatJRX"
+#define LOG_FILE_EXTENSION      ".bcn"
 #define LOG_FILENAME_TEMPLATE   "%s/%02d%02d%02d-%02d%02d%02d.bcn"
 
 // Hardware 

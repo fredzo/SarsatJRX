@@ -11,7 +11,6 @@
 #include <Settings.h>
 
 // System info
-#define LINE_HEIGHT         18
 #define SPACER              8
 #define VERSION_LABEL       "Version :"
 #define VERSION_LABEL_WIDTH 80
@@ -93,15 +92,16 @@
 
 // SD card
 #define SD_LABEL                "SD card mounted :"
-#define SD_LABEL_WIDTH          100
+#define SD_LABEL_WIDTH          160
 #define TOTAL_SIZE_LABEL        "Total size :"
 #define TOTAL_SIZE_LABEL_WIDTH  100
 #define USED_SIZE_LABEL         "Used size :"
 #define USED_SIZE_LABEL_WIDTH   100
 #define LOG_FOLDER_LABEL        "Beacons folder :"
-#define LOG_FOLDER_LABEL_WIDTH  100
+#define LOG_FOLDER_LABEL_WIDTH  160
 #define BEACONS_LABEL           "Beacons :"
 #define BEACONS_LABEL_WIDTH     100
+#define BEACON_LIST_WIDT        240
 
 
 lv_obj_t * settingsTabview;
@@ -414,8 +414,11 @@ void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     currentY+=LINE_HEIGHT;
     beaconsList = lv_list_create(tab); 
     lv_obj_set_pos(beaconsList,0,currentY);
-    lv_obj_set_size(beaconsList, lv_pct(100), tabHeight-currentY);
-    lv_obj_set_style_pad_row(beaconsList, 5, 0);
+    Serial.printf("Tabheight = %d, listhieght = %d\n",tabHeight,tabHeight-currentY);
+    lv_obj_set_size(beaconsList, BEACON_LIST_WIDT, tabHeight-currentY /*120*/);
+    //lv_obj_set_style_pad_row(beaconsList, 2, 0);
+    //lv_obj_set_scrollbar_mode(tab,LV_SCROLLBAR_MODE_OFF);
+    //lv_obj_set_scrollbar_mode(beaconsList,LV_SCROLLBAR_MODE_OFF);
 }
 
 void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth)
@@ -435,7 +438,7 @@ void uiSettingsCreateView(lv_obj_t * cont)
     //lv_obj_set_style_text_color(tab_btns, lv_palette_lighten(LV_PALETTE_GREY, 5), 0);
     lv_obj_set_style_border_side(tab_btns, LV_BORDER_SIDE_RIGHT, LV_PART_ITEMS | LV_STATE_CHECKED);
 
-    /*Add 3 tabs (the tabs are page (lv_page) and can be scrolled*/
+    /*Add 5 tabs */
     lv_obj_t * tab1 = lv_tabview_add_tab(settingsTabview, "Sys.");
     lv_obj_t * tab2 = lv_tabview_add_tab(settingsTabview, "Wifi");
     lv_obj_t * tab3 = lv_tabview_add_tab(settingsTabview, "Net.");
@@ -447,7 +450,7 @@ void uiSettingsCreateView(lv_obj_t * cont)
     lv_obj_add_style(tab4, &style_pad_small, 0);
     lv_obj_add_style(tab5, &style_pad_small, 0);
     int tabWidth = lv_obj_get_width(tab1) - 8; // 2*4 px padding
-    int tabHeight = lv_obj_get_width(tab1) - 8; // 2*4 px padding
+    int tabHeight = lv_obj_get_height(tab1) - 8 - FOOTER_HEIGHT; // 2*4 px padding
 
     //lv_obj_set_style_bg_color(tab2, lv_palette_lighten(LV_PALETTE_AMBER, 3), 0);
     //lv_obj_set_style_bg_opa(tab2, LV_OPA_COVER, 0);
@@ -548,6 +551,7 @@ void uiSettingsUpdateView()
     // SD tab
     Filesystems *filesystems = hardware->getFilesystems();
     lv_obj_clean(beaconsList);
+    int beaconCount = 0;
     if(filesystems->isSdFilesystemMounted())
     {   // SD toogle on
         lv_obj_add_state(sdToggle, LV_STATE_CHECKED);
@@ -557,16 +561,26 @@ void uiSettingsUpdateView()
         {
             File beacon = logDir.openNextFile();
             lv_obj_t * btn;
+            char buffer[32];
             while(beacon)
             {
                 if(!beacon.isDirectory())
                 {
-                    btn = lv_btn_create(beaconsList);
-                    lv_obj_set_width(btn, lv_pct(50));
-                    //lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
-
-                    lv_obj_t *lab = lv_label_create(btn);
-                    lv_label_set_text(lab, beacon.name());
+                    String name = beacon.name();
+                    if(name.endsWith(LOG_FILE_EXTENSION))
+                    {
+                        Serial.println(name);
+                        sprintf(buffer,"%s/%s/%s - %s:%s:%s",name.substring(0,2),name.substring(2,4),name.substring(4,8),name.substring(9,11),name.substring(11,13),name.substring(13,15));
+                        lv_obj_t *lab = lv_label_create(beaconsList);
+                        lv_obj_add_style(lab,&style_section_text,0);
+                        lv_obj_add_style(lab,&style_section_ok,LV_STATE_CHECKED);
+                        lv_label_set_text(lab, buffer);
+                        if(beaconCount == 0)
+                        {   // Select first item
+                            lv_obj_add_state(lab, LV_STATE_CHECKED);
+                        }
+                        beaconCount++;
+                    }
                 }
                 beacon = logDir.openNextFile();
             }
@@ -581,7 +595,7 @@ void uiSettingsUpdateView()
     // total size
     lv_label_set_text(usedBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdUsedBytes(),true).c_str());
     // Log folder
-    lv_label_set_text(logFolderLabel,(filesystems->isLogDirReady() ? "OK" : "KO"));
+    lv_label_set_text(logFolderLabel,(filesystems->isLogDirReady() ? ("OK (" + String(beaconCount) + " beacon(s))").c_str() : "KO"));
     lv_obj_set_style_text_color(logFolderLabel, (filesystems->isLogDirReady() ? uiOkColor : uiKoColor),0);
 
 }

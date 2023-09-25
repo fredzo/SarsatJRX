@@ -54,11 +54,12 @@ void Filesystems::initSdFs()
 }
 
 void Filesystems::unmountSdFs()
-{   // Start SD card
+{   // Unmount SD card
     if(sdFilesystemMounted)
-    {   // sdhander->begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
+    {   
         SD.end();
         sdFilesystemMounted = false;
+        logDirReady = false;
     }
 }
 
