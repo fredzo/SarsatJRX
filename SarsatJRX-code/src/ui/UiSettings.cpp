@@ -495,7 +495,63 @@ void uiSettingsUpdateView()
     lv_label_set_text(flashSizeLabel,formatMemoryValue(ESP.getFlashChipSize(),false).c_str());
     lv_label_set_text(flashFreqLabel,formatHzFrequencyValue(ESP.getFlashChipSpeed()).c_str());
 
-    // Wifi tab
+    uiSettingsUpdateWifi();
+
+    // SD tab
+    Filesystems *filesystems = hardware->getFilesystems();
+    lv_obj_clean(beaconsList);
+    int beaconCount = 0;
+    if(filesystems->isSdFilesystemMounted())
+    {   // SD toogle on
+        lv_obj_add_state(sdToggle, LV_STATE_CHECKED);
+        FS* sdfs = filesystems->getSdFilesystem();
+        File logDir = filesystems->getLogDir();
+        if(logDir && logDir.isDirectory())
+        {
+            File beacon = logDir.openNextFile();
+            lv_obj_t * btn;
+            char buffer[32];
+            while(beacon)
+            {
+                if(!beacon.isDirectory())
+                {
+                    String name = beacon.name();
+                    if(name.endsWith(LOG_FILE_EXTENSION))
+                    {
+                        sprintf(buffer,"%s/%s/%s - %s:%s:%s",name.substring(0,2),name.substring(2,4),name.substring(4,8),name.substring(9,11),name.substring(11,13),name.substring(13,15));
+                        lv_obj_t *lab = lv_label_create(beaconsList);
+                        lv_obj_add_event_cb(lab, beacon_clicked_cb, LV_EVENT_CLICKED, NULL);
+                        lv_obj_add_style(lab,&style_section_text,0);
+                        lv_obj_set_style_text_color(lab,uiOkColor,LV_STATE_CHECKED);
+                        lv_obj_add_flag(lab,LV_OBJ_FLAG_CLICKABLE);
+                        lv_label_set_text(lab, buffer);
+                        if(beaconCount == 0)
+                        {   // Select first item
+                            lv_obj_add_state(lab, LV_STATE_CHECKED);
+                            currentBeacon = lab;
+                        }
+                        beaconCount++;
+                    }
+                }
+                beacon = logDir.openNextFile();
+            }
+        }
+    }
+    else
+    {   // Wifi toggle on
+        lv_obj_clear_state(sdToggle, LV_STATE_CHECKED);
+    }
+    // total size
+    lv_label_set_text(totalBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdTotalBytes(),true).c_str());
+    // total size
+    lv_label_set_text(usedBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdUsedBytes(),true).c_str());
+    // Log folder
+    lv_label_set_text(logFolderLabel,(filesystems->isLogDirReady() ? ("OK (" + String(beaconCount) + " beacon(s))").c_str() : "KO"));
+    lv_obj_set_style_text_color(logFolderLabel, (filesystems->isLogDirReady() ? uiOkColor : uiKoColor),0);
+}
+
+void uiSettingsUpdateWifi()
+{   // Wifi tab
     // Wifi state and Portal mode
     WifiStatus status = wifiManagerGetStatus();
     if(status == WifiStatus::OFF)
@@ -555,62 +611,10 @@ void uiSettingsUpdateView()
     // Mask
     lv_label_set_text(maskLabel,WiFi.subnetMask().toString().c_str());
     // Date
-    Rtc* rtc = hardware->getRtc();
+    Rtc* rtc = Rtc::getRtc();
     lv_label_set_text(ntpDateLabel,(rtc->getDateString() + " - " + rtc->getTimeString()).c_str());
     // NTP
     lv_label_set_text(ntpSyncLabel,(rtc->isNtpSynched() ? "OK" : "KO"));
     lv_obj_set_style_text_color(ntpSyncLabel, (rtc->isNtpSynched() ? uiOkColor : uiKoColor),0);
-
-    // SD tab
-    Filesystems *filesystems = hardware->getFilesystems();
-    lv_obj_clean(beaconsList);
-    int beaconCount = 0;
-    if(filesystems->isSdFilesystemMounted())
-    {   // SD toogle on
-        lv_obj_add_state(sdToggle, LV_STATE_CHECKED);
-        FS* sdfs = filesystems->getSdFilesystem();
-        File logDir = filesystems->getLogDir();
-        if(logDir && logDir.isDirectory())
-        {
-            File beacon = logDir.openNextFile();
-            lv_obj_t * btn;
-            char buffer[32];
-            while(beacon)
-            {
-                if(!beacon.isDirectory())
-                {
-                    String name = beacon.name();
-                    if(name.endsWith(LOG_FILE_EXTENSION))
-                    {
-                        sprintf(buffer,"%s/%s/%s - %s:%s:%s",name.substring(0,2),name.substring(2,4),name.substring(4,8),name.substring(9,11),name.substring(11,13),name.substring(13,15));
-                        lv_obj_t *lab = lv_label_create(beaconsList);
-                        lv_obj_add_event_cb(lab, beacon_clicked_cb, LV_EVENT_CLICKED, NULL);
-                        lv_obj_add_style(lab,&style_section_text,0);
-                        lv_obj_set_style_text_color(lab,uiOkColor,LV_STATE_CHECKED);
-                        lv_obj_add_flag(lab,LV_OBJ_FLAG_CLICKABLE);
-                        lv_label_set_text(lab, buffer);
-                        if(beaconCount == 0)
-                        {   // Select first item
-                            lv_obj_add_state(lab, LV_STATE_CHECKED);
-                            currentBeacon = lab;
-                        }
-                        beaconCount++;
-                    }
-                }
-                beacon = logDir.openNextFile();
-            }
-        }
-    }
-    else
-    {   // Wifi toggle on
-        lv_obj_clear_state(sdToggle, LV_STATE_CHECKED);
-    }
-    // total size
-    lv_label_set_text(totalBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdTotalBytes(),true).c_str());
-    // total size
-    lv_label_set_text(usedBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdUsedBytes(),true).c_str());
-    // Log folder
-    lv_label_set_text(logFolderLabel,(filesystems->isLogDirReady() ? ("OK (" + String(beaconCount) + " beacon(s))").c_str() : "KO"));
-    lv_obj_set_style_text_color(logFolderLabel, (filesystems->isLogDirReady() ? uiOkColor : uiKoColor),0);
-
 }
+

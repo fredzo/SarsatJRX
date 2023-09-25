@@ -422,7 +422,7 @@ void uiSetWifiStatus(WifiStatus status)
         break;
   }
   // Update settings page
-  uiSettingsUpdateView();
+  uiSettingsUpdateWifi();
 }
 #endif
 

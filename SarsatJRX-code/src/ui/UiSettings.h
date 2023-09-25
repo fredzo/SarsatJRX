@@ -9,4 +9,6 @@ void uiSettingsCreateView(lv_obj_t * cont);
 
 void uiSettingsUpdateView();
 
+void uiSettingsUpdateWifi();
+
 #endif 
