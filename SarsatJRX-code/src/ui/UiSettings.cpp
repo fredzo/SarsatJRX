@@ -192,6 +192,7 @@ static lv_obj_t * logFolderTitle;
 static lv_obj_t * logFolderLabel;
 static lv_obj_t * beaconsTitle;
 static lv_obj_t * beaconsList;
+static lv_obj_t * currentBeacon = NULL;
 
 
 
@@ -306,6 +307,18 @@ static void toggle_sd_cb(lv_event_t * e)
     }
 }
 
+static void beacon_clicked_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *obj = lv_event_get_target(e);
+    Serial.printf("Clicked: %s", lv_list_get_btn_text(beaconsList, obj));
+    lv_obj_add_state(obj, LV_STATE_CHECKED);
+    if(currentBeacon != NULL)
+    {
+       lv_obj_clear_state(currentBeacon, LV_STATE_CHECKED);
+    }
+    currentBeacon = obj;
+}
 void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
     // Wifi On/Off -> save to EEProm
@@ -569,15 +582,17 @@ void uiSettingsUpdateView()
                     String name = beacon.name();
                     if(name.endsWith(LOG_FILE_EXTENSION))
                     {
-                        Serial.println(name);
                         sprintf(buffer,"%s/%s/%s - %s:%s:%s",name.substring(0,2),name.substring(2,4),name.substring(4,8),name.substring(9,11),name.substring(11,13),name.substring(13,15));
                         lv_obj_t *lab = lv_label_create(beaconsList);
+                        lv_obj_add_event_cb(lab, beacon_clicked_cb, LV_EVENT_CLICKED, NULL);
                         lv_obj_add_style(lab,&style_section_text,0);
                         lv_obj_set_style_text_color(lab,uiOkColor,LV_STATE_CHECKED);
+                        lv_obj_add_flag(lab,LV_OBJ_FLAG_CLICKABLE);
                         lv_label_set_text(lab, buffer);
                         if(beaconCount == 0)
                         {   // Select first item
                             lv_obj_add_state(lab, LV_STATE_CHECKED);
+                            currentBeacon = lab;
                         }
                         beaconCount++;
                     }
