@@ -101,7 +101,7 @@
 #define LOG_FOLDER_LABEL_WIDTH  160
 #define BEACONS_LABEL           "Beacons :"
 #define BEACONS_LABEL_WIDTH     100
-#define BEACON_LIST_WIDT        260
+#define BEACON_LIST_WIDTH       260
 
 
 lv_obj_t * settingsTabview;
@@ -192,9 +192,12 @@ static lv_obj_t * logFolderTitle;
 static lv_obj_t * logFolderLabel;
 static lv_obj_t * beaconsTitle;
 static lv_obj_t * beaconsList;
+static lv_obj_t * beaconsListButtons;
+static lv_obj_t * beaconsUpButton;
+static lv_obj_t * beaconsDownButton;
+static lv_obj_t * beaconsLoadButton;
+static lv_obj_t * beaconsDeleteButton;
 static lv_obj_t * currentBeacon = NULL;
-
-
 
 void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
 {  
@@ -311,7 +314,7 @@ static void beacon_clicked_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t *obj = lv_event_get_target(e);
-    Serial.printf("Clicked: %s", lv_list_get_btn_text(beaconsList, obj));
+    //Serial.printf("Clicked: %s", lv_list_get_btn_text(beaconsList, obj));
     lv_obj_add_state(obj, LV_STATE_CHECKED);
     if(currentBeacon != NULL)
     {
@@ -319,6 +322,60 @@ static void beacon_clicked_cb(lv_event_t * e)
     }
     currentBeacon = obj;
 }
+
+static void beacon_up_cb(lv_event_t * e)
+{
+    if(currentBeacon == NULL) return;
+    lv_event_code_t code = lv_event_get_code(e);
+    if((code == LV_EVENT_CLICKED) || (code == LV_EVENT_LONG_PRESSED_REPEAT)) 
+    {
+        uint32_t index = lv_obj_get_index(currentBeacon);
+        if(index <= 0) return;
+        lv_obj_move_to_index(currentBeacon, index - 1);
+        lv_obj_scroll_to_view(currentBeacon, LV_ANIM_ON);
+    }    
+}
+
+static void beacon_down_cb(lv_event_t * e)
+{
+    if(currentBeacon == NULL) return;
+    lv_event_code_t code = lv_event_get_code(e);
+    if((code == LV_EVENT_CLICKED) || (code == LV_EVENT_LONG_PRESSED_REPEAT)) 
+    {
+        uint32_t index = lv_obj_get_index(currentBeacon);
+        lv_obj_move_to_index(currentBeacon, index + 1);
+        lv_obj_scroll_to_view(currentBeacon, LV_ANIM_ON);
+    }    
+}
+
+static void beacon_load_cb(lv_event_t * e)
+{
+    if(currentBeacon == NULL) return;
+    lv_event_code_t code = lv_event_get_code(e);
+    if((code == LV_EVENT_CLICKED) || (code == LV_EVENT_LONG_PRESSED_REPEAT)) 
+    {
+        String* fileName = (String*)lv_obj_get_user_data(currentBeacon);
+        if(fileName)
+        {
+            Serial.printf("Load file %s\n",(*fileName).c_str());
+        }
+    }
+}
+
+static void beacon_delete_cb(lv_event_t * e)
+{
+    if(currentBeacon == NULL) return;
+    lv_event_code_t code = lv_event_get_code(e);
+    if((code == LV_EVENT_CLICKED) || (code == LV_EVENT_LONG_PRESSED_REPEAT)) 
+    {
+        String* fileName = (String*)lv_obj_get_user_data(currentBeacon);
+        if(fileName)
+        {
+            Serial.printf("Delete file %s\n",(*fileName).c_str());
+        }
+    }
+}
+
 void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
     // Wifi On/Off -> save to EEProm
@@ -427,11 +484,26 @@ void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     currentY+=LINE_HEIGHT;
     beaconsList = lv_list_create(tab); 
     lv_obj_set_pos(beaconsList,0,currentY);
-    Serial.printf("Tabheight = %d, listhieght = %d\n",tabHeight,tabHeight-currentY);
-    lv_obj_set_size(beaconsList, BEACON_LIST_WIDT, tabHeight-currentY /*120*/);
+    lv_obj_set_size(beaconsList, BEACON_LIST_WIDTH, tabHeight-currentY);
     //lv_obj_set_style_pad_row(beaconsList, 2, 0);
-    //lv_obj_set_scrollbar_mode(tab,LV_SCROLLBAR_MODE_OFF);
-    //lv_obj_set_scrollbar_mode(beaconsList,LV_SCROLLBAR_MODE_OFF);
+    // Beacons list buttons
+    beaconsListButtons = lv_list_create(tab);
+    lv_obj_set_pos(beaconsListButtons,BEACON_LIST_WIDTH,currentY);
+    lv_obj_set_size(beaconsListButtons, tabWidth-BEACON_LIST_WIDTH-20, tabHeight-currentY);
+    //lv_obj_align(beaconsListButtons, LV_ALIGN_TOP_RIGHT, 0, 0);
+    lv_obj_set_flex_flow(beaconsListButtons, LV_FLEX_FLOW_COLUMN);
+    // Up
+    beaconsUpButton = lv_list_add_btn(beaconsListButtons, LV_SYMBOL_UP, NULL);
+    lv_obj_add_event_cb(beaconsUpButton, beacon_up_cb, LV_EVENT_ALL, NULL);
+    // Down
+    beaconsDownButton = lv_list_add_btn(beaconsListButtons, LV_SYMBOL_DOWN, NULL);
+    lv_obj_add_event_cb(beaconsDownButton, beacon_down_cb, LV_EVENT_ALL, NULL);
+    // Load
+    beaconsLoadButton = lv_list_add_btn(beaconsListButtons, LV_SYMBOL_UPLOAD, NULL);
+    lv_obj_add_event_cb(beaconsLoadButton, beacon_load_cb, LV_EVENT_ALL, NULL);
+    // Delete
+    beaconsDeleteButton = lv_list_add_btn(beaconsListButtons, LV_SYMBOL_TRASH, NULL);
+    lv_obj_add_event_cb(beaconsDeleteButton, beacon_delete_cb, LV_EVENT_ALL, NULL);
 }
 
 void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth)
@@ -499,8 +571,10 @@ void uiSettingsUpdateView()
 
     // SD tab
     Filesystems *filesystems = hardware->getFilesystems();
+    // Clean list
     lv_obj_clean(beaconsList);
     int beaconCount = 0;
+    currentBeacon = NULL;
     if(filesystems->isSdFilesystemMounted())
     {   // SD toogle on
         lv_obj_add_state(sdToggle, LV_STATE_CHECKED);
@@ -520,6 +594,7 @@ void uiSettingsUpdateView()
                     {
                         sprintf(buffer,"%s/%s/%s - %s:%s:%s",name.substring(0,2),name.substring(2,4),name.substring(4,8),name.substring(9,11),name.substring(11,13),name.substring(13,15));
                         lv_obj_t *lab = lv_label_create(beaconsList);
+                        lv_obj_set_user_data(lab,new String(name));
                         lv_obj_add_event_cb(lab, beacon_clicked_cb, LV_EVENT_CLICKED, NULL);
                         lv_obj_add_style(lab,&style_section_text,0);
                         lv_obj_set_style_text_color(lab,uiOkColor,LV_STATE_CHECKED);
