@@ -102,9 +102,10 @@
 #define BEACONS_LABEL           "Beacons :"
 #define BEACONS_LABEL_WIDTH     100
 #define BEACON_LIST_WIDTH       260
-#define BEACON_BTTON_SIZE       70
+#define BEACON_BUTTON_WIDTH     70
+#define BEACON_BUTTON_HEIGHT    50
 #define BEACON_BUTTON_X1        BEACON_LIST_WIDTH + 4
-#define BEACON_BUTTON_X2        BEACON_BUTTON_X1 + BEACON_BTTON_SIZE + 4
+#define BEACON_BUTTON_X2        BEACON_BUTTON_X1 + BEACON_BUTTON_WIDTH + 4
 
 lv_obj_t * settingsTabview;
 
@@ -312,15 +313,23 @@ static void toggle_sd_cb(lv_event_t * e)
     }
 }
 
+static void selectBeacon(lv_obj_t* beacon)
+{
+    if(beacon)
+    {
+        lv_obj_add_state(beacon, LV_STATE_CHECKED);
+        if((currentBeacon != NULL) && (currentBeacon != beacon))
+        {
+            lv_obj_clear_state(currentBeacon, LV_STATE_CHECKED);
+        }
+        currentBeacon = beacon;
+    }
+}
+
 static void beacon_clicked_cb(lv_event_t * e)
 {
     lv_obj_t *obj = lv_event_get_target(e);
-    lv_obj_add_state(obj, LV_STATE_CHECKED);
-    if(currentBeacon != NULL)
-    {
-       lv_obj_clear_state(currentBeacon, LV_STATE_CHECKED);
-    }
-    currentBeacon = obj;
+    selectBeacon(obj);
 }
 
 static void beacon_up_cb(lv_event_t * e)
@@ -331,7 +340,8 @@ static void beacon_up_cb(lv_event_t * e)
     {
         uint32_t index = lv_obj_get_index(currentBeacon);
         if(index <= 0) return;
-        lv_obj_move_to_index(currentBeacon, index - 1);
+        index--;
+        selectBeacon(lv_obj_get_child(beaconsList,index));
         lv_obj_scroll_to_view(currentBeacon, LV_ANIM_ON);
     }    
 }
@@ -343,8 +353,13 @@ static void beacon_down_cb(lv_event_t * e)
     if((code == LV_EVENT_CLICKED) || (code == LV_EVENT_LONG_PRESSED_REPEAT)) 
     {
         uint32_t index = lv_obj_get_index(currentBeacon);
-        lv_obj_move_to_index(currentBeacon, index + 1);
-        lv_obj_scroll_to_view(currentBeacon, LV_ANIM_ON);
+        index++;
+        lv_obj_t *obj = lv_obj_get_child(beaconsList,index);
+        if(obj)
+        {
+            selectBeacon(obj);
+            lv_obj_scroll_to_view(currentBeacon, LV_ANIM_ON);
+        }
     }    
 }
 
@@ -494,14 +509,14 @@ void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_set_size(beaconsList, BEACON_LIST_WIDTH, bListHeight);
     //lv_obj_set_style_pad_row(beaconsList, 2, 0);
     // Up
-    beaconsUpButton = uiCreateImageButton(tab,LV_SYMBOL_UP,beacon_up_cb,LV_EVENT_ALL,BEACON_BTTON_SIZE, BEACON_BTTON_SIZE,BEACON_BUTTON_X1,currentY);
+    beaconsUpButton = uiCreateImageButton(tab,LV_SYMBOL_UP,beacon_up_cb,LV_EVENT_ALL,BEACON_BUTTON_WIDTH, BEACON_BUTTON_HEIGHT,BEACON_BUTTON_X1,currentY);
     // Down
-    int bottomButtonY = currentY+bListHeight-BEACON_BTTON_SIZE;
-    beaconsDownButton = uiCreateImageButton(tab,LV_SYMBOL_DOWN,beacon_down_cb,LV_EVENT_ALL,BEACON_BTTON_SIZE, BEACON_BTTON_SIZE,BEACON_BUTTON_X1,bottomButtonY);
+    int bottomButtonY = currentY+bListHeight-BEACON_BUTTON_HEIGHT;
+    beaconsDownButton = uiCreateImageButton(tab,LV_SYMBOL_DOWN,beacon_down_cb,LV_EVENT_ALL,BEACON_BUTTON_WIDTH, BEACON_BUTTON_HEIGHT,BEACON_BUTTON_X1,bottomButtonY);
     // Load
-    beaconsLoadButton = uiCreateImageButton(tab,LV_SYMBOL_UPLOAD,beacon_load_cb,LV_EVENT_CLICKED,BEACON_BTTON_SIZE, BEACON_BTTON_SIZE,BEACON_BUTTON_X2,currentY);
+    beaconsLoadButton = uiCreateImageButton(tab,LV_SYMBOL_UPLOAD,beacon_load_cb,LV_EVENT_CLICKED,BEACON_BUTTON_WIDTH, BEACON_BUTTON_HEIGHT,BEACON_BUTTON_X2,currentY);
     // Delete
-    beaconsDeleteButton = uiCreateImageButton(tab,LV_SYMBOL_TRASH,beacon_delete_cb,LV_EVENT_CLICKED,BEACON_BTTON_SIZE, BEACON_BTTON_SIZE,BEACON_BUTTON_X2,bottomButtonY);
+    beaconsDeleteButton = uiCreateImageButton(tab,LV_SYMBOL_TRASH,beacon_delete_cb,LV_EVENT_CLICKED,BEACON_BUTTON_WIDTH, BEACON_BUTTON_HEIGHT,BEACON_BUTTON_X2,bottomButtonY);
     lv_obj_add_event_cb(beaconsDeleteButton, beacon_delete_longpress_cb, LV_EVENT_LONG_PRESSED, NULL);
 }
 
