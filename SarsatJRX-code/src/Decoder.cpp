@@ -14,6 +14,8 @@ unsigned long frameStartTime;
 bool frameStarted = false;
 byte frame[Beacon::SIZE];
 byte byteCount;
+bool frameFromDisk = false;
+Rtc::Date frameDate;
 
 #ifdef DEBUG_DECODE
   // For debug
@@ -56,6 +58,23 @@ void setFrameComplete(bool complete)
 {
   frameComplete = complete;
 }
+
+void setFrameFromDisk(Rtc::Date date)
+{
+  frameDate = date;
+  frameFromDisk = true;
+}
+
+bool isFrameFromDisk()
+{
+  return frameFromDisk;
+}
+
+Rtc::Date getDiskFrameDate()
+{
+  return frameDate;
+}
+
 
 void readFrameBit(bool newBit)
 { 
@@ -144,6 +163,7 @@ void resetFrameReading()
   frameStartCount = 0;
   frameStarted = false;
   frameComplete = false;
+  frameFromDisk = false;
   // Clear frame content
   for ( byte i = 0; i < Beacon::SIZE; i++)
   { 

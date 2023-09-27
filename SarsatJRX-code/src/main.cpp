@@ -67,7 +67,15 @@ void readBeacon()
   }
   // Delete previously stored beacon to prevent memory leak
   delete beacons[beaconsWriteIndex];
-  Beacon* beacon = new Beacon(getFrame());
+  Beacon* beacon;
+  if(isFrameFromDisk())
+  {
+    beacon = new Beacon(getFrame(),getDiskFrameDate());
+  }
+  else
+  {
+    beacon = new Beacon(getFrame());
+  }
   // Add beacon to the list
   beacons[beaconsWriteIndex] = beacon;
   // Move to last received
@@ -247,11 +255,12 @@ void readNextSampleFrame()
   setFrameComplete(true);
 }
 
-bool readBeaconFromFile(const char* file)
+bool readBeaconFromFile(const char* fileName)
 { // Read the frame content
-  if(hardware->getFilesystems()->loadBeacon(file,getFrame()))
+  if(hardware->getFilesystems()->loadBeacon(fileName,getFrame()))
   { // Tell the state machine that we have a complete frame
     setFrameComplete(true);
+    setFrameFromDisk(parseBeaconFileName(fileName));
     return true;
   }
   else
@@ -362,11 +371,13 @@ void loop()
       readBeacon();
       updateDisplay();
       display->handleTimer();
-      // Finally save beacon to sd card
-      bool success = hardware->getFilesystems()->saveBeacon(beacons[beaconsReadIndex]);
-      if(!success)
-      { // Update SD Card indicator
-        uiSetSdCardStatus(hardware->getFilesystems()->isSdFilesystemMounted());
+      if(!isFrameFromDisk())
+      { // Finally save beacon to sd card
+        bool success = hardware->getFilesystems()->saveBeacon(beacons[beaconsReadIndex]);
+        if(!success)
+        { // Update SD Card indicator
+          uiSetSdCardStatus(hardware->getFilesystems()->isSdFilesystemMounted());
+        }
       }
     } 
     // Reset frame decoding

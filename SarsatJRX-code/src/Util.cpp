@@ -95,7 +95,23 @@ String formatSketchInformation(uint32_t size, String md5)
   return formatMemoryValue(size,false) + " (MD5=" + md5 + ")";
 }
 
+void formatBeaconFileName(char* buffer, String name)
+{
+  sprintf(buffer,"%s/%s/%s - %s:%s:%s",name.substring(0,2),name.substring(2,4),name.substring(4,8),name.substring(9,11),name.substring(11,13),name.substring(13,15));
+}
 
+Rtc::Date parseBeaconFileName(const char* fileName)
+{
+  String name = String(fileName);
+  Rtc::Date result;
+  result.day = atoi(name.substring(0,2).c_str());
+  result.month = atoi(name.substring(2,4).c_str());
+  result.year = atoi(name.substring(4,8).c_str());
+  result.hour = atoi(name.substring(9,11).c_str());
+  result.minute = atoi(name.substring(11,13).c_str());
+  result.second = atoi(name.substring(13,15).c_str());
+  return result;
+}
 
 /* Baudot code matrix */
 char BAUDOT_CODE[64]   = {' ','5',' ','9',' ',' ',' ',' ',' ',' ','4',' ','8','0',' ',' ',

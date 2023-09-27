@@ -3,6 +3,7 @@
 
 #include <SarsatJRXConf.h>
 #include <Arduino.h>
+#include <RTC.h>
 
 #ifdef DEBUG_RAM
 uint32_t freeRam();
@@ -38,6 +39,10 @@ String formatDbmValue(int8_t value);
 String formatHzFrequencyValue(uint32_t value);
 
 String formatSketchInformation(uint32_t size, String md5);
+
+void formatBeaconFileName(char* buffer, String date);
+
+Rtc::Date parseBeaconFileName(const char* fileName);
 
 /* Baudot code matrix */
 extern char BAUDOT_CODE[64];

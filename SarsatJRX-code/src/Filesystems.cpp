@@ -104,8 +104,14 @@ bool Filesystems::loadBeacon(const char* fileName, byte* frameBuffer)
         File file = sdFileSystem->open(buffer, FILE_READ);
         if(file)
         {
-            if(file.read(frameBuffer,18)>0) // Try and read a long frame
+            char* charBuffer[64];
+            // Try and read a long frame (2 char per bytes (hex format))
+            int readBytes = file.read((byte*)charBuffer,18*2);
+            if(readBytes > 0)
             {   
+                charBuffer[readBytes]=0; // String terminator
+                // Convert hex string to bytes
+                readHexString(frameBuffer,String((const char*)charBuffer));
                 file.close();
                 result = true;
             }

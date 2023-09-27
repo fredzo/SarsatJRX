@@ -610,7 +610,7 @@ void uiSettingsUpdateView()
                     String name = beacon.name();
                     if(name.endsWith(LOG_FILE_EXTENSION))
                     {
-                        sprintf(buffer,"%s/%s/%s - %s:%s:%s",name.substring(0,2),name.substring(2,4),name.substring(4,8),name.substring(9,11),name.substring(11,13),name.substring(13,15));
+                        formatBeaconFileName(buffer,name);
                         lv_obj_t *lab = lv_label_create(beaconsList);
                         lv_obj_set_user_data(lab,new String(name));
                         lv_obj_add_event_cb(lab, beacon_clicked_cb, LV_EVENT_CLICKED, NULL);
