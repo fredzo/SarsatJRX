@@ -206,6 +206,7 @@ static lv_obj_t * beaconsDeleteButton;
 static lv_obj_t * currentBeacon = NULL;
 
 static lv_obj_t * deleteConfirmBox;
+static int lastBeaconIndex = 0;
 
 void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
 {  
@@ -328,6 +329,7 @@ static void selectBeacon(lv_obj_t* beacon)
             lv_obj_clear_state(currentBeacon, LV_STATE_CHECKED);
         }
         currentBeacon = beacon;
+        lastBeaconIndex = lv_obj_get_index(currentBeacon);
     }
 }
 
@@ -395,7 +397,7 @@ static void deleteCurrentBeacon()
         currentBeacon = lv_obj_get_child(beaconsList,index);
         if(!currentBeacon)
         {
-            currentBeacon = lv_obj_get_child(beaconsList,index);
+            currentBeacon = lv_obj_get_child(beaconsList,index-1);
         }
         selectBeacon(currentBeacon);
     }
@@ -651,11 +653,16 @@ void uiSettingsUpdateView()
                 beacon = logDir.openNextFile();
             }
             if(beaconCount > 0)
-            {   // Select first item
-                currentBeacon = lv_obj_get_child(beaconsList, 0);
+            {   // Try last selected item
+                currentBeacon = lv_obj_get_child(beaconsList, lastBeaconIndex);
+                if(!currentBeacon)
+                {   // Else first item
+                    currentBeacon = lv_obj_get_child(beaconsList, 0);
+                }
                 if(currentBeacon)
                 {
                     lv_obj_add_state(currentBeacon, LV_STATE_CHECKED);
+                    lv_obj_scroll_to_view(currentBeacon, LV_ANIM_OFF);
                 }
             }
         }
