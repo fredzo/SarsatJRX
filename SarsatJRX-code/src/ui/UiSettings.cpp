@@ -381,6 +381,24 @@ static void beacon_load_cb(lv_event_t * e)
     }
 }
 
+static void deleteCurrentBeacon()
+{
+    if(currentBeacon == NULL) return;
+    String* fileName = (String*)lv_obj_get_user_data(currentBeacon);
+    if(Filesystems::getFilesystems()->deleteBeacon((*fileName).c_str()))
+    {
+        Serial.printf("Deleted file %s\n",(*fileName).c_str());
+        uint32_t index = lv_obj_get_index(currentBeacon);
+        lv_obj_del(currentBeacon);
+        currentBeacon = lv_obj_get_child(beaconsList,index);
+        if(!currentBeacon)
+        {
+            currentBeacon = lv_obj_get_child(beaconsList,index);
+        }
+        selectBeacon(currentBeacon);
+    }
+}
+
 static void beacon_delete_cb(lv_event_t * e)
 {
     if(currentBeacon == NULL) return;
@@ -393,12 +411,7 @@ static void beacon_delete_cb(lv_event_t * e)
 
 static void beacon_delete_longpress_cb(lv_event_t * e)
 {
-    if(currentBeacon == NULL) return;
-    String* fileName = (String*)lv_obj_get_user_data(currentBeacon);
-    if(fileName)
-    {
-        Serial.printf("Delete no confirm file %s\n",(*fileName).c_str());
-    }
+    deleteCurrentBeacon();
 }
 
 void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)

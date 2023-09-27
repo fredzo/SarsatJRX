@@ -133,6 +133,19 @@ bool Filesystems::loadBeacon(const char* fileName, byte* frameBuffer)
      return result;
 }
 
+bool Filesystems::deleteBeacon(const char* fileName)
+{
+    bool result = false;
+    if(sdFilesystemMounted&&logDirReady)
+    {
+        char buffer[64];
+        sprintf(buffer,"%s/%s",SARSATJRX_LOG_DIR,fileName);
+        result = sdFileSystem->remove(buffer);
+    }
+    return result;
+}
+
+
 uint64_t Filesystems::getSdTotalBytes()
 {
     return sdFilesystemMounted ? sdFileSystem->totalBytes(): 0;

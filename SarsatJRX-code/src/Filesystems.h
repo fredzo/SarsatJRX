@@ -30,6 +30,7 @@ class Filesystems
         bool isLogDirReady() { return logDirReady ;}
         bool saveBeacon(Beacon* beacon);
         bool loadBeacon(const char* fileName, byte* frameBuffer);
+        bool deleteBeacon(const char* fileName);
 
     private :
 
