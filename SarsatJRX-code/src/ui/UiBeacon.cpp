@@ -6,7 +6,8 @@
 #include <ui/UiBeacon.h>
 
 // Beacon info
-#define MAIN_BLOC_HEIGHT    HEADER_HEIGHT+8*LINE_HEIGHT
+#define BEACON_HEADER_HEIGHT    24
+#define MAIN_BLOC_HEIGHT    BEACON_HEADER_HEIGHT+8*LINE_HEIGHT
 #define INFO_LABEL          "Info :"
 #define INFO_LABEL_WIDTH    50
 #define SERIAL_LABEL        "Serial # :"
@@ -92,10 +93,10 @@ void createMainBloc(lv_obj_t * bloc, int tabWidth)
     int currentY = 0;
 
     // Time
-    beaconTimeLabel = uiCreateLabel(bloc,&style_time,"",0,currentY,80,HEADER_HEIGHT);
+    beaconTimeLabel = uiCreateLabel(bloc,&style_time,"",0,currentY,80,BEACON_HEADER_HEIGHT);
 
-    frameModeLabel = uiCreateLabel(bloc,&style_header,"",-20,currentY,LV_PCT(100),HEADER_HEIGHT);
-    currentY+=HEADER_HEIGHT;
+    frameModeLabel = uiCreateLabel(bloc,&style_header,"",-20,currentY,LV_PCT(100),BEACON_HEADER_HEIGHT);
+    currentY+=BEACON_HEADER_HEIGHT;
 
     // Info           
     infoTitle =  uiCreateLabel(bloc,&style_section_title,INFO_LABEL,0,currentY,INFO_LABEL_WIDTH,LINE_HEIGHT);

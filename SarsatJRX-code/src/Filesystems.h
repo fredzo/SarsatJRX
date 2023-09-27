@@ -28,7 +28,8 @@ class Filesystems
         uint64_t getSdTotalBytes();
         uint64_t getSdUsedBytes();
         bool isLogDirReady() { return logDirReady ;}
-        boolean saveBeacon(Beacon* beacon);
+        bool saveBeacon(Beacon* beacon);
+        bool loadBeacon(const char* fileName, byte* frameBuffer);
 
     private :
 

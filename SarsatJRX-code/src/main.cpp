@@ -240,12 +240,24 @@ void updateDisplay()
 
 }
 
-
 void readNextSampleFrame()
 { // Read the frame content
   readNextSample(getFrame());
   // Tell the state machine that we have a complete frame
   setFrameComplete(true);
+}
+
+bool readBeaconFromFile(const char* file)
+{ // Read the frame content
+  if(hardware->getFilesystems()->loadBeacon(file,getFrame()))
+  { // Tell the state machine that we have a complete frame
+    setFrameComplete(true);
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 void setup()

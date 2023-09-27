@@ -107,6 +107,9 @@
 #define BEACON_BUTTON_X1        BEACON_LIST_WIDTH + 4
 #define BEACON_BUTTON_X2        BEACON_BUTTON_X1 + BEACON_BUTTON_WIDTH + 4
 
+// Externs
+extern bool readBeaconFromFile(const char * filename);
+
 lv_obj_t * settingsTabview;
 
 // System
@@ -373,6 +376,7 @@ static void beacon_load_cb(lv_event_t * e)
         if(fileName)
         {
             Serial.printf("Load file %s\n",(*fileName).c_str());
+            readBeaconFromFile((*fileName).c_str());
         }
     }
 }

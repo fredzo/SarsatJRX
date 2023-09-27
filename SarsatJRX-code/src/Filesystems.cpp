@@ -94,6 +94,39 @@ bool Filesystems::saveBeacon(Beacon* beacon)
      return result;
 }
 
+bool Filesystems::loadBeacon(const char* fileName, byte* frameBuffer)
+{
+    bool result = false;
+    if(sdFilesystemMounted&&logDirReady)
+    {
+        char buffer[64];
+        sprintf(buffer,"%s/%s",SARSATJRX_LOG_DIR,fileName);
+        File file = sdFileSystem->open(buffer, FILE_READ);
+        if(file)
+        {
+            if(file.read(frameBuffer,18)>0) // Try and read a long frame
+            {   
+                file.close();
+                result = true;
+            }
+            else
+            {   // File not found or empty
+                #ifdef SERIAL_OUT
+                Serial.printf("Could not read beacon file '%s'\n",buffer);
+                #endif
+            }
+        }
+        else
+        {   // SD card has probably been removed
+            sdFilesystemMounted = false;
+            #ifdef SERIAL_OUT
+            Serial.printf("Failed to open beacon file '%s'\n",buffer);
+            #endif
+        }
+     }
+     return result;
+}
+
 uint64_t Filesystems::getSdTotalBytes()
 {
     return sdFilesystemMounted ? sdFileSystem->totalBytes(): 0;
