@@ -79,4 +79,6 @@ lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text
 
 lv_obj_t * uiCreateToggle(lv_obj_t * parent, lv_style_t * style, lv_event_cb_t event_cb, int x, int y, int width, int height);
 
+lv_obj_t * uiCreateImageButton(lv_obj_t * parent, const void* src, lv_event_cb_t event_cb, lv_event_code_t filter, int width, int height, int x = -1, int y = -1);
+
 #endif 

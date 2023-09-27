@@ -212,13 +212,8 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_scrollbar_mode(footer,LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_style(footer, &style_pad_tiny, 0);
     // Previous button
-    previousButton = lv_btn_create(footer);
-    lv_obj_set_size(previousButton, 70, LV_PCT(100));
-    lv_obj_add_event_cb(previousButton, previous_handler, LV_EVENT_CLICKED, NULL);
+    previousButton = uiCreateImageButton(footer,LV_SYMBOL_LEFT,previous_handler,LV_EVENT_CLICKED,70, LV_PCT(100));
     lv_obj_clear_flag(previousButton, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_t * img = lv_img_create(previousButton);
-    lv_img_set_src(img, LV_SYMBOL_LEFT);
-    lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
     // Spinner
     spinner = lv_spinner_create(footer,2000,60);
     lv_obj_set_size(spinner, 42, LV_PCT(100));
@@ -234,13 +229,8 @@ void createFooter(lv_obj_t * win)
     lv_obj_add_style(footerLabel,&style_footer,0);
     lv_obj_set_style_text_align(footerLabel,LV_TEXT_ALIGN_CENTER,0);
     // Next button
-    nextButton = lv_btn_create(footer);
-    lv_obj_set_size(nextButton, 70, LV_PCT(100));
-    lv_obj_add_event_cb(nextButton, next_handler, LV_EVENT_CLICKED, NULL);
+    nextButton = uiCreateImageButton(footer,LV_SYMBOL_RIGHT,next_handler,LV_EVENT_CLICKED,70, LV_PCT(100));
     lv_obj_clear_flag(nextButton, LV_OBJ_FLAG_CLICKABLE);
-    img = lv_img_create(nextButton);
-    lv_img_set_src(img, LV_SYMBOL_RIGHT);
-    lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
 }
 
 void createUi()
@@ -499,4 +489,19 @@ lv_obj_t * uiCreateToggle(lv_obj_t * parent, lv_style_t * style, lv_event_cb_t e
     lv_obj_set_size(result,width,height);
     lv_obj_set_pos(result,x,y);
     return result;
+}
+
+lv_obj_t * uiCreateImageButton(lv_obj_t * parent, const void* src, lv_event_cb_t event_cb, lv_event_code_t filter, int width, int height, int x, int y)
+{   // Image button
+    lv_obj_t * imageButton = lv_btn_create(parent);
+    lv_obj_set_size(imageButton, width, height);
+    lv_obj_add_event_cb(imageButton, event_cb, filter, NULL);
+    lv_obj_t * img = lv_img_create(imageButton);
+    lv_img_set_src(img, src);
+    lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
+    if((x >= 0) && (y>=0))
+    {
+        lv_obj_set_pos(imageButton,x,y);
+    }
+    return imageButton;
 }
