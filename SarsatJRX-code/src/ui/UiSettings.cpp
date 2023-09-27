@@ -612,21 +612,26 @@ void uiSettingsUpdateView()
                     {
                         formatBeaconFileName(buffer,name);
                         lv_obj_t *lab = lv_label_create(beaconsList);
+                        // Reverse list order to have latest beacons at the top of the list
+                        lv_obj_move_background(lab);
                         lv_obj_set_user_data(lab,new String(name));
                         lv_obj_add_event_cb(lab, beacon_clicked_cb, LV_EVENT_CLICKED, NULL);
                         lv_obj_add_style(lab,&style_section_text,0);
                         lv_obj_set_style_text_color(lab,uiOkColor,LV_STATE_CHECKED);
                         lv_obj_add_flag(lab,LV_OBJ_FLAG_CLICKABLE);
                         lv_label_set_text(lab, buffer);
-                        if(beaconCount == 0)
-                        {   // Select first item
-                            lv_obj_add_state(lab, LV_STATE_CHECKED);
-                            currentBeacon = lab;
-                        }
                         beaconCount++;
                     }
                 }
                 beacon = logDir.openNextFile();
+            }
+            if(beaconCount > 0)
+            {   // Select first item
+                currentBeacon = lv_obj_get_child(beaconsList, 0);
+                if(currentBeacon)
+                {
+                    lv_obj_add_state(currentBeacon, LV_STATE_CHECKED);
+                }
             }
         }
     }
