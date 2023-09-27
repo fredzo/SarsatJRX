@@ -377,7 +377,7 @@ static void beacon_load_cb(lv_event_t * e)
         String* fileName = (String*)lv_obj_get_user_data(currentBeacon);
         if(fileName)
         {
-            Serial.printf("Load file %s\n",(*fileName).c_str());
+            //Serial.printf("Load file %s\n",(*fileName).c_str());
             readBeaconFromFile((*fileName).c_str());
         }
     }
@@ -389,7 +389,7 @@ static void deleteCurrentBeacon()
     String* fileName = (String*)lv_obj_get_user_data(currentBeacon);
     if(Filesystems::getFilesystems()->deleteBeacon((*fileName).c_str()))
     {
-        Serial.printf("Deleted file %s\n",(*fileName).c_str());
+        //Serial.printf("Deleted file %s\n",(*fileName).c_str());
         uint32_t index = lv_obj_get_index(currentBeacon);
         lv_obj_del(currentBeacon);
         currentBeacon = lv_obj_get_child(beaconsList,index);
@@ -404,6 +404,9 @@ static void deleteCurrentBeacon()
 static void beacon_delete_cb(lv_event_t * e)
 {
     if(currentBeacon == NULL) return;
+    //lv_event_code_t code = lv_event_get_code(e);
+    //Serial.printf("Delete cb with event code %d\n",code);
+    //if((code != LV_EVENT_SHORT_CLICKED)) return;
     static const char * btns[] = {"OK", "Cancel", NULL};
     deleteConfirmBox = lv_msgbox_create(NULL, "Delete ?", "Do you want to delete this beacon ?", btns, true);
     lv_obj_add_event_cb(deleteConfirmBox, [](lv_event_t * e) 
