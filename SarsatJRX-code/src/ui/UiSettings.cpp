@@ -205,6 +205,8 @@ static lv_obj_t * beaconsLoadButton;
 static lv_obj_t * beaconsDeleteButton;
 static lv_obj_t * currentBeacon = NULL;
 
+static lv_obj_t * deleteConfirmBox;
+
 void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
 {  
     // Version
@@ -402,16 +404,23 @@ static void deleteCurrentBeacon()
 static void beacon_delete_cb(lv_event_t * e)
 {
     if(currentBeacon == NULL) return;
-    String* fileName = (String*)lv_obj_get_user_data(currentBeacon);
-    if(fileName)
+    static const char * btns[] = {"OK", "Cancel", NULL};
+    deleteConfirmBox = lv_msgbox_create(NULL, "Delete ?", "Do you want to delete this beacon ?", btns, true);
+    lv_obj_add_event_cb(deleteConfirmBox, [](lv_event_t * e) 
     {
-        Serial.printf("Delete file %s\n",(*fileName).c_str());
-    }
+        if(lv_msgbox_get_active_btn(deleteConfirmBox) == 0)
+        {
+            deleteCurrentBeacon(); 
+        }
+        lv_msgbox_close(deleteConfirmBox);
+    }, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_center(deleteConfirmBox);
 }
 
 static void beacon_delete_longpress_cb(lv_event_t * e)
 {
     deleteCurrentBeacon();
+    lv_event_stop_processing(e);
 }
 
 void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
@@ -531,9 +540,9 @@ void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     int bottomButtonY = currentY+bListHeight-BEACON_BUTTON_HEIGHT;
     beaconsDownButton = uiCreateImageButton(tab,LV_SYMBOL_DOWN,beacon_down_cb,LV_EVENT_ALL,BEACON_BUTTON_WIDTH, BEACON_BUTTON_HEIGHT,BEACON_BUTTON_X1,bottomButtonY);
     // Load
-    beaconsLoadButton = uiCreateImageButton(tab,LV_SYMBOL_UPLOAD,beacon_load_cb,LV_EVENT_CLICKED,BEACON_BUTTON_WIDTH, BEACON_BUTTON_HEIGHT,BEACON_BUTTON_X2,currentY);
+    beaconsLoadButton = uiCreateImageButton(tab,LV_SYMBOL_PLAY,beacon_load_cb,LV_EVENT_CLICKED,BEACON_BUTTON_WIDTH, BEACON_BUTTON_HEIGHT,BEACON_BUTTON_X2,currentY);
     // Delete
-    beaconsDeleteButton = uiCreateImageButton(tab,LV_SYMBOL_TRASH,beacon_delete_cb,LV_EVENT_CLICKED,BEACON_BUTTON_WIDTH, BEACON_BUTTON_HEIGHT,BEACON_BUTTON_X2,bottomButtonY);
+    beaconsDeleteButton = uiCreateImageButton(tab,LV_SYMBOL_TRASH,beacon_delete_cb,LV_EVENT_SHORT_CLICKED,BEACON_BUTTON_WIDTH, BEACON_BUTTON_HEIGHT,BEACON_BUTTON_X2,bottomButtonY);
     lv_obj_add_event_cb(beaconsDeleteButton, beacon_delete_longpress_cb, LV_EVENT_LONG_PRESSED, NULL);
 }
 
