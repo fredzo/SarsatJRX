@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <HardwareSerial.h>
+#include <DRA818.h>
 
 class Radio
 {
@@ -26,7 +27,9 @@ class Radio
         {
         };
 
-        HardwareSerial radioSerial;
+        HardwareSerial *radioSerial;
+        DRA818 *dra;
+        float radioFrequency; 
 
         static Radio *radioInstance;
 };

@@ -96,14 +96,14 @@ void updateLeds()
 {
   if(ledFrameReceivedOn && ((millis() - ledFrameReceivedStartBlinkTime)>LED_BLINK_TIME))
   { // Led has been on for more than 100 ms => switch it off
-    digitalWrite(notificationPin, LOW); 
+    digitalWrite(NOTIFICATION_PIN, LOW); 
     ledFrameReceivedOn = false;
   }
 }
 
 void frameReceivedLedBlink()
 { // Switch led on and record time
-  digitalWrite(notificationPin, HIGH);
+  digitalWrite(NOTIFICATION_PIN, HIGH);
   ledFrameReceivedOn = true;
   ledFrameReceivedStartBlinkTime = millis();
 }
