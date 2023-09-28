@@ -2,6 +2,7 @@
 #define RADIO_H
 
 #include <Arduino.h>
+#include <HardwareSerial.h>
 
 class Radio
 {
@@ -24,6 +25,8 @@ class Radio
         ~Radio()
         {
         };
+
+        HardwareSerial radioSerial;
 
         static Radio *radioInstance;
 };

@@ -1,11 +1,12 @@
 #include <Hardware.h>
 #include <Power.h>
+#include <SarsatJRXConf.h>
 
 Hardware *Hardware::hardware = nullptr;
 
 void Hardware::init()
 {
-    i2c = new I2CBus();
+    i2c = new I2CBus(Wire,I2C_SDA_PIN,I2C_SCL_PIN);
     rtc = Rtc::getRtc();
     rtc->rtcInit(i2c);
     filesystems = Filesystems::getFilesystems();

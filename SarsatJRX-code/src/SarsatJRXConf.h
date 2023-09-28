@@ -34,5 +34,29 @@
 // RTC
 #define RTC_INT_PIN         36
 
+// Touch
+#define TOUCH_INT_PIN       34
+
+// TFT
+#define LILYPI_TFT_MISO     23
+#define LILYPI_TFT_MOSI     19
+#define LILYPI_TFT_SCLK     18
+#define LILYPI_TFT_CS       5
+#define LILYPI_TFT_DC       27
+#define LILYPI_TFT_RST      -1
+#define LILYPI_TFT_BL       12
+
+// I2C (RTC + Touch)
+#define I2C_SDA_PIN         21    
+#define I2C_SCL_PIN         22
+
+// UART 1
+#define UART1_RX_PIN        39
+#define UART1_TX_PIN        33
+
+// Receiver Pin
+#define RECEIVER_PIN        25
+#define NOTIFICATION_PIN    26
+
 
 #endif

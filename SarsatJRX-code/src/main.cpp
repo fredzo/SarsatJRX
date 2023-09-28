@@ -23,11 +23,6 @@ bool ledSig2State = false;
 bool ledInFrameState = false;
 bool ledFrameReceivedState = false;
 
-// Interupt pin : use digital pin 18
-const int receiverPin = 21;
-// Notification led : use digital pin 19
-const int notificationPin = 22;
-
 // Beacon list
 #define BEACON_LIST_MAX_SIZE  20
 
@@ -271,8 +266,8 @@ bool readBeaconFromFile(const char* fileName)
 
 void setup()
 {
-  pinMode(receiverPin, INPUT);          // Detection stage inpit
-  pinMode(notificationPin, OUTPUT);     // Notification led output
+  pinMode(RECEIVER_PIN, INPUT);          // Detection stage inpit
+  pinMode(NOTIFICATION_PIN, OUTPUT);     // Notification led output
   // pinMode(16, OUTPUT);                  // Buzzer output
   
   Serial.begin(115200);

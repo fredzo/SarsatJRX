@@ -1,4 +1,5 @@
 #include <Display.h>
+#include <SarsatJRXConf.h>
 #include <lvgl.h>
 #include <SPI.h>
 #include <TFT_eSPI.h>
@@ -6,14 +7,6 @@
 #include <ledc.h>
 
 
-
-#define LILYPI_TFT_MISO             23
-#define LILYPI_TFT_MOSI             19
-#define LILYPI_TFT_SCLK             18
-#define LILYPI_TFT_CS               5
-#define LILYPI_TFT_DC               27
-#define LILYPI_TFT_RST              -1
-#define LILYPI_TFT_BL               12
 #define GT911_ADDRESS               0x5D
 
 #define TFT_ESPI_DRIVER             0x9481
