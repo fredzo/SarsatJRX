@@ -4,8 +4,6 @@
 #include <time.h>
 #include <esp_sntp.h>
 
-#define RTC_INT_PIN         36
-
 Rtc *Rtc::rtcInstance = nullptr;
 
 String Rtc::Date::getDateString()

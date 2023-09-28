@@ -31,4 +31,8 @@
 #define SD_MOSI             15
 #define SD_SCLK             14
 
+// RTC
+#define RTC_INT_PIN         36
+
+
 #endif
