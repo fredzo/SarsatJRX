@@ -15,6 +15,8 @@ void Hardware::init()
     settings->init();
     display = new Display();
     display->setup(i2c);
+    radio = Radio::getRadio();
+    radio->radioInit();
 }
 
 Display* Hardware::getDisplay()
@@ -30,6 +32,11 @@ Rtc* Hardware::getRtc()
 Settings* Hardware::getSettings()
 {
     return settings;
+}
+
+Radio* Hardware::getRadio()
+{
+    return radio;
 }
 
 /**

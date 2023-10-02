@@ -19,5 +19,6 @@ void Radio::radioInit()
     dra->group(DRA818_12K5, 406.0, 460.0, 0, 4, 0);
     dra->volume(8);
     dra->filters(true, true, true);
+    dra->rssi();
 }
 
