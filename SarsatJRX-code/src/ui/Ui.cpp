@@ -34,10 +34,10 @@
 #define FOOTER_FRAME_LABEL  "Frame received !"
 #define FOOTER_BUTTON_WIDTH 70
 #define FOOTER_SPINNER_SIZE 42
-#define FOOTER_METER_WIDTH  DISPLAY_WIDTH-2*(FOOTER_METTER_X)
+#define FOOTER_METER_WIDTH  DISPLAY_WIDTH-2*(FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE)-16
 #define FOOTER_METER_HEIGHT 10
-#define FOOTER_METTER_X     FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE+10
-#define FOOTER_METTER_Y     DISPLAY_HEIGHT-FOOTER_METER_HEIGHT-8
+#define FOOTER_METTER_X     FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE+16
+#define FOOTER_METTER_Y     FOOTER_HEIGHT-FOOTER_METER_HEIGHT-8
 
 // Additionnal Symbols
 #define SYMBOL_WIFI_CONNECTED       "\xEF\x87\xAB"
@@ -236,11 +236,11 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_style_text_align(footerLabel,LV_TEXT_ALIGN_CENTER,0);
     lv_obj_set_style_translate_y(footerLabel,-8,0);
     // Meter
-    meter = lv_bar_create(lv_scr_act());
+    meter = lv_bar_create(footer);
     lv_obj_add_flag(meter,LV_OBJ_FLAG_IGNORE_LAYOUT);
     lv_obj_set_size(meter, FOOTER_METER_WIDTH, FOOTER_METER_HEIGHT);
     lv_obj_set_pos(meter,FOOTER_METTER_X,FOOTER_METTER_Y);
-    lv_obj_align_to(meter,footerLabel,LV_ALIGN_OUT_BOTTOM_MID,0,8);
+    //lv_obj_align_to(meter,footerLabel,LV_ALIGN_OUT_BOTTOM_MID,0,8);
     lv_obj_add_style(meter, &style_meter, LV_PART_INDICATOR);
     lv_bar_set_range(meter, 0, 255);
     lv_obj_set_style_anim_time(meter,500,LV_PART_MAIN);
