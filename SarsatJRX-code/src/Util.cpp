@@ -86,11 +86,11 @@ String formatHzFrequencyValue(uint32_t value)
 String formatSketchInformation(uint32_t size, String md5)
 {
   int md5Length = md5.length();
-  Serial.println(md5);
+  //Serial.println(md5);
   if(md5Length > 16)
   {
     md5 = md5.substring(0,8) + "..." + md5.substring(md5Length-8,md5Length);
-    Serial.println(md5);
+    //Serial.println(md5);
   }
   return formatMemoryValue(size,false) + " (MD5=" + md5 + ")";
 }

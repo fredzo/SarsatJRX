@@ -7,7 +7,7 @@ void Radio::radioInit()
 {   // Init UART1
     radioSerial = &Serial1;
     // Seria begin is done here
-    dra = new DRA818(radioSerial, DRA818_UHF);
+    dra = new DRA818(radioSerial, SA818_UHF);
     // Now we can set pins
     if(!radioSerial->setPins(UART1_RX_PIN,UART1_TX_PIN))
     {
@@ -23,5 +23,6 @@ void Radio::radioInit()
     dra->volume(8);
     dra->filters(true, true, true);
     dra->rssi();
+    dra->version();
 }
 
