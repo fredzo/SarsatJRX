@@ -30,10 +30,14 @@
 #define HEADER_LOGO_SRC     "J:/sarsat-jrx.bin"
 
 // Footer
-#define FOOTER_LABEL_X      DISPLAY_WIDTH/2
-#define FOOTER_LABEL_Y      DISPLAY_HEIGHT-SMALL_BUTTON_HEIGHT+14
 #define FOOTER_WAIT_LABEL   "Waiting for the wave..."
 #define FOOTER_FRAME_LABEL  "Frame received !"
+#define FOOTER_BUTTON_WIDTH 70
+#define FOOTER_SPINNER_SIZE 42
+#define FOOTER_METER_WIDTH  DISPLAY_WIDTH-2*(FOOTER_METTER_X)
+#define FOOTER_METER_HEIGHT 10
+#define FOOTER_METTER_X     FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE+10
+#define FOOTER_METTER_Y     DISPLAY_HEIGHT-FOOTER_METER_HEIGHT-8
 
 // Additionnal Symbols
 #define SYMBOL_WIFI_CONNECTED       "\xEF\x87\xAB"
@@ -63,6 +67,7 @@ lv_style_t style_section_text;
 lv_style_t style_section_toggle;
 lv_style_t style_footer_text;
 lv_style_t style_time;
+lv_style_t style_meter;
 
 lv_color_t uiBackgroundColor;
 lv_color_t uiOkColor;
@@ -87,6 +92,7 @@ lv_obj_t * ledInFrame;
 lv_obj_t * ledFrameReceived;
 lv_obj_t * pagesLabel;
 lv_obj_t * footerLabel;
+lv_obj_t * meter;
 lv_obj_t * spinner;
 lv_obj_t * previousButton;
 lv_obj_t * nextButton;
@@ -212,11 +218,11 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_scrollbar_mode(footer,LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_style(footer, &style_pad_tiny, 0);
     // Previous button
-    previousButton = uiCreateImageButton(footer,LV_SYMBOL_LEFT,previous_handler,LV_EVENT_CLICKED,70, LV_PCT(100));
+    previousButton = uiCreateImageButton(footer,LV_SYMBOL_LEFT,previous_handler,LV_EVENT_CLICKED,FOOTER_BUTTON_WIDTH, LV_PCT(100));
     lv_obj_clear_flag(previousButton, LV_OBJ_FLAG_CLICKABLE);
     // Spinner
     spinner = lv_spinner_create(footer,2000,60);
-    lv_obj_set_size(spinner, 42, LV_PCT(100));
+    lv_obj_set_size(spinner, FOOTER_SPINNER_SIZE, LV_PCT(100));
     lv_obj_set_style_arc_width(spinner,6,LV_PART_INDICATOR);
     lv_obj_set_style_arc_width(spinner,6,LV_PART_MAIN);
     lv_obj_set_style_pad_top(spinner,4,0);
@@ -228,8 +234,18 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_flex_grow(footerLabel, 1);
     lv_obj_add_style(footerLabel,&style_footer,0);
     lv_obj_set_style_text_align(footerLabel,LV_TEXT_ALIGN_CENTER,0);
+    lv_obj_set_style_translate_y(footerLabel,-8,0);
+    // Meter
+    meter = lv_bar_create(lv_scr_act());
+    lv_obj_add_flag(meter,LV_OBJ_FLAG_IGNORE_LAYOUT);
+    lv_obj_set_size(meter, FOOTER_METER_WIDTH, FOOTER_METER_HEIGHT);
+    lv_obj_set_pos(meter,FOOTER_METTER_X,FOOTER_METTER_Y);
+    lv_obj_align_to(meter,footerLabel,LV_ALIGN_OUT_BOTTOM_MID,0,8);
+    lv_obj_add_style(meter, &style_meter, LV_PART_INDICATOR);
+    lv_bar_set_range(meter, 0, 255);
+    lv_obj_set_style_anim_time(meter,500,LV_PART_MAIN);
     // Next button
-    nextButton = uiCreateImageButton(footer,LV_SYMBOL_RIGHT,next_handler,LV_EVENT_CLICKED,70, LV_PCT(100));
+    nextButton = uiCreateImageButton(footer,LV_SYMBOL_RIGHT,next_handler,LV_EVENT_CLICKED,FOOTER_BUTTON_WIDTH, LV_PCT(100));
     lv_obj_clear_flag(nextButton, LV_OBJ_FLAG_CLICKABLE);
 }
 
@@ -275,6 +291,12 @@ void createUi()
     lv_style_set_text_align(&style_footer_highlight, LV_TEXT_ALIGN_CENTER);
     lv_style_set_pad_left(&style_footer_highlight, 0);
     lv_style_set_text_color(&style_footer_highlight, lv_palette_lighten(LV_PALETTE_RED,2));
+    // Meter
+    lv_style_init(&style_meter);
+    lv_style_set_bg_opa(&style_meter, LV_OPA_COVER);
+    lv_style_set_bg_color(&style_meter, lv_palette_main(LV_PALETTE_GREEN));
+    lv_style_set_bg_grad_color(&style_meter, lv_palette_main(LV_PALETTE_RED));
+    lv_style_set_bg_grad_dir(&style_meter, LV_GRAD_DIR_HOR);
     // Small padding
     lv_style_init(&style_pad_small);
     lv_style_set_pad_all(&style_pad_small, 4);
@@ -468,6 +490,11 @@ void uiSetLedInFrameState(bool on)
 void uiSetLedFrameReceivedState(bool on)
 {
     on ? lv_led_on(ledFrameReceived) : lv_led_off(ledFrameReceived);
+}
+
+void uiSetPower(int power)
+{
+    lv_bar_set_value(meter, power, LV_ANIM_ON);
 }
 
 lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text, int x, int y, int width, int height)

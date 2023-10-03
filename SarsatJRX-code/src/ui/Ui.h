@@ -75,6 +75,8 @@ void uiSetLedInFrameState(bool on);
 
 void uiSetLedFrameReceivedState(bool on);
 
+void uiSetPower(int power);
+
 lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text, int x, int y, int width, int height);
 
 lv_obj_t * uiCreateToggle(lv_obj_t * parent, lv_style_t * style, lv_event_cb_t event_cb, int x, int y, int width, int height);

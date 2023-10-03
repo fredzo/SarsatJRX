@@ -17,6 +17,8 @@ class Radio
         }
 
         void radioInit();
+        int getPower();
+        String getVersion();
 
     private :
         Radio()

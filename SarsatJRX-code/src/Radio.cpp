@@ -22,7 +22,17 @@ void Radio::radioInit()
     dra->group(DRA818_12K5, 406.0, 460.0, 0, 4, 0);
     dra->volume(8);
     dra->filters(true, true, true);
-    dra->rssi();
-    dra->version();
+    Serial.printf("Rssi = %d\n",dra->rssi());
+    Serial.printf("Version = %s\n",dra->version().c_str());
+}
+
+int Radio::getPower()
+{
+    return dra->rssi();
+}
+
+String Radio::getVersion()
+{
+    return dra->version();
 }
 

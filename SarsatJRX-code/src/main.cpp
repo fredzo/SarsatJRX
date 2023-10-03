@@ -205,6 +205,8 @@ bool footerShowingFrameReceived = false;
 bool footerShowingSpinner = false;
 int spinnerPosition = 0;
 #define FOOTER_FRAME_RECEIVED_TIME 2000
+unsigned long lastPowerUpdateTime;
+#define FOOTER_POWER_UPDATE_TIME 100
 
 void updateFooter(bool frameReceived)
 {  
@@ -226,6 +228,11 @@ void updateFooter(bool frameReceived)
       uiShowFrameReceived(true);
       footerShowingFrameReceived = true;
     }
+  }
+  if((now - lastPowerUpdateTime) > POWER_DISPLAY_PERIOD)
+  {
+    lastPowerUpdateTime = now;
+    uiSetPower(hardware->getRadio()->getPower());
   }
 }
 
