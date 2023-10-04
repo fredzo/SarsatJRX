@@ -24,6 +24,7 @@ void Radio::radioInit()
     dra->filters(true, true, true);
     Serial.printf("Rssi = %d\n",dra->rssi());
     Serial.printf("Version = %s\n",dra->version().c_str());
+    Serial.println(dra->read_group().toString().c_str());
 }
 
 int Radio::getPower()
