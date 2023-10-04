@@ -393,6 +393,8 @@ void loop()
   updateLeds();
   updateHeader();
   display->handleTimer();
+  // Radio task
+  hardware->getRadio()->handleTask();
 
     // Web and wifi
 #ifdef WIFI
