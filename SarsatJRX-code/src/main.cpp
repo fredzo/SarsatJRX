@@ -255,6 +255,7 @@ void readNextSampleFrame()
   readNextSample(getFrame());
   // Tell the state machine that we have a complete frame
   setFrameComplete(true);
+  hardware->getRadio()->startScan();
 }
 
 bool readBeaconFromFile(const char* fileName)

@@ -18,6 +18,14 @@ class Radio
 
         void radioInit();
         void radioStop();
+        /*
+         * Set scan frequencies : last frequency in the array must be 0 to tell the array end   
+        */
+        void setScanFrequencies(float* frequencies);
+        void startScan();
+        void stopScan();
+        float getCurrentScanFrequency();
+        bool isCurrentScanFrequencyBusy();
         int getPower();
         String getVersion();
 
@@ -33,6 +41,8 @@ class Radio
         {
         };
 
+        void scanNext();
+
         static void rssiCallback(int rssi);
         static void readGroupCallback(DRA818::Parameters parameters);
         static void groupCallback(int retCode);
@@ -45,16 +55,18 @@ class Radio
 
         HardwareSerial *radioSerial;
         DRA818 *dra;
-        float radioFrequency; 
+        float *scanFrequencies = NULL;
+        int currentScanFrequencyIndex = 0;
+        bool scanOn = false;
+
+        int power = 0;
+        bool on = false;
+        DRA818::Parameters parameters;
+        float scanFrequency = 0;
+        bool scanFreqBusy = false;
+        String version;
 
         // Static members
-        static int power;
-        static bool on;
-        static DRA818::Parameters parameters;
-        static float scanFrequency;
-        static bool scanFreqBusy;
-        static String version;
-
         static Radio *radioInstance;
 };
 

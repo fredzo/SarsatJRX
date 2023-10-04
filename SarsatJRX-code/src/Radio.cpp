@@ -3,12 +3,6 @@
 
 // Static members
 Radio *Radio::radioInstance = nullptr;
-int Radio::power = 0;
-String Radio::version;
-bool Radio::on = false;
-DRA818::Parameters Radio::parameters;
-float Radio::scanFrequency = 0;
-bool Radio::scanFreqBusy = false;
 
 void Radio::radioInit()
 {   // Init UART1
@@ -36,6 +30,7 @@ void Radio::radioInit()
     dra->read_group_async_cb(Radio::readGroupCallback);
     dra->handshake_async();
     dra->version_async();
+    // Tests
     dra->group_async(DRA818_12K5, 406.0, 460.0, 0, 4, 0);
     dra->volume_async(8);
     dra->filters_async(true, false, true);
@@ -52,16 +47,19 @@ void Radio::radioInit()
     dra->read_group_async();
     dra->group_async(DRA818_25K, 406.025, 433.000, 25, 2, 38);
     dra->read_group_async();
+    float frequecies[] = {406.0,406.025,406.037,406.040,406.049,430,433,0};
+    setScanFrequencies(frequecies);
+    startScan();
 }
 
 void Radio::rssiCallback(int rssi)
 {
-    power = rssi;
+    radioInstance->power = rssi;
 }
 
 void Radio::readGroupCallback(DRA818::Parameters parameters)
 {
-    Radio::parameters = parameters;
+    radioInstance->parameters = parameters;
     #ifdef SERIAL_OUT
         Serial.println(parameters.toString().c_str());
     #endif
@@ -76,7 +74,7 @@ void Radio::groupCallback(int retCode)
 
 void Radio::handshakeCallback(int retCode)
 {
-    on = retCode;
+    radioInstance->on = retCode;
     #ifdef SERIAL_OUT
         retCode ? Serial.println("Handshake command success.") : Serial.println("Handshake command failed.");
     #endif
@@ -84,10 +82,16 @@ void Radio::handshakeCallback(int retCode)
 
 void Radio::scanCallback(int retCode)
 {
-    scanFreqBusy = retCode;
     #ifdef SERIAL_OUT
-        Serial.printf("Frequency %3.4f scan : %s\n",scanFrequency, scanFreqBusy ? "busy" : "no signal");
+        Serial.printf("Frequency %3.4f scan : %s\n",radioInstance->scanFrequency, radioInstance->scanFreqBusy ? "busy" : "no signal");
     #endif
+    radioInstance->scanFreqBusy = retCode;
+    if(radioInstance->scanFreqBusy) radioInstance->scanOn = false; // Stop scan on busy frequencies
+    if(radioInstance->scanOn)
+    {
+        radioInstance->currentScanFrequencyIndex++;
+        radioInstance->scanNext();
+    }
 }
 
 void Radio::volumeCallback(int retCode)
@@ -106,7 +110,7 @@ void Radio::filtersCallback(int retCode)
 
 void Radio::versionCallback(String version)
 {
-    Radio::version = version;
+    radioInstance->version = version;
     #ifdef SERIAL_OUT
         Serial.printf("Radio module version : %s\n",version);
     #endif
@@ -119,6 +123,54 @@ void Radio::tailCallback(int retCode)
     #endif
 }
 
+void Radio::setScanFrequencies(float* frequencies)
+{
+    scanFrequencies = frequencies;
+}
+
+void Radio::scanNext()
+{
+    scanFrequency = scanFrequencies[currentScanFrequencyIndex];
+    if(scanFrequency == 0)
+    {
+        currentScanFrequencyIndex = 0;
+        scanFrequency = scanFrequencies[currentScanFrequencyIndex];
+    }
+    dra->scan_async(scanFrequency);
+}
+
+void Radio::startScan()
+{
+    if(scanFrequencies)
+    {
+        scanOn = true;
+        scanNext();
+    }
+    else
+    {
+    #ifdef SERIAL_OUT
+        Serial.println("Scan impossible : call setScanFrequencies() first.");
+    #endif
+    }
+}
+
+void Radio::stopScan()
+{
+    scanOn = false;
+    parameters.freq_rx = scanFrequency;
+    parameters.freq_tx = scanFrequency;
+    dra->group_async(parameters);
+}
+
+float Radio::getCurrentScanFrequency()
+{
+    return scanFrequency;
+}
+
+bool Radio::isCurrentScanFrequencyBusy()
+{
+    return scanFreqBusy;
+}
 
 void Radio::radioStop()
 {
@@ -129,16 +181,16 @@ void Radio::radioStop()
 
 void Radio::handleTask()
 {
-    dra->async_task();
+    if(dra) dra->async_task();
 }
 
 int Radio::getPower()
 {   
-    dra->rssi_async();
+    if(dra) dra->rssi_async();
     return power;
 }
 
 String Radio::getVersion()
 {
-    return dra->version();
+    return version;
 }
