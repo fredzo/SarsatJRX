@@ -21,7 +21,7 @@ class Radio
         /*
          * Set scan frequencies : last frequency in the array must be 0 to tell the array end   
         */
-        void setScanFrequencies(float* frequencies);
+        void setScanFrequencies(const float* frequencies);
         void startScan();
         void stopScan();
         float getCurrentScanFrequency();
@@ -55,8 +55,8 @@ class Radio
 
         HardwareSerial *radioSerial;
         DRA818 *dra;
-        float *scanFrequencies = NULL;
-        int currentScanFrequencyIndex = 0;
+        const float *scanFrequencies = NULL;
+        int currentScanFrequencyIndex = -1;
         bool scanOn = false;
 
         int power = 0;

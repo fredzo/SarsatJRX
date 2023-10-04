@@ -4,6 +4,9 @@
 // Static members
 Radio *Radio::radioInstance = nullptr;
 
+const float frequecies[] = {406.0,406.025,406.037,406.040,406.049,430,433,0};
+
+
 void Radio::radioInit()
 {   // Init UART1
     radioSerial = &Serial1;
@@ -47,7 +50,6 @@ void Radio::radioInit()
     dra->read_group_async();
     dra->group_async(DRA818_25K, 406.025, 433.000, 25, 2, 38);
     dra->read_group_async();
-    float frequecies[] = {406.0,406.025,406.037,406.040,406.049,430,433,0};
     setScanFrequencies(frequecies);
     startScan();
 }
@@ -82,14 +84,13 @@ void Radio::handshakeCallback(int retCode)
 
 void Radio::scanCallback(int retCode)
 {
+    radioInstance->scanFreqBusy = retCode;
     #ifdef SERIAL_OUT
         Serial.printf("Frequency %3.4f scan : %s\n",radioInstance->scanFrequency, radioInstance->scanFreqBusy ? "busy" : "no signal");
     #endif
-    radioInstance->scanFreqBusy = retCode;
     if(radioInstance->scanFreqBusy) radioInstance->scanOn = false; // Stop scan on busy frequencies
     if(radioInstance->scanOn)
     {
-        radioInstance->currentScanFrequencyIndex++;
         radioInstance->scanNext();
     }
 }
@@ -123,13 +124,20 @@ void Radio::tailCallback(int retCode)
     #endif
 }
 
-void Radio::setScanFrequencies(float* frequencies)
+void Radio::setScanFrequencies(const float* frequencies)
 {
     scanFrequencies = frequencies;
+    // Start scan will increment index before setting frequency
+    currentScanFrequencyIndex = -1;
+    if(frequecies)
+    {
+        scanFrequency = scanFrequencies[0];
+    }
 }
 
 void Radio::scanNext()
 {
+    radioInstance->currentScanFrequencyIndex++;
     scanFrequency = scanFrequencies[currentScanFrequencyIndex];
     if(scanFrequency == 0)
     {
