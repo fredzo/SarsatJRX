@@ -88,7 +88,7 @@ void Radio::scanCallback(int retCode)
     #ifdef SERIAL_OUT
         Serial.printf("Frequency %3.4f scan : %s\n",radioInstance->scanFrequency, radioInstance->scanFreqBusy ? "busy" : "no signal");
     #endif
-    if(radioInstance->scanFreqBusy) radioInstance->scanOn = false; // Stop scan on busy frequencies
+    if(radioInstance->scanFreqBusy) radioInstance->stopScan(); // Stop scan on busy frequencies
     if(radioInstance->scanOn)
     {
         radioInstance->scanNext();
