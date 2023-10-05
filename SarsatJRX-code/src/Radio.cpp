@@ -170,6 +170,11 @@ void Radio::stopScan()
     dra->group_async(parameters);
 }
 
+void Radio::toggleScan()
+{
+    scanOn ? stopScan() : startScan();
+}
+
 float Radio::getCurrentScanFrequency()
 {
     return scanFrequency;

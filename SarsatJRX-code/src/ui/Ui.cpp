@@ -30,14 +30,18 @@
 #define HEADER_LOGO_SRC     "J:/sarsat-jrx.bin"
 
 // Footer
-#define FOOTER_WAIT_LABEL   "Waiting for the wave..."
-#define FOOTER_FRAME_LABEL  "Frame received !"
-#define FOOTER_BUTTON_WIDTH 70
-#define FOOTER_SPINNER_SIZE 42
-#define FOOTER_METER_WIDTH  DISPLAY_WIDTH-2*(FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE)-16
-#define FOOTER_METER_HEIGHT 10
-#define FOOTER_METTER_X     FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE+16
-#define FOOTER_METTER_Y     FOOTER_HEIGHT-FOOTER_METER_HEIGHT-8
+#define FOOTER_WAIT_LABEL           "Waiting for the wave..."
+#define FOOTER_FRAME_LABEL          "Frame received !"
+#define FOOTER_BUTTON_WIDTH         70
+#define FOOTER_SPINNER_SIZE         42
+#define FOOTER_FREQ_BUTTON_WIDTH    120
+#define FOOTER_FREQ_BUTTON_HEIGHT   30
+#define FOOTER_FREQ_BUTTON_X        FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE+8
+#define FOOTER_FREQ_BUTTON_Y        FOOTER_HEIGHT-FOOTER_FREQ_BUTTON_HEIGHT-4
+#define FOOTER_METER_WIDTH          DISPLAY_WIDTH-2*(FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE)-FOOTER_FREQ_BUTTON_WIDTH-8
+#define FOOTER_METER_HEIGHT         10
+#define FOOTER_METTER_X             FOOTER_FREQ_BUTTON_X+FOOTER_FREQ_BUTTON_WIDTH+4
+#define FOOTER_METTER_Y             FOOTER_HEIGHT-FOOTER_METER_HEIGHT-8
 
 // Additionnal Symbols
 #define SYMBOL_WIFI_CONNECTED       "\xEF\x87\xAB"
@@ -48,6 +52,7 @@
 extern void readNextSampleFrame();
 extern void previousFrame();
 extern void nextFrame();
+extern void toggleScan();
 
 /**********************
  *  VARIABLES
@@ -96,6 +101,7 @@ lv_obj_t * meter;
 lv_obj_t * spinner;
 lv_obj_t * previousButton;
 lv_obj_t * nextButton;
+lv_obj_t * freqLabelButton;
 
 UiScreen currentScreen = UiScreen::START;
 
@@ -127,6 +133,11 @@ static void previous_handler(lv_event_t * e)
 static void next_handler(lv_event_t * e)
 {
     nextFrame();
+}
+
+static void freq_handler(lv_event_t * e)
+{
+    toggleScan();
 }
 
 void createHeader(lv_obj_t * win)
@@ -227,6 +238,10 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_style_arc_width(spinner,6,LV_PART_MAIN);
     lv_obj_set_style_pad_top(spinner,4,0);
     lv_obj_set_style_pad_left(spinner,10,0);
+    // Frequ
+    freqLabelButton = uiCreateLabelButton(footer,"000.0000 MHz",freq_handler,LV_EVENT_CLICKED,FOOTER_FREQ_BUTTON_WIDTH, FOOTER_FREQ_BUTTON_HEIGHT, FOOTER_FREQ_BUTTON_X,FOOTER_FREQ_BUTTON_Y);
+    lv_obj_add_flag(freqLabelButton,LV_OBJ_FLAG_IGNORE_LAYOUT);
+    //lv_obj_clear_flag(freqLabelButton, LV_OBJ_FLAG_CLICKABLE);
     // Footer label
     footerLabel = lv_label_create(footer);
     lv_label_set_long_mode(footerLabel, LV_LABEL_LONG_DOT);
@@ -240,7 +255,6 @@ void createFooter(lv_obj_t * win)
     lv_obj_add_flag(meter,LV_OBJ_FLAG_IGNORE_LAYOUT);
     lv_obj_set_size(meter, FOOTER_METER_WIDTH, FOOTER_METER_HEIGHT);
     lv_obj_set_pos(meter,FOOTER_METTER_X,FOOTER_METTER_Y);
-    //lv_obj_align_to(meter,footerLabel,LV_ALIGN_OUT_BOTTOM_MID,0,8);
     lv_obj_add_style(meter, &style_meter, LV_PART_INDICATOR);
     lv_bar_set_range(meter, 0, 255);
     lv_obj_set_style_anim_time(meter,500,LV_PART_MAIN);
@@ -497,6 +511,13 @@ void uiSetPower(int power)
     lv_bar_set_value(meter, power, LV_ANIM_ON);
 }
 
+void uiSetFreq(float freq)
+{
+    char buffer[16];
+    sprintf(buffer,"%3.4f MHz",freq);
+    lv_label_set_text(freqLabelButton,buffer);
+}
+
 lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text, int x, int y, int width, int height)
 {
     lv_obj_t *  result = lv_label_create(parent);
@@ -531,4 +552,19 @@ lv_obj_t * uiCreateImageButton(lv_obj_t * parent, const void* src, lv_event_cb_t
         lv_obj_set_pos(imageButton,x,y);
     }
     return imageButton;
+}
+
+lv_obj_t * uiCreateLabelButton(lv_obj_t * parent, const char* text, lv_event_cb_t event_cb, lv_event_code_t filter, int width, int height, int x, int y)
+{   // Text button
+    lv_obj_t * textButton = lv_btn_create(parent);
+    lv_obj_set_size(textButton, width, height);
+    lv_obj_add_event_cb(textButton, event_cb, filter, NULL);
+    lv_obj_t * label = lv_label_create(textButton);
+    lv_label_set_text(label, text);
+    lv_obj_center(label);
+    if((x >= 0) && (y>=0))
+    {
+        lv_obj_set_pos(textButton,x,y);
+    }
+    return label;
 }

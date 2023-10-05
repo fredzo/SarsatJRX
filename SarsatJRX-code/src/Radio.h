@@ -24,6 +24,7 @@ class Radio
         void setScanFrequencies(const float* frequencies);
         void startScan();
         void stopScan();
+        void toggleScan();
         float getCurrentScanFrequency();
         bool isCurrentScanFrequencyBusy();
         int getPower();

@@ -111,7 +111,7 @@ void frameReceivedLedBlink()
 // Store last displayed power value
 unsigned long lastPowerDisplayTime = 0;
 float powerValue = -1;
-#define POWER_DISPLAY_PERIOD 2000
+#define POWER_DISPLAY_PERIOD 500
 
 void updatePowerValueHeader()
 {  // Power header
@@ -207,6 +207,7 @@ int spinnerPosition = 0;
 #define FOOTER_FRAME_RECEIVED_TIME 2000
 unsigned long lastPowerUpdateTime;
 #define FOOTER_POWER_UPDATE_TIME 100
+float lastFreq = -1;
 
 void updateFooter(bool frameReceived)
 {  
@@ -234,6 +235,12 @@ void updateFooter(bool frameReceived)
     lastPowerUpdateTime = now;
     uiSetPower(hardware->getRadio()->getPower());
   }
+  float freq = hardware->getRadio()->getCurrentScanFrequency();
+  if(freq != lastFreq)
+  {
+    uiSetFreq(freq);
+    lastFreq = freq;
+  }
 }
 
 void updateDisplay()
@@ -255,7 +262,11 @@ void readNextSampleFrame()
   readNextSample(getFrame());
   // Tell the state machine that we have a complete frame
   setFrameComplete(true);
-  hardware->getRadio()->startScan();
+}
+
+void toggleScan()
+{
+  hardware->getRadio()->toggleScan();
 }
 
 bool readBeaconFromFile(const char* fileName)
