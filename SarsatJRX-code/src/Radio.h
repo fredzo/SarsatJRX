@@ -25,8 +25,10 @@ class Radio
         void startScan();
         void stopScan();
         void toggleScan();
-        float getCurrentScanFrequency();
-        bool isCurrentScanFrequencyBusy();
+        float getFrequency();
+        void setFrequency(float frequency);
+        bool isScanFrequencyBusy();
+        bool isScanOn();
         int getPower();
         String getVersion();
 
@@ -63,7 +65,7 @@ class Radio
         int power = 0;
         bool on = false;
         DRA818::Parameters parameters;
-        float scanFrequency = 0;
+        float radioFrequency = 0;
         bool scanFreqBusy = false;
         String version;
 

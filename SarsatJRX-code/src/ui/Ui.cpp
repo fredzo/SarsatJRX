@@ -34,13 +34,13 @@
 #define FOOTER_FRAME_LABEL          "Frame received !"
 #define FOOTER_BUTTON_WIDTH         70
 #define FOOTER_SPINNER_SIZE         42
-#define FOOTER_FREQ_BUTTON_WIDTH    120
+#define FOOTER_FREQ_BUTTON_WIDTH    108
 #define FOOTER_FREQ_BUTTON_HEIGHT   30
 #define FOOTER_FREQ_BUTTON_X        FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE+8
 #define FOOTER_FREQ_BUTTON_Y        FOOTER_HEIGHT-FOOTER_FREQ_BUTTON_HEIGHT-4
-#define FOOTER_METER_WIDTH          DISPLAY_WIDTH-2*(FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE)-FOOTER_FREQ_BUTTON_WIDTH-8
+#define FOOTER_METER_WIDTH          DISPLAY_WIDTH-2*FOOTER_BUTTON_WIDTH-FOOTER_SPINNER_SIZE-FOOTER_FREQ_BUTTON_WIDTH-16
 #define FOOTER_METER_HEIGHT         10
-#define FOOTER_METTER_X             FOOTER_FREQ_BUTTON_X+FOOTER_FREQ_BUTTON_WIDTH+4
+#define FOOTER_METTER_X             FOOTER_FREQ_BUTTON_X+FOOTER_FREQ_BUTTON_WIDTH
 #define FOOTER_METTER_Y             FOOTER_HEIGHT-FOOTER_METER_HEIGHT-8
 
 // Additionnal Symbols
@@ -77,6 +77,8 @@ lv_style_t style_meter;
 lv_color_t uiBackgroundColor;
 lv_color_t uiOkColor;
 lv_color_t uiKoColor;
+lv_color_t uiOnColor;
+lv_color_t uiOffColor;
 
 
 const lv_font_t * font_large = &lv_font_montserrat_24;
@@ -237,19 +239,22 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_style_arc_width(spinner,6,LV_PART_INDICATOR);
     lv_obj_set_style_arc_width(spinner,6,LV_PART_MAIN);
     lv_obj_set_style_pad_top(spinner,4,0);
-    lv_obj_set_style_pad_left(spinner,10,0);
+    lv_obj_set_style_pad_left(spinner,4,0);
+    lv_obj_set_style_pad_right(spinner,4,0);
     // Frequ
-    freqLabelButton = uiCreateLabelButton(footer,"000.0000 MHz",freq_handler,LV_EVENT_CLICKED,FOOTER_FREQ_BUTTON_WIDTH, FOOTER_FREQ_BUTTON_HEIGHT, FOOTER_FREQ_BUTTON_X,FOOTER_FREQ_BUTTON_Y);
-    lv_obj_add_flag(freqLabelButton,LV_OBJ_FLAG_IGNORE_LAYOUT);
+    freqLabelButton = uiCreateLabelButton(footer,"000.0000 MHz",freq_handler,LV_EVENT_CLICKED,lv_color_make(10, 10, 10),FOOTER_FREQ_BUTTON_WIDTH, LV_PCT(100));
+    lv_obj_add_style(freqLabelButton,&style_text_mono,0);
     //lv_obj_clear_flag(freqLabelButton, LV_OBJ_FLAG_CLICKABLE);
     // Footer label
     footerLabel = lv_label_create(footer);
     lv_label_set_long_mode(footerLabel, LV_LABEL_LONG_DOT);
     lv_label_set_text(footerLabel, FOOTER_WAIT_LABEL);
+    lv_obj_set_height(footerLabel, FOOTER_HEIGHT-FOOTER_METER_HEIGHT-4);
+    lv_obj_set_style_pad_left(footerLabel,4,0);
+    lv_obj_set_x(footerLabel,4);
     lv_obj_set_flex_grow(footerLabel, 1);
     lv_obj_add_style(footerLabel,&style_footer,0);
-    lv_obj_set_style_text_align(footerLabel,LV_TEXT_ALIGN_CENTER,0);
-    lv_obj_set_style_translate_y(footerLabel,-8,0);
+    //lv_obj_set_style_translate_y(footerLabel,-8,0);
     // Meter
     meter = lv_bar_create(footer);
     lv_obj_add_flag(meter,LV_OBJ_FLAG_IGNORE_LAYOUT);
@@ -257,7 +262,7 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_pos(meter,FOOTER_METTER_X,FOOTER_METTER_Y);
     lv_obj_add_style(meter, &style_meter, LV_PART_INDICATOR);
     lv_bar_set_range(meter, 0, 255);
-    lv_obj_set_style_anim_time(meter,500,LV_PART_MAIN);
+    lv_obj_set_style_anim_time(meter,200,LV_PART_MAIN);
     // Next button
     nextButton = uiCreateImageButton(footer,LV_SYMBOL_RIGHT,next_handler,LV_EVENT_CLICKED,FOOTER_BUTTON_WIDTH, LV_PCT(100));
     lv_obj_clear_flag(nextButton, LV_OBJ_FLAG_CLICKABLE);
@@ -349,6 +354,9 @@ void createUi()
     // OK  / KO color
     uiOkColor = lv_palette_main(LV_PALETTE_GREEN);
     uiKoColor = lv_palette_lighten(LV_PALETTE_RED,2);
+    // Scan ON / OFF color
+    uiOffColor = lv_palette_main(LV_PALETTE_GREEN);
+    uiOnColor = lv_palette_lighten(LV_PALETTE_RED,1);
     
     lv_obj_t * win = lv_win_create(lv_scr_act(),HEADER_HEIGHT);
     createHeader(win);
@@ -511,11 +519,12 @@ void uiSetPower(int power)
     lv_bar_set_value(meter, power, LV_ANIM_ON);
 }
 
-void uiSetFreq(float freq)
+void uiSetFreq(float freq, bool scanOn)
 {
     char buffer[16];
     sprintf(buffer,"%3.4f MHz",freq);
     lv_label_set_text(freqLabelButton,buffer);
+    lv_obj_set_style_text_color(freqLabelButton,scanOn ? uiOnColor : uiOffColor,0);
 }
 
 lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text, int x, int y, int width, int height)
@@ -554,17 +563,19 @@ lv_obj_t * uiCreateImageButton(lv_obj_t * parent, const void* src, lv_event_cb_t
     return imageButton;
 }
 
-lv_obj_t * uiCreateLabelButton(lv_obj_t * parent, const char* text, lv_event_cb_t event_cb, lv_event_code_t filter, int width, int height, int x, int y)
+lv_obj_t * uiCreateLabelButton(lv_obj_t * parent, const char* text, lv_event_cb_t event_cb, lv_event_code_t filter,lv_color_t buttonColor, int width, int height, int x, int y)
 {   // Text button
     lv_obj_t * textButton = lv_btn_create(parent);
+    if((x >= 0) && (y>=0))
+    {
+        lv_obj_add_flag(textButton,LV_OBJ_FLAG_IGNORE_LAYOUT);
+        lv_obj_set_pos(textButton,x,y);
+    }
     lv_obj_set_size(textButton, width, height);
+    lv_obj_set_style_bg_color(textButton,buttonColor,0);
     lv_obj_add_event_cb(textButton, event_cb, filter, NULL);
     lv_obj_t * label = lv_label_create(textButton);
     lv_label_set_text(label, text);
     lv_obj_center(label);
-    if((x >= 0) && (y>=0))
-    {
-        lv_obj_set_pos(textButton,x,y);
-    }
     return label;
 }

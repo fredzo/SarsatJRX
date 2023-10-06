@@ -245,7 +245,7 @@ bool wifiManagerHandleClient()
     if(changed)
     {
   #ifdef SERIAL_OUT
-      WiFi.printDiag(Serial);
+      if(wifiStatus != WifiStatus::OFF) WiFi.printDiag(Serial); // WiFi.printDiag() crashes when wifi is off
       Serial.println("Ip address : " + ipAddr.toString());
       Serial.println("Wifi status : " + wifiManagerGetStatusString());
       Serial.println("RSSI : "+ String(wifiRssi) + " dBm");

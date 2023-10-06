@@ -38,20 +38,7 @@ void Radio::radioInit()
     dra->volume_async(8);
     dra->filters_async(true, false, true);
     dra->tail_async(true);
-    dra->scan_async(440.125);
-    /*dra->scan(406.00);
-    dra->scan(406.025);
-    dra->scan(406.028);
-    dra->scan(406.037);
-    dra->scan(406.040);
-    dra->scan(406.049);
-    dra->scan(433.000);
-    dra->scan(433.125);*/
-    dra->read_group_async();
-    dra->group_async(DRA818_25K, 406.025, 433.000, 25, 2, 38);
-    dra->read_group_async();
     setScanFrequencies(frequecies);
-    startScan();
 }
 
 void Radio::rssiCallback(int rssi)
@@ -86,9 +73,9 @@ void Radio::scanCallback(int retCode)
 {
     radioInstance->scanFreqBusy = retCode;
     #ifdef SERIAL_OUT
-        Serial.printf("Frequency %3.4f scan : %s\n",radioInstance->scanFrequency, radioInstance->scanFreqBusy ? "busy" : "no signal");
+        Serial.printf("Frequency %3.4f scan : %s\n",radioInstance->radioFrequency, radioInstance->scanFreqBusy ? "busy" : "no signal");
     #endif
-    if(radioInstance->scanFreqBusy) radioInstance->stopScan(); // Stop scan on busy frequencies
+    if(retCode) radioInstance->stopScan(); // Stop scan on busy frequencies
     if(radioInstance->scanOn)
     {
         radioInstance->scanNext();
@@ -131,20 +118,20 @@ void Radio::setScanFrequencies(const float* frequencies)
     currentScanFrequencyIndex = -1;
     if(frequecies)
     {
-        scanFrequency = scanFrequencies[0];
+        radioFrequency = scanFrequencies[0];
     }
 }
 
 void Radio::scanNext()
 {
     radioInstance->currentScanFrequencyIndex++;
-    scanFrequency = scanFrequencies[currentScanFrequencyIndex];
-    if(scanFrequency == 0)
+    radioFrequency = scanFrequencies[currentScanFrequencyIndex];
+    if(radioFrequency == 0)
     {
         currentScanFrequencyIndex = 0;
-        scanFrequency = scanFrequencies[currentScanFrequencyIndex];
+        radioFrequency = scanFrequencies[currentScanFrequencyIndex];
     }
-    dra->scan_async(scanFrequency);
+    dra->scan_async(radioFrequency);
 }
 
 void Radio::startScan()
@@ -165,8 +152,8 @@ void Radio::startScan()
 void Radio::stopScan()
 {
     scanOn = false;
-    parameters.freq_rx = scanFrequency;
-    parameters.freq_tx = scanFrequency;
+    parameters.freq_rx = radioFrequency;
+    parameters.freq_tx = radioFrequency;
     dra->group_async(parameters);
 }
 
@@ -175,14 +162,28 @@ void Radio::toggleScan()
     scanOn ? stopScan() : startScan();
 }
 
-float Radio::getCurrentScanFrequency()
+float Radio::getFrequency()
 {
-    return scanFrequency;
+    return radioFrequency;
 }
 
-bool Radio::isCurrentScanFrequencyBusy()
+void Radio::setFrequency(float freq)
+{
+    scanOn = false;
+    radioFrequency = freq;
+    parameters.freq_rx = freq;
+    parameters.freq_tx = freq;
+    dra->group_async(parameters);
+}
+
+bool Radio::isScanFrequencyBusy()
 {
     return scanFreqBusy;
+}
+
+bool Radio::isScanOn()
+{
+    return scanOn;
 }
 
 void Radio::radioStop()

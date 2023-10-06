@@ -208,6 +208,7 @@ int spinnerPosition = 0;
 unsigned long lastPowerUpdateTime;
 #define FOOTER_POWER_UPDATE_TIME 100
 float lastFreq = -1;
+bool lastScanOn = false;
 
 void updateFooter(bool frameReceived)
 {  
@@ -235,11 +236,13 @@ void updateFooter(bool frameReceived)
     lastPowerUpdateTime = now;
     uiSetPower(hardware->getRadio()->getPower());
   }
-  float freq = hardware->getRadio()->getCurrentScanFrequency();
-  if(freq != lastFreq)
+  float freq = hardware->getRadio()->getFrequency();
+  bool scanOn = hardware->getRadio()->isScanOn();
+  if((freq != lastFreq) || (scanOn != lastScanOn))
   {
-    uiSetFreq(freq);
+    uiSetFreq(freq,scanOn);
     lastFreq = freq;
+    lastScanOn = scanOn;
   }
 }
 
