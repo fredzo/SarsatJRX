@@ -59,6 +59,7 @@ extern void toggleScan();
  **********************/
 
 lv_style_t style_text_mono;
+lv_style_t style_text_lcd_large;
 lv_style_t style_title;
 lv_style_t style_footer;
 lv_style_t style_footer_highlight;
@@ -280,6 +281,10 @@ void createUi()
     lv_style_init(&style_text_mono);
     lv_style_set_text_font(&style_text_mono, font_mono);
     lv_style_set_text_align(&style_text_mono, LV_TEXT_ALIGN_CENTER);
+    // Text 7 large
+    lv_style_init(&style_text_lcd_large);
+    lv_style_set_text_font(&style_text_lcd_large, &lcd_28);
+    lv_style_set_text_align(&style_text_lcd_large, LV_TEXT_ALIGN_CENTER);
     // Text title
     lv_style_init(&style_title);
     lv_style_set_text_font(&style_title, font_large);
