@@ -11,4 +11,8 @@ void uiSettingsUpdateView();
 
 void uiSettingsUpdateWifi();
 
+void uiSettingsUpdatePower(int power);
+
+void uiSettingsUpdateFreq(char* freqBuffer, bool scanOn);
+
 #endif 

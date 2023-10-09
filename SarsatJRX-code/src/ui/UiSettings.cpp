@@ -110,7 +110,6 @@
 // Radio
 #define RADIO_TOGGLE_X          0
 #define RADIO_FREQ_X            TOGGLE_WIDTH+4
-#define RADIO_FREQ_WIDTH        DISPLAY_WIDTH-RADIO_TOGGLE_X-8
 #define RADIO_FREQ_HEIGHT       TOGGLE_LINE_HEIGHT+2*SPACER
 
 // Externs
@@ -592,7 +591,7 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth)
     currentY+=SPACER;
     radioToggle = uiCreateToggle(tab,&style_section_text,toggle_radio_cb,RADIO_TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     // Frequ
-    radiioFrequLabelButton = uiCreateLabelButton(tab,"000.0000 MHz",radio_freq_cb,LV_EVENT_CLICKED,lv_color_make(10, 10, 10),RADIO_FREQ_WIDTH, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
+    radiioFrequLabelButton = uiCreateLabelButton(tab,"000.0000 MHz",radio_freq_cb,LV_EVENT_CLICKED,lv_color_make(10, 10, 10),tabWidth-RADIO_FREQ_X-8, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
     lv_obj_add_style(radiioFrequLabelButton,&style_text_lcd_large,0);
     currentY+=TOGGLE_LINE_HEIGHT+SPACER;
 }
@@ -788,4 +787,17 @@ void uiSettingsUpdateWifi()
     lv_label_set_text(ntpSyncLabel,(rtc->isNtpSynched() ? "OK" : "KO"));
     lv_obj_set_style_text_color(ntpSyncLabel, (rtc->isNtpSynched() ? uiOkColor : uiKoColor),0);
 }
+
+void uiSettingsUpdatePower(int power)
+{
+    // TODO
+}
+
+void uiSettingsUpdateFreq(char* freqBuffer, bool scanOn)
+{
+    lv_label_set_text(radiioFrequLabelButton,freqBuffer);
+    lv_obj_set_style_text_color(radiioFrequLabelButton,scanOn ? uiOnColor : uiOffColor,0);
+}
+
+
 

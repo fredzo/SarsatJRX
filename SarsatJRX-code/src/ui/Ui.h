@@ -36,6 +36,8 @@ extern lv_style_t style_time;
 extern lv_color_t uiBackgroundColor;
 extern lv_color_t uiOkColor;
 extern lv_color_t uiKoColor;
+extern lv_color_t uiOnColor;
+extern lv_color_t uiOffColor;
 
 
 extern const lv_font_t * font_large;

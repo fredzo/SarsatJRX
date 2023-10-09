@@ -477,20 +477,6 @@ void uiSetSdCardStatus(bool mounted)
     }
 }
 
-void uiSetRadioStatus(bool on)
-{
-    if(on)
-    {   // TODO show meter and frequ
-        lv_obj_clear_flag(meter, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(freqLabelButton, LV_OBJ_FLAG_HIDDEN);
-    }
-    else
-    {
-        lv_obj_add_flag(meter, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(freqLabelButton, LV_OBJ_FLAG_HIDDEN);
-    }
-}
-
 void uiSetPower(const char* time)
 {
     lv_label_set_text(powerLabel, time);
@@ -533,9 +519,24 @@ void uiSetLedFrameReceivedState(bool on)
     on ? lv_led_on(ledFrameReceived) : lv_led_off(ledFrameReceived);
 }
 
+void uiSetRadioStatus(bool on)
+{
+    if(on)
+    {   // TODO show meter and frequ
+        lv_obj_clear_flag(meter, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(freqLabelButton, LV_OBJ_FLAG_HIDDEN);
+    }
+    else
+    {
+        lv_obj_add_flag(meter, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(freqLabelButton, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
 void uiSetPower(int power)
 {
     lv_bar_set_value(meter, power, LV_ANIM_ON);
+    uiSettingsUpdatePower(power);
 }
 
 void uiSetFreq(float freq, bool scanOn)
@@ -544,6 +545,7 @@ void uiSetFreq(float freq, bool scanOn)
     sprintf(buffer,"%3.4f MHz",freq);
     lv_label_set_text(freqLabelButton,buffer);
     lv_obj_set_style_text_color(freqLabelButton,scanOn ? uiOnColor : uiOffColor,0);
+    uiSettingsUpdateFreq(buffer, scanOn);
 }
 
 lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text, int x, int y, int width, int height)
