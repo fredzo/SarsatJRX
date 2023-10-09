@@ -107,6 +107,12 @@
 #define BEACON_BUTTON_X1        BEACON_LIST_WIDTH + 4
 #define BEACON_BUTTON_X2        BEACON_BUTTON_X1 + BEACON_BUTTON_WIDTH + 4
 
+// Radio
+#define RADIO_TOGGLE_X          0
+#define RADIO_FREQ_X            TOGGLE_WIDTH+4
+#define RADIO_FREQ_WIDTH        DISPLAY_WIDTH-RADIO_TOGGLE_X-8
+#define RADIO_FREQ_HEIGHT       TOGGLE_LINE_HEIGHT+2*SPACER
+
 // Externs
 extern bool readBeaconFromFile(const char * filename);
 
@@ -207,6 +213,11 @@ static lv_obj_t * currentBeacon = NULL;
 
 static lv_obj_t * deleteConfirmBox;
 static int lastBeaconIndex = 0;
+
+// Radio
+static lv_obj_t * radioToggle;
+static lv_obj_t * radiioFrequLabelButton;
+
 
 void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
 {  
@@ -551,9 +562,39 @@ void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_add_event_cb(beaconsDeleteButton, beacon_delete_longpress_cb, LV_EVENT_LONG_PRESSED, NULL);
 }
 
-void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth)
+static void toggle_radio_cb(lv_event_t * e)
 {
-    // TODO
+    bool state = lv_obj_has_state(radioToggle, LV_STATE_CHECKED);
+    //Serial.println("Toggle radio :" + String(state));
+    Radio* radio = Radio::getRadio();
+    if(state)
+    {
+        radio->radioInit();
+        // TODO
+        //uiSetSdCardStatus(filesystems->isSdFilesystemMounted());
+        //uiSettingsUpdateView();
+    }
+    else
+    {
+        radio->radioStop();
+        // TODO
+        //uiSetSdCardStatus(filesystems->isSdFilesystemMounted());
+        //uiSettingsUpdateView();
+    }
+}
+
+static void radio_freq_cb(lv_event_t * e)
+{   // TODO : keyboard input
+}
+
+void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth)
+{   // Radion on/off
+    currentY+=SPACER;
+    radioToggle = uiCreateToggle(tab,&style_section_text,toggle_radio_cb,RADIO_TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    // Frequ
+    radiioFrequLabelButton = uiCreateLabelButton(tab,"000.0000 MHz",radio_freq_cb,LV_EVENT_CLICKED,lv_color_make(10, 10, 10),RADIO_FREQ_WIDTH, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
+    lv_obj_add_style(radiioFrequLabelButton,&style_text_lcd_large,0);
+    currentY+=TOGGLE_LINE_HEIGHT+SPACER;
 }
 
 void uiSettingsCreateView(lv_obj_t * cont)

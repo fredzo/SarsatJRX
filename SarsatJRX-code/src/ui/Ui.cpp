@@ -283,7 +283,7 @@ void createUi()
     lv_style_set_text_align(&style_text_mono, LV_TEXT_ALIGN_CENTER);
     // Text 7 large
     lv_style_init(&style_text_lcd_large);
-    lv_style_set_text_font(&style_text_lcd_large, &lcd_28);
+    lv_style_set_text_font(&style_text_lcd_large, &lcd_44);
     lv_style_set_text_align(&style_text_lcd_large, LV_TEXT_ALIGN_CENTER);
     // Text title
     lv_style_init(&style_title);
@@ -474,6 +474,20 @@ void uiSetSdCardStatus(bool mounted)
     else
     {
         lv_label_set_text(sdCardIndicator,"");
+    }
+}
+
+void uiSetRadioStatus(bool on)
+{
+    if(on)
+    {   // TODO show meter and frequ
+        lv_obj_clear_flag(meter, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(freqLabelButton, LV_OBJ_FLAG_HIDDEN);
+    }
+    else
+    {
+        lv_obj_add_flag(meter, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(freqLabelButton, LV_OBJ_FLAG_HIDDEN);
     }
 }
 

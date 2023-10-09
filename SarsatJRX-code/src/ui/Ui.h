@@ -15,9 +15,10 @@
 extern const lv_font_t casscadia_mono;
 extern const lv_font_t casscadia_mono_16;
 extern const lv_font_t additional_symbols;
-extern const lv_font_t lcd_28;
+extern const lv_font_t lcd_44;
 
 extern lv_style_t style_text_mono;
+extern lv_style_t style_text_lcd_large;
 extern lv_style_t style_title;
 extern lv_style_t style_footer;
 extern lv_style_t style_footer_highlight;
@@ -63,6 +64,8 @@ void uiSetWifiStatus(WifiStatus status);
 #endif
 
 void uiSetSdCardStatus(bool mounted);
+
+void uiSetRadioStatus(bool on);
 
 void uiSetPower(const char* time);
 

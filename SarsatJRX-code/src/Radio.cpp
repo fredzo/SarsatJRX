@@ -10,7 +10,7 @@ const float frequecies[] = {406.0,406.025,406.037,406.040,406.049,430,433,0};
 void Radio::radioInit()
 {   // Init UART1
     radioSerial = &Serial1;
-    // Seria begin is done here
+    // Serial begin is done here
     dra = new DRA818(radioSerial, SA818_UHF);
     // Now we can set pins
     if(!radioSerial->setPins(UART1_RX_PIN,UART1_TX_PIN))

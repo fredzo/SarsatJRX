@@ -56,8 +56,8 @@ class Radio
         static void versionCallback(String version);
         static void tailCallback(int retCode);
 
-        HardwareSerial *radioSerial;
-        DRA818 *dra;
+        HardwareSerial *radioSerial = NULL;
+        DRA818 *dra = NULL;
         const float *scanFrequencies = NULL;
         int currentScanFrequencyIndex = -1;
         bool scanOn = false;
