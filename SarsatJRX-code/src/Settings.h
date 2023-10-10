@@ -20,6 +20,8 @@ class Settings
 
         bool getWifiState();
         void setWifiState(bool state);
+        bool getRadioState();
+        void setRadioState(bool state);
 
         void save();
 

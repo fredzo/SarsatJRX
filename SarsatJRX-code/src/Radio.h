@@ -28,6 +28,7 @@ class Radio
         float getFrequency();
         void setFrequency(float frequency);
         bool isScanFrequencyBusy();
+        bool isRadioOn();
         bool isScanOn();
         int getPower();
         String getVersion();

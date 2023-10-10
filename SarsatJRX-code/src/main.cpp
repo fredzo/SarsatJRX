@@ -209,6 +209,7 @@ unsigned long lastPowerUpdateTime;
 #define FOOTER_POWER_UPDATE_TIME 100
 float lastFreq = -1;
 bool lastScanOn = false;
+bool lastRadioOn = false;
 
 void updateFooter(bool frameReceived)
 {  
@@ -231,18 +232,29 @@ void updateFooter(bool frameReceived)
       footerShowingFrameReceived = true;
     }
   }
-  if((now - lastPowerUpdateTime) > POWER_DISPLAY_PERIOD)
+  // Radio
+  Radio* radio = hardware->getRadio();
+  bool radioOn = radio->isRadioOn();
+  if(radioOn != lastRadioOn)
   {
-    lastPowerUpdateTime = now;
-    uiSetPower(hardware->getRadio()->getPower());
+    uiSetRadioStatus(radioOn);
+    lastRadioOn = radioOn;
   }
-  float freq = hardware->getRadio()->getFrequency();
-  bool scanOn = hardware->getRadio()->isScanOn();
-  if((freq != lastFreq) || (scanOn != lastScanOn))
+  if(radioOn)
   {
-    uiSetFreq(freq,scanOn);
-    lastFreq = freq;
-    lastScanOn = scanOn;
+    if((now - lastPowerUpdateTime) > POWER_DISPLAY_PERIOD)
+    {
+      lastPowerUpdateTime = now;
+      uiSetPower(radio->getPower());
+    }
+    float freq = radio->getFrequency();
+    bool scanOn = radio->isScanOn();
+    if((freq != lastFreq) || (scanOn != lastScanOn))
+    {
+      uiSetFreq(freq,scanOn);
+      lastFreq = freq;
+      lastScanOn = scanOn;
+    }
   }
 }
 
@@ -302,6 +314,7 @@ void setup()
   // Build the UI
   createUi();
   initHeader();
+  uiSetRadioStatus(hardware->getRadio()->isRadioOn());
 
 #ifdef WIFI
   if(hardware->getSettings()->getWifiState())

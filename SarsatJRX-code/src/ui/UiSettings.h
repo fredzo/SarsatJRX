@@ -11,6 +11,8 @@ void uiSettingsUpdateView();
 
 void uiSettingsUpdateWifi();
 
+void uiSettingsUpdateRadioStatus(bool radioStatus);
+
 void uiSettingsUpdatePower(int power);
 
 void uiSettingsUpdateFreq(char* freqBuffer, bool scanOn);

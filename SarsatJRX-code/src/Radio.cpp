@@ -181,6 +181,11 @@ bool Radio::isScanFrequencyBusy()
     return scanFreqBusy;
 }
 
+bool Radio::isRadioOn()
+{
+    return on;
+}
+
 bool Radio::isScanOn()
 {
     return scanOn;

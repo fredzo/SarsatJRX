@@ -569,17 +569,16 @@ static void toggle_radio_cb(lv_event_t * e)
     if(state)
     {
         radio->radioInit();
-        // TODO
-        //uiSetSdCardStatus(filesystems->isSdFilesystemMounted());
-        //uiSettingsUpdateView();
+        uiSettingsUpdateView();
     }
     else
     {
         radio->radioStop();
-        // TODO
-        //uiSetSdCardStatus(filesystems->isSdFilesystemMounted());
-        //uiSettingsUpdateView();
+        uiSettingsUpdateView();
     }
+    // Save state to settings
+    Settings* settings = Settings::getSettings();
+    settings->setRadioState(state);
 }
 
 static void radio_freq_cb(lv_event_t * e)
@@ -590,7 +589,7 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth)
 {   // Radion on/off
     currentY+=SPACER;
     radioToggle = uiCreateToggle(tab,&style_section_text,toggle_radio_cb,RADIO_TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    // Frequ
+    // Freq
     radiioFrequLabelButton = uiCreateLabelButton(tab,"000.0000 MHz",radio_freq_cb,LV_EVENT_CLICKED,lv_color_make(10, 10, 10),tabWidth-RADIO_FREQ_X-8, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
     lv_obj_add_style(radiioFrequLabelButton,&style_text_lcd_large,0);
     currentY+=TOGGLE_LINE_HEIGHT+SPACER;
@@ -786,6 +785,18 @@ void uiSettingsUpdateWifi()
     // NTP
     lv_label_set_text(ntpSyncLabel,(rtc->isNtpSynched() ? "OK" : "KO"));
     lv_obj_set_style_text_color(ntpSyncLabel, (rtc->isNtpSynched() ? uiOkColor : uiKoColor),0);
+}
+
+void uiSettingsUpdateRadioStatus(bool radioStatus)
+{
+    if(radioStatus)
+    {   // Radio toggle on
+        lv_obj_add_state(radioToggle, LV_STATE_CHECKED);
+    }
+    else
+    {   // Radio toggle off
+        lv_obj_clear_state(radioToggle, LV_STATE_CHECKED);
+    }
 }
 
 void uiSettingsUpdatePower(int power)

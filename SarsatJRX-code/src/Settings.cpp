@@ -3,6 +3,7 @@
 
 #define PREF_PREFIX         "SarsatJRX"
 #define WIFI_STATE_KEY      "Wifi"
+#define RADIO_STATE_KEY     "Radio"
 
 Settings *Settings::settingsInstance = nullptr;
 
@@ -20,6 +21,17 @@ bool Settings::getWifiState()
 void Settings::setWifiState(bool state)
 {
     preferences.putBool(WIFI_STATE_KEY,state);
+    dirty = true;
+}
+
+bool Settings::getRadioState()
+{
+    return preferences.getBool(RADIO_STATE_KEY,true);
+}
+
+void Settings::setRadioState(bool state)
+{
+    preferences.putBool(RADIO_STATE_KEY,state);
     dirty = true;
 }
 

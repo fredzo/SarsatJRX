@@ -104,6 +104,7 @@ lv_obj_t * meter;
 lv_obj_t * spinner;
 lv_obj_t * previousButton;
 lv_obj_t * nextButton;
+lv_obj_t * freqButton;
 lv_obj_t * freqLabelButton;
 
 UiScreen currentScreen = UiScreen::START;
@@ -244,6 +245,7 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_style_pad_right(spinner,4,0);
     // Frequ
     freqLabelButton = uiCreateLabelButton(footer,"000.0000 MHz",freq_handler,LV_EVENT_CLICKED,lv_color_make(10, 10, 10),FOOTER_FREQ_BUTTON_WIDTH, LV_PCT(100));
+    freqButton = lv_obj_get_parent(freqLabelButton);
     lv_obj_add_style(freqLabelButton,&style_text_mono,0);
     //lv_obj_clear_flag(freqLabelButton, LV_OBJ_FLAG_CLICKABLE);
     // Footer label
@@ -524,13 +526,14 @@ void uiSetRadioStatus(bool on)
     if(on)
     {   // TODO show meter and frequ
         lv_obj_clear_flag(meter, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(freqLabelButton, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(freqButton, LV_OBJ_FLAG_HIDDEN);
     }
     else
     {
         lv_obj_add_flag(meter, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(freqLabelButton, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(freqButton, LV_OBJ_FLAG_HIDDEN);
     }
+    uiSettingsUpdateRadioStatus(on);
 }
 
 void uiSetPower(int power)
