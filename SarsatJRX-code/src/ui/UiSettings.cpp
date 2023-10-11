@@ -111,6 +111,8 @@
 #define RADIO_TOGGLE_X          0
 #define RADIO_FREQ_X            TOGGLE_WIDTH+4
 #define RADIO_FREQ_HEIGHT       TOGGLE_LINE_HEIGHT+2*SPACER
+#define RADIO_METER_HEIGHT      LINE_HEIGHT
+
 
 // Externs
 extern bool readBeaconFromFile(const char * filename);
@@ -216,6 +218,8 @@ static int lastBeaconIndex = 0;
 // Radio
 static lv_obj_t * radioToggle;
 static lv_obj_t * radiioFrequLabelButton;
+static lv_obj_t * radioMeter;
+
 
 
 void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
@@ -593,6 +597,14 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth)
     radiioFrequLabelButton = uiCreateLabelButton(tab,"000.0000 MHz",radio_freq_cb,LV_EVENT_CLICKED,lv_color_make(10, 10, 10),tabWidth-RADIO_FREQ_X-8, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
     lv_obj_add_style(radiioFrequLabelButton,&style_text_lcd_large,0);
     currentY+=TOGGLE_LINE_HEIGHT+SPACER;
+    // Meter
+    radioMeter = lv_bar_create(tab);
+    lv_obj_set_size(radioMeter, tabWidth+4, RADIO_METER_HEIGHT);
+    lv_obj_set_pos(radioMeter,0,currentY);
+    lv_obj_add_style(radioMeter, &style_meter, LV_PART_INDICATOR);
+    lv_bar_set_range(radioMeter, 0, 255);
+    lv_obj_set_style_anim_time(radioMeter,200,LV_PART_MAIN);
+    currentY += LINE_HEIGHT;
 }
 
 void uiSettingsCreateView(lv_obj_t * cont)
@@ -801,7 +813,7 @@ void uiSettingsUpdateRadioStatus(bool radioStatus)
 
 void uiSettingsUpdatePower(int power)
 {
-    // TODO
+    lv_bar_set_value(radioMeter, power, LV_ANIM_ON);
 }
 
 void uiSettingsUpdateFreq(char* freqBuffer, bool scanOn)
