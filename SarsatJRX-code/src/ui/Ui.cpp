@@ -603,3 +603,15 @@ lv_obj_t * uiCreateLabelButton(lv_obj_t * parent, const char* text, lv_event_cb_
     lv_obj_center(label);
     return label;
 }
+
+lv_obj_t * uiCreateTextArea(lv_obj_t * parent, lv_event_cb_t event_cb, int width, int height, int x, int y)
+{   // Text area
+    lv_obj_t * ta = lv_textarea_create(parent);
+    lv_obj_add_event_cb(ta, event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_textarea_set_accepted_chars(ta, "0123456789.");
+    lv_textarea_set_max_length(ta, 8);
+    lv_textarea_set_one_line(ta, true);
+    lv_textarea_set_text(ta, "");
+    return ta;
+}
+

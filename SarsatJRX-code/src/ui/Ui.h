@@ -94,4 +94,7 @@ lv_obj_t * uiCreateImageButton(lv_obj_t * parent, const void* src, lv_event_cb_t
 
 lv_obj_t * uiCreateLabelButton(lv_obj_t * parent, const char* text, lv_event_cb_t event_cb, lv_event_code_t filter, lv_color_t buttonColor, int width, int height, int x = -1, int y = -1);
 
+lv_obj_t * uiCreateTextArea(lv_obj_t * parent, lv_event_cb_t event_cb, int width, int height, int x, int y);
+
+
 #endif 
