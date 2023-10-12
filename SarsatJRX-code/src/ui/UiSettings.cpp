@@ -104,15 +104,15 @@
 #define BEACON_LIST_WIDTH       260
 #define BEACON_BUTTON_WIDTH     70
 #define BEACON_BUTTON_HEIGHT    50
-#define BEACON_BUTTON_X1        BEACON_LIST_WIDTH + 4
-#define BEACON_BUTTON_X2        BEACON_BUTTON_X1 + BEACON_BUTTON_WIDTH + 4
+#define BEACON_BUTTON_X1        (BEACON_LIST_WIDTH + 4)
+#define BEACON_BUTTON_X2        (BEACON_BUTTON_X1 + BEACON_BUTTON_WIDTH + 4)
 
 // Radio
 #define RADIO_TOGGLE_X          0
 #define RADIO_BUTTONS_WIDTH     40
-#define RADIO_FREQ_NEXT_X       TOGGLE_WIDTH+4
-#define RADIO_FREQ_X            RADIO_FREQ_NEXT_X+RADIO_BUTTONS_WIDTH+4
-#define RADIO_FREQ_HEIGHT       TOGGLE_LINE_HEIGHT+2*SPACER
+#define RADIO_FREQ_NEXT_X       (TOGGLE_WIDTH+4)
+#define RADIO_FREQ_X            (RADIO_FREQ_NEXT_X+RADIO_BUTTONS_WIDTH+4)
+#define RADIO_FREQ_HEIGHT       (TOGGLE_LINE_HEIGHT+2*SPACER)
 #define RADIO_METER_HEIGHT      LINE_HEIGHT
 
 // Externs
@@ -217,6 +217,9 @@ static lv_obj_t * deleteConfirmBox;
 static int lastBeaconIndex = 0;
 
 // Radio
+static lv_obj_t * radioTab;
+static int radioTabWidth;
+static int radioTabHeight;
 static lv_obj_t * radioToggle;
 static lv_obj_t * radiioFreqLabelButton;
 static lv_obj_t * freqPrevButton;
@@ -569,6 +572,108 @@ void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_add_event_cb(beaconsDeleteButton, beacon_delete_longpress_cb, LV_EVENT_LONG_PRESSED, NULL);
 }
 
+// Hack from https://github.com/lvgl/lvgl/issues/4295#issuecomment-1603873284 to prevent full redraw of keyboard on each button press
+static void invalidate_button_area(const lv_obj_t * obj, uint16_t btn_idx)
+{
+    if(btn_idx == LV_BTNMATRIX_BTN_NONE) return;
+
+    lv_area_t btn_area;
+    lv_area_t obj_area;
+
+    lv_btnmatrix_t * btnm = (lv_btnmatrix_t *)obj;;
+    if(btn_idx >= btnm->btn_cnt) return;
+
+    lv_area_copy(&btn_area, &btnm->button_areas[btn_idx]);
+    lv_obj_get_coords(obj, &obj_area);
+
+    /*The buttons might have outline and shadow so make the invalidation larger with the gaps between the buttons.
+     *It assumes that the outline or shadow is smaller than the gaps*/
+    lv_coord_t row_gap = lv_obj_get_style_pad_row(obj, LV_PART_MAIN);
+    lv_coord_t col_gap = lv_obj_get_style_pad_column(obj, LV_PART_MAIN);
+
+    /*Be sure to have a minimal extra space if row/col_gap is small*/
+    lv_coord_t dpi = lv_disp_get_dpi(lv_obj_get_disp(obj));
+    row_gap = LV_MAX(row_gap, dpi / 10);
+    col_gap = LV_MAX(col_gap, dpi / 10);
+
+    /*Convert relative coordinates to absolute*/
+    btn_area.x1 += obj_area.x1 - row_gap;
+    btn_area.y1 += obj_area.y1 - col_gap;
+    btn_area.x2 += obj_area.x1 + row_gap;
+    btn_area.y2 += obj_area.y1 + col_gap;
+
+    lv_obj_invalidate_area(obj, &btn_area);
+}
+
+void event_pre_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * obj = lv_event_get_target(e);
+    if(code == LV_EVENT_PRESSED) {
+        lv_disp_enable_invalidation(NULL, false); //Disable invalidation on press
+    }
+}
+
+static void radio_keyboard_cb(lv_event_t * e);
+void event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * obj = lv_event_get_target(e);
+    lv_keyboard_t * keyboard = (lv_keyboard_t *) obj;
+    if(code == LV_EVENT_PRESSED) {
+        //Invalidate only the button
+        lv_disp_enable_invalidation(NULL, true);
+        invalidate_button_area(obj, keyboard->btnm.btn_id_sel);
+        lv_disp_enable_invalidation(NULL, false);
+    }
+    if(code == LV_EVENT_RELEASED) {
+        lv_disp_enable_invalidation(NULL, true);
+        invalidate_button_area(obj, keyboard->btnm.btn_id_sel); //Enable invalidation on release
+        lv_obj_invalidate(lv_textarea_get_label(lv_keyboard_get_textarea(obj)));
+    }
+    if(code == LV_EVENT_READY || code == LV_EVENT_CANCEL) {
+        lv_disp_enable_invalidation(NULL, true);
+        radio_keyboard_cb(e);
+    }
+}
+// End hack
+void startEditFreq()
+{
+    // Keyboard
+    lv_obj_clear_flag(radioFreqTextArea, LV_OBJ_FLAG_HIDDEN);
+    radioFreqKeyboard = lv_keyboard_create(radioTab);
+    lv_obj_set_size(radioFreqKeyboard,  radioTabWidth, radioTabHeight-RADIO_FREQ_HEIGHT);
+    lv_keyboard_set_textarea(radioFreqKeyboard, radioFreqTextArea);
+    lv_keyboard_set_mode(radioFreqKeyboard, LV_KEYBOARD_MODE_NUMBER);
+    // Hack (see above)
+    lv_obj_add_event_cb(radioFreqKeyboard, event_pre_cb,  (lv_event_code_t)(LV_EVENT_ALL | LV_EVENT_PREPROCESS), NULL);
+    lv_obj_add_event_cb(radioFreqKeyboard, event_cb, LV_EVENT_ALL, NULL);
+    // End hack
+    //lv_obj_add_event_cb(radioFreqKeyboard, radio_keyboard_cb, LV_EVENT_ALL, NULL);
+    // Hide it for now
+    //lv_obj_add_flag(radioFreqKeyboard, LV_OBJ_FLAG_HIDDEN);
+
+
+    char buffer[16];
+    sprintf(buffer,"%3.4f",Radio::getRadio()->getFrequency());
+    lv_textarea_set_text(radioFreqTextArea, "");
+    lv_textarea_set_placeholder_text(radioFreqTextArea, buffer);
+    //lv_textarea_set_text_selection(radioFreqTextArea,true);
+    lv_obj_t * label = lv_textarea_get_label(radioFreqTextArea);
+    //lv_label_set_text_sel_start(label,0);
+    //lv_label_set_text_sel_end(label,strlen(buffer));
+    //lv_obj_clear_flag(radioFreqKeyboard, LV_OBJ_FLAG_HIDDEN);
+    lv_group_focus_obj(radioFreqTextArea);
+    lv_textarea_set_cursor_pos(radioFreqTextArea,0);
+}
+
+void stopEditFreq()
+{
+    lv_obj_add_flag(radioFreqTextArea, LV_OBJ_FLAG_HIDDEN);
+    //lv_obj_add_flag(radioFreqKeyboard, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_del(radioFreqKeyboard);
+}
+
 static void toggle_radio_cb(lv_event_t * e)
 {
     bool state = lv_obj_has_state(radioToggle, LV_STATE_CHECKED);
@@ -590,12 +695,8 @@ static void toggle_radio_cb(lv_event_t * e)
 }
 
 static void radio_freq_cb(lv_event_t * e)
-{   // TODO : keyboard input
-    char buffer[16];
-    sprintf(buffer,"%3.4f",Radio::getRadio()->getFrequency());
-    lv_textarea_set_text(radioFreqTextArea, buffer);
-    lv_obj_clear_flag(radioFreqTextArea, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_clear_flag(radioFreqKeyboard, LV_OBJ_FLAG_HIDDEN);
+{   // Keyboard input
+    startEditFreq();
 }
 
 static void radio_prev_freq_cb(lv_event_t * e)
@@ -608,7 +709,7 @@ static void radio_next_freq_cb(lv_event_t * e)
 
 static void radio_freq_ta_cb(lv_event_t * e)
 {
-    lv_obj_t * ta = lv_event_get_target(e);
+  /*  lv_obj_t * ta = lv_event_get_target(e);
     const char * txt = lv_textarea_get_text(ta);
     if(txt[0] >= '0' && txt[0] <= '9' &&
        txt[1] >= '0' && txt[1] <= '9' &&
@@ -616,7 +717,7 @@ static void radio_freq_ta_cb(lv_event_t * e)
        txt[3] != '.') {
         lv_textarea_set_cursor_pos(ta, 3);
         lv_textarea_add_char(ta, '.');
-    }
+    }*/
 }
 
 static void radio_keyboard_cb(lv_event_t * e)
@@ -624,12 +725,14 @@ static void radio_keyboard_cb(lv_event_t * e)
     lv_event_code_t code = lv_event_get_code(e);
     if((code == LV_EVENT_READY) || (code == LV_EVENT_CANCEL)) 
     {
-        lv_obj_add_flag(radioFreqTextArea, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(radioFreqKeyboard, LV_OBJ_FLAG_HIDDEN);
         if(code == LV_EVENT_READY)
         {   // TODO : change frequency
-
+            const char * txt = lv_textarea_get_text(radioFreqTextArea);
+            float newFreq = atof(txt);
+            Serial.printf("Found frequency %f\n",newFreq);
+            // Radio::getRadio()->setFrequency(newFreq);
         }
+        stopEditFreq();
     }
 }
 
@@ -640,26 +743,19 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     // Previous button
     freqPrevButton = uiCreateImageButton(tab,LV_SYMBOL_LEFT,radio_prev_freq_cb,LV_EVENT_CLICKED,RADIO_BUTTONS_WIDTH, RADIO_FREQ_HEIGHT,RADIO_FREQ_NEXT_X,0);
     // Freq
-    radiioFreqLabelButton = uiCreateLabelButton(tab,"000.0000 MHz",radio_freq_cb,LV_EVENT_CLICKED,lv_color_make(10, 10, 10),tabWidth-RADIO_FREQ_X-RADIO_BUTTONS_WIDTH-16, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
+    radiioFreqLabelButton = uiCreateLabelButton(tab,"000.0000 MHz",radio_freq_cb,LV_EVENT_CLICKED,lv_color_make(10, 10, 10),tabWidth-RADIO_FREQ_X-RADIO_BUTTONS_WIDTH-8, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
     lv_obj_add_style(radiioFreqLabelButton,&style_text_lcd_large,0);
     // Freq text area
-    radioFreqTextArea = uiCreateTextArea(tab,radio_freq_ta_cb,tabWidth-RADIO_FREQ_X-RADIO_BUTTONS_WIDTH-16, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
+    radioFreqTextArea = uiCreateTextArea(tab,radio_freq_ta_cb,tabWidth-RADIO_FREQ_X-RADIO_BUTTONS_WIDTH-8, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
+    //lv_obj_add_style(radioFreqTextArea,&style_text_lcd_large,0);
     // Hide it for now
     lv_obj_add_flag(radioFreqTextArea, LV_OBJ_FLAG_HIDDEN);
     // Next button
     freqNextButton = uiCreateImageButton(tab,LV_SYMBOL_RIGHT,radio_next_freq_cb,LV_EVENT_CLICKED,RADIO_BUTTONS_WIDTH, RADIO_FREQ_HEIGHT,tabWidth-RADIO_BUTTONS_WIDTH-4,0);
-    currentY+=TOGGLE_LINE_HEIGHT+SPACER;
-    // Keyboard
-    radioFreqKeyboard = lv_keyboard_create(tab);
-    lv_obj_set_size(radioFreqKeyboard,  tabWidth, tabHeight-currentY);
-    lv_keyboard_set_mode(radioFreqKeyboard, LV_KEYBOARD_MODE_NUMBER);
-    lv_keyboard_set_textarea(radioFreqKeyboard, radioFreqTextArea);
-    lv_obj_add_event_cb(radioFreqKeyboard, radio_keyboard_cb, LV_EVENT_ALL, NULL);
-    // Hide it for now
-    lv_obj_add_flag(radioFreqKeyboard, LV_OBJ_FLAG_HIDDEN);
+    currentY+=TOGGLE_LINE_HEIGHT+SPACER+SPACER;
     // Meter
     radioMeter = lv_bar_create(tab);
-    lv_obj_set_size(radioMeter, tabWidth+4, RADIO_METER_HEIGHT);
+    lv_obj_set_size(radioMeter, tabWidth-4, RADIO_METER_HEIGHT);
     lv_obj_set_pos(radioMeter,0,currentY);
     lv_obj_add_style(radioMeter, &style_meter, LV_PART_INDICATOR);
     lv_bar_set_range(radioMeter, 0, 255);
@@ -684,14 +780,16 @@ void uiSettingsCreateView(lv_obj_t * cont)
     lv_obj_t * tab2 = lv_tabview_add_tab(settingsTabview, "Wifi");
     lv_obj_t * tab3 = lv_tabview_add_tab(settingsTabview, "Net.");
     lv_obj_t * tab4 = lv_tabview_add_tab(settingsTabview, "SD");
-    lv_obj_t * tab5 = lv_tabview_add_tab(settingsTabview, "Radio");
+    radioTab = lv_tabview_add_tab(settingsTabview, "Radio");
     lv_obj_add_style(tab1, &style_pad_small, 0);
     lv_obj_add_style(tab2, &style_pad_small, 0);
     lv_obj_add_style(tab3, &style_pad_small, 0);
     lv_obj_add_style(tab4, &style_pad_small, 0);
-    lv_obj_add_style(tab5, &style_pad_small, 0);
+    lv_obj_add_style(radioTab, &style_pad_small, 0);
     int tabWidth = lv_obj_get_width(tab1) - 8; // 2*4 px padding
     int tabHeight = lv_obj_get_height(tab1) - 8 - FOOTER_HEIGHT; // 2*4 px padding
+    radioTabWidth = tabWidth;
+    radioTabHeight = tabHeight;
 
     //lv_obj_set_style_bg_color(tab2, lv_palette_lighten(LV_PALETTE_AMBER, 3), 0);
     //lv_obj_set_style_bg_opa(tab2, LV_OPA_COVER, 0);
@@ -702,7 +800,7 @@ void uiSettingsCreateView(lv_obj_t * cont)
     createWifiTab(tab2,currentY,tabWidth);
     createNetworkTab(tab3,currentY,tabWidth);
     createSdTab(tab4,currentY,tabWidth,tabHeight);
-    createRadioTab(tab5,currentY,tabWidth,tabHeight);
+    createRadioTab(radioTab,currentY,tabWidth,tabHeight);
     lv_obj_clear_flag(lv_tabview_get_content(settingsTabview), LV_OBJ_FLAG_SCROLLABLE);
 }
 

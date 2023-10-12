@@ -608,10 +608,16 @@ lv_obj_t * uiCreateTextArea(lv_obj_t * parent, lv_event_cb_t event_cb, int width
 {   // Text area
     lv_obj_t * ta = lv_textarea_create(parent);
     lv_obj_add_event_cb(ta, event_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_textarea_set_accepted_chars(ta, "0123456789.");
+    //lv_textarea_set_accepted_chars(ta, "0123456789.");
+    //lv_obj_set_scrollbar_mode(ta,LV_SCROLLBAR_MODE_OFF);
     lv_textarea_set_max_length(ta, 8);
     lv_textarea_set_one_line(ta, true);
     lv_textarea_set_text(ta, "");
+    if((x >= 0) && (y>=0))
+    {
+        lv_obj_set_pos(ta,x,y);
+    }
+    lv_obj_set_size(ta, width, height);
     return ta;
 }
 
