@@ -699,12 +699,14 @@ static void radio_freq_cb(lv_event_t * e)
     startEditFreq();
 }
 
+static bool ignoreNext = false;
 static String previousContent;
 static void radio_freq_ta_cb(lv_event_t * e)
 {
     if(radioFreqTextArea)
     {
         String content = String(lv_textarea_get_text(radioFreqTextArea));
+        Serial.printf("Input ctrl, previous = %s, content = %s, length = %d\n",previousContent.c_str(),content.c_str(),content.length());
         if (content.length() == 3)
         {
             if(content.indexOf('.')<0)
@@ -713,6 +715,7 @@ static void radio_freq_ta_cb(lv_event_t * e)
                 {
                     lv_textarea_set_cursor_pos(radioFreqTextArea, 3);
                     lv_textarea_add_char(radioFreqTextArea, '.');
+                    ignoreNext = true;
                 }
             }
         }
@@ -720,14 +723,39 @@ static void radio_freq_ta_cb(lv_event_t * e)
         {
             if(content.charAt(3) == '.')
             {   // Check that we are backspacing
-                if(previousContent.length()>4)
+                if(previousContent.length()>=4)
                 {
                     lv_textarea_set_cursor_pos(radioFreqTextArea, 4);
                     lv_textarea_del_char(radioFreqTextArea);
+                    ignoreNext = true;
                 }
             }
+            else if(content.indexOf('.')<0)
+            {   // Add a '.' at position 3
+                int oldPos = lv_textarea_get_cursor_pos(radioFreqTextArea);
+                lv_textarea_set_cursor_pos(radioFreqTextArea, 3);
+                lv_textarea_add_char(radioFreqTextArea,'.');
+                lv_textarea_set_cursor_pos(radioFreqTextArea, oldPos+1);
+                ignoreNext = true;
+            }
         }
-        previousContent = content;
+        else if (content.length() > 4)
+        {
+            if(content.charAt(content.length()-1) == '.')
+            {   // Prevent '.' at other positions
+                lv_textarea_set_cursor_pos(radioFreqTextArea, (content.length()));
+                lv_textarea_del_char(radioFreqTextArea);
+                ignoreNext = true;
+            }
+        }
+        if(ignoreNext)
+        {
+            ignoreNext = false;
+        }
+        else
+        {
+            previousContent = content;
+        }
     }
 }
 
@@ -738,7 +766,7 @@ static void radio_keyboard_cb(lv_event_t * e)
     {
         stopEditFreq();
         if(code == LV_EVENT_READY)
-        {   // TODO : change frequency
+        {   // Change frequency
             const char * txt = lv_textarea_get_text(radioFreqTextArea);
             float newFreq = atof(txt);
             Serial.printf("Found frequency %3.4f\n",newFreq);
