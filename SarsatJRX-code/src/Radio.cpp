@@ -122,6 +122,33 @@ void Radio::setScanFrequencies(const float* frequencies)
     }
 }
 
+void Radio::nextFrequency()
+{
+    currentScanFrequencyIndex++;
+    float newFreq = scanFrequencies[currentScanFrequencyIndex];
+    if(newFreq == 0)
+    {
+        currentScanFrequencyIndex = 0;
+        newFreq = scanFrequencies[currentScanFrequencyIndex];
+    }
+    setFrequency(newFreq);
+}
+
+void Radio::previousFrequency()
+{
+    currentScanFrequencyIndex--;
+    if(currentScanFrequencyIndex<0)
+    {
+        currentScanFrequencyIndex = 0;
+        while(scanFrequencies[currentScanFrequencyIndex]!=0)
+        {
+            currentScanFrequencyIndex++;
+        }
+        currentScanFrequencyIndex--;
+    }
+    setFrequency(scanFrequencies[currentScanFrequencyIndex]);
+}
+
 void Radio::scanNext()
 {
     radioInstance->currentScanFrequencyIndex++;

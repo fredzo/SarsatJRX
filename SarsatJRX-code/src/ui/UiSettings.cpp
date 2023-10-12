@@ -593,11 +593,13 @@ static void toggle_radio_cb(lv_event_t * e)
 }
 
 static void radio_prev_freq_cb(lv_event_t * e)
-{   // TODO
+{
+    Radio::getRadio()->previousFrequency();
 }
 
 static void radio_next_freq_cb(lv_event_t * e)
-{   // TODO
+{   
+    Radio::getRadio()->nextFrequency();
 }
 
 
@@ -723,7 +725,7 @@ static void radio_freq_ta_cb(lv_event_t * e)
         {
             if(content.charAt(3) == '.')
             {   // Check that we are backspacing
-                if(previousContent.length()>=4)
+                if(previousContent.length()>4)
                 {
                     lv_textarea_set_cursor_pos(radioFreqTextArea, 4);
                     lv_textarea_del_char(radioFreqTextArea);

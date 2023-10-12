@@ -27,6 +27,8 @@ class Radio
         void toggleScan();
         float getFrequency();
         void setFrequency(float frequency);
+        void nextFrequency();
+        void previousFrequency();
         bool isScanFrequencyBusy();
         bool isRadioOn();
         bool isScanOn();
