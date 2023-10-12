@@ -708,7 +708,7 @@ static void radio_freq_ta_cb(lv_event_t * e)
     if(radioFreqTextArea)
     {
         String content = String(lv_textarea_get_text(radioFreqTextArea));
-        Serial.printf("Input ctrl, previous = %s, content = %s, length = %d\n",previousContent.c_str(),content.c_str(),content.length());
+        //Serial.printf("Input ctrl, previous = %s, content = %s, length = %d\n",previousContent.c_str(),content.c_str(),content.length());
         if (content.length() == 3)
         {
             if(content.indexOf('.')<0)
@@ -958,7 +958,7 @@ void uiSettingsUpdateWifi()
     }
 
     // Mode (Station / Acess Point)
-    lv_label_set_text(modeLabel,wifiManagerGetMode()); // TODO translate into String
+    lv_label_set_text(modeLabel,wifiManagerGetMode());
     // Status (Connected etc)
     lv_label_set_text(statusLabel,wifiManagerGetStatusString().c_str());
     lv_obj_set_style_text_color(statusLabel, (wifiManagerIsConnected() ? uiOkColor : uiKoColor),0);
