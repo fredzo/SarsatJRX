@@ -6,6 +6,14 @@ Radio *Radio::radioInstance = nullptr;
 
 const float frequecies[] = {406.0,406.025,406.037,406.040,406.049,430,433,0};
 
+void Radio::radioInit(byte volume, bool filter1, bool filter2, bool filter3)
+{ 
+    Radio::volume = volume;
+    Radio::filter1 = filter1;
+    Radio::filter2 = filter2;
+    Radio::filter3 = filter3;
+    init();
+}
 
 void Radio::radioInit()
 {   // Init UART1
@@ -33,10 +41,10 @@ void Radio::radioInit()
     dra->read_group_async_cb(Radio::readGroupCallback);
     dra->handshake_async();
     dra->version_async();
+    dra->volume_async(volume);
+    dra->filters_async(filter1, filter2, filter3);
     // Tests
     dra->group_async(DRA818_12K5, 406.0, 460.0, 0, 4, 0);
-    dra->volume_async(8);
-    dra->filters_async(true, false, true);
     dra->tail_async(true);
     setScanFrequencies(frequecies);
 }
@@ -239,4 +247,28 @@ int Radio::getPower()
 String Radio::getVersion()
 {
     return version;
+}
+
+void Radio::setVolume(byte volume)
+{
+    Radio::volume = volume;
+    if(dra) dra->volume_async(volume);
+}
+
+void Radio::setFilter1(bool on)
+{
+    Radio::filter1 = on;
+    if(dra) dra->filters_async(filter1,filter2,filter3);
+}
+
+void Radio::setFilter2(bool on)
+{
+    Radio::filter2 = on;
+    if(dra) dra->filters_async(filter1,filter2,filter3);
+}
+
+void Radio::setFilter3(bool on)
+{
+    Radio::filter3 = on;
+    if(dra) dra->filters_async(filter1,filter2,filter3);
 }

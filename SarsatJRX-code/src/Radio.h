@@ -17,6 +17,7 @@ class Radio
         }
 
         void radioInit();
+        void radioInit(byte volume, bool filter1, bool filter2, bool filter3);
         void radioStop();
         /*
          * Set scan frequencies : last frequency in the array must be 0 to tell the array end   
@@ -34,6 +35,11 @@ class Radio
         bool isScanOn();
         int getPower();
         String getVersion();
+        // Settings
+        void setVolume(byte volume);
+        void setFilter1(bool on);
+        void setFilter2(bool on);
+        void setFilter3(bool on);
 
         // Radio task processing
         void handleTask();
@@ -65,12 +71,19 @@ class Radio
         int currentScanFrequencyIndex = -1;
         bool scanOn = false;
 
+        // Radio parameters
+        byte volume = 8;
+        bool filter1 = false;
+        bool filter2 = false;
+        bool filter3 = false;
+
         int power = 0;
         bool on = false;
         DRA818::Parameters parameters;
         float radioFrequency = 0;
         bool scanFreqBusy = false;
         String version;
+        
 
         // Static members
         static Radio *radioInstance;

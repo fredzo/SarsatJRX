@@ -809,19 +809,30 @@ static void toggle_filter1_cb(lv_event_t * e)
 {
     bool state = lv_obj_has_state(radioFilter1Toggle, LV_STATE_CHECKED);
     Radio* radio = Radio::getRadio();
-    if(state)
-    {
-        radio->radioInit();
-        uiSettingsUpdateView();
-    }
-    else
-    {
-        radio->radioStop();
-        uiSettingsUpdateView();
-    }
+    radio->setFilter1(state);
     // Save state to settings
     Settings* settings = Settings::getSettings();
-    settings->setRadioState(state);
+    settings->setRadioFilter1(state);
+}
+
+static void toggle_filter2_cb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(radioFilter2Toggle, LV_STATE_CHECKED);
+    Radio* radio = Radio::getRadio();
+    radio->setFilter2(state);
+    // Save state to settings
+    Settings* settings = Settings::getSettings();
+    settings->setRadioFilter2(state);
+}
+
+static void toggle_filter3_cb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(radioFilter3Toggle, LV_STATE_CHECKED);
+    Radio* radio = Radio::getRadio();
+    radio->setFilter3(state);
+    // Save state to settings
+    Settings* settings = Settings::getSettings();
+    settings->setRadioFilter3(state);
 }
 
 void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
@@ -858,15 +869,15 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     int currentX = 0;
     radioFiltersTitle = uiCreateLabel(tab,&style_section_title,FILTERS_LABEL,0,currentY+HALF_SPACER,FILTERS_LABEL_WIDTH,LINE_HEIGHT);
     currentX+=FILTERS_LABEL_WIDTH+SPACER;
-    radioFilter1Toggle = uiCreateToggle(tab,&style_section_text,toggle_radio_cb,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    radioFilter1Toggle = uiCreateToggle(tab,&style_section_text,toggle_filter1_cb,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentX+=TOGGLE_WIDTH+SPACER;
     radioFilter1Label = uiCreateLabel(tab,&style_section_text,FILTER1_LABEL,currentX,currentY+HALF_SPACER,FILTER_LABEL_WIDTH,LINE_HEIGHT);
     currentX+=FILTER_LABEL_WIDTH+SPACER;
-    radioFilter2Toggle = uiCreateToggle(tab,&style_section_text,toggle_radio_cb,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    radioFilter2Toggle = uiCreateToggle(tab,&style_section_text,toggle_filter2_cb,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentX+=TOGGLE_WIDTH+SPACER;
     radioFilter2Label = uiCreateLabel(tab,&style_section_text,FILTER2_LABEL,currentX,currentY+HALF_SPACER,FILTER_LABEL_WIDTH,LINE_HEIGHT);
     currentX+=FILTER_LABEL_WIDTH+SPACER;
-    radioFilter3Toggle = uiCreateToggle(tab,&style_section_text,toggle_radio_cb,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    radioFilter3Toggle = uiCreateToggle(tab,&style_section_text,toggle_filter3_cb,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentX+=TOGGLE_WIDTH+SPACER;
     radioFilter3Label = uiCreateLabel(tab,&style_section_text,FILTER3_LABEL,currentX,currentY+HALF_SPACER,FILTER_LABEL_WIDTH,LINE_HEIGHT);
     //currentX+=FILTER_LABEL_WIDTH+SPACER;

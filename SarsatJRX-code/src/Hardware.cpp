@@ -18,7 +18,7 @@ void Hardware::init()
     radio = Radio::getRadio();
     if(settings->getRadioState())
     {   // Init radio if setting is on
-        radio->radioInit();
+        radio->radioInit(settings->getRadioVolume(),settings->getRadioFilter1(),settings->getRadioFilter2(),settings->getRadioFilter3());
     }
 }
 
