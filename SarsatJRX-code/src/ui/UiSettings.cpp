@@ -12,6 +12,7 @@
 
 // System info
 #define SPACER              8
+#define HALF_SPACER         4
 #define VERSION_LABEL       "Version :"
 #define VERSION_LABEL_WIDTH 80
 #define SKETCH_LABEL        "Sketch :"
@@ -113,7 +114,14 @@
 #define RADIO_FREQ_NEXT_X       (TOGGLE_WIDTH+4)
 #define RADIO_FREQ_X            (RADIO_FREQ_NEXT_X+RADIO_BUTTONS_WIDTH+4)
 #define RADIO_FREQ_HEIGHT       (TOGGLE_LINE_HEIGHT+2*SPACER)
-#define RADIO_METER_HEIGHT      LINE_HEIGHT
+#define RADIO_METER_HEIGHT      10
+#define FILTERS_LABEL           "Filters :"
+#define FILTERS_LABEL_WIDTH     60
+#define FILTER1_LABEL           "Emph."
+#define FILTER2_LABEL           "HiP."
+#define FILTER3_LABEL           "LoP."
+#define FILTER_LABEL_WIDTH      50
+
 
 // Externs
 extern bool readBeaconFromFile(const char * filename);
@@ -229,7 +237,13 @@ static lv_obj_t * radioFreqKeyboard;
 static lv_obj_t * radioMeter;
 static lv_obj_t * radioVersionTitle;
 static lv_obj_t * radioVersionLabel;
-
+static lv_obj_t * radioFiltersTitle;
+static lv_obj_t * radioFilter1Toggle;
+static lv_obj_t * radioFilter1Label;
+static lv_obj_t * radioFilter2Toggle;
+static lv_obj_t * radioFilter2Label;
+static lv_obj_t * radioFilter3Toggle;
+static lv_obj_t * radioFilter3Label;
 
 void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
 {  
@@ -342,6 +356,15 @@ static void toggle_sd_cb(lv_event_t * e)
     }
 }
 
+static int beaconCount = 0;
+void uiUpdateLogFolder()
+{   // Log folder
+    Filesystems *filesystems =  Hardware::getHardware()->getFilesystems();
+    lv_label_set_text(logFolderLabel,(filesystems->isLogDirReady() ? ("OK (" + String(beaconCount) + " beacon(s))").c_str() : "KO"));
+    lv_obj_set_style_text_color(logFolderLabel, (filesystems->isLogDirReady() ? uiOkColor : uiKoColor),0);
+}
+
+
 static void selectBeacon(lv_obj_t* beacon)
 {
     if(beacon)
@@ -423,6 +446,9 @@ static void deleteCurrentBeacon()
             currentBeacon = lv_obj_get_child(beaconsList,index-1);
         }
         selectBeacon(currentBeacon);
+        // Update beacon count
+        beaconCount--;
+        uiUpdateLogFolder();
     }
 }
 
@@ -779,6 +805,25 @@ static void radio_keyboard_cb(lv_event_t * e)
     }
 }
 
+static void toggle_filter1_cb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(radioFilter1Toggle, LV_STATE_CHECKED);
+    Radio* radio = Radio::getRadio();
+    if(state)
+    {
+        radio->radioInit();
+        uiSettingsUpdateView();
+    }
+    else
+    {
+        radio->radioStop();
+        uiSettingsUpdateView();
+    }
+    // Save state to settings
+    Settings* settings = Settings::getSettings();
+    settings->setRadioState(state);
+}
+
 void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
 {   // Radion on/off
     currentY+=SPACER;
@@ -796,7 +841,7 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_add_flag(radioFreqTextArea, LV_OBJ_FLAG_HIDDEN);
     // Next button
     freqNextButton = uiCreateImageButton(tab,LV_SYMBOL_RIGHT,radio_next_freq_cb,LV_EVENT_CLICKED,RADIO_BUTTONS_WIDTH, RADIO_FREQ_HEIGHT,tabWidth-RADIO_BUTTONS_WIDTH-4,0);
-    currentY+=TOGGLE_LINE_HEIGHT+SPACER+SPACER;
+    currentY+=(TOGGLE_LINE_HEIGHT+SPACER+HALF_SPACER);
     // Meter
     radioMeter = lv_bar_create(tab);
     lv_obj_set_size(radioMeter, tabWidth-4, RADIO_METER_HEIGHT);
@@ -804,11 +849,28 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_add_style(radioMeter, &style_meter, LV_PART_INDICATOR);
     lv_bar_set_range(radioMeter, 0, 255);
     lv_obj_set_style_anim_time(radioMeter,200,LV_PART_MAIN);
-    currentY += LINE_HEIGHT;
+    currentY += (RADIO_METER_HEIGHT+HALF_SPACER);
     // Version
     radioVersionTitle = uiCreateLabel(tab,&style_section_title,VERSION_LABEL,0,currentY,VERSION_LABEL_WIDTH,LINE_HEIGHT);
     radioVersionLabel = uiCreateLabel(tab,&style_section_text,Radio::getRadio()->getVersion().c_str(),VERSION_LABEL_WIDTH,currentY,tabWidth-VERSION_LABEL_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
+    currentY += (LINE_HEIGHT+HALF_SPACER);
+    // Filter toggles
+    int currentX = 0;
+    radioFiltersTitle = uiCreateLabel(tab,&style_section_title,FILTERS_LABEL,0,currentY+HALF_SPACER,FILTERS_LABEL_WIDTH,LINE_HEIGHT);
+    currentX+=FILTERS_LABEL_WIDTH+SPACER;
+    radioFilter1Toggle = uiCreateToggle(tab,&style_section_text,toggle_radio_cb,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentX+=TOGGLE_WIDTH+SPACER;
+    radioFilter1Label = uiCreateLabel(tab,&style_section_text,FILTER1_LABEL,currentX,currentY+HALF_SPACER,FILTER_LABEL_WIDTH,LINE_HEIGHT);
+    currentX+=FILTER_LABEL_WIDTH+SPACER;
+    radioFilter2Toggle = uiCreateToggle(tab,&style_section_text,toggle_radio_cb,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentX+=TOGGLE_WIDTH+SPACER;
+    radioFilter2Label = uiCreateLabel(tab,&style_section_text,FILTER2_LABEL,currentX,currentY+HALF_SPACER,FILTER_LABEL_WIDTH,LINE_HEIGHT);
+    currentX+=FILTER_LABEL_WIDTH+SPACER;
+    radioFilter3Toggle = uiCreateToggle(tab,&style_section_text,toggle_radio_cb,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentX+=TOGGLE_WIDTH+SPACER;
+    radioFilter3Label = uiCreateLabel(tab,&style_section_text,FILTER3_LABEL,currentX,currentY+HALF_SPACER,FILTER_LABEL_WIDTH,LINE_HEIGHT);
+    //currentX+=FILTER_LABEL_WIDTH+SPACER;
+    currentY+=(TOGGLE_LINE_HEIGHT+SPACER+SPACER);
 
 }
 
@@ -876,7 +938,7 @@ void uiSettingsUpdateView()
     Filesystems *filesystems = hardware->getFilesystems();
     // Clean list
     lv_obj_clean(beaconsList);
-    int beaconCount = 0;
+    beaconCount = 0;
     currentBeacon = NULL;
     if(filesystems->isSdFilesystemMounted())
     {   // SD toogle on
@@ -933,9 +995,8 @@ void uiSettingsUpdateView()
     lv_label_set_text(totalBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdTotalBytes(),true).c_str());
     // total size
     lv_label_set_text(usedBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdUsedBytes(),true).c_str());
-    // Log folder
-    lv_label_set_text(logFolderLabel,(filesystems->isLogDirReady() ? ("OK (" + String(beaconCount) + " beacon(s))").c_str() : "KO"));
-    lv_obj_set_style_text_color(logFolderLabel, (filesystems->isLogDirReady() ? uiOkColor : uiKoColor),0);
+    // Update log folder
+    uiUpdateLogFolder();
 }
 
 void uiSettingsUpdateWifi()
