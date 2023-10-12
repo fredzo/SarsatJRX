@@ -87,6 +87,10 @@ void Settings::save()
 {
     if(dirty)
     {
+        /*Serial.println("Saving preferences...");
+        Serial.printf("Wifi : %d\n",getWifiState());
+        Serial.printf("Radio : %d\n",getRadioState());
+        Serial.printf("Filter1 : %d\n",getRadioFilter1());*/
         preferences.end();
         preferences.begin(PREF_PREFIX, false);
         dirty = false;

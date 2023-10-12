@@ -12,7 +12,7 @@ void Radio::radioInit(byte volume, bool filter1, bool filter2, bool filter3)
     Radio::filter1 = filter1;
     Radio::filter2 = filter2;
     Radio::filter3 = filter3;
-    init();
+    radioInit();
 }
 
 void Radio::radioInit()
