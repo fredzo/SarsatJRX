@@ -37,9 +37,13 @@ class Radio
         String getVersion();
         // Settings
         void setVolume(byte volume);
+        byte getVolume();
         void setFilter1(bool on);
+        bool getFilter1();
         void setFilter2(bool on);
+        bool getFilter2();
         void setFilter3(bool on);
+        bool getFilter3();
 
         // Radio task processing
         void handleTask();

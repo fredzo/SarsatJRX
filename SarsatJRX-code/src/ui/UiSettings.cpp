@@ -1083,8 +1083,13 @@ void uiSettingsUpdateRadioStatus(bool radioStatus)
     if(radioStatus)
     {   // Radio toggle on
         lv_obj_add_state(radioToggle, LV_STATE_CHECKED);
+        Radio * radio = Radio::getRadio();
         // Update version
-        lv_label_set_text(radioVersionLabel,Radio::getRadio()->getVersion().c_str());
+        lv_label_set_text(radioVersionLabel,radio->getVersion().c_str());
+        // Update filters
+        radio->getFilter1() ? lv_obj_add_state(radioFilter1Toggle, LV_STATE_CHECKED) : lv_obj_clear_state(radioFilter1Toggle, LV_STATE_CHECKED);
+        radio->getFilter2() ? lv_obj_add_state(radioFilter2Toggle, LV_STATE_CHECKED) : lv_obj_clear_state(radioFilter2Toggle, LV_STATE_CHECKED);
+        radio->getFilter3() ? lv_obj_add_state(radioFilter3Toggle, LV_STATE_CHECKED) : lv_obj_clear_state(radioFilter3Toggle, LV_STATE_CHECKED);
     }
     else
     {   // Radio toggle off

@@ -255,10 +255,20 @@ void Radio::setVolume(byte volume)
     if(dra) dra->volume_async(volume);
 }
 
+byte Radio::getVolume()
+{
+    return volume;
+}
+
 void Radio::setFilter1(bool on)
 {
     Radio::filter1 = on;
     if(dra) dra->filters_async(filter1,filter2,filter3);
+}
+
+bool Radio::getFilter1()
+{
+    return filter1;
 }
 
 void Radio::setFilter2(bool on)
@@ -267,8 +277,18 @@ void Radio::setFilter2(bool on)
     if(dra) dra->filters_async(filter1,filter2,filter3);
 }
 
+bool Radio::getFilter2()
+{
+    return filter2;
+}
+
 void Radio::setFilter3(bool on)
 {
     Radio::filter3 = on;
     if(dra) dra->filters_async(filter1,filter2,filter3);
+}
+
+bool Radio::getFilter3()
+{
+    return filter3;
 }
