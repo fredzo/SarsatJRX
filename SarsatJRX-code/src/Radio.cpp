@@ -7,17 +7,12 @@ Radio *Radio::radioInstance = nullptr;
 const float frequecies[] = {406.0,406.025,406.037,406.040,406.049,430,433,0};
 
 void Radio::radioInit(byte volume, bool filter1, bool filter2, bool filter3)
-{ 
+{   // Init UART1
+    radioSerial = &Serial1;
     Radio::volume = volume;
     Radio::filter1 = filter1;
     Radio::filter2 = filter2;
     Radio::filter3 = filter3;
-    radioInit();
-}
-
-void Radio::radioInit()
-{   // Init UART1
-    radioSerial = &Serial1;
     // Serial begin is done here
     dra = new DRA818(radioSerial, SA818_UHF);
     // Now we can set pins

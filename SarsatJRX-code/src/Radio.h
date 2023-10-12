@@ -16,7 +16,6 @@ class Radio
             return radioInstance;
         }
 
-        void radioInit();
         void radioInit(byte volume, bool filter1, bool filter2, bool filter3);
         void radioStop();
         /*

@@ -606,8 +606,9 @@ static void toggle_radio_cb(lv_event_t * e)
     //Serial.println("Toggle radio :" + String(state));
     Radio* radio = Radio::getRadio();
     if(state)
-    {
-        radio->radioInit();
+    {   // Start radio with saved settings
+        Settings * settings = Settings::getSettings();
+        radio->radioInit(settings->getRadioVolume(),settings->getRadioFilter1(),settings->getRadioFilter2(),settings->getRadioFilter3());
         uiSettingsUpdateView();
     }
     else
