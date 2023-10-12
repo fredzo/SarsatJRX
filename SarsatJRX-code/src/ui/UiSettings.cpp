@@ -572,6 +572,35 @@ void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_add_event_cb(beaconsDeleteButton, beacon_delete_longpress_cb, LV_EVENT_LONG_PRESSED, NULL);
 }
 
+static void toggle_radio_cb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(radioToggle, LV_STATE_CHECKED);
+    //Serial.println("Toggle radio :" + String(state));
+    Radio* radio = Radio::getRadio();
+    if(state)
+    {
+        radio->radioInit();
+        uiSettingsUpdateView();
+    }
+    else
+    {
+        radio->radioStop();
+        uiSettingsUpdateView();
+    }
+    // Save state to settings
+    Settings* settings = Settings::getSettings();
+    settings->setRadioState(state);
+}
+
+static void radio_prev_freq_cb(lv_event_t * e)
+{   // TODO
+}
+
+static void radio_next_freq_cb(lv_event_t * e)
+{   // TODO
+}
+
+
 // Hack from https://github.com/lvgl/lvgl/issues/4295#issuecomment-1603873284 to prevent full redraw of keyboard on each button press
 static void invalidate_button_area(const lv_obj_t * obj, uint16_t btn_idx)
 {
@@ -637,12 +666,13 @@ void event_cb(lv_event_t * e)
     }
 }
 // End hack
+
 void startEditFreq()
-{
-    // Keyboard
+{   // Show text area
     lv_obj_clear_flag(radioFreqTextArea, LV_OBJ_FLAG_HIDDEN);
+    // Create a new Keyboard
     radioFreqKeyboard = lv_keyboard_create(radioTab);
-    lv_obj_set_size(radioFreqKeyboard,  radioTabWidth, radioTabHeight-RADIO_FREQ_HEIGHT);
+    lv_obj_set_size(radioFreqKeyboard,  radioTabWidth, radioTabHeight-RADIO_FREQ_HEIGHT-4);
     lv_keyboard_set_textarea(radioFreqKeyboard, radioFreqTextArea);
     lv_keyboard_set_mode(radioFreqKeyboard, LV_KEYBOARD_MODE_NUMBER);
     // Hack (see above)
@@ -650,48 +680,18 @@ void startEditFreq()
     lv_obj_add_event_cb(radioFreqKeyboard, event_cb, LV_EVENT_ALL, NULL);
     // End hack
     //lv_obj_add_event_cb(radioFreqKeyboard, radio_keyboard_cb, LV_EVENT_ALL, NULL);
-    // Hide it for now
-    //lv_obj_add_flag(radioFreqKeyboard, LV_OBJ_FLAG_HIDDEN);
 
-
+    // Prepare text area content
     char buffer[16];
     sprintf(buffer,"%3.4f",Radio::getRadio()->getFrequency());
     lv_textarea_set_text(radioFreqTextArea, "");
     lv_textarea_set_placeholder_text(radioFreqTextArea, buffer);
-    //lv_textarea_set_text_selection(radioFreqTextArea,true);
-    lv_obj_t * label = lv_textarea_get_label(radioFreqTextArea);
-    //lv_label_set_text_sel_start(label,0);
-    //lv_label_set_text_sel_end(label,strlen(buffer));
-    //lv_obj_clear_flag(radioFreqKeyboard, LV_OBJ_FLAG_HIDDEN);
-    lv_group_focus_obj(radioFreqTextArea);
-    lv_textarea_set_cursor_pos(radioFreqTextArea,0);
 }
 
 void stopEditFreq()
-{
+{   // Hide text area and delete keyboard
     lv_obj_add_flag(radioFreqTextArea, LV_OBJ_FLAG_HIDDEN);
-    //lv_obj_add_flag(radioFreqKeyboard, LV_OBJ_FLAG_HIDDEN);
     lv_obj_del(radioFreqKeyboard);
-}
-
-static void toggle_radio_cb(lv_event_t * e)
-{
-    bool state = lv_obj_has_state(radioToggle, LV_STATE_CHECKED);
-    //Serial.println("Toggle radio :" + String(state));
-    Radio* radio = Radio::getRadio();
-    if(state)
-    {
-        radio->radioInit();
-        uiSettingsUpdateView();
-    }
-    else
-    {
-        radio->radioStop();
-        uiSettingsUpdateView();
-    }
-    // Save state to settings
-    Settings* settings = Settings::getSettings();
-    settings->setRadioState(state);
 }
 
 static void radio_freq_cb(lv_event_t * e)
@@ -699,25 +699,36 @@ static void radio_freq_cb(lv_event_t * e)
     startEditFreq();
 }
 
-static void radio_prev_freq_cb(lv_event_t * e)
-{   // TODO
-}
-
-static void radio_next_freq_cb(lv_event_t * e)
-{   // TODO
-}
-
+static String previousContent;
 static void radio_freq_ta_cb(lv_event_t * e)
 {
-  /*  lv_obj_t * ta = lv_event_get_target(e);
-    const char * txt = lv_textarea_get_text(ta);
-    if(txt[0] >= '0' && txt[0] <= '9' &&
-       txt[1] >= '0' && txt[1] <= '9' &&
-       txt[2] >= '0' && txt[2] <= '9' &&
-       txt[3] != '.') {
-        lv_textarea_set_cursor_pos(ta, 3);
-        lv_textarea_add_char(ta, '.');
-    }*/
+    if(radioFreqTextArea)
+    {
+        String content = String(lv_textarea_get_text(radioFreqTextArea));
+        if (content.length() == 3)
+        {
+            if(content.indexOf('.')<0)
+            {   // Check that we are not backspacing
+                if(previousContent.length()<4)
+                {
+                    lv_textarea_set_cursor_pos(radioFreqTextArea, 3);
+                    lv_textarea_add_char(radioFreqTextArea, '.');
+                }
+            }
+        }
+        else if (content.length() == 4)
+        {
+            if(content.charAt(3) == '.')
+            {   // Check that we are backspacing
+                if(previousContent.length()>4)
+                {
+                    lv_textarea_set_cursor_pos(radioFreqTextArea, 4);
+                    lv_textarea_del_char(radioFreqTextArea);
+                }
+            }
+        }
+        previousContent = content;
+    }
 }
 
 static void radio_keyboard_cb(lv_event_t * e)
@@ -725,14 +736,14 @@ static void radio_keyboard_cb(lv_event_t * e)
     lv_event_code_t code = lv_event_get_code(e);
     if((code == LV_EVENT_READY) || (code == LV_EVENT_CANCEL)) 
     {
+        stopEditFreq();
         if(code == LV_EVENT_READY)
         {   // TODO : change frequency
             const char * txt = lv_textarea_get_text(radioFreqTextArea);
             float newFreq = atof(txt);
-            Serial.printf("Found frequency %f\n",newFreq);
-            // Radio::getRadio()->setFrequency(newFreq);
+            Serial.printf("Found frequency %3.4f\n",newFreq);
+            Radio::getRadio()->setFrequency(newFreq);
         }
-        stopEditFreq();
     }
 }
 
@@ -747,7 +758,8 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_add_style(radiioFreqLabelButton,&style_text_lcd_large,0);
     // Freq text area
     radioFreqTextArea = uiCreateTextArea(tab,radio_freq_ta_cb,tabWidth-RADIO_FREQ_X-RADIO_BUTTONS_WIDTH-8, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
-    //lv_obj_add_style(radioFreqTextArea,&style_text_lcd_large,0);
+    lv_obj_add_style(radioFreqTextArea,&style_header,0);
+    lv_obj_set_style_pad_all(radioFreqTextArea,4,0);
     // Hide it for now
     lv_obj_add_flag(radioFreqTextArea, LV_OBJ_FLAG_HIDDEN);
     // Next button

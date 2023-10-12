@@ -283,7 +283,7 @@ void createUi()
     lv_style_init(&style_text_mono);
     lv_style_set_text_font(&style_text_mono, font_mono);
     lv_style_set_text_align(&style_text_mono, LV_TEXT_ALIGN_CENTER);
-    // Text 7 large
+    // Text lcd large
     lv_style_init(&style_text_lcd_large);
     lv_style_set_text_font(&style_text_lcd_large, &lcd_44);
     lv_style_set_text_align(&style_text_lcd_large, LV_TEXT_ALIGN_CENTER);
@@ -607,7 +607,6 @@ lv_obj_t * uiCreateLabelButton(lv_obj_t * parent, const char* text, lv_event_cb_
 lv_obj_t * uiCreateTextArea(lv_obj_t * parent, lv_event_cb_t event_cb, int width, int height, int x, int y)
 {   // Text area
     lv_obj_t * ta = lv_textarea_create(parent);
-    lv_obj_add_event_cb(ta, event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     //lv_textarea_set_accepted_chars(ta, "0123456789.");
     //lv_obj_set_scrollbar_mode(ta,LV_SCROLLBAR_MODE_OFF);
     lv_textarea_set_max_length(ta, 8);
@@ -618,6 +617,7 @@ lv_obj_t * uiCreateTextArea(lv_obj_t * parent, lv_event_cb_t event_cb, int width
         lv_obj_set_pos(ta,x,y);
     }
     lv_obj_set_size(ta, width, height);
+    lv_obj_add_event_cb(ta, event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     return ta;
 }
 
