@@ -227,6 +227,8 @@ static lv_obj_t * freqNextButton;
 static lv_obj_t * radioFreqTextArea;
 static lv_obj_t * radioFreqKeyboard;
 static lv_obj_t * radioMeter;
+static lv_obj_t * radioVersionTitle;
+static lv_obj_t * radioVersionLabel;
 
 
 void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
@@ -803,6 +805,11 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_bar_set_range(radioMeter, 0, 255);
     lv_obj_set_style_anim_time(radioMeter,200,LV_PART_MAIN);
     currentY += LINE_HEIGHT;
+    // Version
+    radioVersionTitle = uiCreateLabel(tab,&style_section_title,VERSION_LABEL,0,currentY,VERSION_LABEL_WIDTH,LINE_HEIGHT);
+    radioVersionLabel = uiCreateLabel(tab,&style_section_text,Radio::getRadio()->getVersion().c_str(),VERSION_LABEL_WIDTH,currentY,tabWidth-VERSION_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+
 }
 
 void uiSettingsCreateView(lv_obj_t * cont)
@@ -1004,6 +1011,8 @@ void uiSettingsUpdateRadioStatus(bool radioStatus)
     if(radioStatus)
     {   // Radio toggle on
         lv_obj_add_state(radioToggle, LV_STATE_CHECKED);
+        // Update version
+        lv_label_set_text(radioVersionLabel,Radio::getRadio()->getVersion().c_str());
     }
     else
     {   // Radio toggle off

@@ -524,7 +524,7 @@ void uiSetLedFrameReceivedState(bool on)
 void uiSetRadioStatus(bool on)
 {
     if(on)
-    {   // TODO show meter and frequ
+    {   // Show meter and frequ
         lv_obj_clear_flag(meter, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(freqButton, LV_OBJ_FLAG_HIDDEN);
     }
