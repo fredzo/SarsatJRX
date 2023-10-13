@@ -37,7 +37,6 @@ static lv_obj_t * logFolderTitle;
 static lv_obj_t * logFolderLabel;
 static lv_obj_t * beaconsTitle;
 static lv_obj_t * beaconsList;
-static lv_obj_t * beaconsListButtons;
 static lv_obj_t * beaconsUpButton;
 static lv_obj_t * beaconsDownButton;
 static lv_obj_t * beaconsLoadButton;

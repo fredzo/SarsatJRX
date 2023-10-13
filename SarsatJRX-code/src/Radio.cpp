@@ -123,6 +123,12 @@ void Radio::setScanFrequencies(const float* frequencies)
     if(frequecies)
     {
         radioFrequency = scanFrequencies[0];
+        frequencyCount = 0;
+        while(scanFrequencies[frequencyCount]!=0)
+        {
+            frequencyCount++;
+        }
+        frequencyCount--;
     }
 }
 
@@ -143,12 +149,7 @@ void Radio::previousFrequency()
     currentScanFrequencyIndex--;
     if(currentScanFrequencyIndex<0)
     {
-        currentScanFrequencyIndex = 0;
-        while(scanFrequencies[currentScanFrequencyIndex]!=0)
-        {
-            currentScanFrequencyIndex++;
-        }
-        currentScanFrequencyIndex--;
+        currentScanFrequencyIndex = frequencyCount -1;
     }
     setFrequency(scanFrequencies[currentScanFrequencyIndex]);
 }
@@ -297,4 +298,14 @@ void Radio::setFilter3(bool on)
 bool Radio::getFilter3()
 {
     return filter3;
+}
+
+int Radio::getFrequencyCount()
+{
+    return frequencyCount;
+}
+float Radio::getFrequency(int number)
+{
+    if(number<0||number>=frequencyCount) return -1;
+    return scanFrequencies[number];
 }

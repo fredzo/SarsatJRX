@@ -45,6 +45,9 @@ class Radio
         bool getFilter2();
         void setFilter3(bool on);
         bool getFilter3();
+        // Frequencies
+        int getFrequencyCount();
+        float getFrequency(int number);
 
         // Radio task processing
         void handleTask();
@@ -73,6 +76,7 @@ class Radio
         HardwareSerial *radioSerial = NULL;
         DRA818 *dra = NULL;
         const float *scanFrequencies = NULL;
+        int frequencyCount = -1;
         int currentScanFrequencyIndex = -1;
         bool scanOn = false;
 

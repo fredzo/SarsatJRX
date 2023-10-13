@@ -26,6 +26,12 @@
 #define VOLUME_AUTO_LABEL       "Auto"
 #define VOLUME_AUTO_LABEL_WIDTH 50
 #define VOLUME_SPINBOX_WIDTH    50
+// Freq list
+#define FREQ_LIST_WIDTH         200
+#define FREQ_BUTTON_WIDTH       50
+#define FREQ_BUTTON_HEIGHT      40
+#define FREQ_BUTTON_X1          (FREQ_LIST_WIDTH + 4)
+#define FREQ_BUTTON_X2          (FREQ_BUTTON_X1 + FREQ_BUTTON_WIDTH + 4)
 
 // Radio
 static lv_obj_t * radioTab;
@@ -53,6 +59,16 @@ static lv_obj_t * radioVolumeAutoLabel;
 static lv_obj_t * radioVolumeDownButton;
 static lv_obj_t * radioVolumeUpButton;
 static lv_obj_t * radioVolumeSpinbox;
+// Freq list
+static lv_obj_t * freqList;
+static lv_obj_t * freqListUpButton;
+static lv_obj_t * freqListDownButton;
+static lv_obj_t * freqTickButton;
+static lv_obj_t * freqEditButton;
+static lv_obj_t * currentFreq = NULL;
+
+static int lastFreqIndex = 0;
+
 
 static void toggle_radio_cb(lv_event_t * e)
 {
@@ -254,7 +270,7 @@ static void radio_keyboard_cb(lv_event_t * e)
         {   // Change frequency
             const char * txt = lv_textarea_get_text(radioFreqTextArea);
             float newFreq = atof(txt);
-            Serial.printf("Found frequency %3.4f\n",newFreq);
+            //Serial.printf("Found frequency %3.4f\n",newFreq);
             Radio::getRadio()->setFrequency(newFreq);
         }
     }
@@ -316,12 +332,96 @@ static void radio_volume_up_cb(lv_event_t * e)
     }
 }
 
+// Freq List
+static void selectFreq(lv_obj_t* freq)
+{
+    if(freq)
+    {
+        lv_obj_add_state(freq, LV_STATE_CHECKED);
+        if((currentFreq != NULL) && (currentFreq != freq))
+        {
+            lv_obj_clear_state(currentFreq, LV_STATE_CHECKED);
+        }
+        currentFreq = freq;
+        lastFreqIndex = lv_obj_get_index(currentFreq);
+    }
+}
+
+static void freq_clicked_cb(lv_event_t * e)
+{
+    lv_obj_t *obj = lv_event_get_target(e);
+    selectFreq(obj);
+}
+
+static void freq_up_cb(lv_event_t * e)
+{
+    if(currentFreq == NULL) return;
+    lv_event_code_t code = lv_event_get_code(e);
+    if((code == LV_EVENT_CLICKED) || (code == LV_EVENT_LONG_PRESSED_REPEAT)) 
+    {
+        uint32_t index = lv_obj_get_index(currentFreq);
+        if(index <= 0) return;
+        index--;
+        selectFreq(lv_obj_get_child(freqList,index));
+        lv_obj_scroll_to_view(currentFreq, LV_ANIM_ON);
+    }    
+}
+
+static void freq_down_cb(lv_event_t * e)
+{
+    if(currentFreq == NULL) return;
+    lv_event_code_t code = lv_event_get_code(e);
+    if((code == LV_EVENT_CLICKED) || (code == LV_EVENT_LONG_PRESSED_REPEAT)) 
+    {
+        uint32_t index = lv_obj_get_index(currentFreq);
+        index++;
+        lv_obj_t *obj = lv_obj_get_child(freqList,index);
+        if(obj)
+        {
+            selectFreq(obj);
+            lv_obj_scroll_to_view(currentFreq, LV_ANIM_ON);
+        }
+    }    
+}
+
+static void freq_tick_cb(lv_event_t * e)
+{
+    if(currentFreq == NULL) return;
+    lv_event_code_t code = lv_event_get_code(e);
+    if((code == LV_EVENT_CLICKED) || (code == LV_EVENT_LONG_PRESSED_REPEAT)) 
+    {
+        float* freq = (float*)lv_obj_get_user_data(currentFreq);
+        if(freq)
+        {
+            //Serial.printf("Load file %s\n",(*fileName).c_str());
+            //readBeaconFromFile((*fileName).c_str());
+        }
+    }
+}
+
+static void tickCurrentFreq()
+{
+    if(currentFreq == NULL) return;
+    float* freq = (float*)lv_obj_get_user_data(currentFreq);
+    // TODO
+}
+
+static void freq_edit_cb(lv_event_t * e)
+{
+    if(currentFreq == NULL) return;
+    //lv_event_code_t code = lv_event_get_code(e);
+    //Serial.printf("Delete cb with event code %d\n",code);
+    //if((code != LV_EVENT_SHORT_CLICKED)) return;
+    // TODO
+}
+
 
 void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
 {   // Keep track on tab, tabWith and tabHeugth for keyboard creation
     radioTab = tab;
     radioTabWidth = tabWidth;
     radioTabHeight = tabHeight;
+    Radio* radio = Radio::getRadio();
     // Radion on/off
     currentY+=SPACER;
     radioToggle = uiCreateToggle(tab,&style_section_text,toggle_radio_cb,RADIO_TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
@@ -349,7 +449,7 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     currentY += (RADIO_METER_HEIGHT+HALF_SPACER);
     // Version
     radioVersionTitle = uiCreateLabel(tab,&style_section_title,VERSION_LABEL,0,currentY,VERSION_LABEL_WIDTH,LINE_HEIGHT);
-    radioVersionLabel = uiCreateLabel(tab,&style_section_text,Radio::getRadio()->getVersion().c_str(),VERSION_LABEL_WIDTH,currentY,tabWidth-VERSION_LABEL_WIDTH,LINE_HEIGHT);
+    radioVersionLabel = uiCreateLabel(tab,&style_section_text,radio->getVersion().c_str(),VERSION_LABEL_WIDTH,currentY,tabWidth-VERSION_LABEL_WIDTH,LINE_HEIGHT);
     currentY += (LINE_HEIGHT+HALF_SPACER);
     // Filter toggles
     int currentX = 0;
@@ -391,6 +491,43 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     currentX+=VOLUME_SPINBOX_WIDTH+SPACER;
     // Volume up button
     radioVolumeUpButton = uiCreateImageButton(tab,LV_SYMBOL_PLUS,radio_volume_up_cb,LV_EVENT_ALL,RADIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
+    currentY+=(TOGGLE_LINE_HEIGHT+HALF_SPACER);
+    // Freq list
+    freqList = lv_list_create(tab); 
+    lv_obj_set_pos(freqList,0,currentY);
+    int bListHeight = tabHeight-currentY;
+    lv_obj_set_size(freqList, FREQ_LIST_WIDTH, bListHeight);
+    //lv_obj_set_style_pad_row(beaconsList, 2, 0);
+    // Up
+    freqListUpButton = uiCreateImageButton(tab,LV_SYMBOL_UP,freq_up_cb,LV_EVENT_ALL,FREQ_BUTTON_WIDTH, FREQ_BUTTON_HEIGHT,FREQ_BUTTON_X1,currentY);
+    // Down
+    int bottomButtonY = currentY+bListHeight-FREQ_BUTTON_HEIGHT;
+    freqListDownButton = uiCreateImageButton(tab,LV_SYMBOL_DOWN,freq_down_cb,LV_EVENT_ALL,FREQ_BUTTON_WIDTH, FREQ_BUTTON_HEIGHT,FREQ_BUTTON_X1,bottomButtonY);
+    // Tick
+    freqTickButton = uiCreateImageButton(tab,LV_SYMBOL_PLAY,freq_tick_cb,LV_EVENT_CLICKED,FREQ_BUTTON_WIDTH, FREQ_BUTTON_HEIGHT,FREQ_BUTTON_X2,currentY);
+    // Edit
+    freqEditButton = uiCreateImageButton(tab,LV_SYMBOL_TRASH,freq_edit_cb,LV_EVENT_CLICKED,FREQ_BUTTON_WIDTH, FREQ_BUTTON_HEIGHT,FREQ_BUTTON_X2,bottomButtonY);
+    // Fill list
+    int freqCount = 0;
+    currentFreq = NULL;
+    lv_obj_t * btn;
+    char buffer[16];
+
+    for(int i = 0; i < radio->getFrequencyCount() ; i++)
+    {
+        float freq = radio->getFrequency(i);
+        sprintf(buffer,"%3.4f",freq);
+        lv_obj_t *lab = lv_label_create(freqList);
+        // Reverse list order to have latest beacons at the top of the list
+        lv_obj_move_background(lab);
+        lv_obj_set_user_data(lab,&freq);
+        lv_obj_add_event_cb(lab, freq_clicked_cb, LV_EVENT_CLICKED, NULL);
+        lv_obj_add_style(lab,&style_section_text,0);
+        lv_obj_set_style_text_color(lab,uiOkColor,LV_STATE_CHECKED);
+        lv_obj_add_flag(lab,LV_OBJ_FLAG_CLICKABLE);
+        lv_label_set_text(lab, buffer);
+        freqCount++;
+    }
 }
 
 void uiSettingsUpdateRadioStatus(bool radioStatus)
