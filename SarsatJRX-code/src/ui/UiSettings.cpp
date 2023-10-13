@@ -125,6 +125,7 @@
 #define VOLUME_LABEL_WIDTH      60
 #define VOLUME_AUTO_LABEL       "Auto"
 #define VOLUME_AUTO_LABEL_WIDTH 50
+#define VOLUME_SPINBOX_WIDTH    50
 
 // Externs
 extern bool readBeaconFromFile(const char * filename);
@@ -855,6 +856,23 @@ static void toggle_volume_cb(lv_event_t * e)
     settings->setRadioAutoVolume(state);
 }
 
+static void radio_volume_down_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_SHORT_CLICKED || code  == LV_EVENT_LONG_PRESSED_REPEAT) {
+        lv_spinbox_increment(radioVolumeSpinbox);
+    }
+}
+
+static void radio_volume_up_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_SHORT_CLICKED || code == LV_EVENT_LONG_PRESSED_REPEAT) {
+        lv_spinbox_decrement(radioVolumeSpinbox);
+    }
+}
+
+
 void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
 {   // Radion on/off
     currentY+=SPACER;
@@ -900,8 +918,8 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     radioFilter3Toggle = uiCreateToggle(tab,&style_section_text,toggle_filter3_cb,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentX+=TOGGLE_WIDTH+SPACER;
     radioFilter3Label = uiCreateLabel(tab,&style_section_text,FILTER3_LABEL,currentX,currentY+HALF_SPACER,FILTER_LABEL_WIDTH,LINE_HEIGHT);
-    //currentX+=FILTER_LABEL_WIDTH+SPACER;
     currentY+=(TOGGLE_LINE_HEIGHT+SPACER+HALF_SPACER);
+    // Volume
     currentX = 0;
     radioVolumeTitle = uiCreateLabel(tab,&style_section_title,VOLUME_LABEL,0,currentY+HALF_SPACER,VOLUME_LABEL_WIDTH,LINE_HEIGHT);
     currentX+=VOLUME_LABEL_WIDTH+SPACER;
@@ -909,7 +927,20 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     currentX+=TOGGLE_WIDTH+SPACER;
     radioVolumeAutoLabel = uiCreateLabel(tab,&style_section_text,VOLUME_AUTO_LABEL,currentX,currentY+HALF_SPACER,VOLUME_AUTO_LABEL_WIDTH,LINE_HEIGHT);
     currentX+=FILTER_LABEL_WIDTH+SPACER;
-
+    // Volume down button
+    radioVolumeDownButton = uiCreateImageButton(tab,LV_SYMBOL_MINUS,radio_volume_down_cb,LV_EVENT_CLICKED,RADIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
+    currentX+=RADIO_BUTTONS_WIDTH+SPACER;
+    // Spinbox
+    radioVolumeSpinbox = lv_spinbox_create(tab);
+    lv_spinbox_set_range(radioVolumeSpinbox, 0, 9);
+    lv_spinbox_set_digit_format(radioVolumeSpinbox, 1, 0);
+    //lv_spinbox_step_prev(spinbox);
+    lv_obj_set_pos(radioVolumeSpinbox,currentX,currentY);
+    lv_obj_set_size(radioVolumeSpinbox, VOLUME_SPINBOX_WIDTH, TOGGLE_LINE_HEIGHT);
+    currentX+=VOLUME_SPINBOX_WIDTH+SPACER;
+    //lv_obj_center(spinbox);    
+    // Volume up button
+    radioVolumeUpButton = uiCreateImageButton(tab,LV_SYMBOL_PLUS,radio_volume_up_cb,LV_EVENT_CLICKED,RADIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
 }
 
 void uiSettingsCreateView(lv_obj_t * cont)
