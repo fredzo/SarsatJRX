@@ -5,6 +5,7 @@
 #define WIFI_STATE_KEY      "Wifi"
 #define RADIO_STATE_KEY     "Radio"
 #define RADIO_VOLUME_KEY    "Vol"
+#define RADIO_AUTO_VOL_KEY  "AutoVol"
 #define RADIO_FILTER1_KEY   "Filt1"
 #define RADIO_FILTER2_KEY   "Filt2"
 #define RADIO_FILTER3_KEY   "Filt3"
@@ -36,6 +37,17 @@ bool Settings::getRadioState()
 void Settings::setRadioState(bool state)
 {
     preferences.putBool(RADIO_STATE_KEY,state);
+    dirty = true;
+}
+
+bool Settings::getRadioAutoVolume()
+{
+    return preferences.getBool(RADIO_AUTO_VOL_KEY,true);
+}
+
+void Settings::setRadioAutoVolume(bool state)
+{
+    preferences.putBool(RADIO_AUTO_VOL_KEY,state);
     dirty = true;
 }
 

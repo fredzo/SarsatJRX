@@ -121,7 +121,10 @@
 #define FILTER2_LABEL           "HiP."
 #define FILTER3_LABEL           "LoP."
 #define FILTER_LABEL_WIDTH      50
-
+#define VOLUME_LABEL            "Volume :"
+#define VOLUME_LABEL_WIDTH      60
+#define VOLUME_AUTO_LABEL       "Auto"
+#define VOLUME_AUTO_LABEL_WIDTH 50
 
 // Externs
 extern bool readBeaconFromFile(const char * filename);
@@ -244,6 +247,12 @@ static lv_obj_t * radioFilter2Toggle;
 static lv_obj_t * radioFilter2Label;
 static lv_obj_t * radioFilter3Toggle;
 static lv_obj_t * radioFilter3Label;
+static lv_obj_t * radioVolumeTitle;
+static lv_obj_t * radioVolumeToggle;
+static lv_obj_t * radioVolumeAutoLabel;
+static lv_obj_t * radioVolumeDownButton;
+static lv_obj_t * radioVolumeUpButton;
+static lv_obj_t * radioVolumeSpinbox;
 
 void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
 {  
@@ -608,7 +617,7 @@ static void toggle_radio_cb(lv_event_t * e)
     if(state)
     {   // Start radio with saved settings
         Settings * settings = Settings::getSettings();
-        radio->radioInit(settings->getRadioVolume(),settings->getRadioFilter1(),settings->getRadioFilter2(),settings->getRadioFilter3());
+        radio->radioInit(settings->getRadioAutoVolume(),settings->getRadioVolume(),settings->getRadioFilter1(),settings->getRadioFilter2(),settings->getRadioFilter3());
         uiSettingsUpdateView();
     }
     else
@@ -836,6 +845,16 @@ static void toggle_filter3_cb(lv_event_t * e)
     settings->setRadioFilter3(state);
 }
 
+static void toggle_volume_cb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(radioVolumeToggle, LV_STATE_CHECKED);
+    Radio* radio = Radio::getRadio();
+    radio->setAutoVolume(state);
+    // Save state to settings
+    Settings* settings = Settings::getSettings();
+    settings->setRadioAutoVolume(state);
+}
+
 void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
 {   // Radion on/off
     currentY+=SPACER;
@@ -882,7 +901,14 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     currentX+=TOGGLE_WIDTH+SPACER;
     radioFilter3Label = uiCreateLabel(tab,&style_section_text,FILTER3_LABEL,currentX,currentY+HALF_SPACER,FILTER_LABEL_WIDTH,LINE_HEIGHT);
     //currentX+=FILTER_LABEL_WIDTH+SPACER;
-    currentY+=(TOGGLE_LINE_HEIGHT+SPACER+SPACER);
+    currentY+=(TOGGLE_LINE_HEIGHT+SPACER+HALF_SPACER);
+    currentX = 0;
+    radioVolumeTitle = uiCreateLabel(tab,&style_section_title,VOLUME_LABEL,0,currentY+HALF_SPACER,VOLUME_LABEL_WIDTH,LINE_HEIGHT);
+    currentX+=VOLUME_LABEL_WIDTH+SPACER;
+    radioVolumeToggle = uiCreateToggle(tab,&style_section_text,toggle_volume_cb,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentX+=TOGGLE_WIDTH+SPACER;
+    radioVolumeAutoLabel = uiCreateLabel(tab,&style_section_text,VOLUME_AUTO_LABEL,currentX,currentY+HALF_SPACER,VOLUME_AUTO_LABEL_WIDTH,LINE_HEIGHT);
+    currentX+=FILTER_LABEL_WIDTH+SPACER;
 
 }
 

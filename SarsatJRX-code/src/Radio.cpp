@@ -6,9 +6,10 @@ Radio *Radio::radioInstance = nullptr;
 
 const float frequecies[] = {406.0,406.025,406.037,406.040,406.049,430,433,0};
 
-void Radio::radioInit(byte volume, bool filter1, bool filter2, bool filter3)
+void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, bool filter3)
 {   // Init UART1
     radioSerial = &Serial1;
+    Radio::autoVolume = autoVolume;
     Radio::volume = volume;
     Radio::filter1 = filter1;
     Radio::filter2 = filter2;
@@ -242,6 +243,16 @@ int Radio::getPower()
 String Radio::getVersion()
 {
     return version;
+}
+
+void Radio::setAutoVolume(bool on)
+{
+    Radio::autoVolume = on;
+}
+
+bool Radio::getAutoVolume()
+{
+    return autoVolume;
 }
 
 void Radio::setVolume(byte volume)

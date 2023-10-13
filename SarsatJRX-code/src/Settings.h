@@ -22,6 +22,8 @@ class Settings
         void setWifiState(bool state);
         bool getRadioState();
         void setRadioState(bool state);
+        bool getRadioAutoVolume();
+        void setRadioAutoVolume(bool state);
         byte getRadioVolume();
         void setRadioVolume(byte volume);
         bool getRadioFilter1();

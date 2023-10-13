@@ -16,7 +16,7 @@ class Radio
             return radioInstance;
         }
 
-        void radioInit(byte volume, bool filter1, bool filter2, bool filter3);
+        void radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, bool filter3);
         void radioStop();
         /*
          * Set scan frequencies : last frequency in the array must be 0 to tell the array end   
@@ -35,6 +35,8 @@ class Radio
         int getPower();
         String getVersion();
         // Settings
+        void setAutoVolume(bool autoVolume);
+        bool getAutoVolume();
         void setVolume(byte volume);
         byte getVolume();
         void setFilter1(bool on);
@@ -75,6 +77,7 @@ class Radio
         bool scanOn = false;
 
         // Radio parameters
+        bool autoVolume = true;
         byte volume = 8;
         bool filter1 = false;
         bool filter2 = false;
