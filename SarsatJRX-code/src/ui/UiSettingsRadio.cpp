@@ -518,8 +518,6 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
         float freq = radio->getFrequency(i);
         sprintf(buffer,"%3.4f",freq);
         lv_obj_t *lab = lv_label_create(freqList);
-        // Reverse list order to have latest beacons at the top of the list
-        lv_obj_move_background(lab);
         lv_obj_set_user_data(lab,&freq);
         lv_obj_add_event_cb(lab, freq_clicked_cb, LV_EVENT_CLICKED, NULL);
         lv_obj_add_style(lab,&style_section_text,0);

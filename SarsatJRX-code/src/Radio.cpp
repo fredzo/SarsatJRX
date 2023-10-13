@@ -128,7 +128,6 @@ void Radio::setScanFrequencies(const float* frequencies)
         {
             frequencyCount++;
         }
-        frequencyCount--;
     }
 }
 
