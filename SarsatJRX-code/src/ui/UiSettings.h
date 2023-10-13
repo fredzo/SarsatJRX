@@ -5,6 +5,13 @@
 #include <Beacon.h>
 #include <lvgl.h>
 
+#define SPACER              8
+#define HALF_SPACER         4
+#define TOGGLE_LINE_HEIGHT  28
+#define TOGGLE_X            160
+#define TOGGLE_WIDTH        50
+
+
 void uiSettingsCreateView(lv_obj_t * cont);
 
 void uiSettingsUpdateView();
