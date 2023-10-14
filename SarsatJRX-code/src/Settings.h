@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include <Preferences.h>
 
-
 class Settings
 {
     public :
@@ -15,6 +14,13 @@ class Settings
             }
             return settingsInstance;
         }
+
+        class Frequency 
+        {
+            public :
+                float value = -1;
+                bool on = false;
+        };
 
         void init();
 
@@ -32,6 +38,12 @@ class Settings
         void setRadioFilter2(bool on);
         bool getRadioFilter3();
         void setRadioFilter3(bool on);
+        Frequency getFrequency(int index);
+        void setFrequency(int index, Frequency frequency);
+        void setFrequency(int index, float frequency);
+        void setFrequencyOn(int index, bool on);
+        int getFrequencyCount();
+        float[] getActiveFrequencies();
 
         void save();
 
@@ -48,6 +60,8 @@ class Settings
         };
 
         static Settings *settingsInstance;
+        static Frequency NO_FREQUENCY;
+        static float DEFAULT_FREQUENCIES[];
 };
 
 #endif 

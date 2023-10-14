@@ -504,9 +504,9 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     int bottomButtonY = currentY+bListHeight-FREQ_BUTTON_HEIGHT;
     freqListDownButton = uiCreateImageButton(tab,LV_SYMBOL_DOWN,freq_down_cb,LV_EVENT_ALL,FREQ_BUTTON_WIDTH, FREQ_BUTTON_HEIGHT,FREQ_BUTTON_X1,bottomButtonY);
     // Tick
-    freqTickButton = uiCreateImageButton(tab,LV_SYMBOL_PLAY,freq_tick_cb,LV_EVENT_CLICKED,FREQ_BUTTON_WIDTH, FREQ_BUTTON_HEIGHT,FREQ_BUTTON_X2,currentY);
+    freqTickButton = uiCreateImageButton(tab,LV_SYMBOL_OK,freq_tick_cb,LV_EVENT_CLICKED,FREQ_BUTTON_WIDTH, FREQ_BUTTON_HEIGHT,FREQ_BUTTON_X2,currentY);
     // Edit
-    freqEditButton = uiCreateImageButton(tab,LV_SYMBOL_TRASH,freq_edit_cb,LV_EVENT_CLICKED,FREQ_BUTTON_WIDTH, FREQ_BUTTON_HEIGHT,FREQ_BUTTON_X2,bottomButtonY);
+    freqEditButton = uiCreateImageButton(tab,LV_SYMBOL_EDIT,freq_edit_cb,LV_EVENT_CLICKED,FREQ_BUTTON_WIDTH, FREQ_BUTTON_HEIGHT,FREQ_BUTTON_X2,bottomButtonY);
     // Fill list
     int freqCount = 0;
     currentFreq = NULL;
