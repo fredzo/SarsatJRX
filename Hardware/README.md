@@ -8,3 +8,4 @@ Second stage is F1LVT's signal shaping stage from DECTRA decoder : http://www.f1
 
 Audio signal can be provided by either the audio ouput of a receiver or from a NiceRF SA818-S UHF module.
 
+![Schematic](SarsatJRX.png?raw=true "Schematic")
