@@ -4,9 +4,7 @@
 // Static members
 Radio *Radio::radioInstance = nullptr;
 
-const float frequecies[] = {406.0,406.025,406.037,406.040,406.049,430,433,0};
-
-void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, bool filter3)
+void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, bool filter3, float* scanFrequencies)
 {   // Init UART1
     radioSerial = &Serial1;
     Radio::autoVolume = autoVolume;
@@ -39,10 +37,10 @@ void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, 
     dra->version_async();
     dra->volume_async(volume);
     dra->filters_async(filter1, filter2, filter3);
+    setScanFrequencies(scanFrequencies);
     // Tests
     dra->group_async(DRA818_12K5, 406.0, 460.0, 0, 4, 0);
     dra->tail_async(true);
-    setScanFrequencies(frequecies);
 }
 
 void Radio::rssiCallback(int rssi)
@@ -120,7 +118,7 @@ void Radio::setScanFrequencies(const float* frequencies)
     scanFrequencies = frequencies;
     // Start scan will increment index before setting frequency
     currentScanFrequencyIndex = -1;
-    if(frequecies)
+    if(frequencies)
     {
         radioFrequency = scanFrequencies[0];
         frequencyCount = 0;

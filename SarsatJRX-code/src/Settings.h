@@ -4,6 +4,8 @@
 #include <Arduino.h>
 #include <Preferences.h>
 
+#define FREQUENCY_COUNT     7
+
 class Settings
 {
     public :
@@ -43,13 +45,14 @@ class Settings
         void setFrequency(int index, float frequency);
         void setFrequencyOn(int index, bool on);
         int getFrequencyCount();
-        float[] getActiveFrequencies();
+        float* getActiveFrequencies();
 
         void save();
 
     private :
         Preferences preferences;
         bool dirty = false; // True when save is needed
+        float activeFrequencies[FREQUENCY_COUNT+1];
 
         Settings()
         {

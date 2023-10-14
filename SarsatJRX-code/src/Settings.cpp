@@ -12,7 +12,6 @@
 #define RADIO_FREQ_T_KEY    "FrqF%d"
 #define RADIO_FREQ_ON_T_KEY "FrqO%d"
 
-#define FREQUENCY_COUNT     7
 float Settings::DEFAULT_FREQUENCIES[] = {406.025,406.028,406.037,406.040,406.049,406.052,433.125};
 
 Settings *Settings::settingsInstance = nullptr;
@@ -107,9 +106,25 @@ Settings::Frequency Settings::getFrequency(int index)
     Frequency result;
     char buffer[8];
     sprintf(buffer,RADIO_FREQ_T_KEY,index);
-    result.value = preferences.getFloat(buffer,DEFAULT_FREQUENCIES[index]);
+    if(!preferences.isKey(buffer))
+    {   // Init the preference if not available
+        result.value = DEFAULT_FREQUENCIES[index];
+        preferences.putFloat(buffer,result.value);
+    }
+    else
+    {
+        result.value = preferences.getFloat(buffer,DEFAULT_FREQUENCIES[index]);
+    }
     sprintf(buffer,RADIO_FREQ_ON_T_KEY,index);
-    result.value = preferences.getBool(buffer,true);
+    if(!preferences.isKey(buffer))
+    {   // Init the preference if not available
+        result.on = true;
+        preferences.putBool(buffer,true);
+    }
+    else
+    {
+        result.on = preferences.getBool(buffer,true);
+    }
     return result;
 }
 
@@ -146,19 +161,18 @@ int Settings::getFrequencyCount()
 
 float* Settings::getActiveFrequencies()
 {
-    float result[FREQUENCY_COUNT+1];
     int index = 0;
     for(int i = 0 ; i <= FREQUENCY_COUNT ; i++)
     {
         Frequency freq = getFrequency(i);
         if(freq.on)
         {   
-            result[index] = freq.value;
+            activeFrequencies[index] = freq.value;
             index++;
         }
     }
-    result[index] = 0; // Trailing 0 to mark array end
-    return result;
+    activeFrequencies[index] = 0; // Trailing 0 to mark array end
+    return activeFrequencies;
 }
 
 void Settings::save()

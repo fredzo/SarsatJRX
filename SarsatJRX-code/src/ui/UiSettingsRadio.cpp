@@ -78,7 +78,7 @@ static void toggle_radio_cb(lv_event_t * e)
     if(state)
     {   // Start radio with saved settings
         Settings * settings = Settings::getSettings();
-        radio->radioInit(settings->getRadioAutoVolume(),settings->getRadioVolume(),settings->getRadioFilter1(),settings->getRadioFilter2(),settings->getRadioFilter3());
+        radio->radioInit(settings->getRadioAutoVolume(),settings->getRadioVolume(),settings->getRadioFilter1(),settings->getRadioFilter2(),settings->getRadioFilter3(),settings->getActiveFrequencies());
         uiSettingsUpdateView();
     }
     else
@@ -384,26 +384,29 @@ static void freq_down_cb(lv_event_t * e)
     }    
 }
 
-static void freq_tick_cb(lv_event_t * e)
-{
-    if(currentFreq == NULL) return;
-    lv_event_code_t code = lv_event_get_code(e);
-    if((code == LV_EVENT_CLICKED) || (code == LV_EVENT_LONG_PRESSED_REPEAT)) 
-    {
-        float* freq = (float*)lv_obj_get_user_data(currentFreq);
-        if(freq)
-        {
-            //Serial.printf("Load file %s\n",(*fileName).c_str());
-            //readBeaconFromFile((*fileName).c_str());
-        }
-    }
-}
-
 static void tickCurrentFreq()
 {
     if(currentFreq == NULL) return;
+    Settings* settings = Settings::getSettings();
     float* freq = (float*)lv_obj_get_user_data(currentFreq);
-    // TODO
+    uint32_t index = lv_obj_get_index(currentFreq);
+    Settings::Frequency frequency = settings->getFrequency(index);
+    frequency.on = !frequency.on;
+    settings->setFrequencyOn(index,frequency.on);
+    char buffer[16];
+    sprintf(buffer,"(%c) %3.4f",frequency.on ? '*' : ' ', frequency.value);
+    lv_label_set_text(currentFreq, buffer);
+}
+
+static void freq_tick_cb(lv_event_t * e)
+{
+    if(currentFreq == NULL) return;
+    float* freq = (float*)lv_obj_get_user_data(currentFreq);
+    if(freq)
+    {
+        //Serial.printf("Load file %s\n",(*fileName).c_str());
+        tickCurrentFreq();
+    }
 }
 
 static void freq_edit_cb(lv_event_t * e)
@@ -512,11 +515,11 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     currentFreq = NULL;
     lv_obj_t * btn;
     char buffer[16];
-
-    for(int i = 0; i < radio->getFrequencyCount() ; i++)
+    Settings* settings = Settings::getSettings();
+    for(int i = 0; i < settings->getFrequencyCount() ; i++)
     {
-        float freq = radio->getFrequency(i);
-        sprintf(buffer,"%3.4f",freq);
+        Settings::Frequency freq = settings->getFrequency(i);
+        sprintf(buffer,"(%c) %3.4f",freq.on ? '*' : ' ', freq.value);
         lv_obj_t *lab = lv_label_create(freqList);
         lv_obj_set_user_data(lab,&freq);
         lv_obj_add_event_cb(lab, freq_clicked_cb, LV_EVENT_CLICKED, NULL);
@@ -524,6 +527,10 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
         lv_obj_set_style_text_color(lab,uiOkColor,LV_STATE_CHECKED);
         lv_obj_add_flag(lab,LV_OBJ_FLAG_CLICKABLE);
         lv_label_set_text(lab, buffer);
+        if(currentFreq == NULL)
+        {   // Select first freq
+            selectFreq(lab);
+        }
         freqCount++;
     }
 }

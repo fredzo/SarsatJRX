@@ -16,7 +16,7 @@ class Radio
             return radioInstance;
         }
 
-        void radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, bool filter3);
+        void radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, bool filter3, float* scanFrequencies);
         void radioStop();
         /*
          * Set scan frequencies : last frequency in the array must be 0 to tell the array end   
