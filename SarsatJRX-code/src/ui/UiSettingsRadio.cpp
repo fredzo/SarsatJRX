@@ -393,7 +393,7 @@ static void tickCurrentFreq()
     Settings::Frequency frequency = settings->getFrequency(index);
     frequency.on = !frequency.on;
     settings->setFrequencyOn(index,frequency.on);
-    char buffer[16];
+    char buffer[24];
     sprintf(buffer,"(%c) %d - %3.4f",frequency.on ? '*' : ' ', index+1, frequency.value);
     lv_label_set_text(currentFreq, buffer);
     // Uupdate radio active frequencies
@@ -515,7 +515,7 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     int freqCount = 0;
     currentFreq = NULL;
     lv_obj_t * btn;
-    char buffer[16];
+    char buffer[24];
     Settings* settings = Settings::getSettings();
     for(int i = 0; i < settings->getFrequencyCount() ; i++)
     {
