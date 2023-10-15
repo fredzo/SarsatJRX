@@ -394,8 +394,10 @@ static void tickCurrentFreq()
     frequency.on = !frequency.on;
     settings->setFrequencyOn(index,frequency.on);
     char buffer[16];
-    sprintf(buffer,"(%c) %3.4f",frequency.on ? '*' : ' ', frequency.value);
+    sprintf(buffer,"(%c) %d - %3.4f",frequency.on ? '*' : ' ', index+1, frequency.value);
     lv_label_set_text(currentFreq, buffer);
+    // Uupdate radio active frequencies
+    Radio::getRadio()->setScanFrequencies(settings->getActiveFrequencies());
 }
 
 static void freq_tick_cb(lv_event_t * e)
@@ -404,7 +406,6 @@ static void freq_tick_cb(lv_event_t * e)
     float* freq = (float*)lv_obj_get_user_data(currentFreq);
     if(freq)
     {
-        //Serial.printf("Load file %s\n",(*fileName).c_str());
         tickCurrentFreq();
     }
 }
@@ -519,7 +520,7 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     for(int i = 0; i < settings->getFrequencyCount() ; i++)
     {
         Settings::Frequency freq = settings->getFrequency(i);
-        sprintf(buffer,"(%c) %3.4f",freq.on ? '*' : ' ', freq.value);
+        sprintf(buffer,"(%c) %d - %3.4f",freq.on ? '*' : ' ', i+1, freq.value);
         lv_obj_t *lab = lv_label_create(freqList);
         lv_obj_set_user_data(lab,&freq);
         lv_obj_add_event_cb(lab, freq_clicked_cb, LV_EVENT_CLICKED, NULL);
