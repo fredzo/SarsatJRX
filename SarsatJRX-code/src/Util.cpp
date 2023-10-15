@@ -113,6 +113,11 @@ Rtc::Date parseBeaconFileName(const char* fileName)
   return result;
 }
 
+void formatFrequencyItem(char* buffer, int index, float frequency, bool on)
+{
+    sprintf(buffer,"(%c) %d - %3.4f MHz",on ? '*' : ' ', index+1, frequency);
+}
+
 /* Baudot code matrix */
 char BAUDOT_CODE[64]   = {' ','5',' ','9',' ',' ',' ',' ',' ',' ','4',' ','8','0',' ',' ',
                           '3',' ',' ',' ',' ','6',' ','/','-','2',' ',' ','7','1',' ',' ',

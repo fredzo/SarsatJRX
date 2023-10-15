@@ -42,6 +42,8 @@ String formatSketchInformation(uint32_t size, String md5);
 
 void formatBeaconFileName(char* buffer, String date);
 
+void formatFrequencyItem(char* buffer, int index, float frequency, bool on);
+
 Rtc::Date parseBeaconFileName(const char* fileName);
 
 /* Baudot code matrix */

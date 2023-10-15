@@ -116,8 +116,7 @@ void Radio::tailCallback(int retCode)
 void Radio::setScanFrequencies(const float* frequencies)
 {
     scanFrequencies = frequencies;
-    // Start scan will increment index before setting frequency
-    currentScanFrequencyIndex = -1;
+    currentScanFrequencyIndex = 0;
     if(frequencies)
     {
         radioFrequency = scanFrequencies[0];

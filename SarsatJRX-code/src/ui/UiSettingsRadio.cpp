@@ -27,7 +27,7 @@
 #define VOLUME_AUTO_LABEL_WIDTH 50
 #define VOLUME_SPINBOX_WIDTH    50
 // Freq list
-#define FREQ_LIST_WIDTH         200
+#define FREQ_LIST_WIDTH         220
 #define FREQ_BUTTON_WIDTH       50
 #define FREQ_BUTTON_HEIGHT      40
 #define FREQ_BUTTON_X1          (FREQ_LIST_WIDTH + 4)
@@ -394,7 +394,7 @@ static void tickCurrentFreq()
     frequency.on = !frequency.on;
     settings->setFrequencyOn(index,frequency.on);
     char buffer[24];
-    sprintf(buffer,"(%c) %d - %3.4f",frequency.on ? '*' : ' ', index+1, frequency.value);
+    formatFrequencyItem(buffer,index,frequency.value,frequency.on);
     lv_label_set_text(currentFreq, buffer);
     // Uupdate radio active frequencies
     Radio::getRadio()->setScanFrequencies(settings->getActiveFrequencies());
@@ -520,13 +520,14 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     for(int i = 0; i < settings->getFrequencyCount() ; i++)
     {
         Settings::Frequency freq = settings->getFrequency(i);
-        sprintf(buffer,"(%c) %d - %3.4f",freq.on ? '*' : ' ', i+1, freq.value);
+        formatFrequencyItem(buffer,i,freq.value,freq.on);
         lv_obj_t *lab = lv_label_create(freqList);
         lv_obj_set_user_data(lab,&freq);
         lv_obj_add_event_cb(lab, freq_clicked_cb, LV_EVENT_CLICKED, NULL);
         lv_obj_add_style(lab,&style_section_text,0);
         lv_obj_set_style_text_color(lab,uiOkColor,LV_STATE_CHECKED);
         lv_obj_add_flag(lab,LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_style_text_align(lab,LV_TEXT_ALIGN_LEFT,0);
         lv_label_set_text(lab, buffer);
         if(currentFreq == NULL)
         {   // Select first freq
