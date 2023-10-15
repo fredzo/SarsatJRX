@@ -27,7 +27,7 @@
 #define VOLUME_AUTO_LABEL_WIDTH 50
 #define VOLUME_SPINBOX_WIDTH    50
 // Freq list
-#define FREQ_LIST_WIDTH         220
+#define FREQ_LIST_WIDTH         240
 #define FREQ_BUTTON_WIDTH       50
 #define FREQ_BUTTON_HEIGHT      40
 #define FREQ_BUTTON_X1          (FREQ_LIST_WIDTH + 4)

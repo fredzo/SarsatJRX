@@ -115,7 +115,7 @@ Rtc::Date parseBeaconFileName(const char* fileName)
 
 void formatFrequencyItem(char* buffer, int index, float frequency, bool on)
 {
-    sprintf(buffer,"(%c) %d - %3.4f MHz",on ? '*' : ' ', index+1, frequency);
+    sprintf(buffer,"(%c) %d- %3.4f MHz",on ? '*' : ' ', index+1, frequency);
 }
 
 /* Baudot code matrix */
