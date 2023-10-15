@@ -69,6 +69,9 @@ static lv_obj_t * currentFreq = NULL;
 
 static int lastFreqIndex = 0;
 
+// True for main frequency edit, false for frequency list edit
+static bool editMainFrequency = true;
+
 
 static void toggle_radio_cb(lv_event_t * e)
 {
@@ -168,8 +171,26 @@ void event_cb(lv_event_t * e)
 }
 // End hack
 
-void startEditFreq()
-{   // Show text area
+void startEditFreq(bool mainFrequency)
+{   // Move text area accodint to edited content
+    editMainFrequency = mainFrequency;
+    float placeHolderFreq;
+    if(editMainFrequency)
+    {
+        lv_obj_set_pos(radioFreqTextArea,RADIO_FREQ_X,0);
+        placeHolderFreq = Radio::getRadio()->getFrequency();
+    }
+    else
+    {
+        lv_obj_set_pos(radioFreqTextArea,0,0);
+        if(currentFreq != NULL)
+        {
+            Settings* settings = Settings::getSettings();
+            uint32_t index = lv_obj_get_index(currentFreq);
+            placeHolderFreq = settings->getFrequency(index).value;
+        }
+    }
+    // Show text area
     lv_obj_clear_flag(radioFreqTextArea, LV_OBJ_FLAG_HIDDEN);
     // Create a new Keyboard
     radioFreqKeyboard = lv_keyboard_create(radioTab);
@@ -184,7 +205,7 @@ void startEditFreq()
 
     // Prepare text area content
     char buffer[16];
-    sprintf(buffer,"%3.4f",Radio::getRadio()->getFrequency());
+    sprintf(buffer,"%3.4f",placeHolderFreq);
     lv_textarea_set_text(radioFreqTextArea, "");
     lv_textarea_set_placeholder_text(radioFreqTextArea, buffer);
 }
@@ -197,7 +218,7 @@ void stopEditFreq()
 
 static void radio_freq_cb(lv_event_t * e)
 {   // Keyboard input
-    startEditFreq();
+    startEditFreq(true);
 }
 
 static bool ignoreNext = false;
@@ -271,7 +292,28 @@ static void radio_keyboard_cb(lv_event_t * e)
             const char * txt = lv_textarea_get_text(radioFreqTextArea);
             float newFreq = atof(txt);
             //Serial.printf("Found frequency %3.4f\n",newFreq);
-            Radio::getRadio()->setFrequency(newFreq);
+            if(editMainFrequency)
+            {   // Change mainf frequency
+                Radio::getRadio()->setFrequency(newFreq);
+            }
+            else
+            {   // Change currently edited frequency
+                if(currentFreq != NULL)
+                {
+                    Settings* settings = Settings::getSettings();
+                    uint32_t index = lv_obj_get_index(currentFreq);
+                    Settings::Frequency frequency = settings->getFrequency(index);
+                    settings->setFrequency(index,newFreq);
+                    char buffer[24];
+                    formatFrequencyItem(buffer,index,newFreq,frequency.on);
+                    lv_label_set_text(currentFreq, buffer);
+                    if(frequency.on)
+                    {
+                        // Uupdate radio active frequencies
+                        Radio::getRadio()->setScanFrequencies(settings->getActiveFrequencies());
+                    }
+                }
+            }
         }
     }
 }
@@ -384,11 +426,10 @@ static void freq_down_cb(lv_event_t * e)
     }    
 }
 
-static void tickCurrentFreq()
+static void freq_tick_cb(lv_event_t * e)
 {
     if(currentFreq == NULL) return;
     Settings* settings = Settings::getSettings();
-    float* freq = (float*)lv_obj_get_user_data(currentFreq);
     uint32_t index = lv_obj_get_index(currentFreq);
     Settings::Frequency frequency = settings->getFrequency(index);
     frequency.on = !frequency.on;
@@ -400,19 +441,10 @@ static void tickCurrentFreq()
     Radio::getRadio()->setScanFrequencies(settings->getActiveFrequencies());
 }
 
-static void freq_tick_cb(lv_event_t * e)
-{
-    if(currentFreq == NULL) return;
-    float* freq = (float*)lv_obj_get_user_data(currentFreq);
-    if(freq)
-    {
-        tickCurrentFreq();
-    }
-}
-
 static void freq_edit_cb(lv_event_t * e)
 {
     if(currentFreq == NULL) return;
+    startEditFreq(false);
     //lv_event_code_t code = lv_event_get_code(e);
     //Serial.printf("Delete cb with event code %d\n",code);
     //if((code != LV_EVENT_SHORT_CLICKED)) return;
@@ -522,7 +554,6 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
         Settings::Frequency freq = settings->getFrequency(i);
         formatFrequencyItem(buffer,i,freq.value,freq.on);
         lv_obj_t *lab = lv_label_create(freqList);
-        lv_obj_set_user_data(lab,&freq);
         lv_obj_add_event_cb(lab, freq_clicked_cb, LV_EVENT_CLICKED, NULL);
         lv_obj_add_style(lab,&style_section_text,0);
         lv_obj_set_style_text_color(lab,uiOkColor,LV_STATE_CHECKED);
