@@ -29,7 +29,7 @@ class Filesystems
         uint64_t getSdUsedBytes();
         bool isLogDirReady() { return logDirReady ;}
         bool saveBeacon(Beacon* beacon);
-        bool loadBeacon(const char* fileName, byte* frameBuffer);
+        bool loadBeacon(const char* fileName, volatile byte* frameBuffer);
         bool deleteBeacon(const char* fileName);
 
     private :

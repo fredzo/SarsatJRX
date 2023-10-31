@@ -94,7 +94,7 @@ bool Filesystems::saveBeacon(Beacon* beacon)
      return result;
 }
 
-bool Filesystems::loadBeacon(const char* fileName, byte* frameBuffer)
+bool Filesystems::loadBeacon(const char* fileName, volatile byte* frameBuffer)
 {
     bool result = false;
     if(sdFilesystemMounted&&logDirReady)

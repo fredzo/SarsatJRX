@@ -50,8 +50,8 @@ class Beacon
         byte frame[SIZE];
         Location location;
         uint64_t identifier;
-        Beacon(byte frameBuffer[], Rtc::Date date);
-        Beacon(byte frameBuffer[]) : Beacon(frameBuffer,Rtc::getRtc()->getDate()) {}
+        Beacon(volatile byte frameBuffer[], Rtc::Date date);
+        Beacon(volatile byte frameBuffer[]) : Beacon(frameBuffer,Rtc::getRtc()->getDate()) {}
         Rtc::Date date;
         String getProtocolName();
         String getProtocolDesciption();

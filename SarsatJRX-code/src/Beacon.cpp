@@ -155,9 +155,9 @@ uint64_t computeBCH2(byte* frame)
     return computeBCH(frame,107,132,BCH_12_POLYNOMIAL,BCH_12_POLY_LENGTH);
 }
 
-Beacon::Beacon(byte frameBuffer[], Rtc::Date date)
+Beacon::Beacon(volatile byte frameBuffer[], Rtc::Date date)
 {   // Get a local copy of the original frame
-    memcpy(frame,frameBuffer,SIZE);
+    memcpy(frame,(const void*)frameBuffer,SIZE);
     Beacon::date = date;
     parseFrame();
 }

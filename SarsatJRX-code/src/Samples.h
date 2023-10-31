@@ -8,6 +8,6 @@
  * 
  * @param frameBuffer the buffer to read the sample into
  */
-void readNextSample(byte* frameBuffer);
+void readNextSample(volatile byte* frameBuffer);
 
 #endif 

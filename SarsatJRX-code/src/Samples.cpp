@@ -37,7 +37,7 @@ int curFrame = 0;
  * @param frameBuffer the buffer to read the sample into
  * @param frameIndex the sample frame index
  */
-void readNextSample(byte* frameBuffer)
+void readNextSample(volatile byte* frameBuffer)
 { // Read the frame content
   readHexString(frameBuffer,frames[curFrame]);
   curFrame++;

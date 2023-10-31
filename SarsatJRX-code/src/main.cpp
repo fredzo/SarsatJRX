@@ -358,7 +358,7 @@ void loop()
   bool frameTimeout = (isFrameStarted() && ((millis()-getFrameStartTime()) > 500 ));
   if (isFrameComplete() || frameTimeout)
   {
-    byte* frame = getFrame();
+    volatile byte* frame = getFrame();
     // Debug purpose 
  #ifdef SERIAL_OUT 
    if(frameTimeout)

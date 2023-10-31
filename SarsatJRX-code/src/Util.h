@@ -20,7 +20,7 @@ void logFreeRam();
  * @param end end byte
  * @return String 
  */
-String toHexString(byte* frame, bool withSpace, int start, int end);
+String toHexString(volatile byte* frame, bool withSpace, int start, int end);
 
 /**
  * @brief Read the provided hexString and store the content in the buffer
@@ -28,7 +28,7 @@ String toHexString(byte* frame, bool withSpace, int start, int end);
  * @param buffer the buffer to store the converted hex bytes into (the size must match the hex string size)
  * @param hexString the hex string to read
  */
-void readHexString(byte* buffer, String hexString);
+void readHexString(volatile byte* buffer, String hexString);
 
 String formatMemoryValue(uint32_t value, bool showByteValue);
 

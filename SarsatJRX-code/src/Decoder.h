@@ -14,7 +14,7 @@ void resetFrameReading();
 
 bool isFrameStarted();
 
-byte* getFrame();
+volatile byte* getFrame();
 
 byte getByteCount();
 

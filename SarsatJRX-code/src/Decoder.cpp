@@ -1,19 +1,19 @@
 #include "Decoder.h"
 
-unsigned long microseconds;
-unsigned long modDuration;
-bool intputState = false;
-int frameStartCount = 0;
-bool frameComplete = false;
-bool lastModState = 1; // Start with 1
-bool currentBitValue = 1; // Start with 1
-byte frameParseState = 0;
-byte bitCount;
-byte currentByte;
-unsigned long frameStartTime;
-bool frameStarted = false;
-byte frame[Beacon::SIZE];
-byte byteCount;
+volatile unsigned long microseconds;
+volatile unsigned long modDuration;
+volatile bool intputState = false;
+volatile int frameStartCount = 0;
+volatile bool frameComplete = false;
+volatile bool lastModState = 1; // Start with 1
+volatile bool currentBitValue = 1; // Start with 1
+volatile byte frameParseState = 0;
+volatile byte bitCount;
+volatile byte currentByte;
+volatile unsigned long frameStartTime;
+volatile bool frameStarted = false;
+volatile byte frame[Beacon::SIZE];
+volatile byte byteCount;
 bool frameFromDisk = false;
 Rtc::Date frameDate;
 
@@ -34,7 +34,7 @@ bool isFrameStarted()
   return frameStarted;
 }
 
-byte* getFrame()
+volatile byte* getFrame()
 {
   return frame;
 }
@@ -76,7 +76,7 @@ Rtc::Date getDiskFrameDate()
 }
 
 
-void readFrameBit(bool newBit)
+void IRAM_ATTR readFrameBit(bool newBit)
 { 
   // Store new bit and start parsing
   currentByte = currentByte << 1 | newBit;
@@ -204,7 +204,7 @@ bool getInputState()
 /***********************************************
   Read incoming bits
 ***********************************************/
-void analyze(void)
+void IRAM_ATTR analyze(void)
 {
   modDuration = micros() - microseconds;
   intputState = !intputState;
