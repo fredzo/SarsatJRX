@@ -33,6 +33,7 @@ void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, 
     dra->rssi_async_cb(Radio::rssiCallback);
     dra->version_async_cb(Radio::versionCallback);
     dra->read_group_async_cb(Radio::readGroupCallback);
+    /*
     dra->handshake_async();
     dra->version_async();
     dra->volume_async(volume);
@@ -40,7 +41,17 @@ void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, 
     setScanFrequencies(scanFrequencies);
     // Tests
     dra->group_async(DRA818_12K5, 406.0, 460.0, 0, 4, 0);
-    dra->tail_async(true);
+    //dra->tail_async(true);
+    */
+    on = dra->handshake();
+    version = dra->version();
+    dra->volume(volume);
+    dra->filters(filter1, filter2, filter3);
+    setScanFrequencies(scanFrequencies);
+    // TODO Store last used fequency
+    setFrequency(scanFrequencies[0]);
+    // Tests
+    //dra->group_async(DRA818_12K5, 406.0, 460.0, 0, 4, 0);
 }
 
 void Radio::rssiCallback(int rssi)
@@ -201,6 +212,8 @@ void Radio::setFrequency(float freq)
     radioFrequency = freq;
     parameters.freq_rx = freq;
     parameters.freq_tx = freq;
+    // TODO make Squelch part of the settings
+    parameters.squelch = 1;
     dra->group_async(parameters);
 }
 
@@ -253,9 +266,12 @@ bool Radio::getAutoVolume()
 }
 
 void Radio::setVolume(byte volume)
-{
-    Radio::volume = volume;
-    if(dra) dra->volume_async(volume);
+{   // value check
+    if((volume != Radio::volume)&&(volume>=1)&&(volume<=8))
+    {
+        Radio::volume = volume;
+        if(dra) dra->volume_async(volume);
+    }
 }
 
 byte Radio::getVolume()

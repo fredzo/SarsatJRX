@@ -35,7 +35,7 @@
 #define QR_SIZE             130
 // URL templates
 #define MAPS_URL_TEMPLATE   "https://www.google.com/maps/search/?api=1&query=%s%%2C%s"
-#define BEACON_URL_TEMPALTE "https://cryptic-earth-89063heroku-20.herokuapp.com/decoded/%s"
+#define BEACON_URL_TEMPALTE "https://decoder2.herokuapp.com/decoded/%s"
 
 lv_obj_t * beaconMainBloc;
 lv_obj_t * beaconTabview;

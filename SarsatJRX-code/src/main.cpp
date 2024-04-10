@@ -111,7 +111,7 @@ void frameReceivedLedBlink()
 // Store last displayed power value
 unsigned long lastPowerDisplayTime = 0;
 float powerValue = -1;
-#define POWER_DISPLAY_PERIOD 500
+#define POWER_DISPLAY_PERIOD 5000
 
 void updatePowerValueHeader()
 {  // Power header
@@ -305,7 +305,7 @@ void setup()
   // pinMode(16, OUTPUT);                  // Buzzer output
   
   Serial.begin(115200);
-  //attachInterrupt(digitalPinToInterrupt(receiverPin), analyze, CHANGE);  // interruption sur Rise et Fall
+  attachInterrupt(digitalPinToInterrupt(RECEIVER_PIN), analyze, CHANGE);  // interruption sur Rise et Fall
 
   hardware = Hardware::getHardware();
   hardware->init();

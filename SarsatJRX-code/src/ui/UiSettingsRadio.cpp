@@ -358,11 +358,19 @@ static void toggle_volume_cb(lv_event_t * e)
     settings->setRadioAutoVolume(state);
 }
 
+static void radio_update_volume()
+{
+    int32_t volume = lv_spinbox_get_value(radioVolumeSpinbox);
+    Radio* radio = Radio::getRadio();
+    radio->setVolume(volume);
+}
+
 static void radio_volume_down_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_SHORT_CLICKED || code  == LV_EVENT_LONG_PRESSED_REPEAT) {
         lv_spinbox_decrement(radioVolumeSpinbox);
+        radio_update_volume();
     }
 }
 
@@ -371,6 +379,7 @@ static void radio_volume_up_cb(lv_event_t * e)
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_SHORT_CLICKED || code == LV_EVENT_LONG_PRESSED_REPEAT) {
         lv_spinbox_increment(radioVolumeSpinbox);
+        radio_update_volume();
     }
 }
 
@@ -516,7 +525,7 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     currentX+=RADIO_BUTTONS_WIDTH+SPACER;
     // Spinbox
     radioVolumeSpinbox = lv_spinbox_create(tab);
-    lv_spinbox_set_range(radioVolumeSpinbox, 0, 9);
+    lv_spinbox_set_range(radioVolumeSpinbox, 1, 8);
     lv_spinbox_set_digit_format(radioVolumeSpinbox, 1, 0);
     lv_obj_set_style_pad_all(radioVolumeSpinbox,2,0);
     lv_obj_set_pos(radioVolumeSpinbox,currentX,currentY);
