@@ -255,6 +255,7 @@ void uiSettingsUpdateSdView()
                         formatBeaconFileName(buffer,name);
                         lv_obj_t *lab = lv_label_create(beaconsList);
                         // Reverse list order to have latest beacons at the top of the list
+                        // TODO : limit to 32 last beacons
                         lv_obj_move_background(lab);
                         lv_obj_set_user_data(lab,new String(name));
                         lv_obj_add_event_cb(lab, beacon_clicked_cb, LV_EVENT_CLICKED, NULL);
