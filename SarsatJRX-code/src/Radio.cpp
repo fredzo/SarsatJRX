@@ -4,7 +4,7 @@
 // Static members
 Radio *Radio::radioInstance = nullptr;
 
-void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, bool filter3, float* scanFrequencies)
+void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, bool filter3, float frequency, float* scanFrequencies)
 {   // Init UART1
     radioSerial = &Serial1;
     Radio::autoVolume = autoVolume;
@@ -33,6 +33,7 @@ void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, 
     dra->rssi_async_cb(Radio::rssiCallback);
     dra->version_async_cb(Radio::versionCallback);
     dra->read_group_async_cb(Radio::readGroupCallback);
+    // TODD fix async mode...
     /*
     dra->handshake_async();
     dra->version_async();
@@ -49,7 +50,7 @@ void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, 
     dra->filters(filter1, filter2, filter3);
     setScanFrequencies(scanFrequencies);
     // TODO Store last used fequency
-    setFrequency(scanFrequencies[0]);
+    setFrequency(frequency);
     // Tests
     //dra->group_async(DRA818_12K5, 406.0, 460.0, 0, 4, 0);
 }

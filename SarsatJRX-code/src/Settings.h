@@ -34,6 +34,8 @@ class Settings
         void setRadioAutoVolume(bool state);
         byte getRadioVolume();
         void setRadioVolume(byte volume);
+        byte getRadioSquelch();
+        void setRadioSquelch(byte volume);
         bool getRadioFilter1();
         void setRadioFilter1(bool on);
         bool getRadioFilter2();
@@ -46,6 +48,8 @@ class Settings
         void setFrequencyOn(int index, bool on);
         int getFrequencyCount();
         float* getActiveFrequencies();
+        float getLastFrequency();
+        void setLastFrequency(float frequency);
 
         void save();
 

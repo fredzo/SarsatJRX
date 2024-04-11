@@ -23,6 +23,8 @@
 #define BEACON_BUTTON_X1        (BEACON_LIST_WIDTH + 4)
 #define BEACON_BUTTON_X2        (BEACON_BUTTON_X1 + BEACON_BUTTON_WIDTH + 4)
 
+#define MAX_BEACON_FILE_NUMBER  16
+
 // Externs
 extern bool readBeaconFromFile(const char * filename);
 
@@ -255,7 +257,6 @@ void uiSettingsUpdateSdView()
                         formatBeaconFileName(buffer,name);
                         lv_obj_t *lab = lv_label_create(beaconsList);
                         // Reverse list order to have latest beacons at the top of the list
-                        // TODO : limit to 32 last beacons
                         lv_obj_move_background(lab);
                         lv_obj_set_user_data(lab,new String(name));
                         lv_obj_add_event_cb(lab, beacon_clicked_cb, LV_EVENT_CLICKED, NULL);
@@ -263,6 +264,12 @@ void uiSettingsUpdateSdView()
                         lv_obj_set_style_text_color(lab,uiOkColor,LV_STATE_CHECKED);
                         lv_obj_add_flag(lab,LV_OBJ_FLAG_CLICKABLE);
                         lv_label_set_text(lab, buffer);
+                        // Limit to 32 last beacons
+                        if(beaconCount > MAX_BEACON_FILE_NUMBER)
+                        {   // Remove last element from the list
+                            lab = lv_obj_get_child(beaconsList,-1);
+                            if(lab) lv_obj_del(lab);
+                        }
                         beaconCount++;
                     }
                 }

@@ -81,7 +81,7 @@ static void toggle_radio_cb(lv_event_t * e)
     if(state)
     {   // Start radio with saved settings
         Settings * settings = Settings::getSettings();
-        radio->radioInit(settings->getRadioAutoVolume(),settings->getRadioVolume(),settings->getRadioFilter1(),settings->getRadioFilter2(),settings->getRadioFilter3(),settings->getActiveFrequencies());
+        radio->radioInit(settings->getRadioAutoVolume(),settings->getRadioVolume(),settings->getRadioFilter1(),settings->getRadioFilter2(),settings->getRadioFilter3(),settings->getLastFrequency(),settings->getActiveFrequencies());
         uiSettingsUpdateView();
     }
     else
@@ -295,6 +295,9 @@ static void radio_keyboard_cb(lv_event_t * e)
             if(editMainFrequency)
             {   // Change mainf frequency
                 Radio::getRadio()->setFrequency(newFreq);
+                // Update settings
+                Settings* settings = Settings::getSettings();
+                settings->setLastFrequency(newFreq);
             }
             else
             {   // Change currently edited frequency

@@ -5,12 +5,14 @@
 #define WIFI_STATE_KEY      "Wifi"
 #define RADIO_STATE_KEY     "Radio"
 #define RADIO_VOLUME_KEY    "Vol"
+#define RADIO_SQUELCH_KEY   "Sql"
 #define RADIO_AUTO_VOL_KEY  "AutoVol"
 #define RADIO_FILTER1_KEY   "Filt1"
 #define RADIO_FILTER2_KEY   "Filt2"
 #define RADIO_FILTER3_KEY   "Filt3"
 #define RADIO_FREQ_T_KEY    "FrqF%d"
 #define RADIO_FREQ_ON_T_KEY "FrqO%d"
+#define RADIO_LAST_FREQ_KEY "LFrq"
 
 float Settings::DEFAULT_FREQUENCIES[] = {406.025,406.028,406.037,406.040,406.049,406.052,433.125};
 
@@ -64,6 +66,17 @@ byte Settings::getRadioVolume()
 void Settings::setRadioVolume(byte volume)
 {
     preferences.putChar(RADIO_VOLUME_KEY,volume);
+    dirty = true;
+}
+
+byte Settings::getRadioSquelch()
+{
+    return preferences.getChar(RADIO_SQUELCH_KEY,1);
+}
+
+void Settings::setRadioSquelch(byte volume)
+{
+    preferences.putChar(RADIO_SQUELCH_KEY,volume);
     dirty = true;
 }
 
@@ -173,6 +186,17 @@ float* Settings::getActiveFrequencies()
     }
     activeFrequencies[index] = 0; // Trailing 0 to mark array end
     return activeFrequencies;
+}
+
+float Settings::getLastFrequency()
+{
+    return preferences.getFloat(RADIO_LAST_FREQ_KEY,DEFAULT_FREQUENCIES[0]);
+}
+
+void Settings::setLastFrequency(float frequency)
+{
+    preferences.putFloat(RADIO_LAST_FREQ_KEY,frequency);
+    dirty = true;
 }
 
 void Settings::save()
