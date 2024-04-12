@@ -9,12 +9,9 @@
 // Audio
 #define VERSION_LABEL           "Version :"
 #define VERSION_LABEL_WIDTH     80
-#define RADIO_TOGGLE_X          0
-#define RADIO_BUTTONS_WIDTH     40
-#define RADIO_FREQ_NEXT_X       (TOGGLE_WIDTH+4)
-#define RADIO_FREQ_X            (RADIO_FREQ_NEXT_X+RADIO_BUTTONS_WIDTH+4)
-#define RADIO_FREQ_HEIGHT       (TOGGLE_LINE_HEIGHT+2*SPACER)
-#define RADIO_METER_HEIGHT      10
+#define AUDIO_TOGGLE_X          0
+#define AUDIO_BUTTONS_WIDTH     40
+#define AUDIO_METER_HEIGHT      10
 #define FILTERS_LABEL           "Filters :"
 #define FILTERS_LABEL_WIDTH     75
 #define FILTER1_LABEL           "Emph."
@@ -145,15 +142,15 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     Radio* radio = Radio::getRadio();
     // Radion on/off
     currentY+=SPACER;
-    audioToggle = uiCreateToggle(tab,&style_section_text,toggle_audio_cb,RADIO_TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    audioToggle = uiCreateToggle(tab,&style_section_text,toggle_audio_cb,AUDIO_TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     // Meter
     audioMeter = lv_bar_create(tab);
-    lv_obj_set_size(audioMeter, tabWidth-4, RADIO_METER_HEIGHT);
+    lv_obj_set_size(audioMeter, tabWidth-4, AUDIO_METER_HEIGHT);
     lv_obj_set_pos(audioMeter,0,currentY);
     lv_obj_add_style(audioMeter, &style_meter, LV_PART_INDICATOR);
     lv_bar_set_range(audioMeter, 0, 255);
     lv_obj_set_style_anim_time(audioMeter,200,LV_PART_MAIN);
-    currentY += (RADIO_METER_HEIGHT+HALF_SPACER);
+    currentY += (AUDIO_METER_HEIGHT+HALF_SPACER);
     // Filter toggles
     int currentX = 0;
     audioFiltersTitle = uiCreateLabel(tab,&style_section_title,FILTERS_LABEL,0,currentY+HALF_SPACER,FILTERS_LABEL_WIDTH,LINE_HEIGHT);
@@ -179,8 +176,8 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     audioVolumeAutoLabel = uiCreateLabel(tab,&style_section_text,VOLUME_AUTO_LABEL,currentX,currentY+HALF_SPACER,VOLUME_AUTO_LABEL_WIDTH,LINE_HEIGHT);
     currentX+=FILTER_LABEL_WIDTH+SPACER;
     // Volume down button
-    audioVolumeDownButton = uiCreateImageButton(tab,LV_SYMBOL_MINUS,audio_volume_down_cb,LV_EVENT_ALL,RADIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
-    currentX+=RADIO_BUTTONS_WIDTH+SPACER;
+    audioVolumeDownButton = uiCreateImageButton(tab,LV_SYMBOL_MINUS,audio_volume_down_cb,LV_EVENT_ALL,AUDIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
+    currentX+=AUDIO_BUTTONS_WIDTH+SPACER;
     // Spinbox
     audioVolumeSpinbox = lv_spinbox_create(tab);
     lv_spinbox_set_range(audioVolumeSpinbox, 1, 8);
@@ -193,7 +190,7 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_set_style_opa(audioVolumeSpinbox,0,LV_PART_CURSOR);
     currentX+=VOLUME_SPINBOX_WIDTH+SPACER;
     // Volume up button
-    audioVolumeUpButton = uiCreateImageButton(tab,LV_SYMBOL_PLUS,audio_volume_up_cb,LV_EVENT_ALL,RADIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
+    audioVolumeUpButton = uiCreateImageButton(tab,LV_SYMBOL_PLUS,audio_volume_up_cb,LV_EVENT_ALL,AUDIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
     currentY+=(TOGGLE_LINE_HEIGHT+HALF_SPACER);
 }
 
