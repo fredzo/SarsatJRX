@@ -219,12 +219,15 @@ void Radio::setFrequency(float freq)
 
 void Radio::setQuelch(byte squelch)
 {
-    scanOn = false;
-    radioSquelch = squelch;
-    parameters.freq_rx = radioFrequency;
-    parameters.freq_tx = radioFrequency;
-    parameters.squelch = squelch;
-    dra->group_async(parameters);
+    if((squelch != Radio::radioSquelch)&&(squelch>=0)&&(squelch<=8))
+    {
+        scanOn = false;
+        radioSquelch = squelch;
+        parameters.freq_rx = radioFrequency;
+        parameters.freq_tx = radioFrequency;
+        parameters.squelch = squelch;
+        dra->group_async(parameters);
+    }
 }
 
 bool Radio::isScanFrequencyBusy()

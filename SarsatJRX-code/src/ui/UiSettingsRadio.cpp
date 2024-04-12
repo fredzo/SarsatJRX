@@ -504,16 +504,16 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     currentX+=TOGGLE_WIDTH+SPACER;
     radioFilter3Label = uiCreateLabel(tab,&style_section_text,FILTER3_LABEL,currentX,currentY+HALF_SPACER,FILTER_LABEL_WIDTH-4,LINE_HEIGHT);
     currentY+=(TOGGLE_LINE_HEIGHT+HALF_SPACER);
-    // Volume
+    // Squelch
     currentX = 0;
     radioSquelchTitle = uiCreateLabel(tab,&style_section_title,SQUELCH_LABEL,0,currentY+HALF_SPACER,SQUELCH_LABEL_WIDTH,LINE_HEIGHT);
     currentX+=SQUELCH_LABEL_WIDTH+SPACER;
-    // Volume down button
+    // Squelch down button
     radioSquelchDownButton = uiCreateImageButton(tab,LV_SYMBOL_MINUS,radio_squelch_down_cb,LV_EVENT_ALL,RADIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
     currentX+=RADIO_BUTTONS_WIDTH+SPACER;
     // Spinbox
     radioSquelchSpinbox = lv_spinbox_create(tab);
-    lv_spinbox_set_range(radioSquelchSpinbox, 1, 8);
+    lv_spinbox_set_range(radioSquelchSpinbox, 0, 8);
     lv_spinbox_set_digit_format(radioSquelchSpinbox, 1, 0);
     lv_obj_set_style_pad_all(radioSquelchSpinbox,2,0);
     lv_obj_set_pos(radioSquelchSpinbox,currentX,currentY);
@@ -522,7 +522,7 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     // Hide cursor
     lv_obj_set_style_opa(radioSquelchSpinbox,0,LV_PART_CURSOR);
     currentX+=SQUELCH_SPINBOX_WIDTH+SPACER;
-    // Volume up button
+    // Squelch up button
     radioSquelchUpButton = uiCreateImageButton(tab,LV_SYMBOL_PLUS,radio_squelch_up_cb,LV_EVENT_ALL,RADIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
     currentY+=(TOGGLE_LINE_HEIGHT+HALF_SPACER);
     // Freq list
