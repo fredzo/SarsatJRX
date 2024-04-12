@@ -295,6 +295,11 @@ byte Radio::getVolume()
     return volume;
 }
 
+byte Radio::getSquelch()
+{
+    return radioSquelch;
+}
+
 void Radio::setFilter1(bool on)
 {
     Radio::filter1 = on;

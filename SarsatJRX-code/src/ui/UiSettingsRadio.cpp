@@ -571,6 +571,8 @@ void uiSettingsUpdateRadioStatus(bool radioStatus)
     {   // Radio toggle on
         lv_obj_add_state(radioToggle, LV_STATE_CHECKED);
         Radio * radio = Radio::getRadio();
+        // Upadte squelch
+        lv_spinbox_set_value(radioSquelchSpinbox,radio->getSquelch());
         // Update version
         lv_label_set_text(radioVersionLabel,radio->getVersion().c_str());
         // Update filters

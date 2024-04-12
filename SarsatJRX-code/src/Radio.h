@@ -40,6 +40,7 @@ class Radio
         bool getAutoVolume();
         void setVolume(byte volume);
         byte getVolume();
+        byte getSquelch();
         void setFilter1(bool on);
         bool getFilter1();
         void setFilter2(bool on);
