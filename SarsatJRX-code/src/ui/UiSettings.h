@@ -17,7 +17,7 @@ void uiSettingsCreateView(lv_obj_t * cont);
 void uiSettingsUpdateView();
 
 void uiSettingsUpdateWifi();
-
+// TODO : update volume value
 void uiSettingsUpdateRadioStatus(bool radioStatus);
 
 void uiSettingsUpdatePower(int power);

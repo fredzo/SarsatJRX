@@ -12,18 +12,21 @@ void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, 
     Radio::filter1 = filter1;
     Radio::filter2 = filter2;
     Radio::filter3 = filter3;
-    // Serial begin is done here
-    dra = new DRA818(radioSerial, SA818_UHF);
-    // Now we can set pins
+    // First we need to set pins
     if(!radioSerial->setPins(UART1_RX_PIN,UART1_TX_PIN))
     {
 #ifdef SERIAL_OUT
         Serial.println("Could not set UART1 pins for SA818 communication");
 #endif
     }
+    // Serial begin is done here
+    if(dra == NULL)
+    {   // Prevent double instanciation in case of multiple init() calls
+        dra = new DRA818(radioSerial, SA818_UHF);
+    }
 #ifdef DRA818_DEBUG
     dra->set_log(&Serial);
-#endif    
+#endif
     dra->handshake_async_cb(Radio::handshakeCallback);
     dra->group_async_cb(Radio::groupCallback);
     dra->scan_async_cb(Radio::scanCallback);
@@ -33,26 +36,14 @@ void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, 
     dra->rssi_async_cb(Radio::rssiCallback);
     dra->version_async_cb(Radio::versionCallback);
     dra->read_group_async_cb(Radio::readGroupCallback);
-    // TODD fix async mode...
-    /*
-    dra->handshake_async();
-    dra->version_async();
-    dra->volume_async(volume);
-    dra->filters_async(filter1, filter2, filter3);
-    setScanFrequencies(scanFrequencies);
-    // Tests
-    dra->group_async(DRA818_12K5, 406.0, 460.0, 0, 4, 0);
-    //dra->tail_async(true);
-    */
+    // Use sync commands for init
     on = dra->handshake();
     version = dra->version();
     dra->volume(volume);
     dra->filters(filter1, filter2, filter3);
     setScanFrequencies(scanFrequencies);
-    // TODO Store last used fequency
+    // Las command can be async
     setFrequency(frequency);
-    // Tests
-    //dra->group_async(DRA818_12K5, 406.0, 460.0, 0, 4, 0);
 }
 
 void Radio::rssiCallback(int rssi)

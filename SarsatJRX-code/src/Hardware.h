@@ -20,6 +20,8 @@ public:
 
     void init();
 
+    void radioInit();
+
     Display* getDisplay();
 
     Rtc* getRtc();

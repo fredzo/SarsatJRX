@@ -16,11 +16,16 @@ void Hardware::init()
     display = new Display();
     display->setup(i2c);
     radio = Radio::getRadio();
+}
+
+void Hardware::radioInit()
+{
     if(settings->getRadioState())
     {   // Init radio if setting is on
         radio->radioInit(settings->getRadioAutoVolume(),settings->getRadioVolume(),settings->getRadioFilter1(),settings->getRadioFilter2(),settings->getRadioFilter3(),settings->getLastFrequency(),settings->getActiveFrequencies());
     }
 }
+
 
 Display* Hardware::getDisplay()
 {

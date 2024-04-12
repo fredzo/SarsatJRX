@@ -325,7 +325,9 @@ void setup()
 #endif
 
   uiSetSdCardStatus(hardware->getFilesystems()->isSdFilesystemMounted());
-  
+  // Radio should be ready by now
+  hardware->radioInit();
+
   //readNextSampleFrame();
 #ifdef SERIAL_OUT 
   Serial.println("### Boot complete !");
