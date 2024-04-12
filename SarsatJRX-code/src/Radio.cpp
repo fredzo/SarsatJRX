@@ -213,8 +213,17 @@ void Radio::setFrequency(float freq)
     radioFrequency = freq;
     parameters.freq_rx = freq;
     parameters.freq_tx = freq;
-    // TODO make Squelch part of the settings
-    parameters.squelch = 1;
+    parameters.squelch = radioSquelch;
+    dra->group_async(parameters);
+}
+
+void Radio::setQuelch(byte squelch)
+{
+    scanOn = false;
+    radioSquelch = squelch;
+    parameters.freq_rx = radioFrequency;
+    parameters.freq_tx = radioFrequency;
+    parameters.squelch = squelch;
     dra->group_async(parameters);
 }
 
@@ -246,8 +255,11 @@ void Radio::handleTask()
 }
 
 int Radio::getPower()
-{   
-    if(dra) dra->rssi_async();
+{
+    if(!scanOn)
+    {   // Prevent RSSI call while scanning
+        if(dra) dra->rssi_async();
+    }
     return power;
 }
 

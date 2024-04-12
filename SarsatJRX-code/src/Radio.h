@@ -27,6 +27,7 @@ class Radio
         void toggleScan();
         float getFrequency();
         void setFrequency(float frequency);
+        void setQuelch(byte squelch);
         void nextFrequency();
         void previousFrequency();
         bool isScanFrequencyBusy();
@@ -91,10 +92,10 @@ class Radio
         bool on = false;
         DRA818::Parameters parameters;
         float radioFrequency = 0;
+        byte radioSquelch = 1;
         bool scanFreqBusy = false;
         String version;
-        
-
+      
         // Static members
         static Radio *radioInstance;
 };

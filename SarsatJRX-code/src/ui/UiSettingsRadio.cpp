@@ -21,11 +21,9 @@
 #define FILTER2_LABEL           "HiP."
 #define FILTER3_LABEL           "LoP."
 #define FILTER_LABEL_WIDTH      50
-#define VOLUME_LABEL            "Volume :"
-#define VOLUME_LABEL_WIDTH      75
-#define VOLUME_AUTO_LABEL       "Auto"
-#define VOLUME_AUTO_LABEL_WIDTH 50
-#define VOLUME_SPINBOX_WIDTH    50
+#define SQUELCH_LABEL           "Squelch :"
+#define SQUELCH_LABEL_WIDTH     75
+#define SQUELCH_SPINBOX_WIDTH   50
 // Freq list
 #define FREQ_LIST_WIDTH         240
 #define FREQ_BUTTON_WIDTH       50
@@ -38,7 +36,7 @@ static lv_obj_t * radioTab;
 static int radioTabWidth;
 static int radioTabHeight;
 static lv_obj_t * radioToggle;
-static lv_obj_t * radiioFreqLabelButton;
+static lv_obj_t * radioFreqLabelButton;
 static lv_obj_t * freqPrevButton;
 static lv_obj_t * freqNextButton;
 static lv_obj_t * radioFreqTextArea;
@@ -53,12 +51,10 @@ static lv_obj_t * radioFilter2Toggle;
 static lv_obj_t * radioFilter2Label;
 static lv_obj_t * radioFilter3Toggle;
 static lv_obj_t * radioFilter3Label;
-static lv_obj_t * radioVolumeTitle;
-static lv_obj_t * radioVolumeToggle;
-static lv_obj_t * radioVolumeAutoLabel;
-static lv_obj_t * radioVolumeDownButton;
-static lv_obj_t * radioVolumeUpButton;
-static lv_obj_t * radioVolumeSpinbox;
+static lv_obj_t * radioSquelchTitle;
+static lv_obj_t * radioSquelchDownButton;
+static lv_obj_t * radioSquelchUpButton;
+static lv_obj_t * radioSquelchSpinbox;
 // Freq list
 static lv_obj_t * freqList;
 static lv_obj_t * freqListUpButton;
@@ -351,38 +347,31 @@ static void toggle_filter3_cb(lv_event_t * e)
     settings->setRadioFilter3(state);
 }
 
-static void toggle_volume_cb(lv_event_t * e)
+static void radio_update_squelch()
 {
-    bool state = lv_obj_has_state(radioVolumeToggle, LV_STATE_CHECKED);
+    int32_t squelch = lv_spinbox_get_value(radioSquelchSpinbox);
     Radio* radio = Radio::getRadio();
-    radio->setAutoVolume(state);
-    // Save state to settings
+    radio->setQuelch(squelch);
+    // Update Settings
     Settings* settings = Settings::getSettings();
-    settings->setRadioAutoVolume(state);
+    settings->setRadioSquelch(squelch);
 }
 
-static void radio_update_volume()
-{
-    int32_t volume = lv_spinbox_get_value(radioVolumeSpinbox);
-    Radio* radio = Radio::getRadio();
-    radio->setVolume(volume);
-}
-
-static void radio_volume_down_cb(lv_event_t * e)
+static void radio_squelch_down_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_SHORT_CLICKED || code  == LV_EVENT_LONG_PRESSED_REPEAT) {
-        lv_spinbox_decrement(radioVolumeSpinbox);
-        radio_update_volume();
+        lv_spinbox_decrement(radioSquelchSpinbox);
+        radio_update_squelch();
     }
 }
 
-static void radio_volume_up_cb(lv_event_t * e)
+static void radio_squelch_up_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_SHORT_CLICKED || code == LV_EVENT_LONG_PRESSED_REPEAT) {
-        lv_spinbox_increment(radioVolumeSpinbox);
-        radio_update_volume();
+        lv_spinbox_increment(radioSquelchSpinbox);
+        radio_update_squelch();
     }
 }
 
@@ -476,8 +465,8 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     // Previous button
     freqPrevButton = uiCreateImageButton(tab,LV_SYMBOL_LEFT,radio_prev_freq_cb,LV_EVENT_CLICKED,RADIO_BUTTONS_WIDTH, RADIO_FREQ_HEIGHT,RADIO_FREQ_NEXT_X,0);
     // Freq
-    radiioFreqLabelButton = uiCreateLabelButton(tab,"000.0000 MHz",radio_freq_cb,LV_EVENT_CLICKED,lv_color_make(10, 10, 10),tabWidth-RADIO_FREQ_X-RADIO_BUTTONS_WIDTH-8, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
-    lv_obj_add_style(radiioFreqLabelButton,&style_text_lcd_large,0);
+    radioFreqLabelButton = uiCreateLabelButton(tab,"000.0000 MHz",radio_freq_cb,LV_EVENT_CLICKED,lv_color_make(10, 10, 10),tabWidth-RADIO_FREQ_X-RADIO_BUTTONS_WIDTH-8, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
+    lv_obj_add_style(radioFreqLabelButton,&style_text_lcd_large,0);
     // Freq text area
     radioFreqTextArea = uiCreateTextArea(tab,radio_freq_ta_cb,tabWidth-RADIO_FREQ_X-RADIO_BUTTONS_WIDTH-8, RADIO_FREQ_HEIGHT,RADIO_FREQ_X,0);
     lv_obj_add_style(radioFreqTextArea,&style_header,0);
@@ -517,28 +506,24 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     currentY+=(TOGGLE_LINE_HEIGHT+HALF_SPACER);
     // Volume
     currentX = 0;
-    radioVolumeTitle = uiCreateLabel(tab,&style_section_title,VOLUME_LABEL,0,currentY+HALF_SPACER,VOLUME_LABEL_WIDTH,LINE_HEIGHT);
-    currentX+=VOLUME_LABEL_WIDTH+SPACER;
-    radioVolumeToggle = uiCreateToggle(tab,&style_section_text,toggle_volume_cb,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentX+=TOGGLE_WIDTH+SPACER;
-    radioVolumeAutoLabel = uiCreateLabel(tab,&style_section_text,VOLUME_AUTO_LABEL,currentX,currentY+HALF_SPACER,VOLUME_AUTO_LABEL_WIDTH,LINE_HEIGHT);
-    currentX+=FILTER_LABEL_WIDTH+SPACER;
+    radioSquelchTitle = uiCreateLabel(tab,&style_section_title,SQUELCH_LABEL,0,currentY+HALF_SPACER,SQUELCH_LABEL_WIDTH,LINE_HEIGHT);
+    currentX+=SQUELCH_LABEL_WIDTH+SPACER;
     // Volume down button
-    radioVolumeDownButton = uiCreateImageButton(tab,LV_SYMBOL_MINUS,radio_volume_down_cb,LV_EVENT_ALL,RADIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
+    radioSquelchDownButton = uiCreateImageButton(tab,LV_SYMBOL_MINUS,radio_squelch_down_cb,LV_EVENT_ALL,RADIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
     currentX+=RADIO_BUTTONS_WIDTH+SPACER;
     // Spinbox
-    radioVolumeSpinbox = lv_spinbox_create(tab);
-    lv_spinbox_set_range(radioVolumeSpinbox, 1, 8);
-    lv_spinbox_set_digit_format(radioVolumeSpinbox, 1, 0);
-    lv_obj_set_style_pad_all(radioVolumeSpinbox,2,0);
-    lv_obj_set_pos(radioVolumeSpinbox,currentX,currentY);
-    lv_obj_set_size(radioVolumeSpinbox, VOLUME_SPINBOX_WIDTH, TOGGLE_LINE_HEIGHT);
-    lv_obj_set_style_text_align(radioVolumeSpinbox,LV_TEXT_ALIGN_CENTER,0);
+    radioSquelchSpinbox = lv_spinbox_create(tab);
+    lv_spinbox_set_range(radioSquelchSpinbox, 1, 8);
+    lv_spinbox_set_digit_format(radioSquelchSpinbox, 1, 0);
+    lv_obj_set_style_pad_all(radioSquelchSpinbox,2,0);
+    lv_obj_set_pos(radioSquelchSpinbox,currentX,currentY);
+    lv_obj_set_size(radioSquelchSpinbox, SQUELCH_SPINBOX_WIDTH, TOGGLE_LINE_HEIGHT);
+    lv_obj_set_style_text_align(radioSquelchSpinbox,LV_TEXT_ALIGN_CENTER,0);
     // Hide cursor
-    lv_obj_set_style_opa(radioVolumeSpinbox,0,LV_PART_CURSOR);
-    currentX+=VOLUME_SPINBOX_WIDTH+SPACER;
+    lv_obj_set_style_opa(radioSquelchSpinbox,0,LV_PART_CURSOR);
+    currentX+=SQUELCH_SPINBOX_WIDTH+SPACER;
     // Volume up button
-    radioVolumeUpButton = uiCreateImageButton(tab,LV_SYMBOL_PLUS,radio_volume_up_cb,LV_EVENT_ALL,RADIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
+    radioSquelchUpButton = uiCreateImageButton(tab,LV_SYMBOL_PLUS,radio_squelch_up_cb,LV_EVENT_ALL,RADIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
     currentY+=(TOGGLE_LINE_HEIGHT+HALF_SPACER);
     // Freq list
     freqList = lv_list_create(tab); 
@@ -606,8 +591,8 @@ void uiSettingsUpdatePower(int power)
 
 void uiSettingsUpdateFreq(char* freqBuffer, bool scanOn)
 {
-    lv_label_set_text(radiioFreqLabelButton,freqBuffer);
-    lv_obj_set_style_text_color(radiioFreqLabelButton,scanOn ? uiOnColor : uiOffColor,0);
+    lv_label_set_text(radioFreqLabelButton,freqBuffer);
+    lv_obj_set_style_text_color(radioFreqLabelButton,scanOn ? uiOnColor : uiOffColor,0);
 }
 
 

@@ -9,6 +9,7 @@
 // Externs
 extern void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth);
 extern void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight);
+extern void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight);
 extern void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth);
 extern void createNetworkTab(lv_obj_t * tab, int currentY, int tabWidth);
 extern void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight);
@@ -29,17 +30,19 @@ void uiSettingsCreateView(lv_obj_t * cont)
     //lv_obj_set_style_text_color(tab_btns, lv_palette_lighten(LV_PALETTE_GREY, 5), 0);
     lv_obj_set_style_border_side(tab_btns, LV_BORDER_SIDE_RIGHT, LV_PART_ITEMS | LV_STATE_CHECKED);
 
-    /*Add 5 tabs */
+    /*Add 6 tabs */
     lv_obj_t * tab1 = lv_tabview_add_tab(settingsTabview, "Sys.");
     lv_obj_t * tab2 = lv_tabview_add_tab(settingsTabview, "Wifi");
     lv_obj_t * tab3 = lv_tabview_add_tab(settingsTabview, "Net.");
     lv_obj_t * tab4 = lv_tabview_add_tab(settingsTabview, "SD");
     lv_obj_t * tab5 = lv_tabview_add_tab(settingsTabview, "Radio");
+    lv_obj_t * tab6 = lv_tabview_add_tab(settingsTabview, "Audio");
     lv_obj_add_style(tab1, &style_pad_small, 0);
     lv_obj_add_style(tab2, &style_pad_small, 0);
     lv_obj_add_style(tab3, &style_pad_small, 0);
     lv_obj_add_style(tab4, &style_pad_small, 0);
     lv_obj_add_style(tab5, &style_pad_small, 0);
+    lv_obj_add_style(tab6, &style_pad_small, 0);
     int tabWidth = lv_obj_get_width(tab1) - 8; // 2*4 px padding
     int tabHeight = lv_obj_get_height(tab1) - 8 - FOOTER_HEIGHT; // 2*4 px padding
 
@@ -53,6 +56,7 @@ void uiSettingsCreateView(lv_obj_t * cont)
     createNetworkTab(tab3,currentY,tabWidth);
     createSdTab(tab4,currentY,tabWidth,tabHeight);
     createRadioTab(tab5,currentY,tabWidth,tabHeight);
+    createAudioTab(tab6,currentY,tabWidth,tabHeight);
     lv_obj_clear_flag(lv_tabview_get_content(settingsTabview), LV_OBJ_FLAG_SCROLLABLE);
 }
 
