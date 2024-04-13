@@ -446,10 +446,6 @@ static void freq_edit_cb(lv_event_t * e)
 {
     if(currentFreq == NULL) return;
     startEditFreq(false);
-    //lv_event_code_t code = lv_event_get_code(e);
-    //Serial.printf("Delete cb with event code %d\n",code);
-    //if((code != LV_EVENT_SHORT_CLICKED)) return;
-    // TODO
 }
 
 

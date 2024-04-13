@@ -146,6 +146,37 @@ bool Filesystems::deleteBeacon(const char* fileName)
     return result;
 }
 
+int Filesystems::deleteAllBeacons()
+{
+    int result = 0;
+    if(sdFilesystemMounted&&logDirReady)
+    {
+        File logDir = getLogDir();
+        if(logDir && logDir.isDirectory())
+        {
+            File beacon = logDir.openNextFile();
+            while(beacon)
+            {
+                if(!beacon.isDirectory())
+                {
+                    String name = beacon.name();
+                    if(name.endsWith(LOG_FILE_EXTENSION))
+                    {
+                        char buffer[64];
+                        sprintf(buffer,"%s/%s",SARSATJRX_LOG_DIR,name);
+                        if(sdFileSystem->remove(buffer))
+                        {
+                            result++;
+                        }
+                    }
+                }
+                beacon = logDir.openNextFile();
+            }
+        }
+    }
+    return result;
+}
+
 
 uint64_t Filesystems::getSdTotalBytes()
 {

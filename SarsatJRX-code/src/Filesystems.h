@@ -31,6 +31,7 @@ class Filesystems
         bool saveBeacon(Beacon* beacon);
         bool loadBeacon(const char* fileName, volatile byte* frameBuffer);
         bool deleteBeacon(const char* fileName);
+        int deleteAllBeacons();
 
     private :
 
