@@ -27,7 +27,7 @@
 // UI
 #define POWER_DISPLAY_PERIOD    500
 #define POWER_MIN_VALUE         0
-#define POWER_MAX_VALUE         150
+#define POWER_MAX_VALUE         128
 
 // Hardware 
 // SD Card
