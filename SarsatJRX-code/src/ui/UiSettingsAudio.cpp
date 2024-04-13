@@ -42,7 +42,7 @@ static lv_obj_t * audioVolumeToggle;
 static lv_obj_t * audioVolumeAutoLabel;
 static lv_obj_t * audioVolumeDownButton;
 static lv_obj_t * audioVolumeUpButton;
-static lv_obj_t * audioVolumeSpinbox;
+static lv_obj_t * radioVolumeSpinbox;
 
 
 static void toggle_audio_cb(lv_event_t * e)
@@ -108,7 +108,7 @@ static void toggle_volume_cb(lv_event_t * e)
 
 static void audio_update_volume()
 {
-    int32_t volume = lv_spinbox_get_value(audioVolumeSpinbox);
+    int32_t volume = lv_spinbox_get_value(radioVolumeSpinbox);
     Radio* radio = Radio::getRadio();
     radio->setVolume(volume);
     // Update Settings
@@ -120,7 +120,7 @@ static void audio_volume_down_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_SHORT_CLICKED || code  == LV_EVENT_LONG_PRESSED_REPEAT) {
-        lv_spinbox_decrement(audioVolumeSpinbox);
+        lv_spinbox_decrement(radioVolumeSpinbox);
         audio_update_volume();
     }
 }
@@ -129,7 +129,7 @@ static void audio_volume_up_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if(code == LV_EVENT_SHORT_CLICKED || code == LV_EVENT_LONG_PRESSED_REPEAT) {
-        lv_spinbox_increment(audioVolumeSpinbox);
+        lv_spinbox_increment(radioVolumeSpinbox);
         audio_update_volume();
     }
 }
@@ -179,37 +179,26 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     audioVolumeDownButton = uiCreateImageButton(tab,LV_SYMBOL_MINUS,audio_volume_down_cb,LV_EVENT_ALL,AUDIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
     currentX+=AUDIO_BUTTONS_WIDTH+SPACER;
     // Spinbox
-    audioVolumeSpinbox = lv_spinbox_create(tab);
-    lv_spinbox_set_range(audioVolumeSpinbox, 1, 8);
-    lv_spinbox_set_digit_format(audioVolumeSpinbox, 1, 0);
-    lv_obj_set_style_pad_all(audioVolumeSpinbox,2,0);
-    lv_obj_set_pos(audioVolumeSpinbox,currentX,currentY);
-    lv_obj_set_size(audioVolumeSpinbox, VOLUME_SPINBOX_WIDTH, TOGGLE_LINE_HEIGHT);
-    lv_obj_set_style_text_align(audioVolumeSpinbox,LV_TEXT_ALIGN_CENTER,0);
+    radioVolumeSpinbox = lv_spinbox_create(tab);
+    lv_spinbox_set_range(radioVolumeSpinbox, 1, 8);
+    lv_spinbox_set_digit_format(radioVolumeSpinbox, 1, 0);
+    lv_obj_set_style_pad_all(radioVolumeSpinbox,2,0);
+    lv_obj_set_pos(radioVolumeSpinbox,currentX,currentY);
+    lv_obj_set_size(radioVolumeSpinbox, VOLUME_SPINBOX_WIDTH, TOGGLE_LINE_HEIGHT);
+    lv_obj_set_style_text_align(radioVolumeSpinbox,LV_TEXT_ALIGN_CENTER,0);
     // Hide cursor
-    lv_obj_set_style_opa(audioVolumeSpinbox,0,LV_PART_CURSOR);
+    lv_obj_set_style_opa(radioVolumeSpinbox,0,LV_PART_CURSOR);
     currentX+=VOLUME_SPINBOX_WIDTH+SPACER;
     // Volume up button
     audioVolumeUpButton = uiCreateImageButton(tab,LV_SYMBOL_PLUS,audio_volume_up_cb,LV_EVENT_ALL,AUDIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
     currentY+=(TOGGLE_LINE_HEIGHT+HALF_SPACER);
 }
 
-void uiSettingsUpdateAudioStatus(bool radioStatus)
+void uiSettingsUpdateAudioSatus()
 {
-    if(radioStatus)
-    {   // Audio toggle on
-        lv_obj_add_state(audioToggle, LV_STATE_CHECKED);
-        // TODO update audio
-        // Radio * radio = Radio::getRadio();
-        // Update filters
-        //radio->getFilter1() ? lv_obj_add_state(audioFilter1Toggle, LV_STATE_CHECKED) : lv_obj_clear_state(audioFilter1Toggle, LV_STATE_CHECKED);
-        //radio->getFilter2() ? lv_obj_add_state(audioFilter2Toggle, LV_STATE_CHECKED) : lv_obj_clear_state(audioFilter2Toggle, LV_STATE_CHECKED);
-        //radio->getFilter3() ? lv_obj_add_state(audioFilter3Toggle, LV_STATE_CHECKED) : lv_obj_clear_state(audioFilter3Toggle, LV_STATE_CHECKED);
-    }
-    else
-    {   // Audio toggle off
-        lv_obj_clear_state(audioToggle, LV_STATE_CHECKED);
-    }
+    Radio * radio = Radio::getRadio();
+    // Upadte volume
+    lv_spinbox_set_value(radioVolumeSpinbox,radio->getVolume());
 }
 
 void uiSettingsAudioPower(int power)
