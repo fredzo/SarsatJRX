@@ -40,9 +40,7 @@ void Radio::radioInit(bool autoVolume, byte volume, bool filter1, bool filter2, 
     on = dra->handshake();
     version = dra->version();
     dra->volume(volume);
-    dra->filters(filter1, filter2, filter3);
     setScanFrequencies(scanFrequencies);
-    // Las command can be async
     setFrequency(frequency);
 }
 
@@ -183,9 +181,7 @@ void Radio::startScan()
 void Radio::stopScan()
 {
     scanOn = false;
-    parameters.freq_rx = radioFrequency;
-    parameters.freq_tx = radioFrequency;
-    dra->group_async(parameters);
+    setFrequency(radioFrequency);
 }
 
 void Radio::toggleScan()
@@ -205,7 +201,9 @@ void Radio::setFrequency(float freq)
     parameters.freq_rx = freq;
     parameters.freq_tx = freq;
     parameters.squelch = radioSquelch;
-    dra->group_async(parameters);
+    dra->group(parameters);
+    // Group command resets filters => set them back
+    dra->filters(filter1, filter2, filter3);
 }
 
 void Radio::setQuelch(byte squelch)
@@ -214,10 +212,8 @@ void Radio::setQuelch(byte squelch)
     {
         scanOn = false;
         radioSquelch = squelch;
-        parameters.freq_rx = radioFrequency;
-        parameters.freq_tx = radioFrequency;
-        parameters.squelch = squelch;
-        dra->group_async(parameters);
+        // Use set frequency group command
+        setFrequency(radioFrequency);
     }
 }
 
@@ -277,7 +273,7 @@ void Radio::setVolume(byte volume)
     if((volume != Radio::volume)&&(volume>=1)&&(volume<=8))
     {
         Radio::volume = volume;
-        if(dra) dra->volume_async(volume);
+        if(dra) dra->volume(volume);
     }
 }
 
@@ -294,7 +290,7 @@ byte Radio::getSquelch()
 void Radio::setFilter1(bool on)
 {
     Radio::filter1 = on;
-    if(dra) dra->filters_async(filter1,filter2,filter3);
+    if(dra) dra->filters(filter1,filter2,filter3);
 }
 
 bool Radio::getFilter1()
@@ -305,7 +301,7 @@ bool Radio::getFilter1()
 void Radio::setFilter2(bool on)
 {
     Radio::filter2 = on;
-    if(dra) dra->filters_async(filter1,filter2,filter3);
+    if(dra) dra->filters(filter1,filter2,filter3);
 }
 
 bool Radio::getFilter2()
@@ -316,7 +312,7 @@ bool Radio::getFilter2()
 void Radio::setFilter3(bool on)
 {
     Radio::filter3 = on;
-    if(dra) dra->filters_async(filter1,filter2,filter3);
+    if(dra) dra->filters(filter1,filter2,filter3);
 }
 
 bool Radio::getFilter3()
