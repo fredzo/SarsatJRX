@@ -163,7 +163,7 @@ int Filesystems::deleteAllBeacons()
                     if(name.endsWith(LOG_FILE_EXTENSION))
                     {
                         char buffer[64];
-                        sprintf(buffer,"%s/%s",SARSATJRX_LOG_DIR,name);
+                        sprintf(buffer,"%s/%s",SARSATJRX_LOG_DIR,name.c_str());
                         if(sdFileSystem->remove(buffer))
                         {
                             result++;

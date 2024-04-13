@@ -48,6 +48,8 @@ static lv_obj_t * currentBeacon = NULL;
 static lv_obj_t * deleteConfirmBox;
 static int lastBeaconIndex = 0;
 
+void uiSettingsUpdateSdView();
+
 static void toggle_sd_cb(lv_event_t * e)
 {
     bool state = lv_obj_has_state(sdToggle, LV_STATE_CHECKED);
@@ -163,12 +165,17 @@ static void deleteCurrentBeacon()
     }
 }
 
+static void deleteAllBeacons()
+{
+    if(Filesystems::getFilesystems()->deleteAllBeacons()>0)
+    {
+        uiSettingsUpdateSdView();
+    }
+}
+
 static void beacon_delete_cb(lv_event_t * e)
 {
     if(currentBeacon == NULL) return;
-    //lv_event_code_t code = lv_event_get_code(e);
-    //Serial.printf("Delete cb with event code %d\n",code);
-    //if((code != LV_EVENT_SHORT_CLICKED)) return;
     static const char * btns[] = {"OK", "Cancel", NULL};
     deleteConfirmBox = lv_msgbox_create(NULL, "Delete ?", "Do you want to delete this beacon ?", btns, true);
     lv_obj_add_event_cb(deleteConfirmBox, [](lv_event_t * e) 
@@ -182,8 +189,23 @@ static void beacon_delete_cb(lv_event_t * e)
     lv_obj_center(deleteConfirmBox);
 }
 
-static void beacon_delete_longpress_cb(lv_event_t * e)
+static void beacon_title_longpress_cb(lv_event_t * e)
 {
+    static const char * btns[] = {"OK", "Cancel", NULL};
+    deleteConfirmBox = lv_msgbox_create(NULL, "Delete All ?", "Do you want to delete all beacons ?", btns, true);
+    lv_obj_add_event_cb(deleteConfirmBox, [](lv_event_t * e) 
+    {
+        if(lv_msgbox_get_active_btn(deleteConfirmBox) == 0)
+        {
+            deleteAllBeacons(); 
+        }
+        lv_msgbox_close(deleteConfirmBox);
+    }, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_center(deleteConfirmBox);
+}
+
+static void beacon_delete_longpress_cb(lv_event_t * e)
+{   // TODO delete all ?
     deleteCurrentBeacon();
     lv_event_stop_processing(e);
 }
@@ -208,6 +230,8 @@ void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     currentY+=LINE_HEIGHT;
     // Beacons
     beaconsTitle = uiCreateLabel(tab,&style_section_title,BEACONS_LABEL,0,currentY,BEACONS_LABEL_WIDTH,LINE_HEIGHT);
+    lv_obj_add_flag(beaconsTitle, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(beaconsTitle, beacon_title_longpress_cb, LV_EVENT_LONG_PRESSED, NULL);
     currentY+=LINE_HEIGHT;
     beaconsList = lv_list_create(tab); 
     lv_obj_set_pos(beaconsList,0,currentY);
@@ -291,7 +315,7 @@ void uiSettingsUpdateSdView()
         }
     }
     else
-    {   // Wifi toggle on
+    {   // SD toggle off
         lv_obj_clear_state(sdToggle, LV_STATE_CHECKED);
     }
     // total size
