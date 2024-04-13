@@ -62,25 +62,25 @@ void Radio::readGroupCallback(DRA818::Parameters parameters)
 void Radio::groupCallback(int retCode)
 {
     #ifdef SERIAL_OUT
-        retCode ? Serial.println("Group command success.") : Serial.println("Group command failed.");
+        (retCode == 0) ? Serial.println("Group command success.") : Serial.println("Group command failed.");
     #endif
 }
 
 void Radio::handshakeCallback(int retCode)
 {
-    radioInstance->on = retCode;
+    radioInstance->on = (retCode == 0);
     #ifdef SERIAL_OUT
         retCode ? Serial.println("Handshake command success.") : Serial.println("Handshake command failed.");
     #endif
 }
 
 void Radio::scanCallback(int retCode)
-{
-    radioInstance->scanFreqBusy = retCode;
+{   // Radion module will return 0 if the frequency is busy
+    radioInstance->scanFreqBusy = (retCode == 0);
     #ifdef SERIAL_OUT
         Serial.printf("Frequency %3.4f scan : %s\n",radioInstance->radioFrequency, radioInstance->scanFreqBusy ? "busy" : "no signal");
     #endif
-    if(retCode) radioInstance->stopScan(); // Stop scan on busy frequencies
+    if(radioInstance->scanFreqBusy) radioInstance->stopScan(); // Stop scan on busy frequencies
     if(radioInstance->scanOn)
     {
         radioInstance->scanNext();
@@ -90,14 +90,14 @@ void Radio::scanCallback(int retCode)
 void Radio::volumeCallback(int retCode)
 {
     #ifdef SERIAL_OUT
-        retCode ? Serial.println("Volume command success.") : Serial.println("Volume command failed.");
+        (retCode == 0) ? Serial.println("Volume command success.") : Serial.println("Volume command failed.");
     #endif
 }
 
 void Radio::filtersCallback(int retCode)
 {
     #ifdef SERIAL_OUT
-        retCode ? Serial.println("Filters command success.") : Serial.println("Filters command failed.");
+        (retCode == 0) ? Serial.println("Filters command success.") : Serial.println("Filters command failed.");
     #endif
 }
 
@@ -112,7 +112,7 @@ void Radio::versionCallback(String version)
 void Radio::tailCallback(int retCode)
 {
     #ifdef SERIAL_OUT
-        retCode ? Serial.println("Tail command success.") : Serial.println("Tail command failed.");
+        (retCode == 0) ? Serial.println("Tail command success.") : Serial.println("Tail command failed.");
     #endif
 }
 
