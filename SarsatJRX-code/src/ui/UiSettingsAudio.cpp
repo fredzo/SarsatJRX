@@ -148,7 +148,7 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_set_size(audioMeter, tabWidth-4, AUDIO_METER_HEIGHT);
     lv_obj_set_pos(audioMeter,0,currentY);
     lv_obj_add_style(audioMeter, &style_meter, LV_PART_INDICATOR);
-    lv_bar_set_range(audioMeter, 0, 255);
+    lv_bar_set_range(audioMeter, POWER_MIN_VALUE, POWER_MAX_VALUE);
     lv_obj_set_style_anim_time(audioMeter,200,LV_PART_MAIN);
     currentY += (AUDIO_METER_HEIGHT+HALF_SPACER);
     // Filter toggles

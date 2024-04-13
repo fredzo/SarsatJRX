@@ -477,7 +477,7 @@ void createRadioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_set_size(radioMeter, tabWidth-4, RADIO_METER_HEIGHT);
     lv_obj_set_pos(radioMeter,0,currentY);
     lv_obj_add_style(radioMeter, &style_meter, LV_PART_INDICATOR);
-    lv_bar_set_range(radioMeter, 0, 255);
+    lv_bar_set_range(radioMeter, POWER_MIN_VALUE, POWER_MAX_VALUE);
     lv_obj_set_style_anim_time(radioMeter,200,LV_PART_MAIN);
     currentY += (RADIO_METER_HEIGHT+HALF_SPACER);
     // Version

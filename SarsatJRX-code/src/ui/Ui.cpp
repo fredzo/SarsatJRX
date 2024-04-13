@@ -264,7 +264,7 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_size(meter, FOOTER_METER_WIDTH, FOOTER_METER_HEIGHT);
     lv_obj_set_pos(meter,FOOTER_METTER_X,FOOTER_METTER_Y);
     lv_obj_add_style(meter, &style_meter, LV_PART_INDICATOR);
-    lv_bar_set_range(meter, 0, 255);
+    lv_bar_set_range(meter, POWER_MIN_VALUE, POWER_MAX_VALUE);
     lv_obj_set_style_anim_time(meter,200,LV_PART_MAIN);
     // Next button
     nextButton = uiCreateImageButton(footer,LV_SYMBOL_RIGHT,next_handler,LV_EVENT_CLICKED,FOOTER_BUTTON_WIDTH, LV_PCT(100));

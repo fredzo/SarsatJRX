@@ -78,7 +78,7 @@ void Radio::scanCallback(int retCode)
 {   // Radion module will return 0 if the frequency is busy
     radioInstance->scanFreqBusy = (retCode == 0);
     #ifdef SERIAL_OUT
-        Serial.printf("Frequency %3.4f scan : %s\n",radioInstance->radioFrequency, radioInstance->scanFreqBusy ? "busy" : "no signal");
+        // Serial.printf("Frequency %3.4f scan : %s\n",radioInstance->radioFrequency, radioInstance->scanFreqBusy ? "busy" : "no signal");
     #endif
     if(radioInstance->scanFreqBusy) radioInstance->stopScan(); // Stop scan on busy frequencies
     if(radioInstance->scanOn)

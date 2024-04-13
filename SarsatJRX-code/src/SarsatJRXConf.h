@@ -24,6 +24,11 @@
 #define LOG_FILE_EXTENSION      ".bcn"
 #define LOG_FILENAME_TEMPLATE   "%s/%02d%02d%02d-%02d%02d%02d.bcn"
 
+// UI
+#define POWER_DISPLAY_PERIOD    500
+#define POWER_MIN_VALUE         0
+#define POWER_MAX_VALUE         150
+
 // Hardware 
 // SD Card
 #define SD_CS               13

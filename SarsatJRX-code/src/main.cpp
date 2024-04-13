@@ -111,7 +111,6 @@ void frameReceivedLedBlink()
 // Store last displayed power value
 unsigned long lastPowerDisplayTime = 0;
 float powerValue = -1;
-#define POWER_DISPLAY_PERIOD 5000
 
 void updatePowerValueHeader()
 {  // Power header
