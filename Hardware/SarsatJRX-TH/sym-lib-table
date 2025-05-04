@@ -1,0 +1,7 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "SA602AN")(type "Legacy")(uri "${KIPRJMOD}/libraries/SA602AN.lib")(options "")(descr ""))
+  (lib (name "si5351module")(type "KiCad")(uri "${KIPRJMOD}/libraries/si5351module.kicad_sym")(options "")(descr ""))
+  (lib (name "dra818u")(type "Legacy")(uri "${KIPRJMOD}/libraries/DRA818U_AND_V_Kicad-master/dra818u.lib")(options "")(descr ""))
+  (lib (name "LilyPiGpioHeader")(type "KiCad")(uri "${KIPRJMOD}/libraries/LilyPiGpioHeader.kicad_sym")(options "")(descr ""))
+)

@@ -1,0 +1,6 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "footprints")(type "KiCad")(uri "${KIPRJMOD}/footprints")(options "")(descr ""))
+  (lib (name "DRA818U_AND_V_Kicad-master")(type "KiCad")(uri "${KIPRJMOD}/libraries/DRA818U_AND_V_Kicad-master")(options "")(descr ""))
+  (lib (name "RPI_Hat")(type "KiCad")(uri "${KIPRJMOD}/footprints/RPI_Hat.pretty")(options "")(descr ""))
+)

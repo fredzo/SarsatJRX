@@ -1,0 +1,31 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#(c) SnapEDA 2016 (snapeda.com)
+#This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) with Design Exception 1.0
+#
+# SA602AN
+#
+DEF SA602AN U 0 40 Y Y 1 L N
+F0 "U" -216 503 50 H V L BNN
+F1 "SA602AN" -175 -767 50 H V L BNN
+F2 "DIP254P762X420-8" 0 0 50 H I L BNN
+F3 "" 0 0 50 H I L BNN
+F4 "DIP-8" 0 0 50 H I L BNN "PACKAGE"
+F5 "NXP" 0 0 50 H I L BNN "SUPPLIER"
+F6 "3026279" 0 0 50 H I L BNN "OC_FARNELL"
+F7 "69C4673" 0 0 50 H I L BNN "OC_NEWARK"
+F8 "SA602AN" 0 0 50 H I L BNN "MPN"
+DRAW
+S -500 -600 500 400 0 0 16 f
+X VCC 8 -700 200 200 R 40 40 0 0 W 
+X INA 1 -700 0 200 R 40 40 0 0 I 
+X INB 2 -700 -100 200 R 40 40 0 0 I 
+X OSCB 6 -700 -200 200 R 40 40 0 0 I 
+X GND 3 -700 -400 200 R 40 40 0 0 P 
+X OUTA 4 700 200 200 L 40 40 0 0 O 
+X OUTB 5 700 100 200 L 40 40 0 0 O 
+X OSCE 7 700 0 200 L 40 40 0 0 O 
+ENDDRAW
+ENDDEF
+#
+# End Library
