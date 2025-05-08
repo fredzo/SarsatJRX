@@ -25,9 +25,9 @@
 #define LOG_FILENAME_TEMPLATE   "%s/%02d%02d%02d-%02d%02d%02d.bcn"
 
 // UI
-#define POWER_DISPLAY_PERIOD    500
+#define POWER_DISPLAY_PERIOD    5 // 5ms
 #define POWER_MIN_VALUE         0
-#define POWER_MAX_VALUE         128
+#define POWER_MAX_VALUE         384
 
 // Hardware 
 // SD Card
@@ -35,6 +35,12 @@
 #define SD_MISO             2
 #define SD_MOSI             15
 #define SD_SCLK             14
+
+// Battery voltage input
+#define BATTERY_ADC_PIN     35
+
+// Audio power input
+#define AUDIO_ADC_PIN       34
 
 // RTC
 #define RTC_INT_PIN         36
@@ -55,13 +61,13 @@
 #define I2C_SDA_PIN         21    
 #define I2C_SCL_PIN         22
 
-// UART 1
+// UART 1 => free
 #define UART1_RX_PIN        39
-#define UART1_TX_PIN        33
+#define UART1_TX_PIN        33 // => Led err
 
 // Receiver Pin
-#define RECEIVER_PIN        25
-#define NOTIFICATION_PIN    26
+#define RECEIVER_PIN        25 // Int
+#define NOTIFICATION_PIN    26 // => LED Frame
 
 
 #endif

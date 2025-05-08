@@ -17,39 +17,16 @@ class Settings
             return settingsInstance;
         }
 
-        class Frequency 
-        {
-            public :
-                float value = -1;
-                bool on = false;
-        };
-
         void init();
 
         bool getWifiState();
         void setWifiState(bool state);
-        bool getRadioState();
-        void setRadioState(bool state);
-        bool getRadioAutoVolume();
-        void setRadioAutoVolume(bool state);
-        byte getRadioVolume();
-        void setRadioVolume(byte volume);
-        byte getRadioSquelch();
-        void setRadioSquelch(byte volume);
-        bool getRadioFilter1();
-        void setRadioFilter1(bool on);
-        bool getRadioFilter2();
-        void setRadioFilter2(bool on);
-        bool getRadioFilter3();
-        void setRadioFilter3(bool on);
-        Frequency getFrequency(int index);
-        void setFrequency(int index, Frequency frequency);
-        void setFrequency(int index, float frequency);
-        void setFrequencyOn(int index, bool on);
-        int getFrequencyCount();
-        float* getActiveFrequencies();
-        float getLastFrequency();
-        void setLastFrequency(float frequency);
+
+        bool getDisplayReverse();
+        void setDisplayReverse(bool reverse);
+
+        uint8_t getDisplayBacklight();
+        void setDisplayBacklight(uint8_t backlight);
 
         void save();
 
@@ -67,8 +44,6 @@ class Settings
         };
 
         static Settings *settingsInstance;
-        static Frequency NO_FREQUENCY;
-        static float DEFAULT_FREQUENCIES[];
 };
 
 #endif 

@@ -5,7 +5,7 @@
 #include <Display.h>
 #include <Filesystems.h>
 #include <Settings.h>
-#include <Radio.h>
+#include <Audio.h>
 
 class Hardware
 {
@@ -20,8 +20,6 @@ public:
 
     void init();
 
-    void radioInit();
-
     Display* getDisplay();
 
     Rtc* getRtc();
@@ -30,7 +28,7 @@ public:
 
     Settings* getSettings();
 
-    Radio* getRadio();
+    Audio* getAudio();
 
     /**
      * @brief Returns actual VCC value
@@ -60,7 +58,7 @@ private:
     Rtc *rtc = nullptr;
     Filesystems *filesystems = nullptr;
     Settings *settings = nullptr;
-    Radio* radio = nullptr;
+    Audio* audio = nullptr;
 
     static Hardware *hardware;
 

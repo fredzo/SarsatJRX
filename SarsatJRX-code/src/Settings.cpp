@@ -3,22 +3,10 @@
 
 #define PREF_PREFIX         "SarsatJRX"
 #define WIFI_STATE_KEY      "Wifi"
-#define RADIO_STATE_KEY     "Radio"
-#define RADIO_VOLUME_KEY    "Vol"
-#define RADIO_SQUELCH_KEY   "Sql"
-#define RADIO_AUTO_VOL_KEY  "AutoVol"
-#define RADIO_FILTER1_KEY   "Filt1"
-#define RADIO_FILTER2_KEY   "Filt2"
-#define RADIO_FILTER3_KEY   "Filt3"
-#define RADIO_FREQ_T_KEY    "FrqF%d"
-#define RADIO_FREQ_ON_T_KEY "FrqO%d"
-#define RADIO_LAST_FREQ_KEY "LFrq"
-
-float Settings::DEFAULT_FREQUENCIES[] = {406.025,406.028,406.037,406.040,406.049,406.052,433.125};
+#define DISPLAY_REVERSE     "DRev"
+#define DISPLAY_BACKLIGHT   "DBL"
 
 Settings *Settings::settingsInstance = nullptr;
-
-Settings::Frequency Settings::NO_FREQUENCY;
 
 void Settings::init()
 {
@@ -36,168 +24,22 @@ void Settings::setWifiState(bool state)
     dirty = true;
 }
 
-bool Settings::getRadioState()
+bool Settings::getDisplayReverse()
 {
-    return preferences.getBool(RADIO_STATE_KEY,true);
+    return preferences.getBool(DISPLAY_REVERSE,true);
 }
 
-void Settings::setRadioState(bool state)
+void Settings::setDisplayBacklight(uint8_t backlight)
 {
-    preferences.putBool(RADIO_STATE_KEY,state);
+    preferences.putUChar(DISPLAY_BACKLIGHT,backlight);
     dirty = true;
 }
 
-bool Settings::getRadioAutoVolume()
+uint8_t Settings::getDisplayBacklight()
 {
-    return preferences.getBool(RADIO_AUTO_VOL_KEY,true);
+    return preferences.getUChar(DISPLAY_BACKLIGHT,true);
 }
 
-void Settings::setRadioAutoVolume(bool state)
-{
-    preferences.putBool(RADIO_AUTO_VOL_KEY,state);
-    dirty = true;
-}
-
-byte Settings::getRadioVolume()
-{
-    return preferences.getChar(RADIO_VOLUME_KEY,8);
-}
-
-void Settings::setRadioVolume(byte volume)
-{
-    preferences.putChar(RADIO_VOLUME_KEY,volume);
-    dirty = true;
-}
-
-byte Settings::getRadioSquelch()
-{
-    return preferences.getChar(RADIO_SQUELCH_KEY,1);
-}
-
-void Settings::setRadioSquelch(byte volume)
-{
-    preferences.putChar(RADIO_SQUELCH_KEY,volume);
-    dirty = true;
-}
-
-bool Settings::getRadioFilter1()
-{
-    return preferences.getBool(RADIO_FILTER1_KEY,true);
-}
-
-void Settings::setRadioFilter1(bool state)
-{
-    preferences.putBool(RADIO_FILTER1_KEY,state);
-    dirty = true;
-}
-
-bool Settings::getRadioFilter2()
-{
-    return preferences.getBool(RADIO_FILTER2_KEY,true);
-}
-
-void Settings::setRadioFilter2(bool state)
-{
-    preferences.putBool(RADIO_FILTER2_KEY,state);
-    dirty = true;
-}
-
-bool Settings::getRadioFilter3()
-{
-    return preferences.getBool(RADIO_FILTER3_KEY,true);
-}
-
-void Settings::setRadioFilter3(bool state)
-{
-    preferences.putBool(RADIO_FILTER3_KEY,state);
-    dirty = true;
-}
-
-Settings::Frequency Settings::getFrequency(int index)
-{
-    if(index < 0 || index >= FREQUENCY_COUNT) return NO_FREQUENCY;
-    Frequency result;
-    char buffer[8];
-    sprintf(buffer,RADIO_FREQ_T_KEY,index);
-    if(!preferences.isKey(buffer))
-    {   // Init the preference if not available
-        result.value = DEFAULT_FREQUENCIES[index];
-        preferences.putFloat(buffer,result.value);
-    }
-    else
-    {
-        result.value = preferences.getFloat(buffer,DEFAULT_FREQUENCIES[index]);
-    }
-    sprintf(buffer,RADIO_FREQ_ON_T_KEY,index);
-    if(!preferences.isKey(buffer))
-    {   // Init the preference if not available
-        result.on = true;
-        preferences.putBool(buffer,true);
-    }
-    else
-    {
-        result.on = preferences.getBool(buffer,true);
-    }
-    return result;
-}
-
-void Settings::setFrequency(int index, Frequency frequency)
-{
-   if(index < 0 || index >= FREQUENCY_COUNT) return;
-    char buffer[8];
-    sprintf(buffer,RADIO_FREQ_T_KEY,index);
-    preferences.putFloat(buffer,frequency.value);
-    sprintf(buffer,RADIO_FREQ_ON_T_KEY,index);
-    preferences.putBool(buffer,frequency.on);
-}
-
-void Settings::setFrequency(int index, float frequency)
-{
-    if(index < 0 || index >= FREQUENCY_COUNT) return;
-    char buffer[8];
-    sprintf(buffer,RADIO_FREQ_T_KEY,index);
-    preferences.putFloat(buffer,frequency);
-}
-
-void Settings::setFrequencyOn(int index, bool on)
-{
-    if(index < 0 || index >= FREQUENCY_COUNT) return;
-    char buffer[8];
-    sprintf(buffer,RADIO_FREQ_ON_T_KEY,index);
-    preferences.putBool(buffer,on);
-}
-
-int Settings::getFrequencyCount()
-{
-    return FREQUENCY_COUNT;
-}
-
-float* Settings::getActiveFrequencies()
-{
-    int index = 0;
-    for(int i = 0 ; i <= FREQUENCY_COUNT ; i++)
-    {
-        Frequency freq = getFrequency(i);
-        if(freq.on)
-        {   
-            activeFrequencies[index] = freq.value;
-            index++;
-        }
-    }
-    activeFrequencies[index] = 0; // Trailing 0 to mark array end
-    return activeFrequencies;
-}
-
-float Settings::getLastFrequency()
-{
-    return preferences.getFloat(RADIO_LAST_FREQ_KEY,DEFAULT_FREQUENCIES[0]);
-}
-
-void Settings::setLastFrequency(float frequency)
-{
-    preferences.putFloat(RADIO_LAST_FREQ_KEY,frequency);
-    dirty = true;
-}
 
 void Settings::save()
 {

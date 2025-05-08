@@ -34,13 +34,9 @@
 #define FOOTER_FRAME_LABEL          "Frame received !"
 #define FOOTER_BUTTON_WIDTH         70
 #define FOOTER_SPINNER_SIZE         42
-#define FOOTER_FREQ_BUTTON_WIDTH    108
-#define FOOTER_FREQ_BUTTON_HEIGHT   30
-#define FOOTER_FREQ_BUTTON_X        FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE+8
-#define FOOTER_FREQ_BUTTON_Y        FOOTER_HEIGHT-FOOTER_FREQ_BUTTON_HEIGHT-4
-#define FOOTER_METER_WIDTH          DISPLAY_WIDTH-2*FOOTER_BUTTON_WIDTH-FOOTER_SPINNER_SIZE-FOOTER_FREQ_BUTTON_WIDTH-16
+#define FOOTER_METER_WIDTH          DISPLAY_WIDTH-2*FOOTER_BUTTON_WIDTH-FOOTER_SPINNER_SIZE-16
 #define FOOTER_METER_HEIGHT         10
-#define FOOTER_METTER_X             FOOTER_FREQ_BUTTON_X+FOOTER_FREQ_BUTTON_WIDTH
+#define FOOTER_METTER_X             FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE+8
 #define FOOTER_METTER_Y             FOOTER_HEIGHT-FOOTER_METER_HEIGHT-8
 
 // Additionnal Symbols
@@ -104,8 +100,6 @@ lv_obj_t * meter;
 lv_obj_t * spinner;
 lv_obj_t * previousButton;
 lv_obj_t * nextButton;
-lv_obj_t * freqButton;
-lv_obj_t * freqLabelButton;
 
 UiScreen currentScreen = UiScreen::START;
 
@@ -137,11 +131,6 @@ static void previous_handler(lv_event_t * e)
 static void next_handler(lv_event_t * e)
 {
     nextFrame();
-}
-
-static void freq_handler(lv_event_t * e)
-{
-    toggleScan();
 }
 
 void createHeader(lv_obj_t * win)
@@ -243,11 +232,6 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_style_pad_top(spinner,4,0);
     lv_obj_set_style_pad_left(spinner,4,0);
     lv_obj_set_style_pad_right(spinner,4,0);
-    // Frequ
-    freqLabelButton = uiCreateLabelButton(footer,"000.0000 MHz",freq_handler,LV_EVENT_CLICKED,lv_color_make(10, 10, 10),FOOTER_FREQ_BUTTON_WIDTH, LV_PCT(100));
-    freqButton = lv_obj_get_parent(freqLabelButton);
-    lv_obj_add_style(freqLabelButton,&style_text_mono,0);
-    //lv_obj_clear_flag(freqLabelButton, LV_OBJ_FLAG_CLICKABLE);
     // Footer label
     footerLabel = lv_label_create(footer);
     lv_label_set_long_mode(footerLabel, LV_LABEL_LONG_DOT);
@@ -521,36 +505,10 @@ void uiSetLedFrameReceivedState(bool on)
     on ? lv_led_on(ledFrameReceived) : lv_led_off(ledFrameReceived);
 }
 
-void uiSetRadioStatus(bool on)
-{
-    if(on)
-    {   // Show meter and frequ
-        lv_obj_clear_flag(meter, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(freqButton, LV_OBJ_FLAG_HIDDEN);
-        // Update radioVolume
-        uiSettingsUpdateAudioSatus();
-    }
-    else
-    {
-        lv_obj_add_flag(meter, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(freqButton, LV_OBJ_FLAG_HIDDEN);
-    }
-    uiSettingsUpdateRadioStatus(on);
-}
-
 void uiSetPower(int power)
 {
     lv_bar_set_value(meter, power, LV_ANIM_ON);
     uiSettingsUpdatePower(power);
-}
-
-void uiSetFreq(float freq, bool scanOn)
-{
-    char buffer[16];
-    sprintf(buffer,"%3.4f MHz",freq);
-    lv_label_set_text(freqLabelButton,buffer);
-    lv_obj_set_style_text_color(freqLabelButton,scanOn ? uiOnColor : uiOffColor,0);
-    uiSettingsUpdateFreq(buffer, scanOn);
 }
 
 lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text, int x, int y, int width, int height)

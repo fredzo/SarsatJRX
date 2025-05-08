@@ -25,6 +25,8 @@ class Display
         Display();
         void setup(I2CBus *i2c);
         void clearDisplay();
+        void setReverse(bool reverse);
+        bool getReverse();
         void setCursor(int x, int y);
         void setColor(Color color);
         void setBackgroundColor(Color bgColor);
@@ -49,9 +51,6 @@ class Display
         void print(String s);
         void print(long value);
         void printHex(byte value);
-        TouchType touchAvailable();
-        int getTouchX();
-        int getTouchY();
         int getWidth();
         int getHeight();
         void backlightOn();
@@ -62,6 +61,7 @@ class Display
 
     private : 
         int x, y;
+        bool reverse = false;
         String displayBuffer;
         Color currentColor = Color::White;
         Color currentBackColor = Color::White;

@@ -18,6 +18,7 @@
 TFT_eSPI *myGLCD = new TFT_eSPI(DISPLAY_HEIGHT,DISPLAY_WIDTH);
 BackLight *bl = new BackLight(LILYPI_TFT_BL);
 GT9xx_Class *touch = new GT9xx_Class();
+bool reverseScreen = false;
 
 // For LVGL ///////////////////////////////////////////////////////////////////////
 
@@ -44,8 +45,16 @@ void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
       uint16_t x = 0,y = 0;
       touch->getPoint(x,y,0);
       // Handle rotation (cf. TTGO.h l. 299)
-      data->point.x = DISPLAY_WIDTH - y;
-      data->point.y = x;
+      if(reverseScreen)
+      {
+        data->point.x = DISPLAY_WIDTH - y;
+        data->point.y = x;
+      }
+      else
+      {
+        data->point.x = y;
+        data->point.y = DISPLAY_HEIGHT - x;
+      }
       /*Serial.print( "Data x " );
       Serial.println( x );
       Serial.print( "Data y " );
@@ -69,7 +78,8 @@ void Display::setup(I2CBus *i2c)
   lv_init();
   // Initial setup
   myGLCD->init();
-  myGLCD->setRotation(3);
+  myGLCD->setRotation(reverse ? 3 : 1);
+  reverseScreen = reverse;
   currentColor = Color::White;
   currentTextColor = Color::White;
   //clearDisplay();
@@ -102,6 +112,23 @@ void Display::setup(I2CBus *i2c)
   indev_drv.type = LV_INDEV_TYPE_POINTER;
   indev_drv.read_cb = touchpad_read;
   lv_indev_drv_register(&indev_drv);
+}
+
+void Display::setReverse(bool reverse)
+{
+  if(reverse != this->reverse)
+  {
+    this->reverse = reverse;
+    myGLCD->setRotation(reverse ? 3 : 1);
+    reverseScreen = reverse;
+    // Force redraw all screen
+    lv_obj_invalidate(lv_scr_act()); 
+  }
+}
+
+bool Display::getReverse()
+{
+  return reverse;
 }
 
 void Display::handleTimer()
@@ -245,61 +272,6 @@ int Display::getWidth()
 int Display::getHeight()
 {
   return DISPLAY_HEIGHT;
-}
-
-#define FOOTER_READ_PERIOD 50
-
-Display::TouchType Display::touchAvailable()
-{
-  unsigned long now = millis();
-  if((now - lastTouchReadTime) < FOOTER_READ_PERIOD)
-  {
-    return touchType;
-  }
-  lastTouchReadTime = now;
-  uint16_t x = 0,y = 0;
-  if (touch->scanPoint() > 0)
-  {
-    touch->getPoint(x,y,0);
-    // Handle rotation (cf. TTGO.h l. 299)
-    touchX = DISPLAY_WIDTH - y;
-    touchY = x;
-    if(touchType == TouchType::NONE)
-    {
-      touchType = TouchType::PRESS;
-      //Serial.println("Press");
-    }
-    else
-    {
-      touchType = TouchType::HOLD;
-      //Serial.println("Hold");
-    }
-    return touchType;
-  }
-  else
-  {
-    if(touchType == TouchType::PRESS || touchType == TouchType::HOLD)
-    {
-      touchType = TouchType::RELEASE;
-      //Serial.println("Release");
-    }
-    else if(touchType != TouchType::NONE)
-    {
-      touchType = TouchType::NONE;
-      //Serial.println("NONE");
-    }
-    return touchType;
-  }
-}
-
-int Display::getTouchX()
-{
-    return touchX;
-}
-
-int Display::getTouchY()
-{
-    return touchY;
 }
 
 /******************************************

@@ -17,6 +17,9 @@
 #include <ui/Ui.h>
 #include <WifiManager.h>
 
+// Nedded if stack size of Arduino loop is too small
+// SET_LOOP_TASK_STACK_SIZE(16*1024)
+
 // Header LEDS
 bool ledSig1State = false;
 bool ledSig2State = false;
@@ -206,9 +209,6 @@ int spinnerPosition = 0;
 #define FOOTER_FRAME_RECEIVED_TIME 2000
 unsigned long lastPowerUpdateTime;
 #define FOOTER_POWER_UPDATE_TIME 100
-float lastFreq = -1;
-bool lastScanOn = false;
-bool lastRadioOn = false;
 
 void updateFooter(bool frameReceived)
 {  
@@ -231,29 +231,12 @@ void updateFooter(bool frameReceived)
       footerShowingFrameReceived = true;
     }
   }
-  // Radio
-  Radio* radio = hardware->getRadio();
-  bool radioOn = radio->isRadioOn();
-  if(radioOn != lastRadioOn)
+  // Audio
+  Audio* audio = hardware->getAudio();
+  if((now - lastPowerUpdateTime) > POWER_DISPLAY_PERIOD)
   {
-    uiSetRadioStatus(radioOn);
-    lastRadioOn = radioOn;
-  }
-  if(radioOn)
-  {
-    if((now - lastPowerUpdateTime) > POWER_DISPLAY_PERIOD)
-    {
-      lastPowerUpdateTime = now;
-      uiSetPower(radio->getPower());
-    }
-    float freq = radio->getFrequency();
-    bool scanOn = radio->isScanOn();
-    if((freq != lastFreq) || (scanOn != lastScanOn))
-    {
-      uiSetFreq(freq,scanOn);
-      lastFreq = freq;
-      lastScanOn = scanOn;
-    }
+    lastPowerUpdateTime = now;
+    uiSetPower(audio->getSignalPower());
   }
 }
 
@@ -276,11 +259,6 @@ void readNextSampleFrame()
   readNextSample(getFrame());
   // Tell the state machine that we have a complete frame
   setFrameComplete(true);
-}
-
-void toggleScan()
-{
-  hardware->getRadio()->toggleScan();
 }
 
 bool readBeaconFromFile(const char* fileName)
@@ -313,7 +291,6 @@ void setup()
   // Build the UI
   createUi();
   initHeader();
-  uiSetRadioStatus(hardware->getRadio()->isRadioOn());
 
 #ifdef WIFI
   if(hardware->getSettings()->getWifiState())
@@ -325,7 +302,7 @@ void setup()
 
   uiSetSdCardStatus(hardware->getFilesystems()->isSdFilesystemMounted());
   // Radio should be ready by now
-  hardware->radioInit();
+  hardware->getAudio()->audioInit();
 
   //readNextSampleFrame();
 #ifdef SERIAL_OUT 
@@ -355,6 +332,8 @@ void nextFrame()
 
 void loop()
 {
+  // Audio task
+  hardware->getAudio()->handleTask();
   // If frameParseState > 0, we are reading an frame, if more thant 500ms elapsed (a frame should be 144x2.5ms = 360 ms max)
   bool frameTimeout = (isFrameStarted() && ((millis()-getFrameStartTime()) > 500 ));
   if (isFrameComplete() || frameTimeout)
@@ -422,8 +401,6 @@ void loop()
   updateLeds();
   updateHeader();
   display->handleTimer();
-  // Radio task
-  hardware->getRadio()->handleTask();
 
     // Web and wifi
 #ifdef WIFI

@@ -18,7 +18,7 @@ void uiSettingsUpdateView();
 
 void uiSettingsUpdateWifi();
 
-void uiSettingsUpdateRadioStatus(bool radioStatus);
+void uiSettingsUpdateDisplay();
 
 void uiSettingsUpdateAudioSatus();
 
