@@ -4,6 +4,14 @@
 	(generator_version "9.0")
 	(uuid "756f9ab3-bcf2-4930-b1a2-703f1d715265")
 	(paper "A4")
+	(title_block
+		(title "SarsatJRX signal board")
+		(date "2025-05-23")
+		(rev "v1.0")
+		(company "F4JRX - ADRASEC 31")
+		(comment 1 "Based on the work of Jean-Paul YONNET (F1LVT) : https://f1lvt.com/")
+		(comment 2 "SIgnal board for SarsatJRX decoder by F4JRX")
+	)
 	(lib_symbols
 		(symbol "Amplifier_Operational:TLC2274"
 			(pin_names
