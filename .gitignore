@@ -5,3 +5,4 @@ software/.vscode/c_cpp_properties.json
 software/.vscode/launch.json
 *.zip
 *.lck
+*.FCBak
