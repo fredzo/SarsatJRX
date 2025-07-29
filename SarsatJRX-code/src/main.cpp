@@ -118,7 +118,7 @@ float powerValue = -1;
 
 void updatePowerValueHeader()
 {  // Power header
-  uiSetPower(hardware->getVccStringValue().c_str());
+  uiSetPower(hardware->getPower()->getVccStringValue().c_str());
 }
 
 void updateTimeHeader()
@@ -184,7 +184,7 @@ void updateHeader()
   if(now - lastPowerDisplayTime > POWER_DISPLAY_PERIOD)
   {
     lastPowerDisplayTime = now;
-    float newValue = hardware->getVccValue();
+    float newValue = hardware->getPower()->getVccValue();
       Serial.print("ADC = ");
       Serial.println(analogReadMilliVolts(BATTERY_ADC_PIN));
       Serial.print("Discri Jack = ");

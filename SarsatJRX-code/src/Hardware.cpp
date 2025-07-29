@@ -7,7 +7,8 @@ Hardware *Hardware::hardware = nullptr;
 void Hardware::init()
 {
     i2c = new I2CBus(Wire,I2C_SDA_PIN,I2C_SCL_PIN);
-    powerInit();
+    power = Power::getPower();
+    power->powerInit();
     rtc = Rtc::getRtc();
     rtc->rtcInit(i2c);
     filesystems = Filesystems::getFilesystems();
@@ -39,27 +40,12 @@ Audio* Hardware::getAudio()
     return audio;
 }
 
-/**
- * @brief Returns actual VCC value
- * 
- * @return VCC value
- */
-float Hardware::getVccValue()
+Power* Hardware::getPower()
 {
-    return getPowerVccValue();
+    return power;
 }
 
-/**
- * @brief Read VCC value into the provided char* with the format "x.xx"
- * 
- * @param vccString the char* to store the VCC string value in
- */
-String Hardware::getVccStringValue()
+Filesystems* Hardware::getFilesystems()
 {
-    return getPowerVccStringValue();
+   return filesystems;
 }
-
- Filesystems* Hardware::getFilesystems()
- {
-    return filesystems;
- }

@@ -143,7 +143,7 @@ void uiSettingsSystemView()
     Hardware* hardware = Hardware::getHardware();
     // System tab
     // Vbat
-    lv_label_set_text(vBatLabel,hardware->getVccStringValue().c_str());
+    lv_label_set_text(vBatLabel,hardware->getPower()->getVccStringValue().c_str());
     // Ram
     lv_label_set_text(ramSizeLabel,formatMemoryValue(ESP.getHeapSize(),true).c_str());
     lv_label_set_text(ramFreeLabel,formatMemoryValue(ESP.getFreeHeap(),true).c_str());

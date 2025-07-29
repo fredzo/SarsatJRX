@@ -6,6 +6,7 @@
 #include <Filesystems.h>
 #include <Settings.h>
 #include <Audio.h>
+#include <Power.h>
 
 class Hardware
 {
@@ -30,19 +31,7 @@ public:
 
     Audio* getAudio();
 
-    /**
-     * @brief Returns actual VCC value
-     * 
-     * @return VCC value
-     */
-    float getVccValue();
-
-    /**
-     * @brief Read VCC value into the provided char* with the format "x.xx"
-     * 
-     * @return Rhe VCC string value
-     */
-    String getVccStringValue();
+    Power* getPower();
 
 private:
     Hardware()
@@ -59,6 +48,7 @@ private:
     Filesystems *filesystems = nullptr;
     Settings *settings = nullptr;
     Audio* audio = nullptr;
+    Power* power = nullptr;
 
     static Hardware *hardware;
 

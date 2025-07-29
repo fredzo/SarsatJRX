@@ -3,37 +3,56 @@
 
 #include <Arduino.h>
 
-typedef enum {
-    POWER_STATE_ON_BATTERY,
-    POWER_STATE_CHARGING,
-    POWER_STATE_FULL
-} PowerState;
+class Power
+{
+    public :
+        enum class PowerState { POWER_STATE_ON_BATTERY, POWER_STATE_CHARGING, POWER_STATE_FULL };
 
-/**
- * @brief Init power module
- * 
- */
-void powerInit();
+        static Power *getPower()
+        {
+            if (powerInstance == nullptr) {
+                powerInstance = new Power();
+            }
+            return powerInstance;
+        }
 
-/**
- * @brief Returns actual VCC value
- * 
- * @return VCC value
- */
-float getPowerVccValue();
+        void powerInit();
+        void powerStop();
+        
+        /**
+         * @brief Returns actual VCC value
+         * 
+         * @return VCC value
+         */
+        float getVccValue();
 
-/**
- * @brief Read VCC value into the provided char* with the format "x.xx"
- * 
- * @return Rhe VCC string value
- */
-String getPowerVccStringValue();
+        /**
+         * @brief Read VCC value into the provided char* with the format "x.xx"
+         * 
+         * @return Rhe VCC string value
+         */
+        String getVccStringValue();
 
-/**
- * @brief Get current PowerState
- * 
- * @return PowerState  the current PowerState
- */
-PowerState getPowerState();
+        /**
+         * @brief Get current PowerState
+         * 
+         * @return PowerState  the current PowerState
+         */
+        PowerState getPowerState();
 
+        // Power task processing
+        void handleTask();
+
+    private :
+        Power()
+        {
+        };
+
+        ~Power()
+        {
+        };
+
+        // Static members
+        static Power *powerInstance;
+};
 #endif 
