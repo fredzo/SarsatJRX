@@ -19,6 +19,8 @@ class Audio
 
         int getSignalPower();
 
+        bool isDiscriInput();
+
         // Audio task processing
         void handleTask();
 

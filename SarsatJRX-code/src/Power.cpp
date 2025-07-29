@@ -1,7 +1,14 @@
 #include "Power.h"
 #include <SarsatJRXConf.h>
 
-uint16_t adc_vref = 1100;
+#define MAX_BATTERY_VOLTAGE     4.2
+
+void powerInit()
+{
+  pinMode(BATTERY_ADC_PIN, ANALOG);      // Battery level pin
+  pinMode(CHARGE_INPUT_PIN, INPUT);      // Charge status pin
+}
+
 
 /**
  * @brief Returns actual VCC value
@@ -9,8 +16,8 @@ uint16_t adc_vref = 1100;
  * @return VCC value
  */
 float getPowerVccValue() {
-    uint16_t v = analogRead(BATTERY_ADC_PIN);
-    return  ((float)v / 4095.0) * 2.0 * 3.3 * (adc_vref / 1000.0);
+    uint32_t v = analogReadMilliVolts(BATTERY_ADC_PIN);
+    return  (((float)v)*2.0/1000.0);
 }
 
 /**
@@ -24,4 +31,26 @@ String getPowerVccStringValue()
     dtostrf(getPowerVccValue(), 3, 2, buffer);
     return (String(buffer) + "V");
 }
+
+PowerState getPowerState()
+{
+    PowerState result;
+    if(digitalRead(CHARGE_INPUT_PIN))
+    {   // Charging
+        result = POWER_STATE_CHARGING;
+    }
+    else
+    {   // Either on battery or full
+        if(getPowerVccValue() >= MAX_BATTERY_VOLTAGE)
+        {
+            result = POWER_STATE_FULL;
+        }
+        else
+        {
+            result = POWER_STATE_ON_BATTERY;
+        }
+    }
+    return result;
+}
+
 

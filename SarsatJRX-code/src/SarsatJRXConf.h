@@ -25,7 +25,7 @@
 #define LOG_FILENAME_TEMPLATE   "%s/%02d%02d%02d-%02d%02d%02d.bcn"
 
 // UI
-#define POWER_DISPLAY_PERIOD    5 // 5ms
+#define POWER_DISPLAY_PERIOD    1000 // 5ms
 #define POWER_MIN_VALUE         0
 #define POWER_MAX_VALUE         384
 
@@ -36,8 +36,13 @@
 #define SD_MOSI             15
 #define SD_SCLK             14
 
+// Button 
+#define BUTTON_INPUT_PIN    0
+
 // Battery voltage input
 #define BATTERY_ADC_PIN     35
+// Charge input
+#define CHARGE_INPUT_PIN    32 // Low when charged or unplugged, high when charging
 
 // Audio power input
 #define AUDIO_ADC_PIN       34
@@ -61,13 +66,24 @@
 #define I2C_SDA_PIN         21    
 #define I2C_SCL_PIN         22
 
-// UART 1 => free
+// UART 1 (unused)
 #define UART1_RX_PIN        39
-#define UART1_TX_PIN        33 // => Led err
+#define UART1_TX_PIN        33
+
 
 // Receiver Pin
 #define RECEIVER_PIN        25 // Int
+// Frame led
 #define NOTIFICATION_PIN    26 // => LED Frame
+// Error Led
+#define ERROR_PIN           33 // => LED Err
+
+// Buzzer
+#define BUZZER_PIN          39 // Buzzer
+
+// Discri jack detection pin
+#define DISCRI_JACK_PIN     04 // Discri jack inserted
+
 
 
 #endif

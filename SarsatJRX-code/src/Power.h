@@ -3,6 +3,18 @@
 
 #include <Arduino.h>
 
+typedef enum {
+    POWER_STATE_ON_BATTERY,
+    POWER_STATE_CHARGING,
+    POWER_STATE_FULL
+} PowerState;
+
+/**
+ * @brief Init power module
+ * 
+ */
+void powerInit();
+
 /**
  * @brief Returns actual VCC value
  * 
@@ -16,5 +28,12 @@ float getPowerVccValue();
  * @return Rhe VCC string value
  */
 String getPowerVccStringValue();
+
+/**
+ * @brief Get current PowerState
+ * 
+ * @return PowerState  the current PowerState
+ */
+PowerState getPowerState();
 
 #endif 

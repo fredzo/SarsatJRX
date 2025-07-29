@@ -8,6 +8,9 @@ Audio *Audio::audioInstance = nullptr;
 
 void Audio::audioInit()
 {
+    pinMode(AUDIO_ADC_PIN, ANALOG);             // Audio level pin
+    pinMode(DISCRI_JACK_PIN, INPUT_PULLUP);     // Discri jack detection pin
+    // Read noise floor
     noiseFloor = analogReadMilliVolts(AUDIO_ADC_PIN);
     Serial.print("Noise floor = ");
     Serial.println(noiseFloor);
@@ -15,6 +18,12 @@ void Audio::audioInit()
 void Audio::audioStop()
 {
 }
+
+bool Audio::isDiscriInput()
+{
+    return (digitalRead(DISCRI_JACK_PIN) != 0);
+}
+
 
 void Audio::handleTask()
 {   // Read value

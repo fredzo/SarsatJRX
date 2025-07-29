@@ -100,6 +100,7 @@ void updateLeds()
   if(ledFrameReceivedOn && ((millis() - ledFrameReceivedStartBlinkTime)>LED_BLINK_TIME))
   { // Led has been on for more than 100 ms => switch it off
     digitalWrite(NOTIFICATION_PIN, LOW); 
+    digitalWrite(ERROR_PIN, LOW); 
     ledFrameReceivedOn = false;
   }
 }
@@ -184,6 +185,10 @@ void updateHeader()
   {
     lastPowerDisplayTime = now;
     float newValue = hardware->getVccValue();
+      Serial.print("ADC = ");
+      Serial.println(analogReadMilliVolts(BATTERY_ADC_PIN));
+      Serial.print("Discri Jack = ");
+      Serial.println(hardware->getAudio()->isDiscriInput() ? "On" : "Off");
     if(abs(newValue - powerValue) > 0.01)
     {
       powerValue = newValue;
@@ -277,9 +282,12 @@ bool readBeaconFromFile(const char* fileName)
 
 void setup()
 {
-  pinMode(RECEIVER_PIN, INPUT);          // Detection stage inpit
+  pinMode(RECEIVER_PIN, INPUT);          // Detection stage input
   pinMode(NOTIFICATION_PIN, OUTPUT);     // Notification led output
-  // pinMode(16, OUTPUT);                  // Buzzer output
+  pinMode(ERROR_PIN, OUTPUT);            // Error led output
+  pinMode(BUZZER_PIN, OUTPUT);           // Buzzer output
+
+
   
   Serial.begin(115200);
   attachInterrupt(digitalPinToInterrupt(RECEIVER_PIN), analyze, CHANGE);  // interruption sur Rise et Fall
@@ -379,6 +387,10 @@ void loop()
       display->handleTimer();
       // Then read beacon and update beacon display
       readBeacon();
+      if(!beacons[beaconsReadIndex]->isBch1Valid() || !beacons[beaconsReadIndex]->isBch2Valid())
+      { // Error led
+        digitalWrite(ERROR_PIN, HIGH);
+      }
       updateDisplay();
       display->handleTimer();
       if(!isFrameFromDisk())
