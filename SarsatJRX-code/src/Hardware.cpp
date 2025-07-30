@@ -18,6 +18,7 @@ void Hardware::init()
     display = new Display();
     display->setup(i2c);
     audio = Audio::getAudio();
+    audio->audioInit();
 }
 
 Display* Hardware::getDisplay()

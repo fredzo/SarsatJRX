@@ -189,6 +189,9 @@ void updateHeader()
       Serial.println(analogReadMilliVolts(BATTERY_ADC_PIN));
       Serial.print("Discri Jack = ");
       Serial.println(hardware->getAudio()->isDiscriInput() ? "On" : "Off");
+      Serial.print("Power State = ");
+      Power::PowerState powerState = hardware->getPower()->getPowerState();
+      Serial.println(powerState == Power::PowerState::POWER_STATE_CHARGING ? "Charging" : powerState == Power::PowerState::POWER_STATE_FULL ? "Full" : "Battery");
     if(abs(newValue - powerValue) > 0.01)
     {
       powerValue = newValue;
@@ -309,8 +312,6 @@ void setup()
 #endif
 
   uiSetSdCardStatus(hardware->getFilesystems()->isSdFilesystemMounted());
-  // Radio should be ready by now
-  hardware->getAudio()->audioInit();
 
   //readNextSampleFrame();
 #ifdef SERIAL_OUT 

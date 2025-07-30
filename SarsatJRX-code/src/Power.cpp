@@ -41,11 +41,7 @@ Power::PowerState Power::getPowerState()
 {
     PowerState result;
     if(digitalRead(CHARGE_INPUT_PIN))
-    {   // Charging
-        result = PowerState::POWER_STATE_CHARGING;
-    }
-    else
-    {   // Either on battery or full
+    {   // Led off (pin is high) => Either on battery or full
         if(getVccValue() >= MAX_BATTERY_VOLTAGE)
         {
             result = PowerState::POWER_STATE_FULL;
@@ -54,6 +50,10 @@ Power::PowerState Power::getPowerState()
         {
             result = PowerState::POWER_STATE_ON_BATTERY;
         }
+    }
+    else
+    {   // Charging
+        result = PowerState::POWER_STATE_CHARGING;
     }
     return result;
 }
