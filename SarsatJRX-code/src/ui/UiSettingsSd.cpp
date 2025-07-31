@@ -48,7 +48,7 @@ static lv_obj_t * currentBeacon = NULL;
 static lv_obj_t * deleteConfirmBox;
 static int lastBeaconIndex = 0;
 
-void uiSettingsUpdateSdView();
+void uiSettingsUpdateSd();
 
 static void toggle_sd_cb(lv_event_t * e)
 {
@@ -169,7 +169,7 @@ static void deleteAllBeacons()
 {
     if(Filesystems::getFilesystems()->deleteAllBeacons()>0)
     {
-        uiSettingsUpdateSdView();
+        uiSettingsUpdateSd();
     }
 }
 
@@ -252,7 +252,7 @@ void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
 
 
 
-void uiSettingsUpdateSdView()
+void uiSettingsUpdateSd()
 {
     Hardware* hardware = Hardware::getHardware();
     // SD tab

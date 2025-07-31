@@ -398,7 +398,7 @@ void createDisplayTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_set_size(displayMeter, tabWidth-4, RADIO_METER_HEIGHT);
     lv_obj_set_pos(displayMeter,0,currentY);
     lv_obj_add_style(displayMeter, &style_meter, LV_PART_INDICATOR);
-    lv_bar_set_range(displayMeter, POWER_MIN_VALUE, POWER_MAX_VALUE);
+    lv_bar_set_range(displayMeter, AUDIO_POWER_MIN_VALUE, AUDIO_POWER_MAX_VALUE);
     lv_obj_set_style_anim_time(displayMeter,200,LV_PART_MAIN);
     currentY += (RADIO_METER_HEIGHT+HALF_SPACER);
     // Version
@@ -483,7 +483,7 @@ void createDisplayTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     }*/
 }
 
-void uiSettingsUpdatePower(int power)
+void uiSettingsUpdateAudioPower(int power)
 {
     lv_bar_set_value(displayMeter, power, LV_ANIM_ON);
 }

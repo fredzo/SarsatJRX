@@ -6,7 +6,7 @@
 class Power
 {
     public :
-        enum class PowerState { POWER_STATE_ON_BATTERY, POWER_STATE_CHARGING, POWER_STATE_FULL };
+        enum class PowerState { ON_BATTERY, CHARGING, FULL, NO_BATTERY };
 
         static Power *getPower()
         {
@@ -40,6 +40,20 @@ class Power
          */
         PowerState getPowerState();
 
+        /**
+         * @brief Get the Power State String representation
+         * 
+         * @return String the Power State String representation
+         */
+        String getPowerStateString();
+
+        /**
+         * @brief Returns true if power has changed since last call to getVccValue()
+         * 
+         * @return true if power has changed since last call to getVccValue()
+         */
+        bool hasChanged() { return changed; };
+
         // Power task processing
         void handleTask();
 
@@ -51,6 +65,20 @@ class Power
         ~Power()
         {
         };
+        // Current power state
+        PowerState state = PowerState::ON_BATTERY;
+        // Current vcc value
+        float powerValue = 0;
+        // Last power sample time
+        unsigned long lastPowerSampleTime = 0;
+        // Last charge sample time
+        unsigned long lastChargeSampleTime = 0;
+        // True when power changed
+        bool changed = true;
+        // Last value of charge pin
+        int lastChargeValue = 0;
+        // Charge value count
+        int chargeValueCount = 0;
 
         // Static members
         static Power *powerInstance;

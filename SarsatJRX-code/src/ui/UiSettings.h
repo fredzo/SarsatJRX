@@ -18,11 +18,15 @@ void uiSettingsUpdateView();
 
 void uiSettingsUpdateWifi();
 
+void uiSettingsUpdateSystem();
+
+void uiSettingsUpdateSd();
+
 void uiSettingsUpdateDisplay();
 
 void uiSettingsUpdateAudioSatus();
 
-void uiSettingsUpdatePower(int power);
+void uiSettingsUpdateAudioPower(int power);
 
 void uiSettingsUpdateFreq(char* freqBuffer, bool scanOn);
 

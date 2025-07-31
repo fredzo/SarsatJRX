@@ -6,6 +6,7 @@
 #include <extra/libs/qrcode/lv_qrcode.h>
 #include <ui/SpiffsLvgl.h>
 #include <Settings.h>
+#include <Hardware.h>
 
 // Header
 #define HEADER_TEXT         "SarsatJRX"
@@ -248,7 +249,7 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_size(meter, FOOTER_METER_WIDTH, FOOTER_METER_HEIGHT);
     lv_obj_set_pos(meter,FOOTER_METTER_X,FOOTER_METTER_Y);
     lv_obj_add_style(meter, &style_meter, LV_PART_INDICATOR);
-    lv_bar_set_range(meter, POWER_MIN_VALUE, POWER_MAX_VALUE);
+    lv_bar_set_range(meter, AUDIO_POWER_MIN_VALUE, AUDIO_POWER_MAX_VALUE);
     lv_obj_set_style_anim_time(meter,200,LV_PART_MAIN);
     // Next button
     nextButton = uiCreateImageButton(footer,LV_SYMBOL_RIGHT,next_handler,LV_EVENT_CLICKED,FOOTER_BUTTON_WIDTH, LV_PCT(100));
@@ -463,9 +464,13 @@ void uiSetSdCardStatus(bool mounted)
     }
 }
 
-void uiSetPower(const char* time)
+void uiUpdatePower()
 {
-    lv_label_set_text(powerLabel, time);
+    Power* power = Hardware::getHardware()->getPower();
+    // TODO replace with battery logo
+    lv_label_set_text(powerLabel, power->getVccStringValue().c_str());
+    // Also update VCC and power state in system tab
+    uiSettingsUpdateSystem();
 }
 
 void uiShowFrameReceived(bool show)
@@ -505,10 +510,10 @@ void uiSetLedFrameReceivedState(bool on)
     on ? lv_led_on(ledFrameReceived) : lv_led_off(ledFrameReceived);
 }
 
-void uiSetPower(int power)
+void uiSetAudioPower(int power)
 {
     lv_bar_set_value(meter, power, LV_ANIM_ON);
-    uiSettingsUpdatePower(power);
+    uiSettingsUpdateAudioPower(power);
 }
 
 lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text, int x, int y, int width, int height)

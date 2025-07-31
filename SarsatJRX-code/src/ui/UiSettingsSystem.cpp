@@ -12,6 +12,7 @@
 #define SKETCH_LABEL_WIDTH  80
 #define VBAT_LABEL          "Vbat :"
 #define VBAT_LABEL_WIDTH    80
+#define VBAT_TEXT_WIDTH     80
 
 #define CHIP_LABEL          "Chip :"
 #define CHIP_LABEL_WIDTH    50
@@ -52,6 +53,7 @@ static lv_obj_t * sketchTitle;
 static lv_obj_t * sketchLabel;
 static lv_obj_t * vBatTitle;
 static lv_obj_t * vBatLabel;
+static lv_obj_t * powerStateLabel;
 static lv_obj_t * chipTitle;
 static lv_obj_t * chipModelTitle;
 static lv_obj_t * chipModelLabel;
@@ -92,8 +94,11 @@ void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
 
     // Vbat
     vBatTitle = uiCreateLabel(tab,&style_section_title,VBAT_LABEL,0,currentY,VBAT_LABEL_WIDTH,LINE_HEIGHT);
-    vBatLabel = uiCreateLabel(tab,&style_section_text,"",VBAT_LABEL_WIDTH,currentY,tabWidth-VBAT_LABEL_WIDTH,LINE_HEIGHT);
+    vBatLabel = uiCreateLabel(tab,&style_section_text,"",VBAT_LABEL_WIDTH,currentY,VBAT_LABEL_WIDTH,LINE_HEIGHT);
+    // Power State
+    powerStateLabel = uiCreateLabel(tab,&style_section_text,"",VBAT_LABEL_WIDTH+VBAT_TEXT_WIDTH,currentY,tabWidth-VBAT_LABEL_WIDTH-VBAT_TEXT_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
+
 
     // Chip
     chipTitle = uiCreateLabel(tab,&style_section_title,CHIP_LABEL,0,currentY,CHIP_LABEL_WIDTH,LINE_HEIGHT);
@@ -138,12 +143,14 @@ void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
     //currentY+=LINE_HEIGHT;
 }
 
-void uiSettingsSystemView()
+void uiSettingsUpdateSystem()
 {
     Hardware* hardware = Hardware::getHardware();
     // System tab
     // Vbat
     lv_label_set_text(vBatLabel,hardware->getPower()->getVccStringValue().c_str());
+    // Power state
+    lv_label_set_text(powerStateLabel,hardware->getPower()->getPowerStateString().c_str());
     // Ram
     lv_label_set_text(ramSizeLabel,formatMemoryValue(ESP.getHeapSize(),true).c_str());
     lv_label_set_text(ramFreeLabel,formatMemoryValue(ESP.getFreeHeap(),true).c_str());

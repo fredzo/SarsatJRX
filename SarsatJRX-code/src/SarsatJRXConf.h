@@ -25,9 +25,9 @@
 #define LOG_FILENAME_TEMPLATE   "%s/%02d%02d%02d-%02d%02d%02d.bcn"
 
 // UI
-#define POWER_DISPLAY_PERIOD    1000 // 5ms
-#define POWER_MIN_VALUE         0
-#define POWER_MAX_VALUE         384
+#define AUDIO_POWER_DISPLAY_PERIOD    5 // 5ms
+#define AUDIO_POWER_MIN_VALUE         0
+#define AUDIO_POWER_MAX_VALUE         384
 
 // Hardware 
 // SD Card

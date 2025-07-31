@@ -13,8 +13,6 @@ extern void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHe
 extern void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth);
 extern void createNetworkTab(lv_obj_t * tab, int currentY, int tabWidth);
 extern void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight);
-extern void uiSettingsUpdateSdView();
-extern void uiSettingsSystemView();
 
 lv_obj_t * settingsTabview;
 
@@ -62,8 +60,8 @@ void uiSettingsCreateView(lv_obj_t * cont)
 
 void uiSettingsUpdateView()
 {
-    uiSettingsSystemView();
+    uiSettingsUpdateSystem();
     uiSettingsUpdateWifi();
-    uiSettingsUpdateSdView();
+    uiSettingsUpdateSd();
     uiSettingsUpdateDisplay();
 }

@@ -114,12 +114,6 @@ void frameReceivedLedBlink()
 
 // Store last displayed power value
 unsigned long lastPowerDisplayTime = 0;
-float powerValue = -1;
-
-void updatePowerValueHeader()
-{  // Power header
-  uiSetPower(hardware->getPower()->getVccStringValue().c_str());
-}
 
 void updateTimeHeader()
 {  // Time header
@@ -180,23 +174,10 @@ void updateHeader()
     updateTimeHeader();
   }
   // Check for power value update
-  unsigned long now = millis();
-  if(now - lastPowerDisplayTime > POWER_DISPLAY_PERIOD)
+  Power* power = hardware->getPower();
+  if(power->hasChanged())
   {
-    lastPowerDisplayTime = now;
-    float newValue = hardware->getPower()->getVccValue();
-      Serial.print("ADC = ");
-      Serial.println(analogReadMilliVolts(BATTERY_ADC_PIN));
-      Serial.print("Discri Jack = ");
-      Serial.println(hardware->getAudio()->isDiscriInput() ? "On" : "Off");
-      Serial.print("Power State = ");
-      Power::PowerState powerState = hardware->getPower()->getPowerState();
-      Serial.println(powerState == Power::PowerState::POWER_STATE_CHARGING ? "Charging" : powerState == Power::PowerState::POWER_STATE_FULL ? "Full" : "Battery");
-    if(abs(newValue - powerValue) > 0.01)
-    {
-      powerValue = newValue;
-      updatePowerValueHeader();
-    }
+    uiUpdatePower();
   }
   updateLedHeader(false);
 }
@@ -215,7 +196,7 @@ bool footerShowingFrameReceived = false;
 bool footerShowingSpinner = false;
 int spinnerPosition = 0;
 #define FOOTER_FRAME_RECEIVED_TIME 2000
-unsigned long lastPowerUpdateTime;
+unsigned long lastAudioPowerUpdateTime;
 #define FOOTER_POWER_UPDATE_TIME 100
 
 void updateFooter(bool frameReceived)
@@ -241,10 +222,10 @@ void updateFooter(bool frameReceived)
   }
   // Audio
   Audio* audio = hardware->getAudio();
-  if((now - lastPowerUpdateTime) > POWER_DISPLAY_PERIOD)
+  if((now - lastAudioPowerUpdateTime) > AUDIO_POWER_DISPLAY_PERIOD)
   {
-    lastPowerUpdateTime = now;
-    uiSetPower(audio->getSignalPower());
+    lastAudioPowerUpdateTime = now;
+    uiSetAudioPower(audio->getSignalPower());
   }
 }
 
@@ -343,6 +324,8 @@ void loop()
 {
   // Audio task
   hardware->getAudio()->handleTask();
+  // Power task
+  hardware->getPower()->handleTask();
   // If frameParseState > 0, we are reading an frame, if more thant 500ms elapsed (a frame should be 144x2.5ms = 360 ms max)
   bool frameTimeout = (isFrameStarted() && ((millis()-getFrameStartTime()) > 500 ));
   if (isFrameComplete() || frameTimeout)

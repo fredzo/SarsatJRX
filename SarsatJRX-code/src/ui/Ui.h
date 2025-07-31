@@ -5,6 +5,7 @@
 #include <SarsatJRXConf.h>
 #include <WifiManager.h>
 #include <Beacon.h>
+#include <Power.h>
 #include <lvgl.h>
 
 #define LINE_HEIGHT         18
@@ -70,7 +71,7 @@ void uiSetSdCardStatus(bool mounted);
 
 void uiSetRadioStatus(bool on);
 
-void uiSetPower(const char* time);
+void uiUpdatePower();
 
 void uiShowFrameReceived(bool show);
 
@@ -82,7 +83,7 @@ void uiSetLedInFrameState(bool on);
 
 void uiSetLedFrameReceivedState(bool on);
 
-void uiSetPower(int power);
+void uiSetAudioPower(int power);
 
 void uiSetFreq(float freq, bool scanOn);
 
