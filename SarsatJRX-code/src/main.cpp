@@ -266,6 +266,9 @@ bool readBeaconFromFile(const char* fileName)
 
 void setup()
 {
+  // For heap corruption debugging
+  //heap_caps_print_heap_info(MALLOC_CAP_DEFAULT);
+
   pinMode(RECEIVER_PIN, INPUT);          // Detection stage input
   pinMode(NOTIFICATION_PIN, OUTPUT);     // Notification led output
   pinMode(ERROR_PIN, OUTPUT);            // Error led output
@@ -293,6 +296,9 @@ void setup()
 #endif
 
   uiSetSdCardStatus(hardware->getFilesystems()->isSdFilesystemMounted());
+
+  // UI is now ready : start display task
+  display->startDisplayTask();
 
   //readNextSampleFrame();
 #ifdef SERIAL_OUT 
@@ -366,17 +372,14 @@ void loop()
     if (((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
     { // First blick leds
       frameReceivedLedBlink();
-      updateLeds();
-      updateHeader();
-      display->handleTimer();
       // Then read beacon and update beacon display
       readBeacon();
       if(!beacons[beaconsReadIndex]->isBch1Valid() || !beacons[beaconsReadIndex]->isBch2Valid())
       { // Error led
         digitalWrite(ERROR_PIN, HIGH);
+        Serial.println("Frame error !");
       }
       updateDisplay();
-      display->handleTimer();
       if(!isFrameFromDisk())
       { // Finally save beacon to sd card
         bool success = hardware->getFilesystems()->saveBeacon(beacons[beaconsReadIndex]);
@@ -396,7 +399,6 @@ void loop()
   }
   updateLeds();
   updateHeader();
-  display->handleTimer();
 
     // Web and wifi
 #ifdef WIFI

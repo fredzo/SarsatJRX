@@ -378,7 +378,10 @@ void uiSetBeacon(Beacon* beacon, int curPage, int pageCount)
     uiBeaconSetBeacon(beacon);
     // Set pages
     lv_label_set_text_fmt(pagesLabel,HEADER_PAGES_TEMPLATE,curPage,pageCount);
-    uiShowScreen(UiScreen::BEACON);
+    if(currentScreen != UiScreen::SETTINGS)
+    {
+        uiShowScreen(UiScreen::BEACON);
+    }
 }
 
 void uiShowScreen(UiScreen screen)

@@ -56,7 +56,7 @@ class Display
         void backlightOn();
         void backlightOff();
         void setBrightness(uint8_t level);
-        void handleTimer();
+        void startDisplayTask();
 
 
     private : 

@@ -76,13 +76,13 @@
 // Frame led
 #define NOTIFICATION_PIN    26 // => LED Frame
 // Error Led
-#define ERROR_PIN           33 // => LED Err
+#define ERROR_PIN           04 // 39 // => LED Err // Input only => swap with PIN 04
 
 // Buzzer
-#define BUZZER_PIN          39 // Buzzer
+#define BUZZER_PIN          33 // Buzzer
 
 // Discri jack detection pin
-#define DISCRI_JACK_PIN     04 // Discri jack inserted
+#define DISCRI_JACK_PIN     39 // 04 // Discri jack inserted
 
 
 

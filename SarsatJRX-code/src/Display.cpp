@@ -25,6 +25,14 @@ bool reverseScreen = false;
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf[ DISPLAY_WIDTH * DISPLAY_HEIGHT / 10 ];
 
+// LVGL dedicated task
+void lvglTask(void *pvParameters) {
+  while (1) {
+    lv_timer_handler();  // Handles animations, redraw, input
+    vTaskDelay(pdMS_TO_TICKS(1));
+  }
+}
+
 static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 {
     uint32_t w = ( area->x2 - area->x1 + 1 );
@@ -131,9 +139,18 @@ bool Display::getReverse()
   return reverse;
 }
 
-void Display::handleTimer()
+void Display::startDisplayTask()
 {
-    lv_timer_handler(); /* let the GUI do its work */
+  // Create LVGL task on Core 1
+  xTaskCreatePinnedToCore(
+    lvglTask,      // Task fubction
+    "LVGL Task",   // Task name
+    2*4096,          // Stack size
+    NULL,          // Params
+    configMAX_PRIORITIES,// 1,             // Priority
+    NULL,          // Handle
+    1              // Core 1
+  );
 }
 
 

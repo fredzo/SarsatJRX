@@ -1,7 +1,7 @@
 #include "Power.h"
 #include <SarsatJRXConf.h>
 
-#define MAX_BATTERY_VOLTAGE     4.15
+#define MAX_BATTERY_VOLTAGE     4.19
 #define POWER_SAMPLE_PERIOD     1000 // 1s
 #define CHARGE_SAMPLE_PERIOD    50   // 50ms
 #define CHARGE_SAMPLE_COUNT     15   // Wait for 15 consecutive samples with same value to validate charge state
@@ -122,8 +122,8 @@ void Power::handleTask()
             chargeValueCount = 0;
             if(state != PowerState::NO_BATTERY)
             {
-                changed = true;
                 state = PowerState::NO_BATTERY;
+                changed = true;
             }
             lastChargeValue = newValue;
         }
