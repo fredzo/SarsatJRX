@@ -23,6 +23,7 @@
 bool ledSig1State = false;
 bool ledSig2State = false;
 bool ledInFrameState = false;
+bool ledInFrameError = false;
 bool ledFrameReceivedState = false;
 
 // Beacon list
@@ -101,6 +102,7 @@ void updateLeds()
     digitalWrite(NOTIFICATION_PIN, LOW); 
     digitalWrite(ERROR_PIN, LOW); 
     ledFrameReceivedOn = false;
+    ledInFrameError = false;
   }
 }
 
@@ -157,8 +159,7 @@ void updateLedHeader(bool force)
   }
   if(drawledSig1) display->updateLedSig1(ledSig1State);
   if(drawledSig2) display->updateLedSig2(ledSig2State);
-  // TODO : pass error
-  if(drawledInFrame) display->updateLedInFrame(ledInFrameState,false);
+  if(drawledInFrame) display->updateLedInFrame(ledInFrameState,ledInFrameError);
   if(drawledFrameReceived) display->updateLedFrameReceived(ledFrameReceivedState);
 }
 
@@ -367,6 +368,7 @@ void loop()
       if(!beacons[beaconsReadIndex]->isBch1Valid() || !beacons[beaconsReadIndex]->isBch2Valid())
       { // Error led
         digitalWrite(ERROR_PIN, HIGH);
+        ledInFrameError = true;
         Serial.println("Frame error !");
       }
       updateDisplay();

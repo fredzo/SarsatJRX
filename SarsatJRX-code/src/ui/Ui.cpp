@@ -504,7 +504,8 @@ void uiSetLedSig2State(bool on)
 }
 
 void uiSetLedInFrameState(bool on, bool error)
-{   // TODO : change led color to red if on and is error
+{   // Change led color to red if error
+    lv_led_set_color(ledInFrame,error ? lv_palette_main(LV_PALETTE_RED) : lv_palette_main(LV_PALETTE_ORANGE) );
     on ? lv_led_on(ledInFrame) : lv_led_off(ledInFrame);
 }
 
