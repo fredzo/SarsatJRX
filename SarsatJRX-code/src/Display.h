@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 #include <i2c_bus.h>
+#include <Beacon.h>
+
 
 #define DISPLAY_WIDTH   480
 #define DISPLAY_HEIGHT  320
@@ -58,6 +60,55 @@ class Display
         void setBrightness(uint8_t level);
         void startDisplayTask();
 
+        // Called by lvgl task to peform needed ui updates
+        void updateUi();
+
+        // Update ui methods exposed to main loop
+        void updateTime() { needUpdateTime = true; };
+        void updateLedSig1(bool ledSig1) 
+        {
+            needUpdateLedSig1 = true;
+            ledSig1State = ledSig1;
+        }
+        void updateLedSig2(bool ledSig2)
+        {
+            needUpdateLedSig2 = true;
+            ledSig2State = ledSig2;
+        }
+        void updateLedInFrame(bool ledInFrame, bool ledInFrameError) 
+        {
+            needUpdateLedInFrame = true;
+            ledInFrameState = ledInFrame;
+            ledInFrameErrorState = ledInFrameError;
+        }
+        void updateLedFrameReceived(bool ledFrameReceived) 
+        {
+            needUpdateLedReceived = true;
+            ledFrameReceivedState = ledFrameReceived;
+        }
+        void updatePower() { needUpdatePower = true; }
+        void updateFrameReceived (bool state) 
+        {
+            needUpdateFrameReceived = true;
+            ledFrameReceivedState = state;
+        }
+        void updateAudioPower() { needUpdateAudioPower = true; }
+        void updateBeacon(Beacon* beacon, int currentPage, int totalPage)
+        {
+            needUpdateBeacon = true;
+            currentBeacon = beacon;
+            currentBeaconPage = currentPage;
+            totalBeaconPage = totalPage;
+        }
+        void updateWifi()
+        {
+            needUpdateWifi = true;
+        }
+        void updateSdCard()
+        {
+            needUpdateSdCard = true;
+        }
+
 
     private : 
         int x, y;
@@ -76,6 +127,40 @@ class Display
             const Color* background;
             const Color* border;
         };
+
+        // Update ui flags
+        // Time
+        bool needUpdateTime = false;
+        // Leds
+        bool needUpdateLedSig1 = false;
+        bool ledSig1State = false;
+        bool needUpdateLedSig2 = false;
+        bool ledSig2State = false;
+        bool needUpdateLedInFrame = false;
+        bool ledInFrameState = false;
+        bool ledInFrameErrorState = false;
+        bool needUpdateLedReceived = false;
+        bool ledFrameReceivedState = false;
+        // Power
+        bool needUpdatePower = false;
+        // Frame received
+        bool needUpdateFrameReceived = false;
+        bool frameReceivedState = false;
+        // Audio Power
+        bool needUpdateAudioPower = false;
+        // Beacon
+        bool needUpdateBeacon = false;
+        Beacon* currentBeacon = nullptr;
+        int currentBeaconPage = 0;
+        int totalBeaconPage = 0;
+        // Wifi
+        bool needUpdateWifi = false;
+        // SD
+        bool needUpdateSdCard = false;
+
+
+
+
 };
 
 #endif // DISPLAY_H

@@ -58,15 +58,13 @@ static void toggle_sd_cb(lv_event_t * e)
     if(state)
     {
         filesystems->initSdFs();
-        uiSetSdCardStatus(filesystems->isSdFilesystemMounted());
-        uiSettingsUpdateView();
     }
     else
     {
         filesystems->unmountSdFs();
-        uiSetSdCardStatus(filesystems->isSdFilesystemMounted());
-        uiSettingsUpdateView();
     }
+    uiUpdateSdCardStatus();
+    uiSettingsUpdateView();
 }
 
 static int beaconCount = 0;

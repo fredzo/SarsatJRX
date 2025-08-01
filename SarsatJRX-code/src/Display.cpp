@@ -5,6 +5,7 @@
 #include <TFT_eSPI.h>
 #include <gt911.h>
 #include <ledc.h>
+#include <ui/Ui.h>
 
 
 #define GT911_ADDRESS               0x5D
@@ -26,8 +27,13 @@ static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf[ DISPLAY_WIDTH * DISPLAY_HEIGHT / 10 ];
 
 // LVGL dedicated task
-void lvglTask(void *pvParameters) {
+void lvglTask(void *pvParameters) 
+{
+  Display* display = (Display*)pvParameters;
   while (1) {
+    // First update ui elements according to display class state
+    display->updateUi();
+    // Then hand it over to lvgl
     lv_timer_handler();  // Handles animations, redraw, input
     vTaskDelay(pdMS_TO_TICKS(1));
   }
@@ -80,6 +86,21 @@ Display::Display()
     displayBuffer = "";
 }
 
+void Display::updateUi()
+{ // Checkf for requested udpates
+  if(needUpdateLedSig1)         uiSetLedSig1State(ledSig1State);
+  if(needUpdateLedSig2)         uiSetLedSig2State(ledSig2State);
+  if(needUpdateLedInFrame)      uiSetLedInFrameState(ledInFrameState,ledInFrameErrorState);
+  if(needUpdateLedReceived)     uiSetLedFrameReceivedState(ledFrameReceivedState);
+  if(needUpdateTime)            uiUpdateTime();
+  if(needUpdatePower)           uiUpdatePower();
+  if(needUpdateFrameReceived)   uiShowFrameReceived(frameReceivedState);
+  if(needUpdateAudioPower)      uiUpdateAudioPower();
+  if(needUpdateBeacon)          uiSetBeacon(currentBeacon,currentBeaconPage,totalBeaconPage);
+  if(needUpdateWifi)            uiUpdateWifiStatus();
+  if(needUpdateSdCard)          uiUpdateSdCardStatus();
+}
+
 void Display::setup(I2CBus *i2c)
 {
   // Lvgl init
@@ -120,6 +141,11 @@ void Display::setup(I2CBus *i2c)
   indev_drv.type = LV_INDEV_TYPE_POINTER;
   indev_drv.read_cb = touchpad_read;
   lv_indev_drv_register(&indev_drv);
+
+  // Build ui
+  createUi();
+  uiUpdateTime();
+  uiUpdatePower();
 }
 
 void Display::setReverse(bool reverse)
@@ -146,7 +172,7 @@ void Display::startDisplayTask()
     lvglTask,      // Task fubction
     "LVGL Task",   // Task name
     2*4096,          // Stack size
-    NULL,          // Params
+    this,          // Params
     configMAX_PRIORITIES,// 1,             // Priority
     NULL,          // Handle
     1              // Core 1

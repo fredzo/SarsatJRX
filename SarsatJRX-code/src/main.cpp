@@ -14,7 +14,6 @@
 #include <Util.h>
 #include <Samples.h>
 #include <Decoder.h>
-#include <ui/Ui.h>
 #include <WifiManager.h>
 
 // Nedded if stack size of Arduino loop is too small
@@ -115,11 +114,6 @@ void frameReceivedLedBlink()
 // Store last displayed power value
 unsigned long lastPowerDisplayTime = 0;
 
-void updateTimeHeader()
-{  // Time header
-  uiSetTime(hardware->getRtc()->getTimeString().c_str());
-}
-
 void updateLedHeader(bool force)
 { // Led header
   bool newInputState = getInputState();
@@ -161,23 +155,24 @@ void updateLedHeader(bool force)
     ledFrameReceivedState = ledFrameReceivedOn;
     drawledFrameReceived = true;
   }
-  if(drawledSig1) uiSetLedSig1State(ledSig1State);
-  if(drawledSig2) uiSetLedSig2State(ledSig2State);
-  if(drawledInFrame) uiSetLedInFrameState(ledInFrameState);
-  if(drawledFrameReceived) uiSetLedFrameReceivedState(ledFrameReceivedState);
+  if(drawledSig1) display->updateLedSig1(ledSig1State);
+  if(drawledSig2) display->updateLedSig2(ledSig2State);
+  // TODO : pass error
+  if(drawledInFrame) display->updateLedInFrame(ledInFrameState,false);
+  if(drawledFrameReceived) display->updateLedFrameReceived(ledFrameReceivedState);
 }
 
 void updateHeader()
 { // Check for time update
   if(hardware->getRtc()->hasChanged())
   {
-    updateTimeHeader();
+    display->updateTime();
   }
   // Check for power value update
   Power* power = hardware->getPower();
   if(power->hasChanged())
   {
-    uiUpdatePower();
+    display->updatePower();
   }
   updateLedHeader(false);
 }
@@ -185,7 +180,7 @@ void updateHeader()
 void initHeader()
 {
   // Time
-  updateTimeHeader();
+  display->updateTime();
   // Draw leds
   updateLedHeader(true);
 }
@@ -207,7 +202,7 @@ void updateFooter(bool frameReceived)
     if((now - lastFooterUpdateTime) > FOOTER_FRAME_RECEIVED_TIME)
     {
       lastFooterUpdateTime = now;
-      uiShowFrameReceived(false);
+      display->updateFrameReceived(false);
       footerShowingFrameReceived = false;
     }
   }
@@ -216,16 +211,15 @@ void updateFooter(bool frameReceived)
     if(frameReceived)
     {
       lastFooterUpdateTime = now;
-      uiShowFrameReceived(true);
+      display->updateFrameReceived(true);
       footerShowingFrameReceived = true;
     }
   }
   // Audio
-  Audio* audio = hardware->getAudio();
   if((now - lastAudioPowerUpdateTime) > AUDIO_POWER_DISPLAY_PERIOD)
   {
     lastAudioPowerUpdateTime = now;
-    uiSetAudioPower(audio->getSignalPower());
+    display->updateAudioPower();
   }
 }
 
@@ -236,7 +230,7 @@ void updateDisplay()
 #endif
   // Rotating index based on beacon list max size and position of last read frame
   int displayIndex = ((beaconsSize-1 + beaconsReadIndex - beaconsWriteIndex) % BEACON_LIST_MAX_SIZE)+1;
-  uiSetBeacon(beacons[beaconsReadIndex],displayIndex,beaconsSize);
+  display->updateBeacon(beacons[beaconsReadIndex],displayIndex,beaconsSize);
 #ifdef DEBUG_RAM
   Serial.println(freeRam());
 #endif
@@ -283,19 +277,15 @@ void setup()
   hardware->init();
   display = hardware->getDisplay();
 
-  // Build the UI
-  createUi();
-  initHeader();
-
 #ifdef WIFI
   if(hardware->getSettings()->getWifiState())
   {
     wifiManagerStart();
-    uiSetWifiStatus(wifiManagerGetStatus());
+    display->updateWifi();
   }
 #endif
 
-  uiSetSdCardStatus(hardware->getFilesystems()->isSdFilesystemMounted());
+  display->updateSdCard();
 
   // UI is now ready : start display task
   display->startDisplayTask();
@@ -385,7 +375,7 @@ void loop()
         bool success = hardware->getFilesystems()->saveBeacon(beacons[beaconsReadIndex]);
         if(!success)
         { // Update SD Card indicator
-          uiSetSdCardStatus(hardware->getFilesystems()->isSdFilesystemMounted());
+          display->updateSdCard();
         }
       }
     } 
@@ -404,7 +394,7 @@ void loop()
 #ifdef WIFI
     if(wifiManagerHandleClient())
     {
-      uiSetWifiStatus(wifiManagerGetStatus());
+      display->updateWifi();
     }
 #endif
   //delay(5);

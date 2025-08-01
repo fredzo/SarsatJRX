@@ -425,15 +425,15 @@ void uiShowScreen(UiScreen screen)
     }
 }
 
-void uiSetTime(const char* time)
+void uiUpdateTime()
 {
-    lv_label_set_text(timeLabel, time);
+    lv_label_set_text(timeLabel, Hardware::getHardware()->getRtc()->getTimeString().c_str());
 }
 
 #ifdef WIFI   
-void uiSetWifiStatus(WifiStatus status)
+void uiUpdateWifiStatus()
 {
-  switch(status)
+  switch(wifiManagerGetStatus())
   {
     case WifiStatus::CONNECTED : 
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_CONNECTED);
@@ -455,9 +455,9 @@ void uiSetWifiStatus(WifiStatus status)
 }
 #endif
 
-void uiSetSdCardStatus(bool mounted)
+void uiUpdateSdCardStatus()
 {
-    if(mounted)
+    if(Hardware::getHardware()->getFilesystems()->isSdFilesystemMounted())
     {
         lv_label_set_text(sdCardIndicator,LV_SYMBOL_SD_CARD);
     }
@@ -503,8 +503,8 @@ void uiSetLedSig2State(bool on)
     on ? lv_led_on(ledSig2) : lv_led_off(ledSig2);
 }
 
-void uiSetLedInFrameState(bool on)
-{
+void uiSetLedInFrameState(bool on, bool error)
+{   // TODO : change led color to red if on and is error
     on ? lv_led_on(ledInFrame) : lv_led_off(ledInFrame);
 }
 
@@ -513,8 +513,10 @@ void uiSetLedFrameReceivedState(bool on)
     on ? lv_led_on(ledFrameReceived) : lv_led_off(ledFrameReceived);
 }
 
-void uiSetAudioPower(int power)
+void uiUpdateAudioPower()
 {
+    Audio* audio = Hardware::getHardware()->getAudio();
+    int power = audio->getSignalPower();
     lv_bar_set_value(meter, power, LV_ANIM_ON);
     uiSettingsUpdateAudioPower(power);
 }

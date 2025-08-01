@@ -61,15 +61,13 @@ void uiSetBeacon(Beacon* beacon, int curPage, int pageCount);
 
 void uiShowScreen(UiScreen screen);
 
-void uiSetTime(const char* time);
+void uiUpdateTime();
 
 #ifdef WIFI
-void uiSetWifiStatus(WifiStatus status);
+void uiUpdateWifiStatus();
 #endif
 
-void uiSetSdCardStatus(bool mounted);
-
-void uiSetRadioStatus(bool on);
+void uiUpdateSdCardStatus();
 
 void uiUpdatePower();
 
@@ -79,11 +77,11 @@ void uiSetLedSig1State(bool on);
 
 void uiSetLedSig2State(bool on);
 
-void uiSetLedInFrameState(bool on);
+void uiSetLedInFrameState(bool on, bool error);
 
 void uiSetLedFrameReceivedState(bool on);
 
-void uiSetAudioPower(int power);
+void uiUpdateAudioPower();
 
 void uiSetFreq(float freq, bool scanOn);
 
