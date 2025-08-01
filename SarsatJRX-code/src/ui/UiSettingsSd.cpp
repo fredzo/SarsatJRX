@@ -203,7 +203,7 @@ static void beacon_title_longpress_cb(lv_event_t * e)
 }
 
 static void beacon_delete_longpress_cb(lv_event_t * e)
-{   // TODO delete all ?
+{
     deleteCurrentBeacon();
     lv_event_stop_processing(e);
 }

@@ -89,16 +89,28 @@ Display::Display()
 void Display::updateUi()
 { // Checkf for requested udpates
   if(needUpdateLedSig1)         uiSetLedSig1State(ledSig1State);
+  needUpdateLedSig1 = false;
   if(needUpdateLedSig2)         uiSetLedSig2State(ledSig2State);
+  needUpdateLedSig2 = false;
   if(needUpdateLedInFrame)      uiSetLedInFrameState(ledInFrameState,ledInFrameErrorState);
+  needUpdateLedInFrame = false;
   if(needUpdateLedReceived)     uiSetLedFrameReceivedState(ledFrameReceivedState);
+  needUpdateLedReceived = false;
   if(needUpdateTime)            uiUpdateTime();
+  needUpdateTime = false;
   if(needUpdatePower)           uiUpdatePower();
+  needUpdatePower = false;
   if(needUpdateFrameReceived)   uiShowFrameReceived(frameReceivedState);
+  needUpdateFrameReceived = false;
   if(needUpdateAudioPower)      uiUpdateAudioPower();
+  needUpdateAudioPower = false;
   if(needUpdateBeacon)          uiSetBeacon(currentBeacon,currentBeaconPage,totalBeaconPage);
+  needUpdateBeacon = false;
   if(needUpdateWifi)            uiUpdateWifiStatus();
+  needUpdateWifi = false;
   if(needUpdateSdCard)          uiUpdateSdCardStatus();
+  needUpdateSdCard = false;
+
 }
 
 void Display::setup(I2CBus *i2c)
@@ -146,6 +158,10 @@ void Display::setup(I2CBus *i2c)
   createUi();
   uiUpdateTime();
   uiUpdatePower();
+  updateLedSig1(false);
+  updateLedSig2(false);
+  updateLedInFrame(false,false);
+  updateLedFrameReceived(false);
 }
 
 void Display::setReverse(bool reverse)

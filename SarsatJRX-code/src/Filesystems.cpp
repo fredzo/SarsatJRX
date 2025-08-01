@@ -133,7 +133,6 @@ bool Filesystems::loadBeacon(const char* fileName, volatile byte* frameBuffer)
      return result;
 }
 
-// TODO : delete all beacons
 bool Filesystems::deleteBeacon(const char* fileName)
 {
     bool result = false;
