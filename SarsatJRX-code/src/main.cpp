@@ -23,7 +23,7 @@
 bool ledSig1State = false;
 bool ledSig2State = false;
 bool ledInFrameState = false;
-bool ledInFrameError = false;
+bool ledFrameErrorState = false;
 bool ledFrameReceivedState = false;
 
 // Beacon list
@@ -91,7 +91,7 @@ unsigned long ledSig1StartBlinkTime;
 unsigned long ledSig2StartBlinkTime;
 bool ledSig1On = false;
 bool ledSig2On = false;
-bool ledInFrameOn = false;
+bool ledFrameErrorOn = false;
 bool ledFrameReceivedOn = false;
 bool lastInputState = false;
 
@@ -102,7 +102,7 @@ void updateLeds()
     digitalWrite(NOTIFICATION_PIN, LOW); 
     digitalWrite(ERROR_PIN, LOW); 
     ledFrameReceivedOn = false;
-    ledInFrameError = false;
+    ledFrameErrorOn = false;
   }
 }
 
@@ -147,9 +147,10 @@ void updateLedHeader(bool force)
       drawledSig2 = true;
     }
   }
-  if(ledInFrameState != isFrameStarted())
+  if((ledInFrameState != isFrameStarted()) || (ledFrameErrorState != ledFrameErrorOn))
   { // Check if frame started state changed
-    ledInFrameState = isFrameStarted();
+    ledInFrameState = isFrameStarted() || ledFrameErrorOn;
+    ledFrameErrorState = ledFrameErrorOn;
     drawledInFrame = true;
   }
   if(ledFrameReceivedState != ledFrameReceivedOn)
@@ -159,7 +160,7 @@ void updateLedHeader(bool force)
   }
   if(drawledSig1) display->updateLedSig1(ledSig1State);
   if(drawledSig2) display->updateLedSig2(ledSig2State);
-  if(drawledInFrame) display->updateLedInFrame(ledInFrameState,ledInFrameError);
+  if(drawledInFrame) display->updateLedInFrame(ledInFrameState,ledFrameErrorState);
   if(drawledFrameReceived) display->updateLedFrameReceived(ledFrameReceivedState);
 }
 
@@ -368,7 +369,7 @@ void loop()
       if(!beacons[beaconsReadIndex]->isBch1Valid() || !beacons[beaconsReadIndex]->isBch2Valid())
       { // Error led
         digitalWrite(ERROR_PIN, HIGH);
-        ledInFrameError = true;
+        ledFrameErrorOn = true;
         Serial.println("Frame error !");
       }
       updateDisplay();
