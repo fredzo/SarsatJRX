@@ -19,6 +19,8 @@ void Hardware::init()
     display->setup(i2c);
     audio = Audio::getAudio();
     audio->audioInit();
+    soundManager = SoundManager::getSoundManager();
+    soundManager->init();
 }
 
 Display* Hardware::getDisplay()
@@ -49,4 +51,9 @@ Power* Hardware::getPower()
 Filesystems* Hardware::getFilesystems()
 {
    return filesystems;
+}
+
+SoundManager* Hardware::getSoundManager()
+{
+   return soundManager;
 }

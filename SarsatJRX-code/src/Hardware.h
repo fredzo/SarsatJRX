@@ -7,6 +7,7 @@
 #include <Settings.h>
 #include <Audio.h>
 #include <Power.h>
+#include <SoundManager.h>
 
 class Hardware
 {
@@ -33,6 +34,8 @@ public:
 
     Power* getPower();
 
+    SoundManager* getSoundManager();
+
 private:
     Hardware()
     {
@@ -49,6 +52,7 @@ private:
     Settings *settings = nullptr;
     Audio* audio = nullptr;
     Power* power = nullptr;
+    SoundManager* soundManager;
 
     static Hardware *hardware;
 
