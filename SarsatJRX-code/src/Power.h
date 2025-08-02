@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+#define BATTERY_BUFFER_SIZE     128  // Circular buffer for rolling average
+
 class Power
 {
     public :
@@ -72,6 +74,10 @@ class Power
         ~Power()
         {
         };
+
+        void addPowerSample(float newVoltage);
+        float getAveragePowerValue();
+
         // Current power state
         PowerState state = PowerState::ON_BATTERY;
         // Current vcc value
@@ -80,6 +86,8 @@ class Power
         int batteryPercentage = 0;
         // Last power sample time
         unsigned long lastPowerSampleTime = 0;
+        // Last power update time
+        unsigned long lastPowerUpdateTime = 0;
         // Last charge sample time
         unsigned long lastChargeSampleTime = 0;
         // True when power changed
@@ -88,6 +96,11 @@ class Power
         int lastChargeValue = 0;
         // Charge value count
         int chargeValueCount = 0;
+
+        float voltageBuffer[BATTERY_BUFFER_SIZE];
+        uint8_t voltageIndex = 0;
+        uint8_t voltageCount = 0;
+        float voltageSum = 0.0f;
 
         // Static members
         static Power *powerInstance;

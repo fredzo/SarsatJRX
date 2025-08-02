@@ -46,7 +46,7 @@ void formatFrequencyItem(char* buffer, int index, float frequency, bool on);
 
 Rtc::Date parseBeaconFileName(const char* fileName);
 
-uint8_t voltageToPercent(float voltage);
+uint8_t voltageToPercent(float voltage, float voltageMin, float voltageMax);
 
 /* Baudot code matrix */
 extern char BAUDOT_CODE[64];

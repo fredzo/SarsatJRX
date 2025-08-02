@@ -3,10 +3,10 @@
 #include <Util.h>
 
 #define MAX_BATTERY_VOLTAGE     4.19
-#define POWER_SAMPLE_PERIOD     1000 // 1s
+#define POWER_SAMPLE_PERIOD     200  // 200ms
+#define POWER_UPDATE_PERIOD     1000 // 1s
 #define CHARGE_SAMPLE_PERIOD    50   // 50ms
 #define CHARGE_SAMPLE_COUNT     15   // Wait for 15 consecutive samples with same value to validate charge state
-
 
 // Static members
 Power *Power::powerInstance = nullptr;
@@ -73,6 +73,32 @@ int Power::getBatteryPercentage()
     return batteryPercentage;
 }
 
+// For rolling average
+void Power::addPowerSample(float newVoltage) 
+{
+    if (voltageCount < BATTERY_BUFFER_SIZE) 
+    {
+        // Initial filling
+        voltageBuffer[voltageIndex] = newVoltage;
+        voltageSum += newVoltage;
+        voltageCount++;
+    } 
+    else 
+    {   // Buffer full : remove old value, add new
+        float oldVoltage = voltageBuffer[voltageIndex];
+        voltageBuffer[voltageIndex] = newVoltage;
+        voltageSum += newVoltage - oldVoltage;
+    }
+    voltageIndex = (voltageIndex + 1) % BATTERY_BUFFER_SIZE;
+}
+
+// Get rolling average
+float Power::getAveragePowerValue(void) 
+{
+    if (voltageCount == 0) return 0.0f;
+    return voltageSum / voltageCount;
+}
+
 // Power task processing
 void Power::handleTask()
 {   // This task is in charge of updating power value and power state
@@ -82,7 +108,9 @@ void Power::handleTask()
         lastPowerSampleTime = now;
         uint32_t v = analogReadMilliVolts(BATTERY_ADC_PIN);
         float newValue = (((float)v)*2.0/1000.0);
-
+        // Compute rolling average
+        addPowerSample(newValue);
+        newValue = getAveragePowerValue();
         // Simu
         /* newValue = powerValue - 0.05;
         if(newValue < 3.3)
@@ -90,16 +118,19 @@ void Power::handleTask()
             newValue = 4.3;
         }*/
         // Simu
-
-        if(abs(newValue - powerValue) > 0.01)
-        {   // Filter small value changes
-            powerValue = newValue;
-            int newBatteryPercentage = voltageToPercent(powerValue);
-            if(abs(newBatteryPercentage - batteryPercentage) > 10)
-            {
-                batteryPercentage = newBatteryPercentage;
+        if((powerValue == 0) || (now - lastPowerUpdateTime > POWER_UPDATE_PERIOD))
+        {
+            lastPowerUpdateTime = now;
+            if(abs(newValue - powerValue) > 0.01)
+            {   // Filter small value changes
+                powerValue = newValue;
+                int newBatteryPercentage = voltageToPercent(powerValue,3.0f,3.9f);
+                if(abs(newBatteryPercentage - batteryPercentage) > 5)
+                {   // Round to nearest 5
+                    batteryPercentage = ((newBatteryPercentage + 2) / 5) * 5;
+                }
+                changed = true;
             }
-            changed = true;
         }
     }
     if(now - lastChargeSampleTime > CHARGE_SAMPLE_PERIOD)

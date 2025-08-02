@@ -121,51 +121,56 @@ void formatFrequencyItem(char* buffer, int index, float frequency, bool on)
 typedef struct {
     float voltage;
     uint8_t percent;
-} voltage_map_t;
+} voltageMap_t;
 
 // Simplified battery discharge curve
-static const voltage_map_t voltageMap[] = 
-{
-    {4.20f, 100},
-    {4.10f, 90},
-    {4.00f, 80},
-    {3.92f, 70},
-    {3.87f, 60},
-    {3.82f, 50},
-    {3.79f, 40},
-    {3.77f, 30},
-    {3.74f, 20},
-    {3.60f, 10},
-    {3.30f, 0}
+typedef struct {
+    float relVoltage;   // Relative voltage (from 0.0 to 1.0)
+    uint8_t percent;
+} battery_point_t;
+
+// Normalized discharge curve
+static const battery_point_t batteryCurve[] = {
+    {1.00, 100},
+    {0.98,  95},
+    {0.95,  90},
+    {0.90,  80},
+    {0.85,  70},
+    {0.80,  60},
+    {0.75,  50},
+    {0.70,  40},
+    {0.65,  30},
+    {0.60,  20},
+    {0.55,  10},
+    {0.50,   5},
+    {0.00,   0}
 };
 
-uint8_t voltageToPercent(float voltage) 
+uint8_t voltageToPercent(float voltage, float voltageMin, float voltageMax) 
 {
-    const int map_size = sizeof(voltageMap) / sizeof(voltageMap[0]);
+    if (voltageMax <= voltageMin) return 0;
 
-    if (voltage >= voltageMap[0].voltage) 
-    {
-        return 100;
-    } 
-    else if (voltage <= voltageMap[map_size - 1].voltage) 
-    {
-        return 0;
-    }
+    // Ratio entre 0.0 (min) et 1.0 (max)
+    float norm = (voltage - voltageMin) / (voltageMax - voltageMin);
 
-    for (int i = 0; i < map_size - 1; i++) {
-        float v_high = voltageMap[i].voltage;
-        float v_low = voltageMap[i + 1].voltage;
-        uint8_t p_high = voltageMap[i].percent;
-        uint8_t p_low = voltageMap[i + 1].percent;
+    const int count = sizeof(batteryCurve) / sizeof(batteryCurve[0]);
 
-        if (voltage <= v_high && voltage >= v_low) 
-        {   // Linear interpolation
-            float percent = p_low + (voltage - v_low) * (p_high - p_low) / (v_high - v_low);
-            return (uint8_t)(percent + 0.5f); // rounding
+    if (norm >= batteryCurve[0].relVoltage) return 100;
+    if (norm <= batteryCurve[count - 1].relVoltage) return 0;
+
+    for (int i = 0; i < count - 1; i++) {
+        float r_high = batteryCurve[i].relVoltage;
+        float r_low  = batteryCurve[i + 1].relVoltage;
+        uint8_t p_high = batteryCurve[i].percent;
+        uint8_t p_low  = batteryCurve[i + 1].percent;
+
+        if (norm <= r_high && norm >= r_low) 
+        {
+            float percent = p_low + (norm - r_low) * (p_high - p_low) / (r_high - r_low);
+            return (uint8_t)(percent + 0.5f);
         }
     }
-
-    return 0; // Fallback
+    return 0;
 }
 
 /* Baudot code matrix */
