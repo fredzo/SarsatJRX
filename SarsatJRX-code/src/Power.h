@@ -34,6 +34,13 @@ class Power
         String getVccStringValue();
 
         /**
+         * @brief Get the Battery Percentage value
+         * 
+         * @return int the battery percentage value
+         */
+        int getBatteryPercentage();
+
+        /**
          * @brief Get current PowerState
          * 
          * @return PowerState  the current PowerState
@@ -69,6 +76,8 @@ class Power
         PowerState state = PowerState::ON_BATTERY;
         // Current vcc value
         float powerValue = 0;
+        // Current battery percentage
+        int batteryPercentage = 0;
         // Last power sample time
         unsigned long lastPowerSampleTime = 0;
         // Last charge sample time

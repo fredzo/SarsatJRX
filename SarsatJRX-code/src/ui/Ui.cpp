@@ -17,10 +17,14 @@
 #define LED_SPACING         4
 #define LED_SPACE           LED_SIZE+LED_SPACING
 #define LED_CONTAINER_SIZE  4*LED_SIZE+6*LED_SPACING
-// Power and time
-#define HEADER_POWER_TEMPLATE "%sV"   // "4.98V"
-#define HEADER_POWER_Y      (HEADER_HEIGHT-16)/2
-#define HEADER_TIME_Y       HEADER_POWER_Y
+// Battery and time
+#define HEADER_BATTERY_TEMPLATE "%d%%"   // "100%"
+#define HEADER_BATTERY_Y        (HEADER_HEIGHT-16)/2
+#define HEADER_TIME_Y           HEADER_BATTERY_Y
+#define HEADER_BATTERY_WIDTH     50
+#define HEADER_BAR_BATTERY_WIDTH (HEADER_BATTERY_WIDTH-18)
+#define HEADER_BATTERY_HEIGHT    20
+
 // Wifi
 #define HEADER_WIFI_SIZE    20
 // SD Card
@@ -77,11 +81,16 @@ lv_color_t uiOkColor;
 lv_color_t uiKoColor;
 lv_color_t uiOnColor;
 lv_color_t uiOffColor;
+lv_color_t uiBatteryHighColor;
+lv_color_t uiBatteryMediumColor;
+lv_color_t uiBatteryLowColor;
+lv_color_t uiBatteryFullColor;
 
 
 const lv_font_t * font_large = &lv_font_montserrat_24;
 const lv_font_t * font_medium = &lv_font_montserrat_18;
 const lv_font_t * font_normal = &lv_font_montserrat_16;
+const lv_font_t * font_small = &lv_font_montserrat_12;
 const lv_font_t * font_mono_medium = &casscadia_mono_16;
 const lv_font_t * font_mono = &casscadia_mono;
 const lv_font_t * font_symbols = &additional_symbols;
@@ -89,7 +98,11 @@ const lv_font_t * font_symbols = &additional_symbols;
 lv_obj_t * timeLabel;
 lv_obj_t * wifiIndicator;
 lv_obj_t * sdCardIndicator;
-lv_obj_t * powerLabel;
+lv_obj_t * batteryContainer;
+lv_obj_t * batteryBody;
+lv_obj_t * batteryCap;
+lv_obj_t * batteryBar;
+lv_obj_t * batteryLabel;
 lv_obj_t * headerledSig2;
 lv_obj_t * ledSig1;
 lv_obj_t * ledSig2;
@@ -105,6 +118,76 @@ lv_obj_t * nextButton;
 UiScreen currentScreen = UiScreen::START;
 
 UiScreen previousScreen = UiScreen::START;
+
+// For battery animations
+static lv_anim_t opacityAnim;
+static lv_anim_t widthAnim;
+static bool batteryBlinkAnimRunning = false;
+static bool batteryChargeAnimRunning = false;
+
+static void setOpacityCallback(void *object, int32_t value) 
+{
+    lv_obj_set_style_opa((lv_obj_t *)object, value, LV_PART_MAIN);
+}
+
+void startBatteryBlinkAnim() 
+{
+    if (batteryBlinkAnimRunning) return;
+
+    lv_obj_set_style_opa(batteryContainer, LV_OPA_30, LV_PART_MAIN); // Start with opacity
+
+    lv_anim_init(&opacityAnim);
+    lv_anim_set_var(&opacityAnim, batteryContainer);
+    lv_anim_set_exec_cb(&opacityAnim, setOpacityCallback);
+    lv_anim_set_values(&opacityAnim, LV_OPA_30, LV_OPA_100);  // from 100% to 30%
+    lv_anim_set_time(&opacityAnim, 400);
+    lv_anim_set_repeat_delay(&opacityAnim, 600);
+    lv_anim_set_repeat_count(&opacityAnim,LV_ANIM_REPEAT_INFINITE);
+    lv_anim_start(&opacityAnim);
+
+    batteryBlinkAnimRunning = true;
+}
+
+void stopBatteryBlinkAnim() 
+{
+    if (!batteryBlinkAnimRunning) return;
+
+    lv_anim_del(batteryContainer, setOpacityCallback);  // Stop animation
+    lv_obj_set_style_opa(batteryContainer, LV_OPA_100, LV_PART_MAIN); // Reset opacity
+    batteryBlinkAnimRunning = false;
+}
+
+static void setWidthCallback(void *object, int32_t value) 
+{
+    lv_obj_set_width((lv_obj_t *)object, value);
+}
+
+void startBatteryChargeAnim() 
+{
+    if (batteryChargeAnimRunning) return;
+
+    lv_obj_set_width(batteryBar, 0); // Start with 0 width
+
+    lv_anim_init(&widthAnim);
+    lv_anim_set_var(&widthAnim, batteryBar);
+    lv_anim_set_exec_cb(&widthAnim, setWidthCallback);
+    lv_anim_set_values(&widthAnim, 0, HEADER_BAR_BATTERY_WIDTH);
+    lv_anim_set_time(&widthAnim, 1400);
+    lv_anim_set_repeat_delay(&widthAnim, 600);
+    lv_anim_set_repeat_count(&widthAnim,LV_ANIM_REPEAT_INFINITE);
+    lv_anim_start(&widthAnim);
+
+    batteryChargeAnimRunning = true;
+}
+
+void stopBatteryChargeAnim(int currentWidth) 
+{
+    if (!batteryChargeAnimRunning) return;
+
+    lv_anim_del(batteryBar, setWidthCallback);  // Stop animation
+    lv_obj_set_width(batteryBar, currentWidth); // Reset width
+    batteryChargeAnimRunning = false;
+}
 
 static void settings_handler(lv_event_t * e)
 {
@@ -173,14 +256,47 @@ void createHeader(lv_obj_t * win)
     lv_obj_set_style_translate_x(title,-15,0);
     lv_obj_add_flag(title, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(title, title_long_press_handler, LV_EVENT_LONG_PRESSED, NULL);
-    // Power
-    powerLabel = lv_label_create(header);
-    lv_label_set_text(powerLabel,"");
-    lv_label_set_long_mode(powerLabel, LV_LABEL_LONG_DOT);
-    lv_obj_add_style(powerLabel,&style_text_mono,0);
-    lv_obj_set_size(powerLabel, 60, LV_PCT(100));
-    lv_obj_set_style_pad_top(powerLabel,HEADER_TIME_Y,0);
-    
+
+    // Battery
+    batteryContainer = lv_obj_create(header);
+    lv_obj_set_size(batteryContainer, HEADER_BATTERY_WIDTH, HEADER_BATTERY_HEIGHT);
+    lv_obj_set_style_pad_all(batteryContainer, 0, 0);
+    lv_obj_set_style_radius(batteryContainer, 0, 0);
+    lv_obj_clear_flag(batteryContainer, LV_OBJ_FLAG_SCROLLABLE);
+
+    // Create battery indicator
+    batteryBar = lv_obj_create(batteryContainer);
+    lv_obj_set_size(batteryBar, HEADER_BAR_BATTERY_WIDTH, HEADER_BATTERY_HEIGHT-8);
+    lv_obj_set_style_bg_color(batteryBar, uiBatteryHighColor, 0);
+    lv_obj_set_style_border_width(batteryBar, 0, 0);
+    lv_obj_set_style_radius(batteryBar, 0, 0);
+    lv_obj_clear_flag(batteryBar, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_align(batteryBar, LV_ALIGN_LEFT_MID, 2, 0);;
+
+    // Create battery body
+    batteryBody = lv_obj_create(batteryContainer);
+    lv_obj_set_size(batteryBody, HEADER_BATTERY_WIDTH-14, HEADER_BATTERY_HEIGHT-4);
+    lv_obj_set_style_bg_opa(batteryBody, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(batteryBody, 1, 0);
+    lv_obj_set_style_border_color(batteryBody, lv_color_white(), 0);
+    lv_obj_set_style_radius(batteryBody, 0, 0);
+    lv_obj_align(batteryBody, LV_ALIGN_LEFT_MID, 0, 0);
+
+    // Battery cap
+    batteryCap = lv_obj_create(batteryContainer);
+    lv_obj_set_size(batteryCap, 4, 8);
+    lv_obj_set_style_bg_color(batteryCap, lv_color_white(), 0);
+    lv_obj_set_style_border_width(batteryCap, 0, 0);
+    lv_obj_set_style_radius(batteryCap, 0, 0);
+    lv_obj_align_to(batteryCap, batteryBody, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+
+    // Battery label
+    batteryLabel = lv_label_create(batteryBody);
+    lv_label_set_text(batteryLabel, "");
+    lv_obj_set_style_text_color(batteryLabel, lv_color_white(), 0);
+    lv_obj_set_style_text_font(batteryLabel, font_small, 0);
+    lv_obj_align(batteryLabel, LV_ALIGN_CENTER, 0, 0);
+
     // Leds
     // Led container
     lv_obj_t * ledContainer = lv_obj_create(header);
@@ -349,6 +465,11 @@ void createUi()
     // Scan ON / OFF color
     uiOffColor = lv_palette_main(LV_PALETTE_GREEN);
     uiOnColor = lv_palette_lighten(LV_PALETTE_RED,1);
+    // Battery colors
+    uiBatteryFullColor  = lv_palette_darken(LV_PALETTE_BLUE,2);
+    uiBatteryHighColor  = lv_palette_darken(LV_PALETTE_GREEN,2);
+    uiBatteryMediumColor= lv_palette_darken(LV_PALETTE_ORANGE,2);
+    uiBatteryLowColor   = lv_palette_darken(LV_PALETTE_RED,2);
     
     lv_obj_t * win = lv_win_create(lv_scr_act(),HEADER_HEIGHT);
     createHeader(win);
@@ -470,8 +591,62 @@ void uiUpdateSdCardStatus()
 void uiUpdatePower()
 {
     Power* power = Hardware::getHardware()->getPower();
-    // TODO replace with battery logo
-    lv_label_set_text(powerLabel, power->getVccStringValue().c_str());
+    // Update Icon
+    Power::PowerState state = power->getPowerState();
+    int percent = power->getBatteryPercentage();
+    switch (state) 
+    {
+        case Power::PowerState::NO_BATTERY:
+            lv_label_set_text(batteryLabel, LV_SYMBOL_CLOSE); 
+            break;
+        case Power::PowerState::FULL :
+            lv_label_set_text(batteryLabel, LV_SYMBOL_OK); 
+            break;
+        case Power::PowerState::CHARGING :
+            lv_label_set_text(batteryLabel, LV_SYMBOL_CHARGE); 
+            break;
+        case Power::PowerState::ON_BATTERY :
+        default:
+            char buf[6];
+            lv_snprintf(buf, sizeof(buf), HEADER_BATTERY_TEMPLATE, percent);
+            lv_label_set_text(batteryLabel, buf);    
+            break;
+    }    
+    
+    bool noBattery = (state == Power::PowerState::NO_BATTERY);
+    bool charging = (state == Power::PowerState::CHARGING);
+    int width = noBattery ? 0 : (HEADER_BAR_BATTERY_WIDTH * percent) / 100;
+  
+    lv_color_t color = (
+        (state == Power::PowerState::FULL) ? uiBatteryFullColor :
+        (percent <= 15) ? uiBatteryLowColor :  
+        (percent <= 30) ? uiBatteryMediumColor:
+                          uiBatteryHighColor
+    );
+    lv_obj_set_style_bg_color(batteryBar, color, 0);
+    lv_obj_set_width(batteryBar, width);
+    color =  ((percent <= 10)||noBattery) ? lv_palette_main(LV_PALETTE_RED) : lv_color_white();
+    lv_obj_set_style_border_color(batteryBody, color, 0);
+    lv_obj_set_style_bg_color(batteryCap, color, 0);
+
+    if (percent <= 10 || noBattery)
+    {
+        startBatteryBlinkAnim();
+    }
+    else
+    {
+        stopBatteryBlinkAnim();
+    }
+
+    if(charging)
+    {
+        startBatteryChargeAnim();
+    }
+    else
+    {
+        stopBatteryChargeAnim(width);
+    }
+
     // Also update VCC and power state in system tab
     uiSettingsUpdateSystem();
 }

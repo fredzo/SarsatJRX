@@ -118,6 +118,56 @@ void formatFrequencyItem(char* buffer, int index, float frequency, bool on)
     sprintf(buffer,"(%c) %d- %3.4f MHz",on ? '*' : ' ', index+1, frequency);
 }
 
+typedef struct {
+    float voltage;
+    uint8_t percent;
+} voltage_map_t;
+
+// Simplified battery discharge curve
+static const voltage_map_t voltageMap[] = 
+{
+    {4.20f, 100},
+    {4.10f, 90},
+    {4.00f, 80},
+    {3.92f, 70},
+    {3.87f, 60},
+    {3.82f, 50},
+    {3.79f, 40},
+    {3.77f, 30},
+    {3.74f, 20},
+    {3.60f, 10},
+    {3.30f, 0}
+};
+
+uint8_t voltageToPercent(float voltage) 
+{
+    const int map_size = sizeof(voltageMap) / sizeof(voltageMap[0]);
+
+    if (voltage >= voltageMap[0].voltage) 
+    {
+        return 100;
+    } 
+    else if (voltage <= voltageMap[map_size - 1].voltage) 
+    {
+        return 0;
+    }
+
+    for (int i = 0; i < map_size - 1; i++) {
+        float v_high = voltageMap[i].voltage;
+        float v_low = voltageMap[i + 1].voltage;
+        uint8_t p_high = voltageMap[i].percent;
+        uint8_t p_low = voltageMap[i + 1].percent;
+
+        if (voltage <= v_high && voltage >= v_low) 
+        {   // Linear interpolation
+            float percent = p_low + (voltage - v_low) * (p_high - p_low) / (v_high - v_low);
+            return (uint8_t)(percent + 0.5f); // rounding
+        }
+    }
+
+    return 0; // Fallback
+}
+
 /* Baudot code matrix */
 char BAUDOT_CODE[64]   = {' ','5',' ','9',' ',' ',' ',' ',' ',' ','4',' ','8','0',' ',' ',
                           '3',' ',' ',' ',' ','6',' ','/','-','2',' ',' ','7','1',' ',' ',

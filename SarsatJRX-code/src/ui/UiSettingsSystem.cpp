@@ -147,10 +147,12 @@ void uiSettingsUpdateSystem()
 {
     Hardware* hardware = Hardware::getHardware();
     // System tab
+    Power* power = hardware->getPower();
     // Vbat
-    lv_label_set_text(vBatLabel,hardware->getPower()->getVccStringValue().c_str());
+    lv_label_set_text(vBatLabel,power->getVccStringValue().c_str());
     // Power state
-    lv_label_set_text(powerStateLabel,hardware->getPower()->getPowerStateString().c_str());
+    String powerString = power->getPowerStateString() + " ("+power->getBatteryPercentage()+"%)";
+    lv_label_set_text(powerStateLabel,powerString.c_str());
     // Ram
     lv_label_set_text(ramSizeLabel,formatMemoryValue(ESP.getHeapSize(),true).c_str());
     lv_label_set_text(ramFreeLabel,formatMemoryValue(ESP.getFreeHeap(),true).c_str());

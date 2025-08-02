@@ -28,6 +28,18 @@ class Settings
         uint8_t getDisplayBacklight();
         void setDisplayBacklight(uint8_t backlight);
 
+        bool getScreenOffOnCharge();
+        void setScreenOffOnCharge(bool active);
+
+        bool getShowBatteryPercentage();
+        void setShowBatteryPercentage(bool show);
+
+        uint8_t getBuzzerLevel();
+        void setBuzzerLevel(uint8_t volume);
+
+        bool getFrameAnnoucementBuzzer();
+        void setFrameAnnoucementBuzzer(bool active);
+
         void save();
 
     private :

@@ -1,5 +1,6 @@
 #include "Power.h"
 #include <SarsatJRXConf.h>
+#include <Util.h>
 
 #define MAX_BATTERY_VOLTAGE     4.19
 #define POWER_SAMPLE_PERIOD     1000 // 1s
@@ -67,6 +68,11 @@ String Power::getPowerStateString()
     return result;
 }
 
+int Power::getBatteryPercentage()
+{
+    return batteryPercentage;
+}
+
 // Power task processing
 void Power::handleTask()
 {   // This task is in charge of updating power value and power state
@@ -76,9 +82,23 @@ void Power::handleTask()
         lastPowerSampleTime = now;
         uint32_t v = analogReadMilliVolts(BATTERY_ADC_PIN);
         float newValue = (((float)v)*2.0/1000.0);
+
+        // Simu
+        /* newValue = powerValue - 0.05;
+        if(newValue < 3.3)
+        {
+            newValue = 4.3;
+        }*/
+        // Simu
+
         if(abs(newValue - powerValue) > 0.01)
         {   // Filter small value changes
             powerValue = newValue;
+            int newBatteryPercentage = voltageToPercent(powerValue);
+            if(abs(newBatteryPercentage - batteryPercentage) > 10)
+            {
+                batteryPercentage = newBatteryPercentage;
+            }
             changed = true;
         }
     }

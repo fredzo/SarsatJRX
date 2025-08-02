@@ -1,10 +1,14 @@
 #include <Settings.h>
 #include <SarsatJRXConf.h>
 
-#define PREF_PREFIX         "SarsatJRX"
-#define WIFI_STATE_KEY      "Wifi"
-#define DISPLAY_REVERSE     "DRev"
-#define DISPLAY_BACKLIGHT   "DBL"
+#define PREF_PREFIX             "SarsatJRX"
+#define WIFI_STATE_KEY          "Wifi"
+#define DISPLAY_REVERSE         "DRev"
+#define DISPLAY_BACKLIGHT       "DBL"
+#define SHOW_BAT_PERCENTAGE     "SBP"
+#define BUZZER_LEVEL            "BL"
+#define FRAME_ANN_BUZZER        "FAB"
+#define SCREEN_OFF_ON_CHRAGE    "SOOC"
 
 Settings *Settings::settingsInstance = nullptr;
 
@@ -40,6 +44,49 @@ uint8_t Settings::getDisplayBacklight()
     return preferences.getUChar(DISPLAY_BACKLIGHT,true);
 }
 
+bool Settings::getScreenOffOnCharge()
+{
+    return preferences.getBool(SCREEN_OFF_ON_CHRAGE,true);
+}
+
+void Settings::setScreenOffOnCharge(bool active)
+{
+    preferences.putBool(SCREEN_OFF_ON_CHRAGE,active);
+    dirty = true;
+}
+
+bool Settings::getShowBatteryPercentage()
+{
+    return preferences.getBool(SHOW_BAT_PERCENTAGE,true);
+}
+
+void Settings::setShowBatteryPercentage(bool show)
+{
+    preferences.putBool(SHOW_BAT_PERCENTAGE,show);
+    dirty = true;
+}
+
+uint8_t Settings::getBuzzerLevel()
+{
+    return preferences.getUChar(BUZZER_LEVEL,true);
+}
+
+void Settings::setBuzzerLevel(uint8_t level)
+{
+    preferences.putUChar(BUZZER_LEVEL,level);
+    dirty = true;
+}
+
+bool Settings::getFrameAnnoucementBuzzer()
+{
+    return preferences.getBool(FRAME_ANN_BUZZER,true);
+}
+
+void Settings::setFrameAnnoucementBuzzer(bool active)
+{
+    preferences.putBool(FRAME_ANN_BUZZER,active);
+    dirty = true;
+}
 
 void Settings::save()
 {
