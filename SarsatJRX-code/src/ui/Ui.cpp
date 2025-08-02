@@ -601,6 +601,7 @@ void uiUpdatePower()
             break;
         case Power::PowerState::FULL :
             lv_label_set_text(batteryLabel, LV_SYMBOL_OK); 
+            percent = 100;
             break;
         case Power::PowerState::CHARGING :
             lv_label_set_text(batteryLabel, LV_SYMBOL_CHARGE); 

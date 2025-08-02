@@ -124,7 +124,7 @@ void Power::handleTask()
             if(abs(newValue - powerValue) > 0.01)
             {   // Filter small value changes
                 powerValue = newValue;
-                int newBatteryPercentage = voltageToPercent(powerValue,3.0f,3.9f);
+                int newBatteryPercentage = voltageToPercent(powerValue,3.0f,4.0f);
                 if(abs(newBatteryPercentage - batteryPercentage) > 5)
                 {   // Round to nearest 5
                     batteryPercentage = ((newBatteryPercentage + 2) / 5) * 5;
