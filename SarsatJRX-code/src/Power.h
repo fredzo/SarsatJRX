@@ -29,6 +29,13 @@ class Power
         float getVccValue();
 
         /**
+         * @brief Returns actual VCC value
+         * 
+         * @return VCC value
+         */
+        float getRawVccValue() { return rawPowerValue; };
+
+        /**
          * @brief Read VCC value into the provided char* with the format "x.xx"
          * 
          * @return Rhe VCC string value
@@ -82,6 +89,8 @@ class Power
         PowerState state = PowerState::ON_BATTERY;
         // Current vcc value
         float powerValue = 0;
+        // Raw vcc value
+        float rawPowerValue = 0;
         // Current battery percentage
         int batteryPercentage = 0;
         // Last power sample time

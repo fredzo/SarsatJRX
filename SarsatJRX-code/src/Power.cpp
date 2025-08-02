@@ -107,10 +107,11 @@ void Power::handleTask()
     {   // Time to make a new sample
         lastPowerSampleTime = now;
         uint32_t v = analogReadMilliVolts(BATTERY_ADC_PIN);
-        float newValue = (((float)v)*2.0/1000.0);
+        rawPowerValue = (((float)v)*2.0/1000.0);
+
         // Compute rolling average
-        addPowerSample(newValue);
-        newValue = getAveragePowerValue();
+        addPowerSample(rawPowerValue);
+        float newValue = getAveragePowerValue();
         // Simu
         /* newValue = powerValue - 0.05;
         if(newValue < 3.3)
@@ -147,7 +148,7 @@ void Power::handleTask()
                     PowerState newState;
                     if(lastChargeValue)
                     {   // Led off (pin high) => either full or on battery
-                        if(powerValue >= MAX_BATTERY_VOLTAGE)
+                        if(rawPowerValue >= MAX_BATTERY_VOLTAGE)
                         {
                             newState = PowerState::FULL;
                         }
