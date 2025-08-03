@@ -90,7 +90,7 @@ class Display
         void updateFrameReceived (bool state) 
         {
             needUpdateFrameReceived = true;
-            ledFrameReceivedState = state;
+            frameReceivedState = state;
         }
         void updateAudioPower() { needUpdateAudioPower = true; }
         void updateBeacon(Beacon* beacon, int currentPage, int totalPage)
