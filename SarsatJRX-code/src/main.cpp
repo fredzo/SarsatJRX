@@ -64,7 +64,11 @@ void readBeacon()
     beaconsWriteIndex = 0;
   }
   // Delete previously stored beacon to prevent memory leak
-  delete beacons[beaconsWriteIndex];
+  if(beacons[beaconsWriteIndex]) 
+  {
+      delete beacons[beaconsWriteIndex];
+      beacons[beaconsWriteIndex] = nullptr;
+  }
   Beacon* beacon;
   if(isFrameFromDisk())
   {
@@ -261,7 +265,9 @@ bool readBeaconFromFile(const char* fileName)
 }
 
 void setup()
-{
+{ // Init beacon list
+  for(int i=0; i<BEACON_LIST_MAX_SIZE; i++) beacons[i] = nullptr;
+
   // For heap corruption debugging
   //heap_caps_print_heap_info(MALLOC_CAP_DEFAULT);
 
@@ -366,12 +372,14 @@ void loop()
       frameReceivedLedBlink();
       // Then read beacon and update beacon display
       readBeacon();
-      if(!beacons[beaconsReadIndex]->isBch1Valid() || !beacons[beaconsReadIndex]->isBch2Valid())
+      bool error = (!beacons[beaconsReadIndex]->isBch1Valid() || !beacons[beaconsReadIndex]->isBch2Valid());
+      if(error)
       { // Error led
         digitalWrite(ERROR_PIN, HIGH);
         ledFrameErrorOn = true;
         Serial.println("Frame error !");
       }
+      hardware->getSoundManager()->playFrameSound(error);
       updateDisplay();
       if(!isFrameFromDisk())
       { // Finally save beacon to sd card
