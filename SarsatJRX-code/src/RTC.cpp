@@ -9,14 +9,14 @@ Rtc *Rtc::rtcInstance = nullptr;
 String Rtc::Date::getDateString()
 {
     char buffer[16];
-    sprintf(buffer,"%02d/%02d/%04d", day,month,year);
+    snprintf(buffer,sizeof(buffer),"%02d/%02d/%04d", day,month,year);
     return String(buffer);
 }
 
 String Rtc::Date::getTimeString()
 {
     char buffer[16];
-    sprintf(buffer,"%02d:%02d:%02d", hour,minute,second);
+    snprintf(buffer,sizeof(buffer),"%02d:%02d:%02d", hour,minute,second);
     return String(buffer);
 }
 

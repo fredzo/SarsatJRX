@@ -268,7 +268,7 @@ void uiBeaconSetBeacon(Beacon* beacon)
     String date = beacon->date.getDateString();
     String time = beacon->date.getTimeString();
     lv_label_set_text(beaconTimeLabel,time.c_str());
-    sprintf(buffer,"%s - %s",date.c_str(),time.c_str());
+    lv_snprintf(buffer,sizeof(buffer),"%s - %s",date.c_str(),time.c_str());
     lv_label_set_text(infoDateLabel,buffer);
     // Frame mode
     const char* frameMode;
@@ -292,7 +292,7 @@ void uiBeaconSetBeacon(Beacon* beacon)
     if(beacon->protocol->isUnknown())
     {
         // Unknwon protocol (xxxx)
-        sprintf(buffer,"%s (%lu)",beacon->getProtocolName().c_str(),beacon->protocolCode);
+        lv_snprintf(buffer,sizeof(buffer),"%s (%lu)",beacon->getProtocolName().c_str(),beacon->protocolCode);
         lv_label_set_text(infoLabel1,buffer);
         #ifdef SERIAL_OUT 
         Serial.println(buffer);   
@@ -393,7 +393,7 @@ void uiBeaconSetBeacon(Beacon* beacon)
     // "Id = 0x1122334455667788"
     uint32_t msb = beacon->identifier >> 32;
     uint32_t lsb = beacon->identifier;
-    sprintf(buffer,"%07lX%08lX",msb,lsb);
+    lv_snprintf(buffer,sizeof(buffer),"%07lX%08lX",msb,lsb);
     lv_label_set_text(mapHexIdLabel,buffer);
     lv_label_set_text(beaconHexIdLabel,buffer);
     lv_label_set_text(dataHexIdLabel,buffer);
@@ -472,7 +472,7 @@ void uiBeaconSetBeacon(Beacon* beacon)
     const char * data = BEACON_URL_TEMPALTE;
     lv_qrcode_update(mapQr, buffer, strlen(buffer));
     // Set beacon QR data
-    sprintf(buffer,BEACON_URL_TEMPALTE, toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14).c_str());
+    lv_snprintf(buffer,sizeof(buffer),BEACON_URL_TEMPALTE, toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14).c_str());
     #ifdef SERIAL_OUT 
     Serial.println(buffer); 
     #endif

@@ -180,7 +180,7 @@ void startEditFreq(bool mainFrequency)
 
     // Prepare text area content
     char buffer[16];
-    sprintf(buffer,"%3.4f",placeHolderFreq);
+    lv_snprintf(buffer,sizeof(buffer),"%3.4f",placeHolderFreq);
     lv_textarea_set_text(displayFreqTextArea, "");
     lv_textarea_set_placeholder_text(displayFreqTextArea, buffer);
 }

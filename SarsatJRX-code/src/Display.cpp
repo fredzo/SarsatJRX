@@ -313,7 +313,7 @@ void Display::print(long value)
 void Display::printHex(byte value)
 {
     char buffer[4];
-    sprintf(buffer, "%02X", value);
+    snprintf(buffer,sizeof(buffer), "%02X", value);
     displayBuffer += buffer;
 }
 

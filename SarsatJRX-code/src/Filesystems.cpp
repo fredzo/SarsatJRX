@@ -69,7 +69,7 @@ bool Filesystems::saveBeacon(Beacon* beacon)
     if(sdFilesystemMounted&&logDirReady)
     {
         char buffer[64];
-        sprintf(buffer,LOG_FILENAME_TEMPLATE,SARSATJRX_LOG_DIR,beacon->date.day,beacon->date.month,beacon->date.year,beacon->date.hour,beacon->date.minute,beacon->date.second);
+        snprintf(buffer,sizeof(buffer),LOG_FILENAME_TEMPLATE,SARSATJRX_LOG_DIR,beacon->date.day,beacon->date.month,beacon->date.year,beacon->date.hour,beacon->date.minute,beacon->date.second);
         File file = sdFileSystem->open(buffer, FILE_WRITE);
         if(file)
         {
@@ -100,7 +100,7 @@ bool Filesystems::loadBeacon(const char* fileName, volatile byte* frameBuffer)
     if(sdFilesystemMounted&&logDirReady)
     {
         char buffer[64];
-        sprintf(buffer,"%s/%s",SARSATJRX_LOG_DIR,fileName);
+        snprintf(buffer,sizeof(buffer),"%s/%s",SARSATJRX_LOG_DIR,fileName);
         File file = sdFileSystem->open(buffer, FILE_READ);
         if(file)
         {
@@ -139,7 +139,7 @@ bool Filesystems::deleteBeacon(const char* fileName)
     if(sdFilesystemMounted&&logDirReady)
     {
         char buffer[64];
-        sprintf(buffer,"%s/%s",SARSATJRX_LOG_DIR,fileName);
+        snprintf(buffer,sizeof(buffer),"%s/%s",SARSATJRX_LOG_DIR,fileName);
         result = sdFileSystem->remove(buffer);
     }
     return result;
@@ -162,7 +162,7 @@ int Filesystems::deleteAllBeacons()
                     if(name.endsWith(LOG_FILE_EXTENSION))
                     {
                         char buffer[64];
-                        sprintf(buffer,"%s/%s",SARSATJRX_LOG_DIR,name.c_str());
+                        snprintf(buffer,sizeof(buffer),"%s/%s",SARSATJRX_LOG_DIR,name.c_str());
                         if(sdFileSystem->remove(buffer))
                         {
                             result++;

@@ -14,7 +14,7 @@ String Location::toString(bool sexagesimal)
     char buffer[32];
     if(sexagesimal)
     {   // Format :  <xxx°yy'zz"N, xxx°yy'zz"W>
-        sprintf(buffer, "%ld°%02ld'%02ld\"%c, %ld°%02ld'%02ld\"%c", latitude.degrees,latitude.minutes, latitude.seconds, latitude.orientation ? 'S' : 'N',longitude.degrees, longitude.minutes, longitude.seconds, longitude.orientation ? 'W' : 'E');
+        snprintf(buffer,sizeof(buffer), "%ld°%02ld'%02ld\"%c, %ld°%02ld'%02ld\"%c", latitude.degrees,latitude.minutes, latitude.seconds, latitude.orientation ? 'S' : 'N',longitude.degrees, longitude.minutes, longitude.seconds, longitude.orientation ? 'W' : 'E');
     }
     else
     {   // Format :  <-xx.yyy, xxx.yyy>
@@ -30,7 +30,7 @@ void Location::formatFloatLocation(char* buffer, const char* format)
     latitude.toFloatString(latStr);
     char longStr[16];
     longitude.toFloatString(longStr);
-    sprintf(buffer, format, latStr,longStr);
+    snprintf(buffer,sizeof(buffer), format, latStr,longStr);
 }
 
 void Location::clear()

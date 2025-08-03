@@ -42,8 +42,10 @@ class SoundManager
 
 
         SoundManager()
-        {
-            player = new MelodyPlayer(BUZZER_PIN,0,LOW);
+        {   // Uses channel 4 since channel 0 is used for LCD Backlight
+            player = new MelodyPlayer(BUZZER_PIN,4,LOW);
+            // TODO : make this a setting option
+            player->setVolume(255);
         };
 
         ~SoundManager()

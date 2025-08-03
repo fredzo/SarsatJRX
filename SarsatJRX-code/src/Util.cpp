@@ -28,7 +28,7 @@ String toHexString(volatile byte* frame, bool withSpace, int start, int end)
   String result = "";
   for ( byte i = start; i < end; i++) 
   {
-    sprintf(buffer, "%02X", frame[i]);
+    snprintf(buffer,sizeof(buffer), "%02X", frame[i]);
     if(withSpace && i>start) 
     {
       result += " ";
@@ -59,11 +59,11 @@ String formatMemoryValue(uint32_t value, bool showByteValue)
   uint32_t kbValue = value / 1024;
   if(showByteValue)
   {
-    sprintf(buffer,"%'d kB (%'d bytes)",kbValue,value);
+    snprintf(buffer,sizeof(buffer),"%'d kB (%'d bytes)",kbValue,value);
   }
   else
   {
-    sprintf(buffer,"%'d kB",kbValue);
+    snprintf(buffer,sizeof(buffer),"%'d kB",kbValue);
   }
   return String(buffer);
 }
@@ -97,7 +97,7 @@ String formatSketchInformation(uint32_t size, String md5)
 
 void formatBeaconFileName(char* buffer, String name)
 {
-  sprintf(buffer,"%s/%s/%s - %s:%s:%s",name.substring(0,2),name.substring(2,4),name.substring(4,8),name.substring(9,11),name.substring(11,13),name.substring(13,15));
+  snprintf(buffer,sizeof(buffer),"%s/%s/%s - %s:%s:%s",name.substring(0,2),name.substring(2,4),name.substring(4,8),name.substring(9,11),name.substring(11,13),name.substring(13,15));
 }
 
 Rtc::Date parseBeaconFileName(const char* fileName)
@@ -115,7 +115,7 @@ Rtc::Date parseBeaconFileName(const char* fileName)
 
 void formatFrequencyItem(char* buffer, int index, float frequency, bool on)
 {
-    sprintf(buffer,"(%c) %d- %3.4f MHz",on ? '*' : ' ', index+1, frequency);
+    snprintf(buffer,sizeof(buffer),"(%c) %d- %3.4f MHz",on ? '*' : ' ', index+1, frequency);
 }
 
 typedef struct {
