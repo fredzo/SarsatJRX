@@ -305,6 +305,8 @@ void setup()
   display->updateSdCard();
   display->updateDiscri();
 
+  display->setReverse(Settings::getSettings()->getDisplayReverse());
+
   // UI is now ready : start display task
   display->startDisplayTask();
 
@@ -342,6 +344,7 @@ void loop()
   hardware->getPower()->handleTask();
   // Get rtc
   Rtc* rtc = hardware->getRtc();
+  Settings* settings = hardware->getSettings();
   // If frameParseState > 0, we are reading an frame, if more thant 500ms elapsed (a frame should be 144x2.5ms = 360 ms max)
   bool frameTimeout = (isFrameStarted() && ((millis()-getFrameStartTime()) > 500 ));
   if (isFrameComplete() || frameTimeout)
@@ -393,7 +396,10 @@ void loop()
         ledFrameErrorOn = true;
         Serial.println("Frame error !");
       }
-      hardware->getSoundManager()->playFrameSound(error);
+      if(settings->getFrameSound())
+      {
+        hardware->getSoundManager()->playFrameSound(error);
+      }
       updateDisplay();
       if(!isFrameFromDisk())
       { // Finally save beacon to sd card
@@ -417,13 +423,20 @@ void loop()
   if(rtc->countDownHasChanged())
   {
     display->updateTicker();
-    if(rtc->isAlmostLastCount())
+    if(settings->getCountDownSound())
     {
-      hardware->getSoundManager()->playCountDownLowSound();
+      if(rtc->isAlmostLastCount())
+      {
+        hardware->getSoundManager()->playCountDownLowSound();
+      }
+      else if (rtc->isLastCount())
+      {
+        hardware->getSoundManager()->playCountDownHighSound();
+      }
     }
-    else if (rtc->isLastCount())
+    if((rtc->getCountDown()==-1) && settings->getReloadCountDown())
     {
-      hardware->getSoundManager()->playCountDownHighSound();
+      rtc->startCountDown();
     }
   }
 

@@ -77,6 +77,8 @@ static void toggle_display_cb(lv_event_t * e)
     Display* display = hardware->getDisplay();
     // Reverse display if needed
     display->setReverse(state);
+    // Update Settings in flask
+    Settings::getSettings()->setDisplayReverse(state);
     uiSettingsUpdateView();
 }
 

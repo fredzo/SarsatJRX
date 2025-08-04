@@ -25,9 +25,6 @@ class Settings
         bool getDisplayReverse();
         void setDisplayReverse(bool reverse);
 
-        uint8_t getDisplayBacklight();
-        void setDisplayBacklight(uint8_t backlight);
-
         bool getScreenOffOnCharge();
         void setScreenOffOnCharge(bool active);
 
@@ -37,8 +34,17 @@ class Settings
         uint8_t getBuzzerLevel();
         void setBuzzerLevel(uint8_t volume);
 
-        bool getFrameAnnoucementBuzzer();
-        void setFrameAnnoucementBuzzer(bool active);
+        bool getTouchSound();
+        void setTouchSound(bool active);
+
+        bool getFrameSound();
+        void setFrameSound(bool active);
+
+        bool getCountDownSound();
+        void setCountDownSound(bool active);
+
+        bool getReloadCountDown();
+        void setReloadCountDown(bool active);
 
         void save();
 

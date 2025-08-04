@@ -649,9 +649,14 @@ void uiUpdatePower()
             break;
         case Power::PowerState::ON_BATTERY :
         default:
-            char buf[6];
-            lv_snprintf(buf, sizeof(buf), HEADER_BATTERY_TEMPLATE, percent);
-            lv_label_set_text(batteryLabel, buf);    
+            if(Settings::getSettings()->getShowBatteryPercentage())
+            {
+                lv_label_set_text_fmt(batteryLabel, HEADER_BATTERY_TEMPLATE, percent);    
+            }
+            else
+            {
+                lv_label_set_text(batteryLabel, "");    
+            }
             break;
     }    
     

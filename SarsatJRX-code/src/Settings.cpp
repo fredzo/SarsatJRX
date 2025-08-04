@@ -4,11 +4,13 @@
 #define PREF_PREFIX             "SarsatJRX"
 #define WIFI_STATE_KEY          "Wifi"
 #define DISPLAY_REVERSE         "DRev"
-#define DISPLAY_BACKLIGHT       "DBL"
 #define SHOW_BAT_PERCENTAGE     "SBP"
-#define BUZZER_LEVEL            "BL"
-#define FRAME_ANN_BUZZER        "FAB"
 #define SCREEN_OFF_ON_CHRAGE    "SOOC"
+#define BUZZER_LEVEL            "BL"
+#define TOUCH_SOUND             "TS"
+#define FRAME_SOUND             "FS"
+#define COUNTDOWN_SOUD          "CDS"
+#define RELOAD_COUNTDOWN        "RCD"
 
 Settings *Settings::settingsInstance = nullptr;
 
@@ -30,18 +32,13 @@ void Settings::setWifiState(bool state)
 
 bool Settings::getDisplayReverse()
 {
-    return preferences.getBool(DISPLAY_REVERSE,true);
+    return preferences.getBool(DISPLAY_REVERSE,false);
 }
 
-void Settings::setDisplayBacklight(uint8_t backlight)
+void Settings::setDisplayReverse(bool state)
 {
-    preferences.putUChar(DISPLAY_BACKLIGHT,backlight);
+    preferences.putBool(DISPLAY_REVERSE,state);
     dirty = true;
-}
-
-uint8_t Settings::getDisplayBacklight()
-{
-    return preferences.getUChar(DISPLAY_BACKLIGHT,true);
 }
 
 bool Settings::getScreenOffOnCharge()
@@ -77,14 +74,47 @@ void Settings::setBuzzerLevel(uint8_t level)
     dirty = true;
 }
 
-bool Settings::getFrameAnnoucementBuzzer()
+bool Settings::getTouchSound()
 {
-    return preferences.getBool(FRAME_ANN_BUZZER,true);
+    return preferences.getBool(TOUCH_SOUND,true);
 }
 
-void Settings::setFrameAnnoucementBuzzer(bool active)
+void Settings::setTouchSound(bool active)
 {
-    preferences.putBool(FRAME_ANN_BUZZER,active);
+    preferences.putBool(TOUCH_SOUND,active);
+    dirty = true;
+}
+
+bool Settings::getFrameSound()
+{
+    return preferences.getBool(FRAME_SOUND,true);
+}
+
+void Settings::setFrameSound(bool active)
+{
+    preferences.putBool(FRAME_SOUND,active);
+    dirty = true;
+}
+
+bool Settings::getCountDownSound()
+{
+    return preferences.getBool(COUNTDOWN_SOUD,true);
+}
+
+void Settings::setCountDownSound(bool active)
+{
+    preferences.putBool(COUNTDOWN_SOUD,active);
+    dirty = true;
+}
+
+bool Settings::getReloadCountDown()
+{
+    return preferences.getBool(RELOAD_COUNTDOWN,false);
+}
+
+void Settings::setReloadCountDown(bool active)
+{
+    preferences.putBool(RELOAD_COUNTDOWN,active);
     dirty = true;
 }
 

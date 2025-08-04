@@ -7,6 +7,7 @@
 #include <ledc.h>
 #include <ui/Ui.h>
 #include <SoundManager.h>
+#include <Settings.h>
 
 
 #define GT911_ADDRESS               0x5D
@@ -59,6 +60,11 @@ void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
     data->state = touched ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
     if(touched)
     {
+      if(!bl->isOn())
+      { // Wake up display if needed
+        bl->on();
+      }
+
       uint16_t x = 0,y = 0;
       touch->getPoint(x,y,0);
       // Handle rotation (cf. TTGO.h l. 299)
@@ -76,7 +82,7 @@ void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
       Serial.println( x );
       Serial.print( "Data y " );
       Serial.println( y );*/
-      if(!wasTouched)
+      if(!wasTouched && Settings::getSettings()->getTouchSound())
       {
         SoundManager::getSoundManager()->playTouchSound();
         wasTouched = true;
