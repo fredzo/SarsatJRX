@@ -21,7 +21,7 @@ void Settings::init()
 
 bool Settings::getWifiState()
 {
-    return preferences.getBool(WIFI_STATE_KEY,true);
+    return preferences.getBool(WIFI_STATE_KEY,false);
 }
 
 void Settings::setWifiState(bool state)
@@ -65,7 +65,7 @@ void Settings::setShowBatteryPercentage(bool show)
 
 uint8_t Settings::getBuzzerLevel()
 {
-    return preferences.getUChar(BUZZER_LEVEL,true);
+    return preferences.getUChar(BUZZER_LEVEL,255);
 }
 
 void Settings::setBuzzerLevel(uint8_t level)

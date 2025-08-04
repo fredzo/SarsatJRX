@@ -305,10 +305,15 @@ void setup()
   display->updateSdCard();
   display->updateDiscri();
 
-  display->setReverse(Settings::getSettings()->getDisplayReverse());
+  Settings* settings = hardware->getSettings();
+
+  display->setReverse(settings->getDisplayReverse());
 
   // UI is now ready : start display task
   display->startDisplayTask();
+
+  // Init buzzer level
+  hardware->getSoundManager()->setVolume(settings->getBuzzerLevel());
 
   //readNextSampleFrame();
 #ifdef SERIAL_OUT 
