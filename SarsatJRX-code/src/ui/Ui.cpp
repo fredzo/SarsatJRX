@@ -46,6 +46,7 @@
 #define FOOTER_METER_HEIGHT         10
 #define FOOTER_METTER_X             FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE+8
 #define FOOTER_METTER_Y             FOOTER_HEIGHT-FOOTER_METER_HEIGHT-8
+#define SPINNER_COUNTDOWN_TEMPLATE  "%02d"
 
 // Additionnal Symbols
 #define SYMBOL_WIFI_CONNECTED       "\xEF\x87\xAB"
@@ -116,6 +117,7 @@ lv_obj_t * pagesLabel;
 lv_obj_t * footerLabel;
 lv_obj_t * meter;
 lv_obj_t * spinner;
+lv_obj_t * spinnerLabel;
 lv_obj_t * previousButton;
 lv_obj_t * nextButton;
 
@@ -358,6 +360,13 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_style_pad_top(spinner,4,0);
     lv_obj_set_style_pad_left(spinner,4,0);
     lv_obj_set_style_pad_right(spinner,4,0);
+    // Spinner label
+    spinnerLabel = lv_label_create(spinner);
+    lv_label_set_text(spinnerLabel, "");
+    lv_obj_set_style_text_color(spinnerLabel, lv_color_white(), 0);
+    lv_obj_set_style_text_font(spinnerLabel, font_mono, 0);
+    lv_obj_align(spinnerLabel, LV_ALIGN_CENTER, 0, 0);
+
     // Footer label
     footerLabel = lv_label_create(footer);
     lv_label_set_long_mode(footerLabel, LV_LABEL_LONG_DOT);
@@ -557,7 +566,14 @@ void uiShowScreen(UiScreen screen)
 
 void uiUpdateTime()
 {
-    lv_label_set_text(timeLabel, Hardware::getHardware()->getRtc()->getTimeString().c_str());
+    Rtc* rtc = Hardware::getHardware()->getRtc();
+    lv_label_set_text(timeLabel, rtc->getTimeString().c_str());
+}
+
+void uiUpdateTicker()
+{
+    Rtc* rtc = Hardware::getHardware()->getRtc();
+    lv_label_set_text_fmt(spinnerLabel,SPINNER_COUNTDOWN_TEMPLATE,abs(rtc->getCountDown()));
 }
 
 #ifdef WIFI   

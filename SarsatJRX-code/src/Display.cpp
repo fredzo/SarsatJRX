@@ -112,6 +112,8 @@ void Display::updateUi()
   needUpdateSdCard = false;
   if(needUpdateDiscri)          uiUpdateDiscritatus();
   needUpdateDiscri = false;
+  if(needUpdateTicker)          uiUpdateTicker();
+  needUpdateTicker = false;
 
 }
 

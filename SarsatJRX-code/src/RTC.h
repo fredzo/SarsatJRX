@@ -5,6 +5,10 @@
 #include <i2c_bus.h>
 #include <pcf8563.h>
 
+#define RTC_MAX_COUNTDOWN   999
+
+#define RTC_FRAME_COUNTDOWN 50
+
 
 class Rtc
 {
@@ -31,12 +35,20 @@ class Rtc
         };
         
         void rtcInit(I2CBus* i2c);
-        void changeTime() {changed = true;};
+        void changeTime();
+        void tickSecond();
         Date getDate();
         String getDateString();
         String getTimeString();
-        bool hasChanged() { return changed;};
-        bool isNtpSynched() {return ntpSynched;};
+        bool hasChanged()   { return changed; };
+        bool isNtpSynched() { return ntpSynched; };
+        int  getCountDown();
+        bool countDownHasChanged();
+        bool isLastCount();
+        bool isAlmostLastCount();
+        void setCountDown(int value);
+        void startCountDown() { setCountDown(RTC_FRAME_COUNTDOWN); };
+        void countDown();
 
     private :
         I2CBus *rtcI2c = nullptr; 
@@ -46,6 +58,9 @@ class Rtc
         bool ntpStarted = false;
         bool ntpSynched = false;
         Date currentDate;
+        int countDownValue = 0;
+        bool countDownChanged = false;
+        hw_timer_t * timer = NULL;
 
         Rtc()
         {

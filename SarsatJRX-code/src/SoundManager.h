@@ -24,7 +24,9 @@ class SoundManager
 
         void playFrameSound(bool error);
 
-        void playFrameAnnounceSound();
+        void playCountDownLowSound();
+
+        void playCountDownHighSound();
 
         void playTouchSound();
 
@@ -37,7 +39,8 @@ class SoundManager
 
         Melody frameOkSound;
         Melody frameKoSound;
-        Melody frameAnnoucenSound;
+        Melody countDownLowSound;
+        Melody countDownHighSound;
         Melody touchSound;
 
 

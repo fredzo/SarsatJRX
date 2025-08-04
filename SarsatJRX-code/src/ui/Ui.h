@@ -63,6 +63,8 @@ void uiShowScreen(UiScreen screen);
 
 void uiUpdateTime();
 
+void uiUpdateTicker();
+
 #ifdef WIFI
 void uiUpdateWifiStatus();
 #endif

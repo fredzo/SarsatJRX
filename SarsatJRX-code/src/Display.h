@@ -103,6 +103,7 @@ class Display
         void updateWifi() { needUpdateWifi = true; }
         void updateSdCard() { needUpdateSdCard = true; }
         void updateDiscri() { needUpdateDiscri = true; }
+        void updateTicker() { needUpdateTicker = true; }
 
 
     private : 
@@ -154,6 +155,8 @@ class Display
         bool needUpdateSdCard = false;
         // Discri
         bool needUpdateDiscri = false;
+        // Ticker
+        bool needUpdateTicker = false;
 
 
 

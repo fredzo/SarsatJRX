@@ -20,6 +20,10 @@ String Rtc::Date::getTimeString()
     return String(buffer);
 }
 
+void IRAM_ATTR onTimer() 
+{
+    Rtc::getRtc()->tickSecond();
+}
 
 void Rtc::rtcInit(I2CBus* i2c)
 {
@@ -28,6 +32,11 @@ void Rtc::rtcInit(I2CBus* i2c)
     rtcRegisterInterrupt();
     rtc->enableTimer();
     rtc->setTimer(1 /* 1 tick */ ,0b10 /* 1Hz frequecy for timer source */,true /* enable interrupt timer */);
+    // Setup 1sec tick timer for countDown
+    timer = timerBegin(0, 80, true);  // 80 MHz / 80 = 1 MHz (1 µs)
+    timerAttachInterrupt(timer, &onTimer, true);
+    timerAlarmWrite(timer, 1000000, true); // 1 sec
+    timerAlarmEnable(timer);    
 }
 
 Rtc::Date Rtc::getDate()
@@ -89,7 +98,62 @@ String Rtc::getTimeString()
     return getDate().getTimeString();
 }
 
-void rtcInterruptCallack(void)
+int Rtc::getCountDown()
+{
+    return countDownValue;
+}
+
+bool Rtc::isAlmostLastCount()
+{
+    return (countDownValue <= 5 && countDownValue > 1);
+}
+
+bool Rtc::isLastCount()
+{
+    return (countDownValue == 1);
+}
+
+void Rtc::setCountDown(int newCountDown)
+{
+    if(newCountDown < -RTC_MAX_COUNTDOWN)
+    {
+        countDownValue = 0;
+    }
+    else if(newCountDown > RTC_MAX_COUNTDOWN)
+    {
+        countDownValue = RTC_MAX_COUNTDOWN;
+    }
+    else
+    {
+        countDownValue = newCountDown;
+    }
+    countDownChanged = true;
+    timerRestart(timer);
+}
+
+bool Rtc::countDownHasChanged()
+{
+    bool result = countDownChanged;
+    countDownChanged = false;
+    return result;
+}
+
+void Rtc::changeTime()
+{   // Mark time as changed
+    changed = true;
+}
+
+void Rtc::tickSecond()
+{   // Update countdown
+    countDownValue--;
+    if(countDownValue < -RTC_MAX_COUNTDOWN)
+    {
+        countDownValue = 0;
+    }
+    countDownChanged = true;
+}
+
+void IRAM_ATTR rtcInterruptCallack(void)
 {
     Rtc::getRtc()->changeTime();
 }

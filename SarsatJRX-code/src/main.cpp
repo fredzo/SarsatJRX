@@ -173,7 +173,8 @@ void updateLedHeader(bool force)
 
 void updateHeader()
 { // Check for time update
-  if(hardware->getRtc()->hasChanged())
+  Rtc* rtc = hardware->getRtc();
+  if(rtc->hasChanged())
   {
     display->updateTime();
   }
@@ -339,6 +340,8 @@ void loop()
   hardware->getAudio()->handleTask();
   // Power task
   hardware->getPower()->handleTask();
+  // Get rtc
+  Rtc* rtc = hardware->getRtc();
   // If frameParseState > 0, we are reading an frame, if more thant 500ms elapsed (a frame should be 144x2.5ms = 360 ms max)
   bool frameTimeout = (isFrameStarted() && ((millis()-getFrameStartTime()) > 500 ));
   if (isFrameComplete() || frameTimeout)
@@ -377,7 +380,9 @@ void loop()
   #endif    
 
     if (((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
-    { // First blick leds
+    { // Start countdown for next frame
+      rtc->startCountDown();
+      // Blink leds
       frameReceivedLedBlink();
       // Then read beacon and update beacon display
       readBeacon();
@@ -409,6 +414,18 @@ void loop()
   }
   updateLeds();
   updateHeader();
+  if(rtc->countDownHasChanged())
+  {
+    display->updateTicker();
+    if(rtc->isAlmostLastCount())
+    {
+      hardware->getSoundManager()->playCountDownLowSound();
+    }
+    else if (rtc->isLastCount())
+    {
+      hardware->getSoundManager()->playCountDownHighSound();
+    }
+  }
 
     // Web and wifi
 #ifdef WIFI
