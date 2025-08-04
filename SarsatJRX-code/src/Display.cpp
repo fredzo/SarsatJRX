@@ -110,6 +110,8 @@ void Display::updateUi()
   needUpdateWifi = false;
   if(needUpdateSdCard)          uiUpdateSdCardStatus();
   needUpdateSdCard = false;
+  if(needUpdateDiscri)          uiUpdateDiscritatus();
+  needUpdateDiscri = false;
 
 }
 

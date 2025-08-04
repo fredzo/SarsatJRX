@@ -26,6 +26,9 @@ bool ledInFrameState = false;
 bool ledFrameErrorState = false;
 bool ledFrameReceivedState = false;
 
+// Disri jack state
+bool discriJackPlugged = false;
+
 // Beacon list
 #define BEACON_LIST_MAX_SIZE  16
 
@@ -175,10 +178,15 @@ void updateHeader()
     display->updateTime();
   }
   // Check for power value update
-  Power* power = hardware->getPower();
-  if(power->hasChanged())
+  if(hardware->getPower()->hasChanged())
   {
     display->updatePower();
+  }
+  Audio* audio = hardware->getAudio();
+  if(audio->discriHasChanged())
+  {
+    discriJackPlugged = audio->isDiscriInput();
+    display->updateDiscri();
   }
   updateLedHeader(false);
 }
@@ -222,8 +230,8 @@ void updateFooter(bool frameReceived)
     }
   }
   // Audio
-  if((now - lastAudioPowerUpdateTime) > AUDIO_POWER_DISPLAY_PERIOD)
-  {
+  if(!discriJackPlugged && (now - lastAudioPowerUpdateTime) > AUDIO_POWER_DISPLAY_PERIOD)
+  { // Only update audio metter if dscri jack is not plugged
     lastAudioPowerUpdateTime = now;
     display->updateAudioPower();
   }
@@ -294,6 +302,7 @@ void setup()
 #endif
 
   display->updateSdCard();
+  display->updateDiscri();
 
   // UI is now ready : start display task
   display->startDisplayTask();

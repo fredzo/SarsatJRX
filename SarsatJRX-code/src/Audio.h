@@ -21,6 +21,8 @@ class Audio
 
         bool isDiscriInput();
 
+        bool discriHasChanged();
+
         // Audio task processing
         void handleTask();
 
@@ -36,6 +38,11 @@ class Audio
         long filterAccumulator = 0;
         int signalPower = 0;
         int noiseFloor = 0;
+
+        // Last discri sample time
+        unsigned long lastDiscriSampleTime = 0;
+        bool discriState = false;
+        bool discriChanged = false;
 
         // Static members
         static Audio *audioInstance;

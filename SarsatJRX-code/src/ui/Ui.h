@@ -69,6 +69,8 @@ void uiUpdateWifiStatus();
 
 void uiUpdateSdCardStatus();
 
+void uiUpdateDiscritatus();
+
 void uiUpdatePower();
 
 void uiShowFrameReceived(bool show);

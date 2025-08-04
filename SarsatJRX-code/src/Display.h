@@ -100,14 +100,9 @@ class Display
             currentBeaconPage = currentPage;
             totalBeaconPage = totalPage;
         }
-        void updateWifi()
-        {
-            needUpdateWifi = true;
-        }
-        void updateSdCard()
-        {
-            needUpdateSdCard = true;
-        }
+        void updateWifi() { needUpdateWifi = true; }
+        void updateSdCard() { needUpdateSdCard = true; }
+        void updateDiscri() { needUpdateDiscri = true; }
 
 
     private : 
@@ -157,6 +152,8 @@ class Display
         bool needUpdateWifi = false;
         // SD
         bool needUpdateSdCard = false;
+        // Discri
+        bool needUpdateDiscri = false;
 
 
 

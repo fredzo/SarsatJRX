@@ -30,6 +30,9 @@
 // SD Card
 #define HEADER_SDCARD_WIDTH     16
 #define HEADER_SDCARD_HEIGHT    20
+// Discri
+#define HEADER_DISCRI_WIDTH     20
+#define HEADER_DISCRI_HEIGHT    20
 // Logo
 #define HEADER_LOGO_SIZE    20
 #define HEADER_LOGO_SRC     "J:/sarsat-jrx.bin"
@@ -98,6 +101,7 @@ const lv_font_t * font_symbols = &additional_symbols;
 lv_obj_t * timeLabel;
 lv_obj_t * wifiIndicator;
 lv_obj_t * sdCardIndicator;
+lv_obj_t * discriIndicator;
 lv_obj_t * batteryContainer;
 lv_obj_t * batteryBody;
 lv_obj_t * batteryCap;
@@ -241,7 +245,12 @@ void createHeader(lv_obj_t * win)
     lv_label_set_text(sdCardIndicator,"");
     lv_obj_set_style_pad_left(sdCardIndicator,4,0);
     lv_obj_set_size(sdCardIndicator, HEADER_SDCARD_WIDTH, HEADER_SDCARD_HEIGHT);
-    //lv_obj_set_style_text_font(sdCardIndicator,font_symbols,0);
+
+    // Discri indicator
+    discriIndicator = lv_label_create(header);
+    lv_label_set_text(discriIndicator,"");
+    lv_obj_set_style_pad_left(discriIndicator,4,0);
+    lv_obj_set_size(discriIndicator, HEADER_DISCRI_WIDTH, HEADER_DISCRI_HEIGHT);
 
     // Logo
     lv_obj_t * logo = lv_img_create(header);
@@ -585,6 +594,22 @@ void uiUpdateSdCardStatus()
     else
     {
         lv_label_set_text(sdCardIndicator,"");
+    }
+}
+
+void uiUpdateDiscritatus()
+{
+    if(Hardware::getHardware()->getAudio()->isDiscriInput())
+    {
+        lv_label_set_text(discriIndicator,LV_SYMBOL_SHUFFLE);
+        // Hide audio metter in footer when disci jack is plugged
+        lv_obj_add_flag(meter, LV_OBJ_FLAG_HIDDEN);
+    }
+    else
+    {
+        lv_label_set_text(discriIndicator,"");
+        // Restore audio metter in footer when disci jack is unplugged
+        lv_obj_clear_flag(meter, LV_OBJ_FLAG_HIDDEN);
     }
 }
 
