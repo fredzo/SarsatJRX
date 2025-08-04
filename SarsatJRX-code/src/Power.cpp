@@ -5,8 +5,8 @@
 #define MAX_BATTERY_VOLTAGE     4.19
 #define POWER_SAMPLE_PERIOD     200  // 200ms
 #define POWER_UPDATE_PERIOD     1000 // 1s
-#define CHARGE_SAMPLE_PERIOD    50   // 50ms
-#define CHARGE_SAMPLE_COUNT     15   // Wait for 15 consecutive samples with same value to validate charge state
+#define CHARGE_SAMPLE_PERIOD    30   // 30ms
+#define CHARGE_SAMPLE_COUNT     20   // Wait for 15 consecutive samples with same value to validate charge state
 
 // Static members
 Power *Power::powerInstance = nullptr;
