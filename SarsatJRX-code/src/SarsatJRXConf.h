@@ -45,7 +45,7 @@
 #define CHARGE_INPUT_PIN    32 // Low when charged or unplugged, high when charging
 
 // Audio power input
-#define AUDIO_ADC_PIN       39
+#define AUDIO_ADC_PIN       34
 
 // RTC
 #define RTC_INT_PIN         36
@@ -82,7 +82,7 @@
 #define BUZZER_PIN          33 // Buzzer
 
 // Discri jack detection pin
-#define DISCRI_JACK_PIN     34 // Discri jack inserted
+#define DISCRI_JACK_PIN     39 // Discri jack inserted
 
 
 
