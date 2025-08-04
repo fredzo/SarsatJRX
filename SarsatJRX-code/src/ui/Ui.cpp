@@ -258,7 +258,7 @@ void createHeader(lv_obj_t * win)
     lv_obj_t * logo = lv_img_create(header);
     lv_img_set_src(logo,HEADER_LOGO_SRC);
     lv_obj_set_size(logo,HEADER_LOGO_SIZE,HEADER_LOGO_SIZE);
-    lv_obj_set_style_translate_x(logo,18,0);
+    lv_obj_set_style_translate_x(logo,6,0);
     lv_obj_add_flag(logo, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(logo, title_long_press_handler, LV_EVENT_LONG_PRESSED, NULL);
     // Title
