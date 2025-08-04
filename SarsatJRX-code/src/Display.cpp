@@ -6,6 +6,7 @@
 #include <gt911.h>
 #include <ledc.h>
 #include <ui/Ui.h>
+#include <SoundManager.h>
 
 
 #define GT911_ADDRESS               0x5D
@@ -50,6 +51,8 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
     lv_disp_flush_ready(disp_drv);
 }
 
+static bool wasTouched = false;
+
 void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
 {
     bool touched = (touch->scanPoint() > 0);
@@ -73,6 +76,15 @@ void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
       Serial.println( x );
       Serial.print( "Data y " );
       Serial.println( y );*/
+      if(!wasTouched)
+      {
+        SoundManager::getSoundManager()->playTouchSound();
+        wasTouched = true;
+      }
+    }
+    else
+    {
+      wasTouched = false;
     }
 }
 

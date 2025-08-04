@@ -6,7 +6,7 @@ const char frameOkSoundString[]       = "ok:d=4,o=5,b=300:32d6,32d#6,32e6,32f6,3
 const char frameKoSoundString[]       = "ko:d=4,o=5,b=300:32a6,32g#6,32g6,32f#6,32f6,32e6,32d#6,32d6";
 const char countDownLowString[]       = "countl:d=16,o=5,b=60:a";
 const char countDownHighString[]      = "counth:d=16,o=5,b=60:a6";
-const char touchSoundString[]         = "count:d=4,o=5,b=120:8e5";
+const char touchSoundString[]         = "touch:d=4,o=5,b=300:32a4";
 
 void SoundManager::init()
 {
