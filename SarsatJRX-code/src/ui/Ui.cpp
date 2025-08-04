@@ -432,7 +432,7 @@ void createUi()
     lv_style_set_pad_left(&style_footer, -30);
     lv_style_set_text_color(&style_footer, lv_color_white());
     lv_style_init(&style_footer_highlight);
-    lv_style_set_text_font(&style_footer_highlight, font_large);
+    //lv_style_set_text_font(&style_footer_highlight, font_large);
     lv_style_set_text_align(&style_footer_highlight, LV_TEXT_ALIGN_CENTER);
     lv_style_set_pad_left(&style_footer_highlight, 0);
     lv_style_set_text_color(&style_footer_highlight, lv_palette_lighten(LV_PALETTE_RED,2));
