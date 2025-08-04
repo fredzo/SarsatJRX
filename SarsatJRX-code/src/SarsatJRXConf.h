@@ -45,7 +45,7 @@
 #define CHARGE_INPUT_PIN    32 // Low when charged or unplugged, high when charging
 
 // Audio power input
-#define AUDIO_ADC_PIN       34
+#define AUDIO_ADC_PIN       39
 
 // RTC
 #define RTC_INT_PIN         36
@@ -76,13 +76,13 @@
 // Frame led
 #define NOTIFICATION_PIN    26 // => LED Frame
 // Error Led
-#define ERROR_PIN           04 // 39 // => LED Err // Input only => swap with PIN 04
+#define ERROR_PIN           04 // => LED Err // Input only => swap with PIN 04
 
 // Buzzer
 #define BUZZER_PIN          33 // Buzzer
 
 // Discri jack detection pin
-#define DISCRI_JACK_PIN     39 // 04 // Discri jack inserted
+#define DISCRI_JACK_PIN     34 // Discri jack inserted
 
 
 
