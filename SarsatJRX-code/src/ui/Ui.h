@@ -99,5 +99,6 @@ lv_obj_t * uiCreateLabelButton(lv_obj_t * parent, const char* text, lv_event_cb_
 
 lv_obj_t * uiCreateTextArea(lv_obj_t * parent, lv_event_cb_t event_cb, int width, int height, int x, int y);
 
+void uiShowScreenSaverDialog();
 
 #endif 

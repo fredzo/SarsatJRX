@@ -121,6 +121,15 @@ lv_obj_t * spinnerLabel;
 lv_obj_t * previousButton;
 lv_obj_t * nextButton;
 
+// Screen saved dialog
+#define SCREEN_SAVER_SPINNER_SIZE   42
+#define SCREEN_SAVER_COUNTDOWN      10
+static lv_obj_t *   screenSaverDialog;
+static lv_obj_t *   screenSaverDialogSpinner;
+static lv_obj_t *   screenSaverDialogSpinnerLabel;
+static int          screenSaverCountDown;
+static lv_timer_t * screenSaverTimer;
+
 UiScreen currentScreen = UiScreen::START;
 
 UiScreen previousScreen = UiScreen::START;
@@ -645,7 +654,11 @@ void uiUpdatePower()
             percent = 100;
             break;
         case Power::PowerState::CHARGING :
-            lv_label_set_text(batteryLabel, LV_SYMBOL_CHARGE); 
+            lv_label_set_text(batteryLabel, LV_SYMBOL_CHARGE);
+            if(Settings::getSettings()->getScreenOffOnCharge())
+            {   // Prompt for screen off
+                uiShowScreenSaverDialog();
+            }
             break;
         case Power::PowerState::ON_BATTERY :
         default:
@@ -814,3 +827,49 @@ lv_obj_t * uiCreateTextArea(lv_obj_t * parent, lv_event_cb_t event_cb, int width
     return ta;
 }
 
+void uiShowScreenSaverDialog()
+{
+    static const char * btns[] = {"OK", "Cancel", NULL};
+    screenSaverDialog = lv_msgbox_create(NULL, "Turn screen off ?", "Screen will go off in a few seconds...", btns, true);
+    // Add spinner with countdown
+    screenSaverDialogSpinner = lv_spinner_create(screenSaverDialog,2000,60);
+    lv_obj_set_size(screenSaverDialogSpinner, SCREEN_SAVER_SPINNER_SIZE, LV_PCT(100));
+    lv_obj_set_style_arc_width(screenSaverDialogSpinner,6,LV_PART_INDICATOR);
+    lv_obj_set_style_arc_width(screenSaverDialogSpinner,6,LV_PART_MAIN);
+    lv_obj_set_style_pad_top(screenSaverDialogSpinner,4,0);
+    lv_obj_set_style_pad_left(screenSaverDialogSpinner,4,0);
+    lv_obj_set_style_pad_right(screenSaverDialogSpinner,4,0);
+    // Spinner label
+    screenSaverDialogSpinnerLabel = lv_label_create(screenSaverDialogSpinner);
+    lv_label_set_text_fmt(screenSaverDialogSpinnerLabel, "%d", SCREEN_SAVER_COUNTDOWN);
+    lv_obj_set_style_text_color(screenSaverDialogSpinnerLabel, lv_color_white(), 0);
+    lv_obj_set_style_text_font(screenSaverDialogSpinnerLabel, font_mono, 0);
+    lv_obj_align(screenSaverDialogSpinnerLabel, LV_ALIGN_CENTER, 0, 0);
+    // lv_obj_align(screenSaverDialogSpinnerLabel, LV_ALIGN_BOTTOM_MID, 0, -10);
+    // Setup timer
+    screenSaverCountDown = SCREEN_SAVER_COUNTDOWN;
+    screenSaverTimer = lv_timer_create([](lv_timer_t * timer)
+    {
+        screenSaverCountDown--;
+        if(screenSaverCountDown < 0)
+        {
+            lv_msgbox_close(screenSaverDialog);
+            lv_timer_del(screenSaverTimer);
+            Hardware::getHardware()->getDisplay()->backlightOff();
+        }
+        else
+        {
+            lv_label_set_text_fmt(screenSaverDialogSpinnerLabel, "%d", screenSaverCountDown);
+        }
+    }, 1000, NULL);
+
+    lv_obj_add_event_cb(screenSaverDialog, [](lv_event_t * e) 
+    {
+        if(lv_msgbox_get_active_btn(screenSaverDialog) == 0)
+        {
+            lv_timer_del(screenSaverTimer);
+            Hardware::getHardware()->getDisplay()->backlightOff();
+        }
+        lv_msgbox_close(screenSaverDialog);
+    }, LV_EVENT_VALUE_CHANGED, NULL);
+}
