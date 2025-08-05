@@ -19,13 +19,6 @@
 // Nedded if stack size of Arduino loop is too small
 // SET_LOOP_TASK_STACK_SIZE(16*1024)
 
-// Header LEDS
-bool ledSig1State = false;
-bool ledSig2State = false;
-bool ledInFrameState = false;
-bool ledFrameErrorState = false;
-bool ledFrameReceivedState = false;
-
 // Disri jack state
 bool discriJackPlugged = false;
 
@@ -91,9 +84,17 @@ void readBeacon()
 #endif
 }
 
+// Header LEDS
+bool ledSig1State = false;
+bool ledSig2State = false;
+bool ledInFrameState = false;
+bool ledFrameErrorState = false;
+bool ledFrameReceivedState = false;
+
 // Leds management (header + physical led)
 #define LED_BLINK_TIME 1000 // 1 s
-unsigned long ledFrameReceivedStartBlinkTime;
+#define LED_BLINK_SHORT_TIME 100 // 100 ms
+unsigned long ledsStartBlinkTime;
 unsigned long ledSig1StartBlinkTime;
 unsigned long ledSig2StartBlinkTime;
 bool ledSig1On = false;
@@ -101,15 +102,17 @@ bool ledSig2On = false;
 bool ledFrameErrorOn = false;
 bool ledFrameReceivedOn = false;
 bool lastInputState = false;
+bool countDownModeOn = false;
 
 void updateLeds()
 {
-  if(ledFrameReceivedOn && ((millis() - ledFrameReceivedStartBlinkTime)>LED_BLINK_TIME))
-  { // Led has been on for more than 100 ms => switch it off
+  if((ledFrameReceivedOn || ledFrameErrorOn) && ((millis() - ledsStartBlinkTime)> (countDownModeOn ? LED_BLINK_SHORT_TIME : LED_BLINK_TIME)))
+  { // Leds have been on long enough (long blink or short blink accordig to countdown mode beeing on or not)
     digitalWrite(NOTIFICATION_PIN, LOW); 
     digitalWrite(ERROR_PIN, LOW); 
     ledFrameReceivedOn = false;
     ledFrameErrorOn = false;
+    countDownModeOn = false;
   }
 }
 
@@ -117,7 +120,8 @@ void frameReceivedLedBlink()
 { // Switch led on and record time
   digitalWrite(NOTIFICATION_PIN, HIGH);
   ledFrameReceivedOn = true;
-  ledFrameReceivedStartBlinkTime = millis();
+  ledsStartBlinkTime = millis();
+  countDownModeOn = false;
 }
 
 // Store last displayed power value
@@ -429,7 +433,7 @@ void loop()
   {
     display->updateTicker();
     if(settings->getCountDownSound())
-    {
+    { // Play countdown beeps
       if(rtc->isAlmostLastCount())
       {
         hardware->getSoundManager()->playCountDownLowSound();
@@ -437,6 +441,23 @@ void loop()
       else if (rtc->isLastCount())
       {
         hardware->getSoundManager()->playCountDownHighSound();
+      }
+    }
+    if(settings->getCountDownLeds() && !ledFrameReceivedOn)
+    { // Blink leds if not already showing received frame
+      if(rtc->isAlmostLastCount())
+      { // Blue led 4 times
+        digitalWrite(NOTIFICATION_PIN, HIGH);
+        ledFrameReceivedOn = true;
+        ledsStartBlinkTime = millis();
+        countDownModeOn = true;
+      }
+      else if (rtc->isLastCount())
+      { // Red led once
+        digitalWrite(ERROR_PIN, HIGH);
+        ledFrameErrorOn = true;
+        ledsStartBlinkTime = millis();
+        countDownModeOn = true;
       }
     }
     if((rtc->getCountDown()==-1) && settings->getReloadCountDown())

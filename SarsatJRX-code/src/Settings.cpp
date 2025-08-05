@@ -9,7 +9,8 @@
 #define BUZZER_LEVEL            "BL"
 #define TOUCH_SOUND             "TS"
 #define FRAME_SOUND             "FS"
-#define COUNTDOWN_SOUD          "CDS"
+#define COUNTDOWN_SOUND         "CDS"
+#define COUNTDOWN_LEDS          "CDL"
 #define RELOAD_COUNTDOWN        "RCD"
 
 Settings *Settings::settingsInstance = nullptr;
@@ -17,6 +18,7 @@ Settings *Settings::settingsInstance = nullptr;
 void Settings::init()
 {
     preferences.begin(PREF_PREFIX, false);
+    // TODO : use cache to load all settings once and get the values from memory after init
 }
 
 bool Settings::getWifiState()
@@ -98,12 +100,23 @@ void Settings::setFrameSound(bool active)
 
 bool Settings::getCountDownSound()
 {
-    return preferences.getBool(COUNTDOWN_SOUD,true);
+    return preferences.getBool(COUNTDOWN_SOUND,true);
 }
 
 void Settings::setCountDownSound(bool active)
 {
-    preferences.putBool(COUNTDOWN_SOUD,active);
+    preferences.putBool(COUNTDOWN_SOUND,active);
+    dirty = true;
+}
+
+bool Settings::getCountDownLeds()
+{
+    return preferences.getBool(COUNTDOWN_LEDS,true);
+}
+
+void Settings::setCountDownLeds(bool active)
+{
+    preferences.putBool(COUNTDOWN_LEDS,active);
     dirty = true;
 }
 

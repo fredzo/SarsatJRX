@@ -43,6 +43,9 @@ class Settings
         bool getCountDownSound();
         void setCountDownSound(bool active);
 
+        bool getCountDownLeds();
+        void setCountDownLeds(bool active);
+
         bool getReloadCountDown();
         void setReloadCountDown(bool active);
 
