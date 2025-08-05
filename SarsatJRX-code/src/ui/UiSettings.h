@@ -26,8 +26,6 @@ void uiSettingsUpdateDisplay();
 
 void uiSettingsUpdateAudioSatus();
 
-void uiSettingsUpdateAudioPower(int power);
-
 void uiSettingsUpdateFreq(char* freqBuffer, bool scanOn);
 
 #endif 

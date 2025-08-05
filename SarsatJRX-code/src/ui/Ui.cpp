@@ -754,7 +754,6 @@ void uiUpdateAudioPower()
     Audio* audio = Hardware::getHardware()->getAudio();
     int power = audio->getSignalPower();
     lv_bar_set_value(meter, power, LV_ANIM_ON);
-    uiSettingsUpdateAudioPower(power);
 }
 
 lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text, int x, int y, int width, int height)
