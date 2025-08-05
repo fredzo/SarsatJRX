@@ -7,7 +7,7 @@
 #include <Settings.h>
 
 // Display
-#define LABEL_WIDTH                   150
+#define LABEL_WIDTH                   200
 #define SCREEN_REVERSE_LABEL          "Screen reverse:"
 #define SCREEN_OFF_ON_CHARGE_LABEL    "Screen off on charge:"
 #define SHOW_BAT_PERCENTAGE_LABEL     "Show bat. %:"
@@ -47,6 +47,7 @@ static void toggleShowBatPercentageCb(lv_event_t * e)
 {
     bool state = lv_obj_has_state(showBatPercentageToggle, LV_STATE_CHECKED);
     Settings::getSettings()->setShowBatteryPercentage(state);
+    uiUpdatePower();
 }
 
 
@@ -76,8 +77,8 @@ void uiSettingsUpdateDisplay()
 {   // Display tab
     // Display reverse state
     Settings* settings = Settings::getSettings();
-    lv_obj_add_state(displayReverseToggle, settings->getDisplayReverse() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
-    lv_obj_add_state(screenOffOnChargeToggle, settings->getScreenOffOnCharge() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
-    lv_obj_add_state(showBatPercentageToggle, settings->getShowBatteryPercentage() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
+    settings->getDisplayReverse() ? lv_obj_add_state(displayReverseToggle, LV_STATE_CHECKED) : lv_obj_clear_state(displayReverseToggle, LV_STATE_CHECKED);
+    settings->getScreenOffOnCharge() ? lv_obj_add_state(screenOffOnChargeToggle, LV_STATE_CHECKED) : lv_obj_clear_state(screenOffOnChargeToggle, LV_STATE_CHECKED);
+    settings->getShowBatteryPercentage() ? lv_obj_add_state(showBatPercentageToggle, LV_STATE_CHECKED) : lv_obj_clear_state(showBatPercentageToggle, LV_STATE_CHECKED);
 }
 

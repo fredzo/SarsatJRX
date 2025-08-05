@@ -64,4 +64,5 @@ void uiSettingsUpdateView()
     uiSettingsUpdateWifi();
     uiSettingsUpdateSd();
     uiSettingsUpdateDisplay();
+    uiSettingsUpdateAudio();
 }

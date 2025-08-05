@@ -7,12 +7,13 @@
 #include <Settings.h>
 
 // Audio
-#define LABEL_WIDTH                 150
+#define LABEL_WIDTH                 200
 #define BUZZER_LEVEL_LABEL          "Buzzer level:"
 #define TOUCH_SOUND_LABEL           "Touch sound:"
 #define FRAME_SOUND_LABEL           "Frame received sound:"
 #define COUNTDOWN_SOUND_LABEL       "Countdown sound:"
-#define COUNTDOWN_LED_LABEL         "Countdown led:"
+#define COUNTDOWN_LED_LABEL         "Led:"
+#define COUNTDOWN_LED_LABEL_WIDTH   40
 #define COUNTDOWN_RELOAD_LABEL      "Countdown auto reload:"
 
 // Audio
@@ -105,18 +106,23 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     buzzerLeveSpinbox = lv_spinbox_create(tab);
     lv_spinbox_set_range(buzzerLeveSpinbox, 0, 255);
     lv_spinbox_set_digit_format(buzzerLeveSpinbox, 3, 0); // up to 255, no decimal
-    lv_spinbox_set_step(buzzerLeveSpinbox, 1);
+    lv_spinbox_set_step(buzzerLeveSpinbox, 10);
     lv_spinbox_set_rollover(buzzerLeveSpinbox, false); // DISABLE rollover
+    lv_obj_set_style_pad_all(buzzerLeveSpinbox, 4, 0);
+    lv_obj_set_style_text_align(buzzerLeveSpinbox, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_clear_flag(buzzerLeveSpinbox, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_width(buzzerLeveSpinbox, SPINBOX_WIDTH);
+    lv_obj_set_size(buzzerLeveSpinbox,SPINBOX_WIDTH,SPINBOX_LINE_HEIGHT);
+    lv_obj_set_pos(buzzerLeveSpinbox,SPINBOX_X,currentY);
 
     // Add up/down buttons
     buzzerLeveSpinboxUpButton = lv_btn_create(tab);
-    lv_obj_set_size(buzzerLeveSpinboxUpButton, SPINBOX_WIDTH, SPINBOX_WIDTH);
+    lv_obj_set_size(buzzerLeveSpinboxUpButton, SPINBOX_LINE_HEIGHT, SPINBOX_LINE_HEIGHT);
     lv_obj_align_to(buzzerLeveSpinboxUpButton, buzzerLeveSpinbox, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
     lv_obj_set_style_bg_img_src(buzzerLeveSpinboxUpButton, LV_SYMBOL_PLUS, 0);
     
     buzzerLeveSpinboxDownButton = lv_btn_create(tab);
-    lv_obj_set_size(buzzerLeveSpinboxDownButton, SPINBOX_WIDTH, SPINBOX_WIDTH);
+    lv_obj_set_size(buzzerLeveSpinboxDownButton, SPINBOX_LINE_HEIGHT, SPINBOX_LINE_HEIGHT);
     lv_obj_align_to(buzzerLeveSpinboxDownButton, buzzerLeveSpinbox, LV_ALIGN_OUT_LEFT_MID, -10, 0);
     lv_obj_set_style_bg_img_src(buzzerLeveSpinboxDownButton, LV_SYMBOL_MINUS, 0);
 
@@ -137,10 +143,9 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     // Countdown sound
     countDownSoundLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_SOUND_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
     countDownSoundToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownSoundCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
     // Countdown led
-    countDownLedLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_LED_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
-    countDownLedToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownLedCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    countDownLedLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_LED_LABEL,TOGGLE_X+TOGGLE_WIDTH+20,currentY,COUNTDOWN_LED_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    countDownLedToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownLedCb,TOGGLE_X+TOGGLE_WIDTH+COUNTDOWN_LED_LABEL_WIDTH+40,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
     // Countdown reload
     countDownReloadLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_RELOAD_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
@@ -154,11 +159,11 @@ void uiSettingsUpdateAudio()
     // Display reverse state
     Settings* settings = Settings::getSettings();
     lv_spinbox_set_value(buzzerLeveSpinbox,settings->getBuzzerLevel());
-    lv_obj_add_state(touchSoundToggle, settings->getTouchSound() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
-    lv_obj_add_state(frameSoundToggle, settings->getFrameSound() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
-    lv_obj_add_state(countDownSoundToggle, settings->getCountDownSound() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
-    lv_obj_add_state(countDownLedToggle, settings->getCountDownLeds() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
-    lv_obj_add_state(countDownReloadToggle, settings->getReloadCountDown() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
+    settings->getTouchSound() ? lv_obj_add_state(touchSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(touchSoundToggle, LV_STATE_CHECKED);
+    settings->getFrameSound() ? lv_obj_add_state(frameSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(frameSoundToggle, LV_STATE_CHECKED);
+    settings->getCountDownSound() ? lv_obj_add_state(countDownSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(countDownSoundToggle, LV_STATE_CHECKED);
+    settings->getCountDownLeds() ? lv_obj_add_state(countDownLedToggle, LV_STATE_CHECKED) : lv_obj_clear_state(countDownLedToggle, LV_STATE_CHECKED);
+    settings->getReloadCountDown() ? lv_obj_add_state(countDownReloadToggle, LV_STATE_CHECKED) : lv_obj_clear_state(countDownReloadToggle, LV_STATE_CHECKED);
 }
 
 
