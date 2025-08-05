@@ -18,115 +18,135 @@ Settings *Settings::settingsInstance = nullptr;
 void Settings::init()
 {
     preferences.begin(PREF_PREFIX, false);
-    // TODO : use cache to load all settings once and get the values from memory after init
+    // Load all settings on startup to avoid accessing them at runtime
+    wifiState = preferences.getBool(WIFI_STATE_KEY,false);
+    displayReverse = preferences.getBool(DISPLAY_REVERSE,false);
+    screenOffOnCharge = preferences.getBool(SCREEN_OFF_ON_CHRAGE,true);
+    showBatteryPercentage = preferences.getBool(SHOW_BAT_PERCENTAGE,true);
+    buzzerLevel = preferences.getUChar(BUZZER_LEVEL,255);
+    touchSound = preferences.getBool(TOUCH_SOUND,true);
+    frameSound = preferences.getBool(FRAME_SOUND,true);
+    countDownSound = preferences.getBool(COUNTDOWN_SOUND,true);
+    countDownLeds = preferences.getBool(COUNTDOWN_LEDS,true);
+    reloadCountDown = preferences.getBool(RELOAD_COUNTDOWN,false);
 }
 
 bool Settings::getWifiState()
 {
-    return preferences.getBool(WIFI_STATE_KEY,false);
+    return wifiState;
 }
 
 void Settings::setWifiState(bool state)
 {
+    wifiState = state;
     preferences.putBool(WIFI_STATE_KEY,state);
     dirty = true;
 }
 
 bool Settings::getDisplayReverse()
 {
-    return preferences.getBool(DISPLAY_REVERSE,false);
+    return displayReverse;
 }
 
 void Settings::setDisplayReverse(bool state)
 {
+    displayReverse = state;
     preferences.putBool(DISPLAY_REVERSE,state);
     dirty = true;
 }
 
 bool Settings::getScreenOffOnCharge()
 {
-    return preferences.getBool(SCREEN_OFF_ON_CHRAGE,true);
+    return screenOffOnCharge;
 }
 
 void Settings::setScreenOffOnCharge(bool active)
 {
+    screenOffOnCharge = active;
     preferences.putBool(SCREEN_OFF_ON_CHRAGE,active);
     dirty = true;
 }
 
 bool Settings::getShowBatteryPercentage()
 {
-    return preferences.getBool(SHOW_BAT_PERCENTAGE,true);
+    return showBatteryPercentage;
 }
 
 void Settings::setShowBatteryPercentage(bool show)
 {
+    showBatteryPercentage = show;
     preferences.putBool(SHOW_BAT_PERCENTAGE,show);
     dirty = true;
 }
 
 uint8_t Settings::getBuzzerLevel()
 {
-    return preferences.getUChar(BUZZER_LEVEL,255);
+    return buzzerLevel;
 }
 
 void Settings::setBuzzerLevel(uint8_t level)
 {
+    buzzerLevel = level;
     preferences.putUChar(BUZZER_LEVEL,level);
     dirty = true;
 }
 
 bool Settings::getTouchSound()
 {
-    return preferences.getBool(TOUCH_SOUND,true);
+    return touchSound;
 }
 
 void Settings::setTouchSound(bool active)
 {
+    touchSound = active;
     preferences.putBool(TOUCH_SOUND,active);
     dirty = true;
 }
 
 bool Settings::getFrameSound()
 {
-    return preferences.getBool(FRAME_SOUND,true);
+    return frameSound;
 }
 
 void Settings::setFrameSound(bool active)
 {
+    frameSound = active;
     preferences.putBool(FRAME_SOUND,active);
     dirty = true;
 }
 
 bool Settings::getCountDownSound()
 {
-    return preferences.getBool(COUNTDOWN_SOUND,true);
+    return countDownSound;
 }
 
 void Settings::setCountDownSound(bool active)
 {
+    countDownSound = active;
     preferences.putBool(COUNTDOWN_SOUND,active);
     dirty = true;
 }
 
 bool Settings::getCountDownLeds()
 {
-    return preferences.getBool(COUNTDOWN_LEDS,true);
+    return countDownLeds;
 }
 
 void Settings::setCountDownLeds(bool active)
 {
+    countDownLeds = active;
     preferences.putBool(COUNTDOWN_LEDS,active);
     dirty = true;
 }
 
 bool Settings::getReloadCountDown()
 {
-    return preferences.getBool(RELOAD_COUNTDOWN,false);
+    return reloadCountDown;
 }
 
 void Settings::setReloadCountDown(bool active)
 {
+    reloadCountDown = active;
     preferences.putBool(RELOAD_COUNTDOWN,active);
     dirty = true;
 }

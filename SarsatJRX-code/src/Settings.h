@@ -4,8 +4,6 @@
 #include <Arduino.h>
 #include <Preferences.h>
 
-#define FREQUENCY_COUNT     7
-
 class Settings
 {
     public :
@@ -54,7 +52,6 @@ class Settings
     private :
         Preferences preferences;
         bool dirty = false; // True when save is needed
-        float activeFrequencies[FREQUENCY_COUNT+1];
 
         Settings()
         {
@@ -63,6 +60,17 @@ class Settings
         ~Settings()
         {
         };
+
+        bool wifiState;
+        bool displayReverse;
+        bool screenOffOnCharge;
+        bool showBatteryPercentage;
+        uint8_t buzzerLevel;
+        bool touchSound;
+        bool frameSound;
+        bool countDownSound;
+        bool countDownLeds;
+        bool reloadCountDown;
 
         static Settings *settingsInstance;
 };
