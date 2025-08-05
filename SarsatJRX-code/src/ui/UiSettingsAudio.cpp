@@ -7,63 +7,90 @@
 #include <Settings.h>
 
 // Audio
-#define VERSION_LABEL           "Version :"
-#define VERSION_LABEL_WIDTH     80
-#define AUDIO_TOGGLE_X          0
-#define AUDIO_BUTTONS_WIDTH     40
-#define AUDIO_METER_HEIGHT      10
-#define FILTERS_LABEL           "Filters :"
-#define FILTERS_LABEL_WIDTH     75
-#define FILTER1_LABEL           "Emph."
-#define FILTER2_LABEL           "HiP."
-#define FILTER3_LABEL           "LoP."
-#define FILTER_LABEL_WIDTH      50
-#define VOLUME_LABEL            "Volume :"
-#define VOLUME_LABEL_WIDTH      75
-#define VOLUME_AUTO_LABEL       "Auto"
-#define VOLUME_AUTO_LABEL_WIDTH 50
-#define VOLUME_SPINBOX_WIDTH    50
+#define LABEL_WIDTH                 150
+#define BUZZER_LEVEL_LABEL          "Buzzer level:"
+#define TOUCH_SOUND_LABEL           "Touch sound:"
+#define FRAME_SOUND_LABEL           "Frame received sound:"
+#define COUNTDOWN_SOUND_LABEL       "Countdown sound:"
+#define COUNTDOWN_LED_LABEL         "Countdown led:"
+#define COUNTDOWN_RELOAD_LABEL      "Countdown auto reload:"
 
 // Audio
 static lv_obj_t * audioTab;
 static int audioTabWidth;
 static int audioTabHeight;
-static lv_obj_t * audioToggle;
-static lv_obj_t * audioMeter;
-static lv_obj_t * audioFiltersTitle;
-static lv_obj_t * audioFilter1Toggle;
-static lv_obj_t * audioFilter1Label;
-static lv_obj_t * audioFilter2Toggle;
-static lv_obj_t * audioFilter2Label;
-static lv_obj_t * audioFilter3Toggle;
-static lv_obj_t * audioFilter3Label;
-static lv_obj_t * audioVolumeTitle;
-static lv_obj_t * audioVolumeToggle;
-static lv_obj_t * audioVolumeAutoLabel;
-static lv_obj_t * audioVolumeDownButton;
-static lv_obj_t * audioVolumeUpButton;
-static lv_obj_t * audioVolumeSpinbox;
+static lv_obj_t * buzzerLeveLabel;
+static lv_obj_t * buzzerLeveSpinbox;
+static lv_obj_t * buzzerLeveSpinboxUpButton;
+static lv_obj_t * buzzerLeveSpinboxDownButton;
+
+static lv_obj_t * touchSoundLabel;
+static lv_obj_t * touchSoundToggle;
+static lv_obj_t * frameSoundLabel;
+static lv_obj_t * frameSoundToggle;
+static lv_obj_t * countDownSoundLabel;
+static lv_obj_t * countDownSoundToggle;
+static lv_obj_t * countDownLedLabel;
+static lv_obj_t * countDownLedToggle;
+static lv_obj_t * countDownReloadLabel;
+static lv_obj_t * countDownReloadToggle;
 
 
-static void toggle_audio_cb(lv_event_t * e)
+static void updateBuzzerSound()
 {
-    bool state = lv_obj_has_state(audioToggle, LV_STATE_CHECKED);
-    //Serial.println("Toggle audio :" + String(state));
-    Audio* audio = Audio::getAudio();
-    if(state)
-    {   // TODO Start audio with saved settings
-        //Settings * settings = Settings::getSettings();
-        //audio->audioInit(settings->getAudioAutoVolume(),settings->getAudioVolume(),settings->getAudioFilter1(),settings->getAudioFilter2(),settings->getAudioFilter3(),settings->getLastFrequency(),settings->getActiveFrequencies());
-        //uiSettingsUpdateView();
-    }
-    else
-    {   // TODO stop audio
-        //audio->audioStop();
-        //uiSettingsUpdateView();
-    }
-    // TODO Save state to settings
+    SoundManager* soundManager = SoundManager::getSoundManager();
     Settings* settings = Settings::getSettings();
-    //settings->setAudioState(state);
+    int newValue = lv_spinbox_get_value(buzzerLeveSpinbox);
+    soundManager->setVolume(newValue);
+    settings->setBuzzerLevel(newValue);
+    if(!settings->getTouchSound())
+    {   // Force touch sound to give feedback on sound settings
+        SoundManager::getSoundManager()->playTouchSound();
+    }
+}
+
+// Up button event callback
+static void spinboxBtnUpEventCb(lv_event_t * e)
+{
+    lv_spinbox_increment(buzzerLeveSpinbox);
+    updateBuzzerSound();
+}
+
+// Down button event callback
+static void spinboxBtnDownEventCb(lv_event_t * e)
+{
+    lv_spinbox_decrement(buzzerLeveSpinbox);
+    updateBuzzerSound();
+}
+
+static void toggleTouchSoundCb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(touchSoundToggle, LV_STATE_CHECKED);
+    Settings::getSettings()->setTouchSound(state);
+}
+
+static void toggleFrameSoundCb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(frameSoundToggle, LV_STATE_CHECKED);
+    Settings::getSettings()->setFrameSound(state);
+}
+
+static void toggleCountDownSoundCb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(countDownSoundToggle, LV_STATE_CHECKED);
+    Settings::getSettings()->setCountDownSound(state);
+}
+
+static void toggleCountDownLedCb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(countDownLedToggle, LV_STATE_CHECKED);
+    Settings::getSettings()->setCountDownLeds(state);
+}
+
+static void toggleCountDownReloadCb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(countDownReloadToggle, LV_STATE_CHECKED);
+    Settings::getSettings()->setReloadCountDown(state);
 }
 
 void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
@@ -71,64 +98,68 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     audioTab = tab;
     audioTabWidth = tabWidth;
     audioTabHeight = tabHeight;
-    Audio* audio = Audio::getAudio();
-    // Audion on/off
     currentY+=SPACER;
-    audioToggle = uiCreateToggle(tab,&style_section_text,toggle_audio_cb,AUDIO_TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    // Meter
-    audioMeter = lv_bar_create(tab);
-    lv_obj_set_size(audioMeter, tabWidth-4, AUDIO_METER_HEIGHT);
-    lv_obj_set_pos(audioMeter,0,currentY);
-    lv_obj_add_style(audioMeter, &style_meter, LV_PART_INDICATOR);
-    lv_bar_set_range(audioMeter, AUDIO_POWER_MIN_VALUE, AUDIO_POWER_MAX_VALUE);
-    lv_obj_set_style_anim_time(audioMeter,200,LV_PART_MAIN);
-    currentY += (AUDIO_METER_HEIGHT+HALF_SPACER);
-    // Filter toggles
-    int currentX = 0;
-    audioFiltersTitle = uiCreateLabel(tab,&style_section_title,FILTERS_LABEL,0,currentY+HALF_SPACER,FILTERS_LABEL_WIDTH,LINE_HEIGHT);
-    currentX+=FILTERS_LABEL_WIDTH+SPACER;
-    audioFilter1Toggle = uiCreateToggle(tab,&style_section_text,NULL,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentX+=TOGGLE_WIDTH+SPACER;
-    audioFilter1Label = uiCreateLabel(tab,&style_section_text,FILTER1_LABEL,currentX,currentY+HALF_SPACER,FILTER_LABEL_WIDTH,LINE_HEIGHT);
-    currentX+=FILTER_LABEL_WIDTH+SPACER;
-    audioFilter2Toggle = uiCreateToggle(tab,&style_section_text,NULL,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentX+=TOGGLE_WIDTH+SPACER;
-    audioFilter2Label = uiCreateLabel(tab,&style_section_text,FILTER2_LABEL,currentX,currentY+HALF_SPACER,FILTER_LABEL_WIDTH,LINE_HEIGHT);
-    currentX+=FILTER_LABEL_WIDTH+SPACER;
-    audioFilter3Toggle = uiCreateToggle(tab,&style_section_text,NULL,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentX+=TOGGLE_WIDTH+SPACER;
-    audioFilter3Label = uiCreateLabel(tab,&style_section_text,FILTER3_LABEL,currentX,currentY+HALF_SPACER,FILTER_LABEL_WIDTH-4,LINE_HEIGHT);
-    currentY+=(TOGGLE_LINE_HEIGHT+HALF_SPACER);
-    // Volume
-    currentX = 0;
-    audioVolumeTitle = uiCreateLabel(tab,&style_section_title,VOLUME_LABEL,0,currentY+HALF_SPACER,VOLUME_LABEL_WIDTH,LINE_HEIGHT);
-    currentX+=VOLUME_LABEL_WIDTH+SPACER;
-    audioVolumeToggle = uiCreateToggle(tab,&style_section_text,NULL,currentX,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentX+=TOGGLE_WIDTH+SPACER;
-    audioVolumeAutoLabel = uiCreateLabel(tab,&style_section_text,VOLUME_AUTO_LABEL,currentX,currentY+HALF_SPACER,VOLUME_AUTO_LABEL_WIDTH,LINE_HEIGHT);
-    currentX+=FILTER_LABEL_WIDTH+SPACER;
-    // Volume down button
-    audioVolumeDownButton = uiCreateImageButton(tab,LV_SYMBOL_MINUS,NULL,LV_EVENT_ALL,AUDIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
-    currentX+=AUDIO_BUTTONS_WIDTH+SPACER;
-    // Spinbox
-    audioVolumeSpinbox = lv_spinbox_create(tab);
-    lv_spinbox_set_range(audioVolumeSpinbox, 1, 8);
-    lv_spinbox_set_digit_format(audioVolumeSpinbox, 1, 0);
-    lv_obj_set_style_pad_all(audioVolumeSpinbox,2,0);
-    lv_obj_set_pos(audioVolumeSpinbox,currentX,currentY);
-    lv_obj_set_size(audioVolumeSpinbox, VOLUME_SPINBOX_WIDTH, TOGGLE_LINE_HEIGHT);
-    lv_obj_set_style_text_align(audioVolumeSpinbox,LV_TEXT_ALIGN_CENTER,0);
-    // Hide cursor
-    lv_obj_set_style_opa(audioVolumeSpinbox,0,LV_PART_CURSOR);
-    currentX+=VOLUME_SPINBOX_WIDTH+SPACER;
-    // Volume up button
-    audioVolumeUpButton = uiCreateImageButton(tab,LV_SYMBOL_PLUS,NULL,LV_EVENT_ALL,AUDIO_BUTTONS_WIDTH, TOGGLE_LINE_HEIGHT,currentX,currentY);
-    currentY+=(TOGGLE_LINE_HEIGHT+HALF_SPACER);
+
+    // Buzzer level spinbox
+    buzzerLeveLabel      = uiCreateLabel (tab,&style_section_title,BUZZER_LEVEL_LABEL,0,currentY,LABEL_WIDTH,SPINBOX_LINE_HEIGHT);
+    buzzerLeveSpinbox = lv_spinbox_create(tab);
+    lv_spinbox_set_range(buzzerLeveSpinbox, 0, 255);
+    lv_spinbox_set_digit_format(buzzerLeveSpinbox, 3, 0); // up to 255, no decimal
+    lv_spinbox_set_step(buzzerLeveSpinbox, 1);
+    lv_spinbox_set_rollover(buzzerLeveSpinbox, false); // DISABLE rollover
+    lv_obj_set_width(buzzerLeveSpinbox, SPINBOX_WIDTH);
+
+    // Add up/down buttons
+    buzzerLeveSpinboxUpButton = lv_btn_create(tab);
+    lv_obj_set_size(buzzerLeveSpinboxUpButton, SPINBOX_WIDTH, SPINBOX_WIDTH);
+    lv_obj_align_to(buzzerLeveSpinboxUpButton, buzzerLeveSpinbox, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+    lv_obj_set_style_bg_img_src(buzzerLeveSpinboxUpButton, LV_SYMBOL_PLUS, 0);
+    
+    buzzerLeveSpinboxDownButton = lv_btn_create(tab);
+    lv_obj_set_size(buzzerLeveSpinboxDownButton, SPINBOX_WIDTH, SPINBOX_WIDTH);
+    lv_obj_align_to(buzzerLeveSpinboxDownButton, buzzerLeveSpinbox, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+    lv_obj_set_style_bg_img_src(buzzerLeveSpinboxDownButton, LV_SYMBOL_MINUS, 0);
+
+    // Link buttons to callbacks
+    lv_obj_add_event_cb(buzzerLeveSpinboxUpButton, spinboxBtnUpEventCb, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(buzzerLeveSpinboxDownButton, spinboxBtnDownEventCb, LV_EVENT_CLICKED, NULL);
+
+    currentY+=SPINBOX_LINE_HEIGHT+2*SPACER;
+
+    // Touch sound
+    touchSoundLabel  = uiCreateLabel (tab,&style_section_title,TOUCH_SOUND_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    touchSoundToggle = uiCreateToggle(tab,&style_section_text,toggleTouchSoundCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
+    // Frame sound
+    frameSoundLabel  = uiCreateLabel (tab,&style_section_title,FRAME_SOUND_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    frameSoundToggle = uiCreateToggle(tab,&style_section_text,toggleFrameSoundCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
+    // Countdown sound
+    countDownSoundLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_SOUND_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    countDownSoundToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownSoundCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
+    // Countdown led
+    countDownLedLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_LED_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    countDownLedToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownLedCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
+    // Countdown reload
+    countDownReloadLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_RELOAD_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    countDownReloadToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownReloadCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
 }
 
-void uiSettingsAudioPower(int power)
-{
-    lv_bar_set_value(audioMeter, power, LV_ANIM_ON);
+
+void uiSettingsUpdateAudio()
+{   // Display tab
+    // Display reverse state
+    Settings* settings = Settings::getSettings();
+    lv_spinbox_set_value(buzzerLeveSpinbox,settings->getBuzzerLevel());
+    lv_obj_add_state(touchSoundToggle, settings->getTouchSound() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
+    lv_obj_add_state(frameSoundToggle, settings->getFrameSound() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
+    lv_obj_add_state(countDownSoundToggle, settings->getCountDownSound() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
+    lv_obj_add_state(countDownLedToggle, settings->getCountDownLeds() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
+    lv_obj_add_state(countDownReloadToggle, settings->getReloadCountDown() ? LV_STATE_CHECKED : LV_STATE_CHECKED);
 }
+
 
 

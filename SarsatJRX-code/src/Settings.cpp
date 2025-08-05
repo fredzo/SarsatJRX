@@ -38,6 +38,7 @@ bool Settings::getWifiState()
 
 void Settings::setWifiState(bool state)
 {
+    if(wifiState == state) return;
     wifiState = state;
     preferences.putBool(WIFI_STATE_KEY,state);
     dirty = true;
@@ -50,6 +51,7 @@ bool Settings::getDisplayReverse()
 
 void Settings::setDisplayReverse(bool state)
 {
+    if(displayReverse == state) return;
     displayReverse = state;
     preferences.putBool(DISPLAY_REVERSE,state);
     dirty = true;
@@ -62,6 +64,7 @@ bool Settings::getScreenOffOnCharge()
 
 void Settings::setScreenOffOnCharge(bool active)
 {
+    if(screenOffOnCharge == active) return;
     screenOffOnCharge = active;
     preferences.putBool(SCREEN_OFF_ON_CHRAGE,active);
     dirty = true;
@@ -74,6 +77,7 @@ bool Settings::getShowBatteryPercentage()
 
 void Settings::setShowBatteryPercentage(bool show)
 {
+    if(showBatteryPercentage == show) return;
     showBatteryPercentage = show;
     preferences.putBool(SHOW_BAT_PERCENTAGE,show);
     dirty = true;
@@ -86,6 +90,7 @@ uint8_t Settings::getBuzzerLevel()
 
 void Settings::setBuzzerLevel(uint8_t level)
 {
+    if(buzzerLevel == level) return;
     buzzerLevel = level;
     preferences.putUChar(BUZZER_LEVEL,level);
     dirty = true;
@@ -98,6 +103,7 @@ bool Settings::getTouchSound()
 
 void Settings::setTouchSound(bool active)
 {
+    if(touchSound == active) return;
     touchSound = active;
     preferences.putBool(TOUCH_SOUND,active);
     dirty = true;
@@ -110,6 +116,7 @@ bool Settings::getFrameSound()
 
 void Settings::setFrameSound(bool active)
 {
+    if(frameSound == active) return;
     frameSound = active;
     preferences.putBool(FRAME_SOUND,active);
     dirty = true;
@@ -122,6 +129,7 @@ bool Settings::getCountDownSound()
 
 void Settings::setCountDownSound(bool active)
 {
+    if(countDownSound == active) return;
     countDownSound = active;
     preferences.putBool(COUNTDOWN_SOUND,active);
     dirty = true;
@@ -134,6 +142,7 @@ bool Settings::getCountDownLeds()
 
 void Settings::setCountDownLeds(bool active)
 {
+    if(countDownLeds == active) return;
     countDownLeds = active;
     preferences.putBool(COUNTDOWN_LEDS,active);
     dirty = true;
@@ -146,6 +155,7 @@ bool Settings::getReloadCountDown()
 
 void Settings::setReloadCountDown(bool active)
 {
+    if(reloadCountDown == active) return;
     reloadCountDown = active;
     preferences.putBool(RELOAD_COUNTDOWN,active);
     dirty = true;
