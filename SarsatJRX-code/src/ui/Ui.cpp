@@ -674,7 +674,7 @@ void startChargingTimer()
         {
             blinkErrorLed();
         }
-        else if (state == Power::PowerState::CHARGING)
+        else if (state == Power::PowerState::FULL)
         {
             blinkNotifLed();
         }
