@@ -529,7 +529,8 @@ void createUi()
 }
 
 void uiSetBeacon(Beacon* beacon, int curPage, int pageCount)
-{
+{   // Wake screen up if needed
+    Hardware::getHardware()->getDisplay()->backlightOn();
     uiBeaconSetBeacon(beacon);
     // Set pages
     lv_label_set_text_fmt(pagesLabel,HEADER_PAGES_TEMPLATE,curPage,pageCount);
@@ -654,7 +655,11 @@ void uiUpdatePower()
     switch (state) 
     {
         case Power::PowerState::NO_BATTERY:
-            lv_label_set_text(batteryLabel, LV_SYMBOL_CLOSE); 
+            lv_label_set_text(batteryLabel, LV_SYMBOL_CLOSE);
+            if(power->hasPowerStateChanged())
+            {   // New state, see if we need to wake screen up
+                Hardware::getHardware()->getDisplay()->backlightOn();
+            }
             break;
         case Power::PowerState::FULL :
             lv_label_set_text(batteryLabel, LV_SYMBOL_OK); 
@@ -662,8 +667,8 @@ void uiUpdatePower()
             break;
         case Power::PowerState::CHARGING :
             lv_label_set_text(batteryLabel, LV_SYMBOL_CHARGE);
-            if(Settings::getSettings()->getScreenOffOnCharge())
-            {   // Prompt for screen off
+            if(Settings::getSettings()->getScreenOffOnCharge()&&power->hasPowerStateChanged())
+            {   // This is state change => prompt for screen off
                 uiShowScreenSaverDialog();
             }
             break;

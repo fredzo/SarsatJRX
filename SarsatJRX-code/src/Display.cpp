@@ -360,12 +360,12 @@ int Display::getHeight()
  * ***************************************/
 void Display::backlightOn()
 {
-    bl->on();
+  if(!bl->isOn()) bl->on();
 }
 
 void Display::backlightOff()
 {
-    bl->off();
+  if(bl->isOn()) bl->off();
 }
 
 void Display::setBrightness(uint8_t level)

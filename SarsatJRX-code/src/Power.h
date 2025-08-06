@@ -70,6 +70,13 @@ class Power
          */
         bool hasChanged() { return changed; };
 
+        /**
+         * @brief Returns true if power state has changed since last call of this method
+         * 
+         * @return true if power state has changed since last call of this method
+         */
+        bool hasPowerStateChanged();
+
         // Power task processing
         void handleTask();
 
@@ -105,6 +112,8 @@ class Power
         int lastChargeValue = 0;
         // Charge value count
         int chargeValueCount = 0;
+        // True when power state changed
+        bool powerStateChanged = true;
 
         float voltageBuffer[BATTERY_BUFFER_SIZE];
         uint8_t voltageIndex = 0;

@@ -68,6 +68,14 @@ String Power::getPowerStateString()
     return result;
 }
 
+bool Power::hasPowerStateChanged()
+{
+    bool result = powerStateChanged;
+    powerStateChanged = false;
+    return result;
+}
+
+
 int Power::getBatteryPercentage()
 {
     return batteryPercentage;
@@ -165,6 +173,7 @@ void Power::handleTask()
                     {
                         state = newState;
                         changed = true;
+                        powerStateChanged = true;
                     }
                 }
             }
@@ -176,6 +185,7 @@ void Power::handleTask()
             {
                 state = PowerState::NO_BATTERY;
                 changed = true;
+                powerStateChanged = true;
             }
             lastChargeValue = newValue;
         }
