@@ -110,10 +110,12 @@ class Power
         bool changed = true;
         // Last value of charge pin
         int lastChargeValue = 0;
+        // Number of charge samples
+        uint16_t chargeSampleCount = 0;
         // Charge value count
         int chargeValueCount = 0;
         // True when power state changed
-        bool powerStateChanged = true;
+        bool powerStateChanged = false;
 
         float voltageBuffer[BATTERY_BUFFER_SIZE];
         uint8_t voltageIndex = 0;
