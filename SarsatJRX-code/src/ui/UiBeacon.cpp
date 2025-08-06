@@ -8,27 +8,27 @@
 // Beacon info
 #define BEACON_HEADER_HEIGHT    24
 #define MAIN_BLOC_HEIGHT    BEACON_HEADER_HEIGHT+8*LINE_HEIGHT
-#define INFO_LABEL          "Info :"
+#define INFO_LABEL          "Info:"
 #define INFO_LABEL_WIDTH    50
-#define SERIAL_LABEL        "Serial # :"
+#define SERIAL_LABEL        "Serial #:"
 #define SERIAL_LABEL_WIDTH  75
-#define MAIN_LABEL          "Main loc. device :"
+#define MAIN_LABEL          "Main loc. device:"
 #define MAIN_LABEL_WIDTH    144
-#define AUX_LABEL           "Aux. loc. device :"
+#define AUX_LABEL           "Aux. loc. device:"
 #define AUX_LABEL_WIDTH     144
-#define LOCATION_LABEL      "Location :"
-#define CONTROL_LABEL       "Control :"
+#define LOCATION_LABEL      "Location:"
+#define CONTROL_LABEL       "Control:"
 #define CONTROL_TITLE_WIDTH 75
 #define CONTROL_LABEL_WIDTH 80
 #define BCH1_OK_LABEL       "BCH1-OK"
 #define BCH1_KO_LABEL       "BCH1-KO"
 #define BCH2_OK_LABEL       "BCH2-OK"
 #define BCH2_KO_LABEL       "BCH2-KO"
-#define HEX_ID_LABEL        "Hex ID :"
+#define HEX_ID_LABEL        "Hex ID:"
 #define HEX_ID_WIDTH        75
-#define DATA_LABEL          "Data :"
+#define DATA_LABEL          "Data:"
 #define DATA_LABEL_WIDTH    70
-#define DATE_LABEL          "Date :"
+#define DATE_LABEL          "Date:"
 #define DATE_LABEL_WIDTH    55
 #define BCH_LABEL_WIDTH     90
 // QR code

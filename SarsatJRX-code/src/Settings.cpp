@@ -12,6 +12,7 @@
 #define COUNTDOWN_SOUND         "CDS"
 #define COUNTDOWN_LEDS          "CDL"
 #define RELOAD_COUNTDOWN        "RCD"
+#define ALLOW_FRAME_SIMU        "AFS"
 
 Settings *Settings::settingsInstance = nullptr;
 
@@ -29,6 +30,7 @@ void Settings::init()
     countDownSound = preferences.getBool(COUNTDOWN_SOUND,true);
     countDownLeds = preferences.getBool(COUNTDOWN_LEDS,true);
     reloadCountDown = preferences.getBool(RELOAD_COUNTDOWN,false);
+    allowFrameSimu = preferences.getBool(ALLOW_FRAME_SIMU,false);
 }
 
 bool Settings::getWifiState()
@@ -158,6 +160,19 @@ void Settings::setReloadCountDown(bool active)
     if(reloadCountDown == active) return;
     reloadCountDown = active;
     preferences.putBool(RELOAD_COUNTDOWN,active);
+    dirty = true;
+}
+
+bool Settings::getAllowFrameSimu()
+{
+    return allowFrameSimu;
+}
+
+void Settings::setAllowFrameSimu(bool active)
+{
+    if(allowFrameSimu == active) return;
+    allowFrameSimu = active;
+    preferences.putBool(ALLOW_FRAME_SIMU,active);
     dirty = true;
 }
 

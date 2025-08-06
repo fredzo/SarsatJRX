@@ -11,8 +11,9 @@
 #define TOGGLE_X            210
 #define TOGGLE_WIDTH        50
 #define SPINBOX_LINE_HEIGHT 32
+#define SPINBOX_BUTTON_SIZE 36
 #define SPINBOX_WIDTH       80
-#define SPINBOX_X           250
+#define SPINBOX_X           254
 
 
 void uiSettingsCreateView(lv_obj_t * cont);

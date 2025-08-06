@@ -21,9 +21,10 @@ static lv_obj_t * audioTab;
 static int audioTabWidth;
 static int audioTabHeight;
 static lv_obj_t * buzzerLeveLabel;
-static lv_obj_t * buzzerLeveSpinbox;
-static lv_obj_t * buzzerLeveSpinboxUpButton;
-static lv_obj_t * buzzerLeveSpinboxDownButton;
+static lv_obj_t * buzzerLevelSpinbox;
+static int buzzerLevelSpinboxValue;
+static lv_obj_t * buzzerLevelSpinboxUpButton;
+static lv_obj_t * buzzerLevelSpinboxDownButton;
 
 static lv_obj_t * touchSoundLabel;
 static lv_obj_t * touchSoundToggle;
@@ -36,14 +37,19 @@ static lv_obj_t * countDownLedToggle;
 static lv_obj_t * countDownReloadLabel;
 static lv_obj_t * countDownReloadToggle;
 
+static void updateBuzzerLevelSpinboxValue()
+{
+    lv_obj_t * label = lv_textarea_get_label(buzzerLevelSpinbox);
+    lv_label_set_text_fmt(label,"%d",buzzerLevelSpinboxValue);
+
+}
 
 static void updateBuzzerSound()
 {
     SoundManager* soundManager = SoundManager::getSoundManager();
     Settings* settings = Settings::getSettings();
-    int newValue = lv_spinbox_get_value(buzzerLeveSpinbox);
-    soundManager->setVolume(newValue);
-    settings->setBuzzerLevel(newValue);
+    soundManager->setVolume(buzzerLevelSpinboxValue);
+    settings->setBuzzerLevel(buzzerLevelSpinboxValue);
     if(!settings->getTouchSound())
     {   // Force touch sound to give feedback on sound settings
         SoundManager::getSoundManager()->playTouchSound();
@@ -53,14 +59,20 @@ static void updateBuzzerSound()
 // Up button event callback
 static void spinboxBtnUpEventCb(lv_event_t * e)
 {
-    lv_spinbox_increment(buzzerLeveSpinbox);
+    //lv_spinbox_increment(buzzerLevelSpinbox);
+    buzzerLevelSpinboxValue+=10;
+    if(buzzerLevelSpinboxValue > 255) buzzerLevelSpinboxValue = 255;
+    updateBuzzerLevelSpinboxValue();
     updateBuzzerSound();
 }
 
 // Down button event callback
 static void spinboxBtnDownEventCb(lv_event_t * e)
 {
-    lv_spinbox_decrement(buzzerLeveSpinbox);
+    //lv_spinbox_decrement(buzzerLevelSpinbox);
+    buzzerLevelSpinboxValue-=10;
+    if(buzzerLevelSpinboxValue < 0) buzzerLevelSpinboxValue = 0;
+    updateBuzzerLevelSpinboxValue();
     updateBuzzerSound();
 }
 
@@ -103,32 +115,30 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
 
     // Buzzer level spinbox
     buzzerLeveLabel      = uiCreateLabel (tab,&style_section_title,BUZZER_LEVEL_LABEL,0,currentY,LABEL_WIDTH,SPINBOX_LINE_HEIGHT);
-    buzzerLeveSpinbox = lv_spinbox_create(tab);
-    lv_spinbox_set_range(buzzerLeveSpinbox, 0, 255);
-    lv_spinbox_set_digit_format(buzzerLeveSpinbox, 3, 0); // up to 255, no decimal
-    lv_spinbox_set_step(buzzerLeveSpinbox, 10);
-    lv_spinbox_set_rollover(buzzerLeveSpinbox, false); // DISABLE rollover
-    lv_obj_set_style_pad_all(buzzerLeveSpinbox, 4, 0);
-    lv_obj_set_style_text_align(buzzerLeveSpinbox, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_clear_flag(buzzerLeveSpinbox, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_width(buzzerLeveSpinbox, SPINBOX_WIDTH);
-    lv_obj_set_size(buzzerLeveSpinbox,SPINBOX_WIDTH,SPINBOX_LINE_HEIGHT);
-    lv_obj_set_pos(buzzerLeveSpinbox,SPINBOX_X,currentY);
+    buzzerLevelSpinbox = lv_textarea_create(tab);
+    lv_textarea_set_one_line(buzzerLevelSpinbox, true);
+    lv_textarea_set_cursor_click_pos(buzzerLevelSpinbox, false);
+    lv_obj_set_style_pad_all(buzzerLevelSpinbox, 4, 0);
+    lv_obj_set_style_text_align(buzzerLevelSpinbox, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_clear_flag(buzzerLevelSpinbox, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_width(buzzerLevelSpinbox, SPINBOX_WIDTH);
+    lv_obj_set_size(buzzerLevelSpinbox,SPINBOX_WIDTH,SPINBOX_LINE_HEIGHT);
+    lv_obj_set_pos(buzzerLevelSpinbox,SPINBOX_X,currentY);
 
     // Add up/down buttons
-    buzzerLeveSpinboxUpButton = lv_btn_create(tab);
-    lv_obj_set_size(buzzerLeveSpinboxUpButton, SPINBOX_LINE_HEIGHT, SPINBOX_LINE_HEIGHT);
-    lv_obj_align_to(buzzerLeveSpinboxUpButton, buzzerLeveSpinbox, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
-    lv_obj_set_style_bg_img_src(buzzerLeveSpinboxUpButton, LV_SYMBOL_PLUS, 0);
+    buzzerLevelSpinboxUpButton = lv_btn_create(tab);
+    lv_obj_set_size(buzzerLevelSpinboxUpButton, SPINBOX_BUTTON_SIZE, SPINBOX_BUTTON_SIZE);
+    lv_obj_align_to(buzzerLevelSpinboxUpButton, buzzerLevelSpinbox, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+    lv_obj_set_style_bg_img_src(buzzerLevelSpinboxUpButton, LV_SYMBOL_PLUS, 0);
     
-    buzzerLeveSpinboxDownButton = lv_btn_create(tab);
-    lv_obj_set_size(buzzerLeveSpinboxDownButton, SPINBOX_LINE_HEIGHT, SPINBOX_LINE_HEIGHT);
-    lv_obj_align_to(buzzerLeveSpinboxDownButton, buzzerLeveSpinbox, LV_ALIGN_OUT_LEFT_MID, -10, 0);
-    lv_obj_set_style_bg_img_src(buzzerLeveSpinboxDownButton, LV_SYMBOL_MINUS, 0);
+    buzzerLevelSpinboxDownButton = lv_btn_create(tab);
+    lv_obj_set_size(buzzerLevelSpinboxDownButton, SPINBOX_BUTTON_SIZE, SPINBOX_BUTTON_SIZE);
+    lv_obj_align_to(buzzerLevelSpinboxDownButton, buzzerLevelSpinbox, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+    lv_obj_set_style_bg_img_src(buzzerLevelSpinboxDownButton, LV_SYMBOL_MINUS, 0);
 
     // Link buttons to callbacks
-    lv_obj_add_event_cb(buzzerLeveSpinboxUpButton, spinboxBtnUpEventCb, LV_EVENT_CLICKED, NULL);
-    lv_obj_add_event_cb(buzzerLeveSpinboxDownButton, spinboxBtnDownEventCb, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(buzzerLevelSpinboxUpButton, spinboxBtnUpEventCb, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(buzzerLevelSpinboxDownButton, spinboxBtnDownEventCb, LV_EVENT_CLICKED, NULL);
 
     currentY+=SPINBOX_LINE_HEIGHT+2*SPACER;
 
@@ -158,7 +168,8 @@ void uiSettingsUpdateAudio()
 {   // Display tab
     // Display reverse state
     Settings* settings = Settings::getSettings();
-    lv_spinbox_set_value(buzzerLeveSpinbox,settings->getBuzzerLevel());
+    buzzerLevelSpinboxValue = settings->getBuzzerLevel();
+    updateBuzzerLevelSpinboxValue();
     settings->getTouchSound() ? lv_obj_add_state(touchSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(touchSoundToggle, LV_STATE_CHECKED);
     settings->getFrameSound() ? lv_obj_add_state(frameSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(frameSoundToggle, LV_STATE_CHECKED);
     settings->getCountDownSound() ? lv_obj_add_state(countDownSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(countDownSoundToggle, LV_STATE_CHECKED);

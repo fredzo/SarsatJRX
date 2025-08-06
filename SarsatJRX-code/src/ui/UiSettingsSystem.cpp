@@ -6,15 +6,15 @@
 #include <Hardware.h>
 
 // System info
-#define VERSION_LABEL       "Version :"
+#define VERSION_LABEL       "Version:"
 #define VERSION_LABEL_WIDTH 80
-#define SKETCH_LABEL        "Sketch :"
+#define SKETCH_LABEL        "Sketch:"
 #define SKETCH_LABEL_WIDTH  80
-#define VBAT_LABEL          "Vbat :"
+#define VBAT_LABEL          "Vbat:"
 #define VBAT_LABEL_WIDTH    80
 #define VBAT_TEXT_WIDTH     80
 
-#define CHIP_LABEL          "Chip :"
+#define CHIP_LABEL          "Chip:"
 #define CHIP_LABEL_WIDTH    50
 #define CHIPM_LABEL         "- Model:"
 #define CHIPM_LABEL_WIDTH   70
@@ -25,21 +25,21 @@
 #define CHIPF_LABEL         "- Freq.:"
 #define CHIPF_LABEL_WIDTH   70
 
-#define RAM_LABEL          "Ram :"
+#define RAM_LABEL          "Ram:"
 #define RAM_LABEL_WIDTH    50
 #define RAMS_LABEL         "- Total:"
 #define RAMS_LABEL_WIDTH   70
 #define RAMF_LABEL         "- Free:"
 #define RAMF_LABEL_WIDTH   70
 
-#define PSRAM_LABEL          "PS-Ram :"
+#define PSRAM_LABEL          "PS-Ram:"
 #define PSRAM_LABEL_WIDTH    75
 #define PSRAMS_LABEL         "- Total:"
 #define PSRAMS_LABEL_WIDTH   75
 #define PSRAMF_LABEL         "- Free:"
 #define PSRAMF_LABEL_WIDTH   75
 
-#define FLASH_LABEL          "Flash :"
+#define FLASH_LABEL          "Flash:"
 #define FLASH_LABEL_WIDTH    75
 #define FLASHS_LABEL         "- Size:"
 #define FLASHS_LABEL_WIDTH   75

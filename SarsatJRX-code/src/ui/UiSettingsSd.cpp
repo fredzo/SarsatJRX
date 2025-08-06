@@ -7,15 +7,15 @@
 #include <Settings.h>
 
 // SD card
-#define SD_LABEL                "SD card mounted :"
+#define SD_LABEL                "SD card mounted:"
 #define SD_LABEL_WIDTH          160
-#define TOTAL_SIZE_LABEL        "Total size :"
+#define TOTAL_SIZE_LABEL        "Total size:"
 #define TOTAL_SIZE_LABEL_WIDTH  100
-#define USED_SIZE_LABEL         "Used size :"
+#define USED_SIZE_LABEL         "Used size:"
 #define USED_SIZE_LABEL_WIDTH   100
-#define LOG_FOLDER_LABEL        "Beacons folder :"
+#define LOG_FOLDER_LABEL        "Beacons folder:"
 #define LOG_FOLDER_LABEL_WIDTH  160
-#define BEACONS_LABEL           "Beacons :"
+#define BEACONS_LABEL           "Beacons:"
 #define BEACONS_LABEL_WIDTH     100
 #define BEACON_LIST_WIDTH       260
 #define BEACON_BUTTON_WIDTH     70

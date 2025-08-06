@@ -47,6 +47,9 @@ class Settings
         bool getReloadCountDown();
         void setReloadCountDown(bool active);
 
+        bool getAllowFrameSimu();
+        void setAllowFrameSimu(bool active);
+
         void save();
 
     private :
@@ -71,6 +74,7 @@ class Settings
         bool countDownSound;
         bool countDownLeds;
         bool reloadCountDown;
+        bool allowFrameSimu;
 
         static Settings *settingsInstance;
 };

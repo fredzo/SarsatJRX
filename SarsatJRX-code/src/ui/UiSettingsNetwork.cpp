@@ -9,33 +9,33 @@
 #include <Settings.h>
 
 // Wifi / Net
-#define WIFI_LABEL          "Wifi :"
+#define WIFI_LABEL          "Wifi:"
 #define WIFI_LABEL_WIDTH    80
-#define PORTAL_LABEL        "Wifi setup portal :"
+#define PORTAL_LABEL        "Wifi setup portal:"
 #define PORTAL_LABEL_WIDTH  200
-#define MODE_LABEL          "Mode :"
+#define MODE_LABEL          "Mode:"
 #define MODE_LABEL_WIDTH    80
-#define STATUS_LABEL        "Status :"
+#define STATUS_LABEL        "Status:"
 #define STATUS_LABEL_WIDTH  80
-#define SIGNAL_LABEL        "Signal :"
+#define SIGNAL_LABEL        "Signal:"
 #define SIGNAL_LABEL_WIDTH  80
-#define SSID_LABEL          "SSID :"
+#define SSID_LABEL          "SSID:"
 #define SSID_LABEL_WIDTH    80
-#define MAC_LABEL           "MAC :"
+#define MAC_LABEL           "MAC:"
 #define MAC_LABEL_WIDTH     80
-#define IP_LABEL            "IP :"
+#define IP_LABEL            "IP:"
 #define IP_LABEL_WIDTH      80
-#define GATEWAY_LABEL       "Gateway :"
+#define GATEWAY_LABEL       "Gateway:"
 #define GATEWAY_LABEL_WIDTH 80
-#define DNS_LABEL           "DNS :"
-#define DNS1_LABEL          "DNS 1 :"
+#define DNS_LABEL           "DNS:"
+#define DNS1_LABEL          "DNS 1:"
 #define DNS1_LABEL_WIDTH    80
-#define DNS2_LABEL          "DNS 2 :"
+#define DNS2_LABEL          "DNS 2:"
 #define DNS2_LABEL_WIDTH    80
-#define MASK_LABEL          "Mask :"
+#define MASK_LABEL          "Mask:"
 #define MASK_LABEL_WIDTH    80
 // NTP status
-#define NTP_LABEL           "NTP :"
+#define NTP_LABEL           "NTP:"
 #define NTP_LABEL_WIDTH     50
 #define NTP_DATE_LABEL      "- Date:"
 #define NTP_DATE_WIDTH      70
