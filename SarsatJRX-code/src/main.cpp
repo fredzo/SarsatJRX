@@ -345,6 +345,28 @@ void nextFrame()
     updateDisplay();
 }
 
+void blinkNotifLed()
+{
+  if(!ledFrameReceivedOn)
+  { // Blink leds if not already showing received frame
+        digitalWrite(NOTIFICATION_PIN, HIGH);
+        ledFrameReceivedOn = true;
+        ledsStartBlinkTime = millis();
+        countDownModeOn = true;
+  }
+}
+
+void blinkErrorLed()
+{
+  if(!ledFrameReceivedOn)
+  { // Blink leds if not already showing received frame
+        digitalWrite(ERROR_PIN, HIGH);
+        ledFrameErrorOn = true;
+        ledsStartBlinkTime = millis();
+        countDownModeOn = true;
+  }
+}
+
 void loop()
 {
   // Audio task
@@ -443,21 +465,15 @@ void loop()
         hardware->getSoundManager()->playCountDownHighSound();
       }
     }
-    if(settings->getCountDownLeds() && !ledFrameReceivedOn)
-    { // Blink leds if not already showing received frame
+    if(settings->getCountDownLeds())
+    {
       if(rtc->isAlmostLastCount())
       { // Blue led 4 times
-        digitalWrite(NOTIFICATION_PIN, HIGH);
-        ledFrameReceivedOn = true;
-        ledsStartBlinkTime = millis();
-        countDownModeOn = true;
+        blinkNotifLed();
       }
       else if (rtc->isLastCount())
       { // Red led once
-        digitalWrite(ERROR_PIN, HIGH);
-        ledFrameErrorOn = true;
-        ledsStartBlinkTime = millis();
-        countDownModeOn = true;
+        blinkErrorLed();
       }
     }
     if((rtc->getCountDown()==-1) && settings->getReloadCountDown())
