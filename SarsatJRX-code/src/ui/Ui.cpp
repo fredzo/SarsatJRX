@@ -134,6 +134,16 @@ static int          screenSaverCountDown;
 static lv_timer_t * screenSaverTimer;
 static bool         screenSaverShowing = false;
 
+// Battery dialog
+#define BATTERY_DIALOG_WIDTH            320
+#define BATTERY_DIALOG_HEIGHT           180
+#define BATTERY_DIALOG_ICONS_HEIGHT     42
+#define BATTERY_DIALOG_ICONS_WIDTH      70
+#define BATTERY_DIALOG_BUTTONS_HEIGHT   32
+static lv_obj_t *   batteryDialog;
+static lv_obj_t *   batteryDialogLabel;
+static bool         batteryDialogShowing = false;
+
 UiScreen currentScreen = UiScreen::START;
 
 UiScreen previousScreen = UiScreen::START;
@@ -660,6 +670,7 @@ void uiUpdatePower()
             if(powerStateChanged)
             {   // New state, see if we need to wake screen up
                 Hardware::getHardware()->getDisplay()->backlightOn();
+                if(Settings::getSettings()->getShowBatteryWarnMessage()) uiShowBatteryDialog();
             }
             break;
         case Power::PowerState::FULL :
@@ -721,6 +732,10 @@ void uiUpdatePower()
         {
             stopBatteryChargeAnim(width);
             if(screenSaverShowing)  lv_msgbox_close(screenSaverDialog);
+        }
+        if(!noBattery)
+        {
+            if(batteryDialogShowing) lv_msgbox_close(batteryDialog);
         }
     }
 
@@ -809,7 +824,7 @@ lv_obj_t * uiCreateImageButton(lv_obj_t * parent, const void* src, lv_event_cb_t
     return imageButton;
 }
 
-lv_obj_t * uiCreateLabelButton(lv_obj_t * parent, const char* text, lv_event_cb_t event_cb, lv_event_code_t filter,lv_color_t buttonColor, int width, int height, int x, int y)
+lv_obj_t * uiCreateLabelButton(lv_obj_t * parent, const char* text, lv_event_cb_t event_cb, lv_event_code_t filter,int width, int height, int x, int y)
 {   // Text button
     lv_obj_t * textButton = lv_btn_create(parent);
     if((x >= 0) && (y>=0))
@@ -818,7 +833,6 @@ lv_obj_t * uiCreateLabelButton(lv_obj_t * parent, const char* text, lv_event_cb_
         lv_obj_set_pos(textButton,x,y);
     }
     lv_obj_set_size(textButton, width, height);
-    lv_obj_set_style_bg_color(textButton,buttonColor,0);
     lv_obj_add_event_cb(textButton, event_cb, filter, NULL);
     lv_obj_t * label = lv_label_create(textButton);
     lv_label_set_text(label, text);
@@ -904,6 +918,42 @@ void uiShowScreenSaverDialog()
         {
             lv_timer_del(screenSaverTimer);
             screenSaverShowing = false;
+        }
+    }, LV_EVENT_ALL, NULL);
+}
+
+void uiShowBatteryDialog()
+{
+    if(batteryDialogShowing) return;
+    batteryDialogShowing = true;
+    static const char * btns[] = {"OK", NULL};
+    batteryDialog = lv_msgbox_create(NULL, "Battery not charging !", "Turn power button on to charge battery:", btns, true);
+    lv_obj_set_size(batteryDialog, BATTERY_DIALOG_WIDTH, BATTERY_DIALOG_HEIGHT); 
+    lv_obj_center(batteryDialog);
+    // Center buttons
+    lv_obj_t * btnmatrix = lv_msgbox_get_btns(batteryDialog);
+    lv_obj_set_size(btnmatrix, BATTERY_DIALOG_WIDTH,BATTERY_DIALOG_BUTTONS_HEIGHT);
+    lv_obj_align(btnmatrix, LV_ALIGN_CENTER, 0, 0);
+    // Add spinner with countdown
+    lv_obj_t * content_area = lv_msgbox_get_content(batteryDialog);
+    lv_obj_set_height(content_area,70);
+    // Spinner label
+    batteryDialogLabel = lv_label_create(content_area);
+    lv_obj_set_pos(batteryDialogLabel, (BATTERY_DIALOG_WIDTH-65-BATTERY_DIALOG_ICONS_WIDTH)/2,40);
+    lv_label_set_text_fmt(batteryDialogLabel, "%s  %s%s  %s", LV_SYMBOL_POWER,LV_SYMBOL_MINUS, LV_SYMBOL_RIGHT, LV_SYMBOL_CHARGE);
+    lv_obj_set_style_text_color(batteryDialogLabel, lv_color_white(), 0);
+    lv_obj_set_style_text_font(batteryDialogLabel, font_large, 0);
+
+    lv_obj_add_event_cb(batteryDialog, [](lv_event_t * e) 
+    {
+        lv_event_code_t eventCode = lv_event_get_code(e);
+        if(eventCode == LV_EVENT_VALUE_CHANGED)
+        {
+            lv_msgbox_close(batteryDialog);
+        }
+        else if(eventCode == LV_EVENT_DELETE)
+        {
+            batteryDialogShowing = false;
         }
     }, LV_EVENT_ALL, NULL);
 }

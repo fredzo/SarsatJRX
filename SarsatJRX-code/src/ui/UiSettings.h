@@ -14,6 +14,7 @@
 #define SPINBOX_BUTTON_SIZE 36
 #define SPINBOX_WIDTH       80
 #define SPINBOX_X           254
+#define BUTTON_HEIGHT       36
 
 
 void uiSettingsCreateView(lv_obj_t * cont);
@@ -31,5 +32,7 @@ void uiSettingsUpdateDisplay();
 void uiSettingsUpdateAudio();
 
 void uiSettingsUpdateFreq(char* freqBuffer, bool scanOn);
+
+void uiShowBatteryDialog();
 
 #endif 

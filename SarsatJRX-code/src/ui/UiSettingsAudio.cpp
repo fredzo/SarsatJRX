@@ -116,9 +116,11 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     // Buzzer level spinbox
     buzzerLeveLabel      = uiCreateLabel (tab,&style_section_title,BUZZER_LEVEL_LABEL,0,currentY,LABEL_WIDTH,SPINBOX_LINE_HEIGHT);
     buzzerLevelSpinbox = lv_textarea_create(tab);
+    lv_obj_t * label = lv_textarea_get_label(buzzerLevelSpinbox);
+    lv_obj_set_style_text_font(label,font_mono_medium,0);
     lv_textarea_set_one_line(buzzerLevelSpinbox, true);
     lv_textarea_set_cursor_click_pos(buzzerLevelSpinbox, false);
-    lv_obj_set_style_pad_all(buzzerLevelSpinbox, 4, 0);
+    lv_obj_set_style_pad_all(buzzerLevelSpinbox, 6, 0);
     lv_obj_set_style_text_align(buzzerLevelSpinbox, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_clear_flag(buzzerLevelSpinbox, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_width(buzzerLevelSpinbox, SPINBOX_WIDTH);

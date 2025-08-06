@@ -29,6 +29,9 @@ class Settings
         bool getShowBatteryPercentage();
         void setShowBatteryPercentage(bool show);
 
+        bool getShowBatteryWarnMessage();
+        void setShowBatteryWarnMessage(bool show);
+
         uint8_t getBuzzerLevel();
         void setBuzzerLevel(uint8_t volume);
 
@@ -68,6 +71,7 @@ class Settings
         bool displayReverse;
         bool screenOffOnCharge;
         bool showBatteryPercentage;
+        bool showBatteryWarnMessage;
         uint8_t buzzerLevel;
         bool touchSound;
         bool frameSound;

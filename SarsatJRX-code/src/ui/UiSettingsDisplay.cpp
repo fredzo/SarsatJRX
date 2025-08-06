@@ -10,7 +10,9 @@
 #define LABEL_WIDTH                   200
 #define SCREEN_REVERSE_LABEL          "Screen reverse:"
 #define SCREEN_OFF_ON_CHARGE_LABEL    "Screen off on charge:"
-#define SHOW_BAT_PERCENTAGE_LABEL     "Show bat. %:"
+#define SHOW_BAT_PERCENTAGE_LABEL     "Battery:      Show %:"
+#define SHOW_BAT_WARN_LABEL           "Warn:"
+#define SHOW_BAT_WARN_LABEL_WIDTH     50
 #define ALLOW_FRAM_SIMU_LABEL         "Allow frame simu.:"
 
 
@@ -22,8 +24,11 @@ static lv_obj_t * displayReverseLabel;
 static lv_obj_t * displayReverseToggle;
 static lv_obj_t * screenOffOnChargeLabel;
 static lv_obj_t * screenOffOnChargeToggle;
+static lv_obj_t * screenOffOnButton;
 static lv_obj_t * showBatPercentageLabel;
 static lv_obj_t * showBatPercentageToggle;
+static lv_obj_t * showBatWarnMessageLabel;
+static lv_obj_t * showBatWarnMessageToggle;
 static lv_obj_t * allowFrameSimuLabel;
 static lv_obj_t * allowFrameSimuToggle;
 
@@ -53,6 +58,12 @@ static void toggleShowBatPercentageCb(lv_event_t * e)
     uiUpdatePower();
 }
 
+static void toggleShowBatWarnMessageCb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(showBatWarnMessageToggle, LV_STATE_CHECKED);
+    Settings::getSettings()->setShowBatteryWarnMessage(state);
+}
+
 static void toggleAllowFrameSimuCb(lv_event_t * e)
 {
     bool state = lv_obj_has_state(allowFrameSimuToggle, LV_STATE_CHECKED);
@@ -73,10 +84,19 @@ void createDisplayTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     // Screen off on charge
     screenOffOnChargeLabel  = uiCreateLabel (tab,&style_section_title,SCREEN_OFF_ON_CHARGE_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
     screenOffOnChargeToggle = uiCreateToggle(tab,&style_section_text,toggleScreenOffOnChargeCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    screenOffOnButton = uiCreateLabelButton(tab,"Screen Off",[](lv_event_t * e) {
+        if (lv_event_get_code(e) == LV_EVENT_CLICKED) {
+            Serial.println("Screen Off pressed");
+            Hardware::getHardware()->getDisplay()->backlightOff();
+        }
+    },LV_EVENT_CLICKED,100,BUTTON_HEIGHT,TOGGLE_X+TOGGLE_WIDTH+40,currentY);
     currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
     // Show bat percentage
     showBatPercentageLabel  = uiCreateLabel (tab,&style_section_title,SHOW_BAT_PERCENTAGE_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
     showBatPercentageToggle = uiCreateToggle(tab,&style_section_text,toggleShowBatPercentageCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    // Warn message
+    showBatWarnMessageLabel  = uiCreateLabel (tab,&style_section_title,SHOW_BAT_WARN_LABEL,TOGGLE_X+TOGGLE_WIDTH+20,currentY,SHOW_BAT_WARN_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    showBatWarnMessageToggle = uiCreateToggle(tab,&style_section_text,toggleShowBatWarnMessageCb,TOGGLE_X+TOGGLE_WIDTH+SHOW_BAT_WARN_LABEL_WIDTH+40,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
     // Allow frame simu
     allowFrameSimuLabel  = uiCreateLabel (tab,&style_section_title,ALLOW_FRAM_SIMU_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
@@ -93,6 +113,7 @@ void uiSettingsUpdateDisplay()
     settings->getDisplayReverse() ? lv_obj_add_state(displayReverseToggle, LV_STATE_CHECKED) : lv_obj_clear_state(displayReverseToggle, LV_STATE_CHECKED);
     settings->getScreenOffOnCharge() ? lv_obj_add_state(screenOffOnChargeToggle, LV_STATE_CHECKED) : lv_obj_clear_state(screenOffOnChargeToggle, LV_STATE_CHECKED);
     settings->getShowBatteryPercentage() ? lv_obj_add_state(showBatPercentageToggle, LV_STATE_CHECKED) : lv_obj_clear_state(showBatPercentageToggle, LV_STATE_CHECKED);
+    settings->getShowBatteryWarnMessage() ? lv_obj_add_state(showBatWarnMessageToggle, LV_STATE_CHECKED) : lv_obj_clear_state(showBatWarnMessageToggle, LV_STATE_CHECKED);
     settings->getAllowFrameSimu() ? lv_obj_add_state(allowFrameSimuToggle, LV_STATE_CHECKED) : lv_obj_clear_state(allowFrameSimuToggle, LV_STATE_CHECKED);
 }
 

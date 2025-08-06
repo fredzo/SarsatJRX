@@ -5,6 +5,7 @@
 #define WIFI_STATE_KEY          "Wifi"
 #define DISPLAY_REVERSE         "DRev"
 #define SHOW_BAT_PERCENTAGE     "SBP"
+#define SHOW_BAT_WARN_MESSAGE   "SBW"
 #define SCREEN_OFF_ON_CHRAGE    "SOOC"
 #define BUZZER_LEVEL            "BL"
 #define TOUCH_SOUND             "TS"
@@ -24,6 +25,7 @@ void Settings::init()
     displayReverse = preferences.getBool(DISPLAY_REVERSE,false);
     screenOffOnCharge = preferences.getBool(SCREEN_OFF_ON_CHRAGE,true);
     showBatteryPercentage = preferences.getBool(SHOW_BAT_PERCENTAGE,true);
+    showBatteryWarnMessage = preferences.getBool(SHOW_BAT_WARN_MESSAGE,true);
     buzzerLevel = preferences.getUChar(BUZZER_LEVEL,255);
     touchSound = preferences.getBool(TOUCH_SOUND,true);
     frameSound = preferences.getBool(FRAME_SOUND,true);
@@ -82,6 +84,19 @@ void Settings::setShowBatteryPercentage(bool show)
     if(showBatteryPercentage == show) return;
     showBatteryPercentage = show;
     preferences.putBool(SHOW_BAT_PERCENTAGE,show);
+    dirty = true;
+}
+
+bool Settings::getShowBatteryWarnMessage()
+{
+    return showBatteryWarnMessage;
+}
+
+void Settings::setShowBatteryWarnMessage(bool show)
+{
+    if(showBatteryWarnMessage == show) return;
+    showBatteryWarnMessage = show;
+    preferences.putBool(SHOW_BAT_WARN_MESSAGE,show);
     dirty = true;
 }
 
