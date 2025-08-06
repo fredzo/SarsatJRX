@@ -652,11 +652,12 @@ void uiUpdatePower()
     // Update Icon
     Power::PowerState state = power->getPowerState();
     int percent = power->getBatteryPercentage();
+    bool powerStateChanged = power->hasPowerStateChanged();
     switch (state) 
     {
         case Power::PowerState::NO_BATTERY:
             lv_label_set_text(batteryLabel, LV_SYMBOL_CLOSE);
-            if(power->hasPowerStateChanged())
+            if(powerStateChanged)
             {   // New state, see if we need to wake screen up
                 Hardware::getHardware()->getDisplay()->backlightOn();
             }
@@ -667,7 +668,7 @@ void uiUpdatePower()
             break;
         case Power::PowerState::CHARGING :
             lv_label_set_text(batteryLabel, LV_SYMBOL_CHARGE);
-            if(Settings::getSettings()->getScreenOffOnCharge()&&power->hasPowerStateChanged())
+            if(powerStateChanged && Settings::getSettings()->getScreenOffOnCharge())
             {   // This is state change => prompt for screen off
                 uiShowScreenSaverDialog();
             }
@@ -710,13 +711,17 @@ void uiUpdatePower()
         stopBatteryBlinkAnim();
     }
 
-    if(charging)
+    if(powerStateChanged)
     {
-        startBatteryChargeAnim();
-    }
-    else
-    {
-        stopBatteryChargeAnim(width);
+        if(charging)
+        {
+            startBatteryChargeAnim();
+        }
+        else
+        {
+            stopBatteryChargeAnim(width);
+            if(screenSaverShowing)  lv_msgbox_close(screenSaverDialog);
+        }
     }
 
     // Also update VCC and power state in system tab
