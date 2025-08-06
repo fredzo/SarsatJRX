@@ -58,6 +58,8 @@ extern void readNextSampleFrame();
 extern void previousFrame();
 extern void nextFrame();
 extern void toggleScan();
+extern void blinkNotifLed();
+extern void blinkErrorLed();
 
 /**********************
  *  VARIABLES
@@ -143,6 +145,10 @@ static bool         screenSaverShowing = false;
 static lv_obj_t *   batteryDialog;
 static lv_obj_t *   batteryDialogLabel;
 static bool         batteryDialogShowing = false;
+// Charging timer
+static lv_timer_t * chargingTimer;
+static bool         chargingTimerRunning = false;
+
 
 UiScreen currentScreen = UiScreen::START;
 
@@ -656,6 +662,31 @@ void uiUpdateDiscritatus()
     }
 }
 
+void startChargingTimer()
+{
+    if(chargingTimerRunning) return;
+    chargingTimerRunning = true;
+    // Setup timer
+    chargingTimer = lv_timer_create([](lv_timer_t * timer)
+    {
+        Power::PowerState state = Hardware::getHardware()->getPower()->getPowerState();
+        if(state == Power::PowerState::CHARGING)
+        {
+            blinkErrorLed();
+        }
+        else if (state == Power::PowerState::CHARGING)
+        {
+            blinkNotifLed();
+        }
+    }, 1000, NULL);
+}
+
+void stopChargingTimer()
+{
+    if(chargingTimerRunning) lv_timer_del(chargingTimer);
+    chargingTimerRunning = false;
+}
+
 void uiUpdatePower()
 {
     Power* power = Hardware::getHardware()->getPower();
@@ -699,6 +730,7 @@ void uiUpdatePower()
     
     bool noBattery = (state == Power::PowerState::NO_BATTERY);
     bool charging = (state == Power::PowerState::CHARGING);
+    bool full = (state == Power::PowerState::FULL);
     int width = noBattery ? 0 : (HEADER_BAR_BATTERY_WIDTH * percent) / 100;
   
     lv_color_t color = (
@@ -727,11 +759,20 @@ void uiUpdatePower()
         if(charging)
         {
             startBatteryChargeAnim();
+            startChargingTimer();
         }
         else
         {
             stopBatteryChargeAnim(width);
             if(screenSaverShowing)  lv_msgbox_close(screenSaverDialog);
+            if(full)
+            {
+                startChargingTimer();
+            }
+            else
+            {
+                stopChargingTimer();
+            }
         }
         if(!noBattery)
         {
