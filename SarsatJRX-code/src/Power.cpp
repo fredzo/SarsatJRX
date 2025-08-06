@@ -2,7 +2,8 @@
 #include <SarsatJRXConf.h>
 #include <Util.h>
 
-#define MAX_BATTERY_VOLTAGE         4.15
+#define MAX_BATTERY_VOLTAGE_DOWN    4.1
+#define MAX_BATTERY_VOLTAGE_UP      4.2
 #define POWER_SAMPLE_PERIOD         200  // 200ms
 #define POWER_UPDATE_PERIOD         1000 // 1s
 #define CHARGE_SAMPLE_PERIOD        25   // 25ms
@@ -157,13 +158,20 @@ void Power::handleTask()
                     PowerState newState;
                     if(lastChargeValue)
                     {   // Led off (pin high) => either full or on battery
-                        if(rawPowerValue >= MAX_BATTERY_VOLTAGE)
+                        if(rawPowerValue >= MAX_BATTERY_VOLTAGE_UP)
                         {
                             newState = PowerState::FULL;
                         }
                         else
                         {
-                            newState = PowerState::ON_BATTERY;
+                            if(rawPowerValue >= MAX_BATTERY_VOLTAGE_DOWN && state == PowerState::CHARGING)
+                            {   // Previous state was charging => must be full now
+                                newState = PowerState::FULL;
+                            }
+                            else
+                            {
+                                newState = PowerState::ON_BATTERY;
+                            }
                         }
                     }
                     else
