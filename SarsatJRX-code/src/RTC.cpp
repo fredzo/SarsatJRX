@@ -36,7 +36,14 @@ void Rtc::rtcInit(I2CBus* i2c)
     timer = timerBegin(0, 80, true);  // 80 MHz / 80 = 1 MHz (1 µs)
     timerAttachInterrupt(timer, &onTimer, true);
     timerAlarmWrite(timer, 1000000, true); // 1 sec
-    timerAlarmEnable(timer);    
+    timerAlarmEnable(timer);
+    // Preset the year to something close to the present
+    RTC_Date dt = rtc->getDateTime();
+    if(dt.year < 2025)
+    {
+        dt.year = 2025;
+        rtc->setDateTime(dt);
+    }
 }
 
 Rtc::Date Rtc::getDate()
@@ -86,6 +93,19 @@ Rtc::Date Rtc::getDate()
         #endif
     }
     return currentDate;
+}
+
+void Rtc::setDate(Date date)
+{
+    RTC_Date dt;
+    dt.hour = date.hour;
+    dt.minute = date.minute;
+    dt.second = date.second;
+    dt.day = date.day;
+    dt.month = date.month;
+    dt.year = date.year;
+    rtc->setDateTime(dt);
+    changed = true;
 }
 
 String Rtc::getDateString()

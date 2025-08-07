@@ -38,6 +38,7 @@ class Rtc
         void changeTime();
         void tickSecond();
         Date getDate();
+        void setDate(Date date);
         String getDateString();
         String getTimeString();
         bool hasChanged()   { return changed; };
