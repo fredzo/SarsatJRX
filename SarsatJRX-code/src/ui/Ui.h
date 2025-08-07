@@ -102,4 +102,7 @@ lv_obj_t * uiCreateTextArea(lv_obj_t * parent, lv_event_cb_t event_cb, int width
 
 void uiShowScreenSaverDialog();
 
+void uiSettingsUpdateDateAndTime();
+
+
 #endif 

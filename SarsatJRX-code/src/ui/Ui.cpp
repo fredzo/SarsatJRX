@@ -601,6 +601,7 @@ void uiUpdateTime()
 {
     Rtc* rtc = Hardware::getHardware()->getRtc();
     lv_label_set_text(timeLabel, rtc->getTimeString().c_str());
+    uiSettingsUpdateDateAndTime();
 }
 
 void uiUpdateTicker()
@@ -835,7 +836,10 @@ lv_obj_t * uiCreateLabel(lv_obj_t * parent, lv_style_t * style, const char* text
     lv_label_set_text(result, text);
     lv_obj_add_style(result,style,0);
     lv_obj_set_size(result,width,height);
-    lv_obj_set_pos(result,x,y);
+    if((x >= 0) && (y>=0))
+    {
+        lv_obj_set_pos(result,x,y);
+    }
     return result;
 }
 

@@ -125,6 +125,7 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_clear_flag(buzzerLevelSpinbox, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_size(buzzerLevelSpinbox,SPINBOX_WIDTH,SPINBOX_LINE_HEIGHT);
     lv_obj_set_pos(buzzerLevelSpinbox,SPINBOX_X,currentY);
+    lv_obj_set_style_opa(buzzerLevelSpinbox, LV_OPA_TRANSP, LV_PART_CURSOR);
 
     // Add up/down buttons
     buzzerLevelSpinboxUpButton = lv_btn_create(tab);
