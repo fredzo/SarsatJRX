@@ -123,7 +123,6 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     lv_obj_set_style_pad_all(buzzerLevelSpinbox, 6, 0);
     lv_obj_set_style_text_align(buzzerLevelSpinbox, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_clear_flag(buzzerLevelSpinbox, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_width(buzzerLevelSpinbox, SPINBOX_WIDTH);
     lv_obj_set_size(buzzerLevelSpinbox,SPINBOX_WIDTH,SPINBOX_LINE_HEIGHT);
     lv_obj_set_pos(buzzerLevelSpinbox,SPINBOX_X,currentY);
 
