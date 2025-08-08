@@ -73,6 +73,7 @@ static bool dateSelected = false;
 static void calendarDatePressedCb(lv_event_t *e) {
     lv_calendar_date_t sel;
     if (lv_calendar_get_pressed_date(calendar, &sel)) {
+        lv_calendar_set_today_date(calendar,sel.year,sel.month,sel.day);
         lastPressedDate = sel;
         dateSelected = true;
     }
@@ -155,6 +156,7 @@ static lv_obj_t *createSpinboxWithArrows(lv_obj_t *parent, int x, int y, TimeDat
     // Spinbox
     lv_obj_t *sb = lv_textarea_create(col);
     lv_obj_t * label = lv_textarea_get_label(sb);
+    lv_textarea_set_text(sb,"00");
     lv_obj_set_style_text_font(label,font_mono_medium,0);
     lv_textarea_set_one_line(sb, true);
     lv_textarea_set_cursor_click_pos(sb, false);
