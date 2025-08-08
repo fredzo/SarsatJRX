@@ -145,6 +145,7 @@ static bool         screenSaverShowing = false;
 static lv_obj_t *   batteryDialog;
 static lv_obj_t *   batteryDialogLabel;
 static bool         batteryDialogShowing = false;
+static bool         batteryDialogShownOnce = false;
 // Charging timer
 static lv_timer_t * chargingTimer;
 static bool         chargingTimerRunning = false;
@@ -777,7 +778,12 @@ void uiUpdatePower()
         }
         if(!noBattery)
         {
-            if(batteryDialogShowing) lv_msgbox_close(batteryDialog);
+            if(batteryDialogShowing)
+            {
+                lv_msgbox_close(batteryDialog);
+                // User did not dismiss the dialog, we can present it to him again
+                batteryDialogShownOnce = false;
+            } 
         }
     }
 
@@ -968,9 +974,11 @@ void uiShowScreenSaverDialog()
 }
 
 void uiShowBatteryDialog()
-{
-    if(batteryDialogShowing) return;
+{   // Only show dialog if not alreay presented once
+    if(batteryDialogShowing || batteryDialogShownOnce) return;
     batteryDialogShowing = true;
+    // Only present the dialog to the user once
+    batteryDialogShownOnce = true;
     static const char * btns[] = {"OK", NULL};
     batteryDialog = lv_msgbox_create(NULL, "Battery not charging !", "Turn power button on to charge battery:", btns, true);
     lv_obj_set_size(batteryDialog, BATTERY_DIALOG_WIDTH, BATTERY_DIALOG_HEIGHT); 
