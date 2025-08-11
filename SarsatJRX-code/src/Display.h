@@ -57,6 +57,8 @@ class Display
         int getHeight();
         void backlightOn();
         void backlightOff();
+        void screenOn();
+        void screenOff();
         void setBrightness(uint8_t level);
         void startDisplayTask();
 

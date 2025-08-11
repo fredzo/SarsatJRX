@@ -23,6 +23,37 @@ BackLight *bl = new BackLight(LILYPI_TFT_BL);
 GT9xx_Class *touch = new GT9xx_Class();
 bool reverseScreen = false;
 
+// Scren / backlight management
+static bool screenIsOn = true;
+
+static void blOn()
+{
+  if(!bl->isOn()) bl->on();
+}
+
+static void blOff()
+{
+  if(bl->isOn()) bl->off();
+}
+
+static void scrOn()
+{
+  if(screenIsOn) return;
+  screenIsOn = true;
+  blOn();
+  // Force redraw all screen
+  lv_obj_invalidate(lv_scr_act()); 
+}
+
+static void scrOff()
+{
+  if(!screenIsOn) return;
+  screenIsOn = false;
+  blOff();
+  myGLCD->fillScreen(RGB565(0, 0, 0));
+}
+
+
 // For LVGL ///////////////////////////////////////////////////////////////////////
 
 static lv_disp_draw_buf_t draw_buf;
@@ -60,9 +91,9 @@ void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
     data->state = touched ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
     if(touched)
     {
-      if(!bl->isOn())
+      if(screenIsOn)
       { // Wake up display if needed
-        bl->on();
+        scrOn();
       }
 
       uint16_t x = 0,y = 0;
@@ -355,17 +386,28 @@ int Display::getHeight()
   return DISPLAY_HEIGHT;
 }
 
+void Display::screenOn()
+{
+  scrOn();
+}
+
+void Display::screenOff()
+{
+  scrOff();
+}
+
+
 /******************************************
  *              BACKLIGHT
  * ***************************************/
 void Display::backlightOn()
 {
-  if(!bl->isOn()) bl->on();
+  blOn();
 }
 
 void Display::backlightOff()
 {
-  if(bl->isOn()) bl->off();
+  blOff();
 }
 
 void Display::setBrightness(uint8_t level)

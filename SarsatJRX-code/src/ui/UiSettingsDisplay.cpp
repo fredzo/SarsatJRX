@@ -316,7 +316,7 @@ void createDisplayTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     screenOffOnButton = uiCreateLabelButton(tab,"Screen Off",[](lv_event_t * e) {
         if (lv_event_get_code(e) == LV_EVENT_CLICKED) {
             Serial.println("Screen Off pressed");
-            Hardware::getHardware()->getDisplay()->backlightOff();
+            Hardware::getHardware()->getDisplay()->screenOff();
         }
     },LV_EVENT_CLICKED,100,BUTTON_HEIGHT,TOGGLE_X_DISPLAY+FRAME_SIMU_LABEL_WIDTH,currentY-SPACER/2);
     currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;

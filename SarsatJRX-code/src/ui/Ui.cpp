@@ -547,7 +547,7 @@ void createUi()
 
 void uiSetBeacon(Beacon* beacon, int curPage, int pageCount)
 {   // Wake screen up if needed
-    Hardware::getHardware()->getDisplay()->backlightOn();
+    Hardware::getHardware()->getDisplay()->screenOn();
     uiBeaconSetBeacon(beacon);
     // Set pages
     lv_label_set_text_fmt(pagesLabel,HEADER_PAGES_TEMPLATE,curPage,pageCount);
@@ -702,7 +702,7 @@ void uiUpdatePower()
             lv_label_set_text(batteryLabel, LV_SYMBOL_CLOSE);
             if(powerStateChanged)
             {   // New state, see if we need to wake screen up
-                Hardware::getHardware()->getDisplay()->backlightOn();
+                Hardware::getHardware()->getDisplay()->screenOn();
                 if(Settings::getSettings()->getShowBatteryWarnMessage()) uiShowBatteryDialog();
             }
             break;
@@ -719,6 +719,8 @@ void uiUpdatePower()
             break;
         case Power::PowerState::ON_BATTERY :
         default:
+            // Wake display up if needed 
+            if(powerStateChanged) Hardware::getHardware()->getDisplay()->screenOn();
             if(Settings::getSettings()->getShowBatteryPercentage())
             {
                 lv_label_set_text_fmt(batteryLabel, HEADER_BATTERY_TEMPLATE, percent);    
@@ -946,7 +948,7 @@ void uiShowScreenSaverDialog()
         if(screenSaverCountDown < 0)
         {
             lv_msgbox_close(screenSaverDialog);
-            Hardware::getHardware()->getDisplay()->backlightOff();
+            Hardware::getHardware()->getDisplay()->screenOff();
         }
         else
         {
@@ -961,7 +963,7 @@ void uiShowScreenSaverDialog()
         {
             if(lv_msgbox_get_active_btn(screenSaverDialog) == 0)
             {
-                Hardware::getHardware()->getDisplay()->backlightOff();
+                Hardware::getHardware()->getDisplay()->screenOff();
             }
             lv_msgbox_close(screenSaverDialog);
         }
