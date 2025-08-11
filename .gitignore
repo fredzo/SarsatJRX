@@ -3,7 +3,11 @@ software/.pio/build/project.checksum
 software/.pio/build/megaatmega2560/idedata.json
 software/.vscode/c_cpp_properties.json
 software/.vscode/launch.json
-*.zip
 *.lck
 *.FCBak
 Hardware/SarsatJRX-CMS/#auto_saved_files#
+Hardware/SarsatJRX-CMS/footprints/app.freerouting.kicad-plugin_v1.8.0.zip
+Hardware/SarsatJRX-CMS/production/backups/
+Hardware/SarsatJRX-CMS/SarsatJRX-backups/
+Hardware/SarsatJRX-TH/SarsatJRX-backups/
+Hardware/SarsatJRX-TH/footprints/app.freerouting.kicad-plugin_v1.8.0.zip
