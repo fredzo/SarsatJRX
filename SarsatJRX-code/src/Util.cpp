@@ -95,9 +95,9 @@ String formatSketchInformation(uint32_t size, String md5)
   return formatMemoryValue(size,false) + " (MD5=" + md5 + ")";
 }
 
-void formatBeaconFileName(char* buffer, String name)
+void formatBeaconFileName(char* buffer, size_t size, String name)
 {
-  snprintf(buffer,sizeof(buffer),"%s/%s/%s - %s:%s:%s",name.substring(0,2),name.substring(2,4),name.substring(4,8),name.substring(9,11),name.substring(11,13),name.substring(13,15));
+  snprintf(buffer,size,"%s/%s/%s - %s:%s:%s",name.substring(0,2),name.substring(2,4),name.substring(4,8),name.substring(9,11),name.substring(11,13),name.substring(13,15));
 }
 
 Rtc::Date parseBeaconFileName(const char* fileName)
@@ -113,9 +113,9 @@ Rtc::Date parseBeaconFileName(const char* fileName)
   return result;
 }
 
-void formatFrequencyItem(char* buffer, int index, float frequency, bool on)
+void formatFrequencyItem(char* buffer, size_t size, int index, float frequency, bool on)
 {
-    snprintf(buffer,sizeof(buffer),"(%c) %d- %3.4f MHz",on ? '*' : ' ', index+1, frequency);
+    snprintf(buffer,size,"(%c) %d- %3.4f MHz",on ? '*' : ' ', index+1, frequency);
 }
 
 typedef struct {

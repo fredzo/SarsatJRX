@@ -25,7 +25,7 @@ class Location
         void clear();
         boolean isUnknown();
         String toString(bool sexagesimal);
-        void formatFloatLocation(char* buffer, const char* format);
+        void formatFloatLocation(char* buffer, size_t size, const char* format);
 
 };
 #endif 

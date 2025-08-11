@@ -40,9 +40,9 @@ String formatHzFrequencyValue(uint32_t value);
 
 String formatSketchInformation(uint32_t size, String md5);
 
-void formatBeaconFileName(char* buffer, String date);
+void formatBeaconFileName(char* buffer, size_t size, String date);
 
-void formatFrequencyItem(char* buffer, int index, float frequency, bool on);
+void formatFrequencyItem(char* buffer, size_t size, int index, float frequency, bool on);
 
 Rtc::Date parseBeaconFileName(const char* fileName);
 

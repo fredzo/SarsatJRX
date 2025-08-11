@@ -51,7 +51,7 @@
 #define RTC_INT_PIN         36
 
 // Touch
-#define TOUCH_INT_PIN       34
+#define TOUCH_INT_PIN       34 // Not used as such
 
 // TFT
 #define LILYPI_TFT_MISO     23

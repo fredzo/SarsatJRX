@@ -18,19 +18,19 @@ String Location::toString(bool sexagesimal)
     }
     else
     {   // Format :  <-xx.yyy, xxx.yyy>
-        formatFloatLocation(buffer, "%s, %s");
+        formatFloatLocation(buffer,sizeof(buffer),"%s, %s");
     }
     return buffer;
 }
 
-void Location::formatFloatLocation(char* buffer, const char* format)
+void Location::formatFloatLocation(char* buffer, size_t size, const char* format)
 {   // Format :  <-xx.yyy>
     // sprintf %f is not supported by Arduino :-/
     char latStr[16];
     latitude.toFloatString(latStr);
     char longStr[16];
     longitude.toFloatString(longStr);
-    snprintf(buffer,sizeof(buffer), format, latStr,longStr);
+    snprintf(buffer,size,format,latStr,longStr);
 }
 
 void Location::clear()

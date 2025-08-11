@@ -465,7 +465,7 @@ void uiBeaconSetBeacon(Beacon* beacon)
     lv_label_set_text(dataDataLabel2,line2.c_str());
 
     // Set map QR data
-    beacon->location.formatFloatLocation(buffer,MAPS_URL_TEMPLATE);
+    beacon->location.formatFloatLocation(buffer,sizeof(buffer),MAPS_URL_TEMPLATE);
     #ifdef SERIAL_OUT 
     Serial.println(buffer); 
     #endif

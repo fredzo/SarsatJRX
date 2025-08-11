@@ -276,7 +276,7 @@ void uiSettingsUpdateSd()
                     String name = beacon.name();
                     if(name.endsWith(LOG_FILE_EXTENSION))
                     {
-                        formatBeaconFileName(buffer,name);
+                        formatBeaconFileName(buffer,sizeof(buffer),name);
                         lv_obj_t *lab = lv_label_create(beaconsList);
                         // Reverse list order to have latest beacons at the top of the list
                         lv_obj_move_background(lab);
