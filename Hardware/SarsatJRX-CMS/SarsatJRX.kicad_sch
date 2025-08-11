@@ -3719,6 +3719,12 @@
 		(uuid "c1e36ac9-6cb7-4432-8e4c-a3ec337e953c")
 	)
 	(junction
+		(at 142.24 105.41)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "c3b7a187-b9e4-4992-8bc6-94e21045790c")
+	)
+	(junction
 		(at 110.49 64.77)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3735,6 +3741,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "d3e4564b-8a3a-43b0-b95b-f9d06d99166f")
+	)
+	(junction
+		(at 78.74 109.22)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "d549762b-b842-4841-ad84-a7021af4e54d")
 	)
 	(junction
 		(at 232.41 111.76)
@@ -3932,7 +3944,7 @@
 	)
 	(wire
 		(pts
-			(xy 44.45 109.22) (xy 161.29 109.22)
+			(xy 44.45 109.22) (xy 78.74 109.22)
 		)
 		(stroke
 			(width 0)
@@ -4742,6 +4754,16 @@
 	)
 	(wire
 		(pts
+			(xy 78.74 109.22) (xy 161.29 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "677b2246-aadc-445f-8bbf-c4b2bad2e5fa")
+	)
+	(wire
+		(pts
 			(xy 176.53 88.9) (xy 176.53 92.71)
 		)
 		(stroke
@@ -5082,7 +5104,7 @@
 	)
 	(wire
 		(pts
-			(xy 135.89 105.41) (xy 154.94 105.41)
+			(xy 135.89 105.41) (xy 142.24 105.41)
 		)
 		(stroke
 			(width 0)
@@ -5699,6 +5721,16 @@
 			(type default)
 		)
 		(uuid "e7510b2c-8d61-4887-add5-5cb9627049a7")
+	)
+	(wire
+		(pts
+			(xy 142.24 105.41) (xy 154.94 105.41)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e7957906-4caf-4047-8734-6e40318b2962")
 	)
 	(wire
 		(pts
@@ -7404,6 +7436,72 @@
 			(project "DCR"
 				(path "/c201e1b2-fc01-4110-bdaa-a33290468c83"
 					(reference "#PWR010")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 142.24 105.41 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "374f395b-f049-4d21-81d4-1b5efa5d9aea")
+		(property "Reference" "TP8"
+			(at 141.224 100.33 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "~"
+			(at 144.78 103.378 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 147.32 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 147.32 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 142.24 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "ceee7d28-268e-4196-a4af-05c7a233b2c0")
+		)
+		(instances
+			(project "SarsatJRX"
+				(path "/756f9ab3-bcf2-4930-b1a2-703f1d715265"
+					(reference "TP8")
 					(unit 1)
 				)
 			)
@@ -9876,6 +9974,72 @@
 			(project "DCR"
 				(path "/c201e1b2-fc01-4110-bdaa-a33290468c83"
 					(reference "R4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 78.74 109.22 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "8a638a6a-3227-4b5b-b532-cac136d12eab")
+		(property "Reference" "TP7"
+			(at 77.724 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "~"
+			(at 81.28 107.188 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 83.82 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 83.82 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 78.74 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "335b098e-a412-4422-b3f4-801d9463ddd2")
+		)
+		(instances
+			(project "SarsatJRX"
+				(path "/756f9ab3-bcf2-4930-b1a2-703f1d715265"
+					(reference "TP7")
 					(unit 1)
 				)
 			)
