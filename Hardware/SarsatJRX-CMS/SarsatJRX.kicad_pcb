@@ -2419,7 +2419,7 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP5"
-			(at 2.423503 0.053473 0)
+			(at 0.010503 1.831473 0)
 			(layer "F.SilkS")
 			(uuid "afccd340-1a48-4a2e-8d97-ee1ff9fc7fb0")
 			(effects
@@ -3353,7 +3353,7 @@
 		(descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
 		(tags "resistor")
 		(property "Reference" "R3"
-			(at 0 1.524 90)
+			(at 0.127 -1.524 90)
 			(layer "F.SilkS")
 			(uuid "3ceccffa-fcbf-4ead-b987-58bddef8df3c")
 			(effects
@@ -11655,7 +11655,7 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP6"
-			(at 0 -1.448 0)
+			(at 0 -1.524 0)
 			(layer "F.SilkS")
 			(uuid "68474eb6-09da-404f-9e3f-2b5b95372dbd")
 			(effects
@@ -14287,15 +14287,29 @@
 		(uuid "f319687e-4c08-439b-b168-ecefc113a9cf")
 	)
 	(gr_text "Frame"
-		(at 166.729 105.775 0)
+		(at 165.84 106.029 0)
 		(layer "F.SilkS")
 		(uuid "081243ad-33d1-4bc2-bdae-acf7d89cdfce")
 		(effects
 			(font
-				(size 1 1)
-				(thickness 0.15)
+				(size 1.5 1.5)
+				(thickness 0.3)
+				(bold yes)
 			)
 			(justify left bottom)
+		)
+	)
+	(gr_text "F4JRX\nADRASEC 31"
+		(at 168.761 99.679 0)
+		(layer "F.SilkS")
+		(uuid "20d02d0b-ab91-4868-a7e0-afe43eefb55b")
+		(effects
+			(font
+				(size 1.5 1.5)
+				(thickness 0.3)
+				(bold yes)
+			)
+			(justify bottom)
 		)
 	)
 	(gr_text "5V"
@@ -14311,25 +14325,27 @@
 		)
 	)
 	(gr_text "Deriv. adj."
-		(at 121.517 69.199 0)
+		(at 121.136 69.326 0)
 		(layer "F.SilkS")
 		(uuid "4908ab92-8eef-426f-b640-71b223a850c5")
 		(effects
 			(font
-				(size 1 1)
-				(thickness 0.15)
+				(size 1.1 1.1)
+				(thickness 0.275)
+				(bold yes)
 			)
 			(justify left bottom)
 		)
 	)
 	(gr_text "Error\n"
-		(at 160.125 105.775 0)
+		(at 159.109 106.029 0)
 		(layer "F.SilkS")
 		(uuid "5ac81725-1ee2-4fa8-84f0-f54231d543de")
 		(effects
 			(font
-				(size 1 1)
-				(thickness 0.15)
+				(size 1.5 1.5)
+				(thickness 0.3)
+				(bold yes)
 			)
 			(justify left bottom)
 		)
@@ -14346,14 +14362,15 @@
 			(justify left bottom)
 		)
 	)
-	(gr_text "SarsatJRX v1.1 - 08/2025\nF4JRX - ADRASEC 31"
-		(at 147.679 78.343 0)
+	(gr_text "SarsatJRX v1.1\n08/2025"
+		(at 147.552 78.978 0)
 		(layer "F.SilkS")
 		(uuid "6696787c-0fb9-42a5-a300-29807fa6f1c4")
 		(effects
 			(font
-				(size 1 1)
-				(thickness 0.15)
+				(size 1.5 1.5)
+				(thickness 0.3)
+				(bold yes)
 			)
 			(justify bottom)
 		)
@@ -14372,25 +14389,27 @@
 		)
 	)
 	(gr_text "Deco. adj."
-		(at 160.887 69.326 0)
+		(at 160.506 69.453 0)
 		(layer "F.SilkS")
 		(uuid "9e21a522-7d49-42bf-9804-df3082a25c01")
 		(effects
 			(font
-				(size 1 1)
-				(thickness 0.15)
+				(size 1.1 1.1)
+				(thickness 0.275)
+				(bold yes)
 			)
 			(justify left bottom)
 		)
 	)
 	(gr_text "Signal"
-		(at 151.616 105.775 0)
+		(at 151.489 106.029 0)
 		(layer "F.SilkS")
 		(uuid "b43f359a-ef5d-4d96-986a-538c9060d1f2")
 		(effects
 			(font
-				(size 1 1)
-				(thickness 0.15)
+				(size 1.5 1.5)
+				(thickness 0.3)
+				(bold yes)
 			)
 			(justify bottom)
 		)
