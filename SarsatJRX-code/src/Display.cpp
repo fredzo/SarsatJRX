@@ -91,7 +91,7 @@ void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
     data->state = touched ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
     if(touched)
     {
-      if(screenIsOn)
+      if(!screenIsOn)
       { // Wake up display if needed
         scrOn();
       }
