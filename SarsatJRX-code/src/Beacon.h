@@ -66,6 +66,7 @@ class Beacon
         uint32_t bch1;
         uint32_t computedBch1;
         bool isBch1Valid();
+        bool hasBch2;
         uint32_t bch2;
         uint32_t computedBch2;
         bool isBch2Valid();

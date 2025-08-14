@@ -361,8 +361,8 @@ void uiBeaconSetBeacon(Beacon* beacon)
     // Append BCH values before frame data
     lv_label_set_text(controlLabel1,beacon->isBch1Valid() ? BCH1_OK_LABEL : BCH1_KO_LABEL);
     lv_obj_set_style_text_color(controlLabel1,beacon->isBch1Valid() ? uiOkColor : uiKoColor,0);
-    if(beacon->longFrame) 
-    { // No second proteced field in short frames
+    if(beacon->longFrame && beacon->hasBch2) 
+    {   // No second proteced field in short frames
         lv_label_set_text(controlLabel2,beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
         lv_obj_set_style_text_color(controlLabel2,beacon->isBch2Valid() ? uiOkColor : uiKoColor,0);
     }
@@ -379,7 +379,7 @@ void uiBeaconSetBeacon(Beacon* beacon)
         Serial.print("Expected :");
         Serial.println(beacon->computedBch1,2);
     }
-    if(beacon->longFrame && !beacon->isBch2Valid())
+    if(beacon->longFrame && beacon->hasBch2 && !beacon->isBch2Valid())
     {
         Serial.println("Wrong BCH2 value :");
         Serial.print("Found    :");

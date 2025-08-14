@@ -25,7 +25,8 @@ static const String frames[] = {
   "FFFE2FEDF67B7182038C2F0E10CFE0FF0F61", // 19 - Serial user -	ELT with Aircraft Operator Designator & Serial Number 
   "FFFE2FA157B081437FDFF8B4833783E0F66C", // 20 - Standard Location Protocol - PLB (Serial) 
   "FFFED096ED09900149D4D467EE0851A3B2E8", // 21 - RLS Location Protocol
-  "FFFE2F8DB345B146202DDF3C71F59BAB7072"  // 22 - ELT 24 bits
+  "FFFE2FCE3000000000000DBD0E4022417500", // 22 - Orbitography Protocol (from Toulouse FMCC's LUT)
+  "FFFE2F8DB345B146202DDF3C71F59BAB7072"  // 23 - ELT 24 bits
   };
 static const int sampleFrameNumber = 22;
 
