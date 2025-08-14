@@ -420,7 +420,7 @@ void loop()
       frameReceivedLedBlink();
       // Then read beacon and update beacon display
       readBeacon();
-      bool error = (!beacons[beaconsReadIndex]->isBch1Valid() || !beacons[beaconsReadIndex]->isBch2Valid());
+      bool error = !(beacons[beaconsReadIndex]->isFrameValid());
       if(error)
       { // Error led
         digitalWrite(ERROR_PIN, HIGH);

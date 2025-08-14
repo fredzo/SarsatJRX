@@ -70,6 +70,7 @@ class Beacon
         uint32_t bch2;
         uint32_t computedBch2;
         bool isBch2Valid();
+        bool isFrameValid();
     private:
         void parseFrame();
         void parseProtocol();

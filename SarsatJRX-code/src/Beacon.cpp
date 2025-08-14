@@ -826,5 +826,11 @@ bool Beacon::isBch1Valid()
 
 bool Beacon::isBch2Valid()
 {
-    return ((!hasBch2) || (bch2 == computedBch2));
+    return (bch2 == computedBch2);
 }
+
+bool Beacon::isFrameValid()
+{
+    return isBch1Valid() && ((!hasBch2)||isBch2Valid());
+}
+
