@@ -555,6 +555,10 @@ void uiSetBeacon(Beacon* beacon, int curPage, int pageCount)
     {
         uiShowScreen(UiScreen::BEACON);
     }
+    else
+    {   // Make sure we show beacon screen after exiting settings
+        previousScreen = UiScreen::BEACON;
+    }
 }
 
 void uiShowScreen(UiScreen screen)
