@@ -25,6 +25,10 @@ void uiSettingsUpdateWifi();
 
 void uiSettingsUpdateSystem();
 
+void uiSettingsUpdateSystemPower();
+
+void uiSettingsUpdateSystemUptime();
+
 void uiSettingsUpdateSd();
 
 void uiSettingsUpdateDisplay();

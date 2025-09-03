@@ -43,6 +43,18 @@ String Power::getVccStringValue()
     return (String(buffer) + "V");
 }
 
+/**
+ * @brief Read raw VCC value into the provided char* with the format "x.xx"
+ * 
+ * @return The VCC string value
+ */
+String Power::getRawVccStringValue()
+{   /* 6 is mininum width, 4 is precision; float value is copied onto angleStr */
+    char buffer[8];
+    dtostrf(getRawVccValue(), 3, 2, buffer);
+    return (String(buffer) + "V");
+}
+
 Power::PowerState Power::getPowerState()
 {
     return state;

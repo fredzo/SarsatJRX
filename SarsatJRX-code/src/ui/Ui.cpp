@@ -606,7 +606,10 @@ void uiUpdateTime()
 {
     Rtc* rtc = Hardware::getHardware()->getRtc();
     lv_label_set_text(timeLabel, rtc->getTimeString().c_str());
+    // Update time in display screen
     uiSettingsUpdateDateAndTime();
+    // Update uptime in system screen
+    uiSettingsUpdateSystemUptime();
 }
 
 void uiUpdateTicker()
@@ -794,7 +797,7 @@ void uiUpdatePower()
     }
 
     // Also update VCC and power state in system tab
-    uiSettingsUpdateSystem();
+    uiSettingsUpdateSystemPower();
 }
 
 void uiShowFrameReceived(bool show)

@@ -140,6 +140,28 @@ String Rtc::getTimeString()
     return getDate().getTimeString();
 }
 
+String Rtc::getUptimeString() 
+{
+  unsigned long millisecs = millis(); // ms since boot
+  
+  unsigned long seconds = millisecs / 1000;
+  unsigned long minutes = seconds / 60;
+  unsigned long hours   = minutes / 60;
+  unsigned long days    = hours / 24;
+
+  seconds %= 60;
+  minutes %= 60;
+  hours   %= 24;
+
+  // Format
+  String uptime;
+  if(days > 0) uptime = String(days) + "d";
+  if(hours > 0) uptime += (((hours > 9) ? "" : "0") + String(hours) + "h");
+  if(minutes > 0) uptime += (((minutes > 9) ? "" : "0") + String(minutes) + "'");
+  uptime += (((seconds > 9) ? "" : "0") + String(seconds) + "\"");
+  return uptime;
+}
+
 int Rtc::getCountDown()
 {
     return countDownValue;

@@ -41,6 +41,7 @@ class Rtc
         void setDate(Date date);
         String getDateString();
         String getTimeString();
+        String getUptimeString();
         bool hasChanged()   { return changed; };
         bool isNtpSynched() { return ntpSynched; };
         int  getCountDown();

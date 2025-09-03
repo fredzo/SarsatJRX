@@ -29,16 +29,23 @@ class Power
         float getVccValue();
 
         /**
-         * @brief Returns actual VCC value
+         * @brief Returns raw VCC value
          * 
-         * @return VCC value
+         * @return raw VCC value
          */
         float getRawVccValue() { return rawPowerValue; };
 
         /**
+         * @brief Read raw VCC value into the provided char* with the format "x.xx"
+         * 
+         * @return The raw VCC string value
+         */
+        String getRawVccStringValue();
+
+        /**
          * @brief Read VCC value into the provided char* with the format "x.xx"
          * 
-         * @return Rhe VCC string value
+         * @return The VCC string value
          */
         String getVccStringValue();
 

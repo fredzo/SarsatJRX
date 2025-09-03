@@ -12,14 +12,16 @@
 #define SKETCH_LABEL_WIDTH  80
 #define VBAT_LABEL          "Vbat:"
 #define VBAT_LABEL_WIDTH    80
-#define VBAT_TEXT_WIDTH     80
+#define VBAT_TEXT_WIDTH     50
+#define VBAT_RAW_TEXT_WIDTH 90
+
+#define UPTIME_LABEL          "Uptime:"
+#define UPTIME_LABEL_WIDTH    80
 
 #define CHIP_LABEL          "Chip:"
 #define CHIP_LABEL_WIDTH    50
 #define CHIPM_LABEL         "- Model:"
 #define CHIPM_LABEL_WIDTH   70
-#define CHIPR_LABEL         "- Rev.:"
-#define CHIPR_LABEL_WIDTH   70
 #define CHIPC_LABEL         "- Cores:"
 #define CHIPC_LABEL_WIDTH   70
 #define CHIPF_LABEL         "- Freq.:"
@@ -53,12 +55,13 @@ static lv_obj_t * sketchTitle;
 static lv_obj_t * sketchLabel;
 static lv_obj_t * vBatTitle;
 static lv_obj_t * vBatLabel;
+static lv_obj_t * vBatRawLabel;
 static lv_obj_t * powerStateLabel;
+static lv_obj_t * uptimeTitle;
+static lv_obj_t * uptimeLabel;
 static lv_obj_t * chipTitle;
 static lv_obj_t * chipModelTitle;
 static lv_obj_t * chipModelLabel;
-static lv_obj_t * chipRevisionTitle;
-static lv_obj_t * chipRevisionLabel;
 static lv_obj_t * chipCoresTitle;
 static lv_obj_t * chipCoresLabel;
 static lv_obj_t * chipFreqTitle;
@@ -86,27 +89,30 @@ void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
     versionLabel = uiCreateLabel(tab,&style_section_text,SARSAT_JRX_VERSION,VERSION_LABEL_WIDTH,currentY,tabWidth-VERSION_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
 
+    // Vbat
+    vBatTitle = uiCreateLabel(tab,&style_section_title,VBAT_LABEL,0,currentY,VBAT_LABEL_WIDTH,LINE_HEIGHT);
+    vBatLabel = uiCreateLabel(tab,&style_section_text,"",VBAT_LABEL_WIDTH,currentY,VBAT_TEXT_WIDTH,LINE_HEIGHT);
+    vBatRawLabel = uiCreateLabel(tab,&style_section_text,"",VBAT_LABEL_WIDTH+VBAT_TEXT_WIDTH,currentY,VBAT_RAW_TEXT_WIDTH,LINE_HEIGHT);
+    // Power State
+    powerStateLabel = uiCreateLabel(tab,&style_section_text,"",VBAT_LABEL_WIDTH+VBAT_TEXT_WIDTH+VBAT_RAW_TEXT_WIDTH,currentY,tabWidth-VBAT_LABEL_WIDTH-VBAT_TEXT_WIDTH-VBAT_RAW_TEXT_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+
+    // Uptime
+    uptimeTitle = uiCreateLabel(tab,&style_section_title,UPTIME_LABEL,0,currentY,UPTIME_LABEL_WIDTH,LINE_HEIGHT);
+    uptimeLabel = uiCreateLabel(tab,&style_section_text,"",UPTIME_LABEL_WIDTH,currentY,tabWidth-UPTIME_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+
+
     // Sketch
     sketchTitle = uiCreateLabel(tab,&style_section_title,SKETCH_LABEL,0,currentY,SKETCH_LABEL_WIDTH,LINE_HEIGHT);
     sketchLabel = uiCreateLabel(tab,&style_section_text,formatSketchInformation(ESP.getSketchSize(),ESP.getSketchMD5()).c_str(),SKETCH_LABEL_WIDTH,currentY,tabWidth-SKETCH_LABEL_WIDTH,LINE_HEIGHT);
     // lv_label_set_long_mode(sketchLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
     currentY+=LINE_HEIGHT;
 
-    // Vbat
-    vBatTitle = uiCreateLabel(tab,&style_section_title,VBAT_LABEL,0,currentY,VBAT_LABEL_WIDTH,LINE_HEIGHT);
-    vBatLabel = uiCreateLabel(tab,&style_section_text,"",VBAT_LABEL_WIDTH,currentY,VBAT_LABEL_WIDTH,LINE_HEIGHT);
-    // Power State
-    powerStateLabel = uiCreateLabel(tab,&style_section_text,"",VBAT_LABEL_WIDTH+VBAT_TEXT_WIDTH,currentY,tabWidth-VBAT_LABEL_WIDTH-VBAT_TEXT_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
-
-
     // Chip
     chipTitle = uiCreateLabel(tab,&style_section_title,CHIP_LABEL,0,currentY,CHIP_LABEL_WIDTH,LINE_HEIGHT);
     chipModelTitle = uiCreateLabel(tab,&style_section_title,CHIPM_LABEL,CHIP_LABEL_WIDTH,currentY,CHIPM_LABEL_WIDTH,LINE_HEIGHT);
     chipModelLabel = uiCreateLabel(tab,&style_section_text,ESP.getChipModel(),CHIP_LABEL_WIDTH+CHIPM_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH-CHIPM_LABEL_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
-    chipRevisionTitle = uiCreateLabel(tab,&style_section_title,CHIPR_LABEL,CHIP_LABEL_WIDTH,currentY,CHIPR_LABEL_WIDTH,LINE_HEIGHT);
-    chipRevisionLabel = uiCreateLabel(tab,&style_section_text,(String(ESP.getChipRevision())).c_str(),CHIP_LABEL_WIDTH+CHIPR_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH-CHIPR_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
     chipCoresTitle = uiCreateLabel(tab,&style_section_title,CHIPC_LABEL,CHIP_LABEL_WIDTH,currentY,CHIPC_LABEL_WIDTH,LINE_HEIGHT);
     chipCoresLabel = uiCreateLabel(tab,&style_section_text,(String(ESP.getChipCores())).c_str(),CHIP_LABEL_WIDTH+CHIPC_LABEL_WIDTH,currentY,tabWidth-CHIP_LABEL_WIDTH-CHIPC_LABEL_WIDTH,LINE_HEIGHT);
@@ -145,14 +151,9 @@ void createSystemTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 void uiSettingsUpdateSystem()
 {
-    Hardware* hardware = Hardware::getHardware();
     // System tab
-    Power* power = hardware->getPower();
-    // Vbat
-    lv_label_set_text(vBatLabel,power->getVccStringValue().c_str());
-    // Power state
-    String powerString = power->getPowerStateString() + " ("+power->getBatteryPercentage()+"%)";
-    lv_label_set_text(powerStateLabel,powerString.c_str());
+    uiSettingsUpdateSystemPower();
+    uiSettingsUpdateSystemUptime();
     // Ram
     lv_label_set_text(ramSizeLabel,formatMemoryValue(ESP.getHeapSize(),true).c_str());
     lv_label_set_text(ramFreeLabel,formatMemoryValue(ESP.getFreeHeap(),true).c_str());
@@ -162,4 +163,35 @@ void uiSettingsUpdateSystem()
     // Flash
     lv_label_set_text(flashSizeLabel,formatMemoryValue(ESP.getFlashChipSize(),false).c_str());
     lv_label_set_text(flashFreqLabel,formatHzFrequencyValue(ESP.getFlashChipSpeed()).c_str());
+}
+
+void uiSettingsUpdateSystemRawPower()
+{
+    Hardware* hardware = Hardware::getHardware();
+    Power* power = hardware->getPower();
+    // Vbat
+    String vBatRawString =  " (" + power->getRawVccStringValue() + ")";
+    lv_label_set_text(vBatRawLabel,vBatRawString.c_str());
+}
+
+
+void uiSettingsUpdateSystemPower()
+{
+    Hardware* hardware = Hardware::getHardware();
+    Power* power = hardware->getPower();
+    // Vbat
+    String vBatString =  + " (" + power->getRawVccStringValue() + ")";
+    lv_label_set_text(vBatLabel,power->getVccStringValue().c_str());
+    uiSettingsUpdateSystemRawPower();
+    // Power state
+    String powerString = power->getPowerStateString() + " ("+power->getBatteryPercentage()+"%)";
+    lv_label_set_text(powerStateLabel,powerString.c_str());
+}
+
+void uiSettingsUpdateSystemUptime()
+{
+    Hardware* hardware = Hardware::getHardware();
+    // Uptime
+    lv_label_set_text(uptimeLabel,hardware->getRtc()->getUptimeString().c_str());
+    uiSettingsUpdateSystemRawPower();
 }
