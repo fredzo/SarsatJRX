@@ -20,9 +20,10 @@
 #define TIME_ZONE    "CET-1CEST,M3.5.0,M10.5.0/3" // Europe/Paris (See https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv )
 
 // Filesystem
-#define SARSATJRX_LOG_DIR       "/SarsatJRX"
-#define LOG_FILE_EXTENSION      ".bcn"
-#define LOG_FILENAME_TEMPLATE   "%s/%02d%02d%02d-%02d%02d%02d.bcn"
+#define SARSATJRX_LOG_DIR_NAME          "/SarsatJRX"
+#define SARSATJRX_LOG_DIR_PATH_TEMPLATE "%s/%02d%02d%02d"
+#define LOG_FILE_EXTENSION              ".bcn"
+#define LOG_FILENAME_TEMPLATE           "%s/%02d%02d%02d-%02d%02d%02d.bcn"
 
 // UI
 #define AUDIO_POWER_DISPLAY_PERIOD    5 // 5ms

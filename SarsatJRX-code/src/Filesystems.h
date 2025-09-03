@@ -50,6 +50,7 @@ class Filesystems
         static SDFS* sdFileSystem;
         bool sdFilesystemMounted = false;
         bool logDirReady = false;
+        char logDirPath[64];
 
         static Filesystems *filesystemsInstance;
 };

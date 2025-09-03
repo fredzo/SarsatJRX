@@ -2,6 +2,7 @@
 #include <SarsatJRXConf.h>
 #include <SPIFFS.h>
 #include <Util.h>
+#include <RTC.h>
 
 void Filesystems::init()
 {   // SPIFSS filesystem
@@ -32,11 +33,18 @@ void Filesystems::initSdFs()
         {
             sdFilesystemMounted = true;
             // Create SarsatJRX folder if needed
-            if(SD.mkdir(SARSATJRX_LOG_DIR))
-            {
-                logDirReady = true;
+            logDirReady = false;
+            if(SD.mkdir(SARSATJRX_LOG_DIR_NAME))
+            {   // Get current date to setup log dir path
+                Rtc::Date today = Rtc::getRtc()->getDate();
+                snprintf(logDirPath,sizeof(logDirPath),SARSATJRX_LOG_DIR_PATH_TEMPLATE,SARSATJRX_LOG_DIR_NAME,today.day,today.month,today.year);
+                // Create folder for today
+                if(SD.mkdir(logDirPath))
+                {
+                    logDirReady = true;
+                }
             }
-            else
+            if(!logDirReady)
             {
                 #ifdef SERIAL_OUT
                 Serial.println("Could not create log directory.");
@@ -69,7 +77,7 @@ bool Filesystems::saveBeacon(Beacon* beacon)
     if(sdFilesystemMounted&&logDirReady)
     {
         char buffer[64];
-        snprintf(buffer,sizeof(buffer),LOG_FILENAME_TEMPLATE,SARSATJRX_LOG_DIR,beacon->date.day,beacon->date.month,beacon->date.year,beacon->date.hour,beacon->date.minute,beacon->date.second);
+        snprintf(buffer,sizeof(buffer),LOG_FILENAME_TEMPLATE,logDirPath,beacon->date.day,beacon->date.month,beacon->date.year,beacon->date.hour,beacon->date.minute,beacon->date.second);
         File file = sdFileSystem->open(buffer, FILE_WRITE);
         if(file)
         {
@@ -100,7 +108,7 @@ bool Filesystems::loadBeacon(const char* fileName, volatile byte* frameBuffer)
     if(sdFilesystemMounted&&logDirReady)
     {
         char buffer[64];
-        snprintf(buffer,sizeof(buffer),"%s/%s",SARSATJRX_LOG_DIR,fileName);
+        snprintf(buffer,sizeof(buffer),"%s/%s",logDirPath,fileName);
         File file = sdFileSystem->open(buffer, FILE_READ);
         if(file)
         {
@@ -139,7 +147,7 @@ bool Filesystems::deleteBeacon(const char* fileName)
     if(sdFilesystemMounted&&logDirReady)
     {
         char buffer[64];
-        snprintf(buffer,sizeof(buffer),"%s/%s",SARSATJRX_LOG_DIR,fileName);
+        snprintf(buffer,sizeof(buffer),"%s/%s",logDirPath,fileName);
         result = sdFileSystem->remove(buffer);
     }
     return result;
@@ -162,7 +170,7 @@ int Filesystems::deleteAllBeacons()
                     if(name.endsWith(LOG_FILE_EXTENSION))
                     {
                         char buffer[64];
-                        snprintf(buffer,sizeof(buffer),"%s/%s",SARSATJRX_LOG_DIR,name.c_str());
+                        snprintf(buffer,sizeof(buffer),"%s/%s",logDirPath,name.c_str());
                         if(sdFileSystem->remove(buffer))
                         {
                             result++;
@@ -191,7 +199,7 @@ File Filesystems::getLogDir()
 {
     if(logDirReady)
     {
-        return sdFileSystem->open(SARSATJRX_LOG_DIR);
+        return sdFileSystem->open(logDirPath);
     }
     else
     {
