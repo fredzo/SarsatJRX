@@ -55,6 +55,7 @@ class Rtc
         I2CBus *rtcI2c = nullptr; 
         PCF8563_Class *rtc = nullptr;
         void rtcRegisterInterrupt();
+        void setSystemTime(RTC_Date* dt);
         bool changed = true;
         bool ntpStarted = false;
         bool ntpSynched = false;

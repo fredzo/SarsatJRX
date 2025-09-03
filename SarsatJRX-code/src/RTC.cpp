@@ -44,6 +44,8 @@ void Rtc::rtcInit(I2CBus* i2c)
         dt.year = 2025;
         rtc->setDateTime(dt);
     }
+    // Update system time
+    setSystemTime(&dt);
 }
 
 Rtc::Date Rtc::getDate()
@@ -95,6 +97,24 @@ Rtc::Date Rtc::getDate()
     return currentDate;
 }
 
+void Rtc::setSystemTime(RTC_Date* dt)
+{
+  // Définir la date et l'heure
+  struct tm t;
+  t.tm_year = dt->year - 1900;  // Years since 1900
+  t.tm_mon  = dt->month -1;     // Month 0-11 (0=Jan)
+  t.tm_mday = dt->day;          // Day of month
+  t.tm_hour = dt->hour;         // Hour
+  t.tm_min  = dt->minute;       // Min
+  t.tm_sec  = dt->second;       // Sec
+  t.tm_isdst = -1;              // Automatic DST detection
+
+  time_t now = mktime(&t); // Convertir en timestamp
+  struct timeval tv = { .tv_sec = now, .tv_usec = 0 };
+  settimeofday(&tv, NULL); // Positionner l'heure système
+}
+
+
 void Rtc::setDate(Date date)
 {
     RTC_Date dt;
@@ -106,6 +126,8 @@ void Rtc::setDate(Date date)
     dt.year = date.year;
     rtc->setDateTime(dt);
     changed = true;
+    // Update system time
+    setSystemTime(&dt);
 }
 
 String Rtc::getDateString()
