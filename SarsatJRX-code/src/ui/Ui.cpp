@@ -804,13 +804,13 @@ void uiShowFrameReceived(bool show)
 {
     if(show)
     {
-        lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+        //lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(footerLabel, FOOTER_FRAME_LABEL);
         lv_obj_add_style(footerLabel,&style_footer_highlight,0);
     }
     else
     {
-        lv_obj_clear_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+        //lv_obj_clear_flag(spinner, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(footerLabel, FOOTER_WAIT_LABEL);
         lv_obj_remove_style(footerLabel,&style_footer_highlight,0);
     }

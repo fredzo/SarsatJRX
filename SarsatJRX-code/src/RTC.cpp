@@ -20,7 +20,12 @@ String Rtc::Date::getTimeString()
     return String(buffer);
 }
 
-void IRAM_ATTR onTimer() 
+void IRAM_ATTR rtcInterruptCallack(void)
+{
+    Rtc::getRtc()->changeTime();
+}
+
+void IRAM_ATTR onCountdownTimer() 
 {
     Rtc::getRtc()->tickSecond();
 }
@@ -29,14 +34,20 @@ void Rtc::rtcInit(I2CBus* i2c)
 {
     rtcI2c = i2c;
     rtc = new PCF8563_Class(*i2c);
-    rtcRegisterInterrupt();
-    rtc->enableTimer();
-    rtc->setTimer(1 /* 1 tick */ ,0b10 /* 1Hz frequecy for timer source */,true /* enable interrupt timer */);
+    // For some reason, RTC interrup is not working (probably an hardware issue with Lily Pi board...)
+    // Let's use an ESP32 hardware timer instead
+    //rtcRegisterInterrupt();
+    //rtc->setTimer(1 /* 1 tick */ ,0b10 /* 1Hz frequecy for timer source */,true /* enable interrupt timer */);
+    //rtc->enableTimer();
+    clockTimer = timerBegin(3, 80, true);  // 80 MHz / 80 = 1 MHz (1 µs)
+    timerAttachInterrupt(clockTimer, &rtcInterruptCallack, true);
+    timerAlarmWrite(clockTimer, 1000000, true); // 1 sec
+    timerAlarmEnable(clockTimer);
     // Setup 1sec tick timer for countDown
-    timer = timerBegin(0, 80, true);  // 80 MHz / 80 = 1 MHz (1 µs)
-    timerAttachInterrupt(timer, &onTimer, true);
-    timerAlarmWrite(timer, 1000000, true); // 1 sec
-    timerAlarmEnable(timer);
+    countdownTimer = timerBegin(0, 80, true);  // 80 MHz / 80 = 1 MHz (1 µs)
+    timerAttachInterrupt(countdownTimer, &onCountdownTimer, true);
+    timerAlarmWrite(countdownTimer, 1000000, true); // 1 sec
+    timerAlarmEnable(countdownTimer);
     // Preset the year to something close to the present
     RTC_Date dt = rtc->getDateTime();
     if(dt.year < 2025)
@@ -112,6 +123,7 @@ void Rtc::setSystemTime(RTC_Date* dt)
   time_t now = mktime(&t); // Convertir en timestamp
   struct timeval tv = { .tv_sec = now, .tv_usec = 0 };
   settimeofday(&tv, NULL); // Positionner l'heure système
+  timerRestart(clockTimer);
 }
 
 
@@ -192,7 +204,7 @@ void Rtc::setCountDown(int newCountDown)
         countDownValue = newCountDown;
     }
     countDownChanged = true;
-    timerRestart(timer);
+    timerRestart(countdownTimer);
 }
 
 bool Rtc::countDownHasChanged()
@@ -217,14 +229,9 @@ void Rtc::tickSecond()
     countDownChanged = true;
 }
 
-void IRAM_ATTR rtcInterruptCallack(void)
-{
-    Rtc::getRtc()->changeTime();
-}
-
 void Rtc::rtcRegisterInterrupt()
 {
-    pinMode(RTC_INT_PIN, INPUT);
+    pinMode(RTC_INT_PIN, INPUT_PULLUP);
     attachInterrupt(RTC_INT_PIN, rtcInterruptCallack, FALLING);
 }
 

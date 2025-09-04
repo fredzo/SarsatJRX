@@ -63,7 +63,8 @@ class Rtc
         Date currentDate;
         int countDownValue = 0;
         bool countDownChanged = false;
-        hw_timer_t * timer = NULL;
+        hw_timer_t * countdownTimer = NULL;
+        hw_timer_t * clockTimer = NULL;
 
         Rtc()
         {

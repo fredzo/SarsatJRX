@@ -4,6 +4,7 @@ SoundManager* SoundManager::soundManagerInstance = nullptr;
 
 const char frameOkSoundString[]       = "ok:d=4,o=5,b=300:32d6,32d#6,32e6,32f6,32f#6,32g6,32g#6,32a6";
 const char frameKoSoundString[]       = "ko:d=4,o=5,b=300:32a6,32g#6,32g6,32f#6,32f6,32e6,32d#6,32d6";
+const char frameinvalidSoundString[]  = "invalid:d=4,o=5,b=120:16a,8.p,16a";
 const char countDownLowString[]       = "countl:d=16,o=5,b=60:a";
 const char countDownHighString[]      = "counth:d=16,o=5,b=60:a6";
 const char touchSoundString[]         = "touch:d=4,o=5,b=300:32a8";
@@ -42,6 +43,11 @@ void SoundManager::playFrameSound(bool error)
   {
       player->playAsync(frameOkSound);
   }
+}
+
+void SoundManager::playInvalidFrameSound()
+{
+  player->playAsync(frameInvalidSound);
 }
 
 void SoundManager::playCountDownLowSound()

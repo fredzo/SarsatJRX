@@ -349,10 +349,10 @@ void blinkNotifLed()
 {
   if(!ledFrameReceivedOn)
   { // Blink leds if not already showing received frame
-        digitalWrite(NOTIFICATION_PIN, HIGH);
-        ledFrameReceivedOn = true;
-        ledsStartBlinkTime = millis();
-        countDownModeOn = true;
+    digitalWrite(NOTIFICATION_PIN, HIGH);
+    ledFrameReceivedOn = true;
+    ledsStartBlinkTime = millis();
+    countDownModeOn = true;
   }
 }
 
@@ -360,10 +360,10 @@ void blinkErrorLed()
 {
   if(!ledFrameReceivedOn)
   { // Blink leds if not already showing received frame
-        digitalWrite(ERROR_PIN, HIGH);
-        ledFrameErrorOn = true;
-        ledsStartBlinkTime = millis();
-        countDownModeOn = true;
+    digitalWrite(ERROR_PIN, HIGH);
+    ledFrameErrorOn = true;
+    ledsStartBlinkTime = millis();
+    countDownModeOn = true;
   }
 }
 
@@ -376,10 +376,12 @@ void loop()
   // Get rtc
   Rtc* rtc = hardware->getRtc();
   Settings* settings = hardware->getSettings();
-  // If frameParseState > 0, we are reading an frame, if more thant 500ms elapsed (a frame should be 144x2.5ms = 360 ms max)
+  // If frameParseState > 0, we are reading an frame, if more than 500ms elapsed (a frame should be 144x2.5ms = 360 ms max)
   bool frameTimeout = (isFrameStarted() && ((millis()-getFrameStartTime()) > 500 ));
   if (isFrameComplete() || frameTimeout)
-  {
+  { // Start countdown for next frame
+    rtc->startCountDown();    
+    // Get frame content
     volatile byte* frame = getFrame();
     // Debug purpose 
  #ifdef SERIAL_OUT 
@@ -414,9 +416,7 @@ void loop()
   #endif    
 
     if (((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
-    { // Start countdown for next frame
-      rtc->startCountDown();
-      // Blink leds
+    { // Blink leds
       frameReceivedLedBlink();
       // Then read beacon and update beacon display
       readBeacon();
@@ -440,7 +440,18 @@ void loop()
           display->updateSdCard();
         }
       }
-    } 
+    }
+    else
+    { // Frame preamble detected, but wrong start bytes
+      // Error led
+      digitalWrite(ERROR_PIN, HIGH);
+      ledFrameErrorOn = true;
+      Serial.println("Invalid frame !");
+      if(settings->getFrameSound())
+      {
+        hardware->getSoundManager()->playInvalidFrameSound();
+      }
+    }
     // Reset frame decoding
     updateFooter(true);
     resetFrameReading();
@@ -476,7 +487,7 @@ void loop()
         blinkErrorLed();
       }
     }
-    if((rtc->getCountDown()==-1) && settings->getReloadCountDown())
+    if((rtc->getCountDown()==0) && settings->getReloadCountDown())
     {
       rtc->startCountDown();
     }
