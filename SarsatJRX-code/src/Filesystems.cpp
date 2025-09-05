@@ -28,8 +28,8 @@ void Filesystems::init()
 void Filesystems::initSdFs()
 {   // Start SD card
     if(!sdFilesystemMounted)
-    {   // sdhander->begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
-        if(SD.begin(SD_CS, *sdHandler))
+    {   // Since our hardware is what it is, we don't use default 4MHz frequency but a lower value
+        if(SD.begin(SD_CS,*sdHandler,2000000))
         {
             sdFilesystemMounted = true;
             // Create SarsatJRX folder if needed
