@@ -27,14 +27,15 @@ void uiSettingsCreateView(lv_obj_t * cont)
     //lv_obj_set_style_bg_color(tab_btns, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
     //lv_obj_set_style_text_color(tab_btns, lv_palette_lighten(LV_PALETTE_GREY, 5), 0);
     lv_obj_set_style_border_side(tab_btns, LV_BORDER_SIDE_RIGHT, LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_text_font(tab_btns, &additional_symbols, LV_PART_ITEMS | LV_STATE_DEFAULT);
 
     /*Add 6 tabs */
-    lv_obj_t * tab1 = lv_tabview_add_tab(settingsTabview, "Sys.");
-    lv_obj_t * tab2 = lv_tabview_add_tab(settingsTabview, "Wifi");
-    lv_obj_t * tab3 = lv_tabview_add_tab(settingsTabview, "Net.");
-    lv_obj_t * tab4 = lv_tabview_add_tab(settingsTabview, "SD");
-    lv_obj_t * tab5 = lv_tabview_add_tab(settingsTabview, "Disp.");
-    lv_obj_t * tab6 = lv_tabview_add_tab(settingsTabview, "Audio");
+    lv_obj_t * tab1 = lv_tabview_add_tab(settingsTabview, SYMBOL_SYSTEM);
+    lv_obj_t * tab2 = lv_tabview_add_tab(settingsTabview, SYMBOL_WIFI_CONNECTED);
+    lv_obj_t * tab3 = lv_tabview_add_tab(settingsTabview, SYMBOL_NETWORK);
+    lv_obj_t * tab4 = lv_tabview_add_tab(settingsTabview, SYMBOL_SD);
+    lv_obj_t * tab5 = lv_tabview_add_tab(settingsTabview, SYMBOL_DISPLAY);
+    lv_obj_t * tab6 = lv_tabview_add_tab(settingsTabview, SYMBOL_AUDIO);
     lv_obj_add_style(tab1, &style_pad_small, 0);
     lv_obj_add_style(tab2, &style_pad_small, 0);
     lv_obj_add_style(tab3, &style_pad_small, 0);
