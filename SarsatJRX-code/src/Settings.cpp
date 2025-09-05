@@ -13,6 +13,7 @@
 #define COUNTDOWN_SOUND         "CDS"
 #define COUNTDOWN_LEDS          "CDL"
 #define RELOAD_COUNTDOWN        "RCD"
+#define COUNTDOWN_DURATION      "CDD"
 #define ALLOW_FRAME_SIMU        "AFS"
 
 Settings *Settings::settingsInstance = nullptr;
@@ -26,12 +27,13 @@ void Settings::init()
     screenOffOnCharge = preferences.getBool(SCREEN_OFF_ON_CHRAGE,true);
     showBatteryPercentage = preferences.getBool(SHOW_BAT_PERCENTAGE,true);
     showBatteryWarnMessage = preferences.getBool(SHOW_BAT_WARN_MESSAGE,true);
-    buzzerLevel = preferences.getUChar(BUZZER_LEVEL,255);
+    buzzerLevel = preferences.getUChar(BUZZER_LEVEL,128);
     touchSound = preferences.getBool(TOUCH_SOUND,true);
     frameSound = preferences.getBool(FRAME_SOUND,true);
     countDownSound = preferences.getBool(COUNTDOWN_SOUND,true);
     countDownLeds = preferences.getBool(COUNTDOWN_LEDS,true);
     reloadCountDown = preferences.getBool(RELOAD_COUNTDOWN,false);
+    countdownDuration = preferences.getUChar(COUNTDOWN_DURATION,FRAME_COUNTDOWN_DEFAULT_DURATION);
     allowFrameSimu = preferences.getBool(ALLOW_FRAME_SIMU,false);
 }
 
@@ -175,6 +177,19 @@ void Settings::setReloadCountDown(bool active)
     if(reloadCountDown == active) return;
     reloadCountDown = active;
     preferences.putBool(RELOAD_COUNTDOWN,active);
+    dirty = true;
+}
+
+uint8_t Settings::getCountdownDuration()
+{
+    return countdownDuration;
+}
+
+void Settings::setCountdownDuration(uint8_t duration)
+{
+    if(countdownDuration == duration) return;
+    countdownDuration = duration;
+    preferences.putUChar(COUNTDOWN_DURATION,duration);
     dirty = true;
 }
 

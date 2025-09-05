@@ -4,11 +4,9 @@
 #include <Arduino.h>
 #include <i2c_bus.h>
 #include <pcf8563.h>
+#include <Settings.h>
 
 #define RTC_MAX_COUNTDOWN   999
-
-#define RTC_FRAME_COUNTDOWN 50
-
 
 class Rtc
 {
@@ -49,7 +47,7 @@ class Rtc
         bool isLastCount();
         bool isAlmostLastCount();
         void setCountDown(int value);
-        void startCountDown() { setCountDown(RTC_FRAME_COUNTDOWN); };
+        void startCountDown() { setCountDown(Settings::getSettings()->getCountdownDuration()); };
         void countDown();
 
     private :

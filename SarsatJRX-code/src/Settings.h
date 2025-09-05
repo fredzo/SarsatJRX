@@ -50,6 +50,9 @@ class Settings
         bool getReloadCountDown();
         void setReloadCountDown(bool active);
 
+        uint8_t getCountdownDuration();
+        void setCountdownDuration(uint8_t duration);
+
         bool getAllowFrameSimu();
         void setAllowFrameSimu(bool active);
 
@@ -78,6 +81,7 @@ class Settings
         bool countDownSound;
         bool countDownLeds;
         bool reloadCountDown;
+        uint8_t countdownDuration;
         bool allowFrameSimu;
 
         static Settings *settingsInstance;
