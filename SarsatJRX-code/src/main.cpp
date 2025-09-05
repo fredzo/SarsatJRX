@@ -124,6 +124,14 @@ void frameReceivedLedBlink()
   countDownModeOn = false;
 }
 
+void invalidFrameReceivedLedBlink()
+{ // Switch led on and record time
+  digitalWrite(ERROR_PIN, HIGH);
+  ledFrameErrorOn = true;
+  ledsStartBlinkTime = millis();
+  countDownModeOn = false;
+}
+
 // Store last displayed power value
 unsigned long lastPowerDisplayTime = 0;
 
@@ -415,7 +423,7 @@ void loop()
     Serial.println("");
   #endif    
 
-    if (((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
+    if(((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
     { // Blink leds
       frameReceivedLedBlink();
       // Then read beacon and update beacon display
@@ -444,8 +452,7 @@ void loop()
     else
     { // Frame preamble detected, but wrong start bytes
       // Error led
-      digitalWrite(ERROR_PIN, HIGH);
-      ledFrameErrorOn = true;
+      invalidFrameReceivedLedBlink();
       Serial.println("Invalid frame !");
       if(settings->getFrameSound())
       {
