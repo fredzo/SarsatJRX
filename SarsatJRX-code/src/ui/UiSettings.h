@@ -33,6 +33,8 @@ void uiSettingsUpdateSd();
 
 void uiSettingsUpdateDisplay();
 
+void uiSettingsUpdateSettings();
+
 void uiSettingsUpdateAudio();
 
 void uiSettingsUpdateFreq(char* freqBuffer, bool scanOn);
