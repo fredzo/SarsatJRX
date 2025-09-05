@@ -296,6 +296,7 @@ void createHeader(lv_obj_t * win)
     lv_label_set_text(discriIndicator,"");
     lv_obj_set_style_pad_left(discriIndicator,4,0);
     lv_obj_set_size(discriIndicator, HEADER_DISCRI_WIDTH, HEADER_DISCRI_HEIGHT);
+    lv_obj_set_style_text_font(discriIndicator,font_symbols,0);
 
     // Logo
     lv_obj_t * logo = lv_img_create(header);
@@ -669,7 +670,7 @@ void uiUpdateDiscritatus()
 {
     if(Hardware::getHardware()->getAudio()->isDiscriInput())
     {
-        lv_label_set_text(discriIndicator,LV_SYMBOL_SHUFFLE);
+        lv_label_set_text(discriIndicator,SYMBOL_DISCRI);
         // Hide audio metter in footer when disci jack is plugged
         lv_obj_add_flag(meter, LV_OBJ_FLAG_HIDDEN);
     }
