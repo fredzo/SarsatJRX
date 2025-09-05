@@ -15,6 +15,7 @@
 #define RELOAD_COUNTDOWN        "RCD"
 #define COUNTDOWN_DURATION      "CDD"
 #define ALLOW_FRAME_SIMU        "AFS"
+#define FILTER_ORBITO           "FO"
 
 Settings *Settings::settingsInstance = nullptr;
 
@@ -35,6 +36,7 @@ void Settings::init()
     reloadCountDown = preferences.getBool(RELOAD_COUNTDOWN,false);
     countdownDuration = preferences.getUChar(COUNTDOWN_DURATION,FRAME_COUNTDOWN_DEFAULT_DURATION);
     allowFrameSimu = preferences.getBool(ALLOW_FRAME_SIMU,false);
+    filterOrbito = preferences.getBool(FILTER_ORBITO,false);
 }
 
 bool Settings::getWifiState()
@@ -205,6 +207,20 @@ void Settings::setAllowFrameSimu(bool active)
     preferences.putBool(ALLOW_FRAME_SIMU,active);
     dirty = true;
 }
+
+bool Settings::getFilterOrbito()
+{
+    return filterOrbito;
+}
+
+void Settings::setFilterOrbito(bool active)
+{
+    if(filterOrbito == active) return;
+    filterOrbito = active;
+    preferences.putBool(FILTER_ORBITO,active);
+    dirty = true;
+}
+
 
 void Settings::save()
 {

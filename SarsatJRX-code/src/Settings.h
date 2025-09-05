@@ -56,6 +56,9 @@ class Settings
         bool getAllowFrameSimu();
         void setAllowFrameSimu(bool active);
 
+        bool getFilterOrbito();
+        void setFilterOrbito(bool active);
+
         void save();
 
     private :
@@ -83,6 +86,7 @@ class Settings
         bool reloadCountDown;
         uint8_t countdownDuration;
         bool allowFrameSimu;
+        bool filterOrbito;
 
         static Settings *settingsInstance;
 };
