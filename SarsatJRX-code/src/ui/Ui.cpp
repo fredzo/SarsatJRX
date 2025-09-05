@@ -52,6 +52,16 @@
 #define SYMBOL_WIFI_CONNECTED       "\xEF\x87\xAB"
 #define SYMBOL_WIFI_AP              "\xEE\x8E\xB2"
 #define SYMBOL_WIFI_AP_CONNECTED    "\xEE\x94\x91"
+#define SYMBOL_DISCRI               "\xEF\xA0\xBE"
+#define SYMBOL_SETTINGS             "\xEF\x80\x93"
+#define SYMBOL_AUDIO                "\xEF\x80\xA8"
+#define SYMBOL_DISPLAY              "\xEE\x85\xA3"
+#define SYMBOL_NETWORK              "\xEF\x9B\xBF"
+#define SYMBOL_BLUETOOTH            "\xEF\x8A\x93"
+#define SYMBOL_SD                   "\xEF\x9F\x82"
+#define SYMBOL_SLIDERS              "\xEF\x87\x9E"
+#define SYMBOL_WRENCH               "\xEF\x82\xAD"
+#define SYMBOL_BELL                 "\xEF\x83\xB3"
 
 // Externs
 extern void readNextSampleFrame();
