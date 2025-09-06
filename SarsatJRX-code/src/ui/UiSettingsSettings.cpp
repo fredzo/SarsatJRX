@@ -12,11 +12,16 @@
 #define COUNTDOWN_DURATION_SEC      "sec."
 #define COUNTDOWN_DURATION_SEC_W    35
 #define FRAME_SOUND_LABEL           "Frame received sound:"
-#define COUNTDOWN_SOUND_LABEL       "Countdown sound:"
-#define COUNTDOWN_LED_LABEL         "Led:"
-#define COUNTDOWN_LED_LABEL_WIDTH   40
+#define COUNTDOWN_LABEL             "Countdown:"
+#define COUNTDOWN_LABEL_WIDTH       120
+#define COUNTDOWN_SOUND_LABEL_WIDTH 80
+#define COUNTDOWN_SOUND_LABEL       "- Sound:"
+#define COUNTDOWN_LED_LABEL         "- Led:"
+#define COUNTDOWN_LED_LABEL_WIDTH   70
 #define COUNTDOWN_RELOAD_LABEL      "Countdown auto reload:"
-#define FILTER_ORBITO_LABEL         "Filter orbito.:"
+#define FILTER_LABEL                "Filter:"
+#define FILTER_ORBITO_LABEL         "- Orbito.:"
+#define FILTER_INVALID_LABEL        "- Invalid:"
 
 // Audio
 static lv_obj_t * settingsTab;
@@ -31,14 +36,18 @@ static lv_obj_t * countdownSecLabel;
 
 static lv_obj_t * frameSoundLabel;
 static lv_obj_t * frameSoundToggle;
+static lv_obj_t * countdownLabel;
 static lv_obj_t * countdownSoundLabel;
 static lv_obj_t * countdownSoundToggle;
 static lv_obj_t * countdownLedLabel;
 static lv_obj_t * countdownLedToggle;
 static lv_obj_t * countdownReloadLabel;
 static lv_obj_t * countdownReloadToggle;
+static lv_obj_t * filterLabel;
 static lv_obj_t * filterOrbitoLabel;
 static lv_obj_t * filterOrbitoToggle;
+static lv_obj_t * filterInvalidLabel;
+static lv_obj_t * filterInvalidToggle;
 
 static void updateCountdownDurationSpinboxValue()
 {
@@ -77,6 +86,12 @@ static void toggleFilterOrbitoCb(lv_event_t * e)
 {
     bool state = lv_obj_has_state(filterOrbitoToggle, LV_STATE_CHECKED);
     Settings::getSettings()->setFilterOrbito(state);
+}
+
+static void toggleFilterInvalidCb(lv_event_t * e)
+{
+    bool state = lv_obj_has_state(filterInvalidToggle, LV_STATE_CHECKED);
+    Settings::getSettings()->setFilterInvalid(state);
 }
 
 static void toggleFrameSoundCb(lv_event_t * e)
@@ -150,19 +165,24 @@ void createSettingsTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight
     currentY+=SPINBOX_LINE_HEIGHT+2*SPACER;
 
     // Countdown sound
-    countdownSoundLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_SOUND_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    countdownLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_LABEL,0,currentY,COUNTDOWN_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    countdownSoundLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_SOUND_LABEL,COUNTDOWN_LABEL_WIDTH,currentY,COUNTDOWN_SOUND_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
     countdownSoundToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownSoundCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     // Countdown led
     countdownLedLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_LED_LABEL,TOGGLE_X+TOGGLE_WIDTH+20,currentY,COUNTDOWN_LED_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
-    countdownLedToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownLedCb,TOGGLE_X+TOGGLE_WIDTH+COUNTDOWN_LED_LABEL_WIDTH+40,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    countdownLedToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownLedCb,TOGGLE_X+TOGGLE_WIDTH+COUNTDOWN_LED_LABEL_WIDTH+30,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
     // Countdown reload
     countdownReloadLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_RELOAD_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
     countdownReloadToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownReloadCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
     // Filter orbito
-    filterOrbitoLabel  = uiCreateLabel (tab,&style_section_title,FILTER_ORBITO_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    filterLabel  = uiCreateLabel (tab,&style_section_title,FILTER_LABEL,0,currentY,COUNTDOWN_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    filterOrbitoLabel  = uiCreateLabel (tab,&style_section_title,FILTER_ORBITO_LABEL,COUNTDOWN_LABEL_WIDTH,currentY,COUNTDOWN_SOUND_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
     filterOrbitoToggle = uiCreateToggle(tab,&style_section_text,toggleFilterOrbitoCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    // Filter invalid
+    filterInvalidLabel  = uiCreateLabel (tab,&style_section_title,FILTER_INVALID_LABEL,TOGGLE_X+TOGGLE_WIDTH+20,currentY,COUNTDOWN_LED_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    filterInvalidToggle = uiCreateToggle(tab,&style_section_text,toggleFilterInvalidCb,TOGGLE_X+TOGGLE_WIDTH+COUNTDOWN_LED_LABEL_WIDTH+30,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
 }
 
@@ -174,6 +194,7 @@ void uiSettingsUpdateSettings()
     countdownDurationSpinboxValue = settings->getCountdownDuration();
     updateCountdownDurationSpinboxValue();
     settings->getFilterOrbito() ? lv_obj_add_state(filterOrbitoToggle, LV_STATE_CHECKED) : lv_obj_clear_state(filterOrbitoToggle, LV_STATE_CHECKED);
+    settings->getFilterInvalid() ? lv_obj_add_state(filterInvalidToggle, LV_STATE_CHECKED) : lv_obj_clear_state(filterInvalidToggle, LV_STATE_CHECKED);
     settings->getFrameSound() ? lv_obj_add_state(frameSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(frameSoundToggle, LV_STATE_CHECKED);
     settings->getCountDownSound() ? lv_obj_add_state(countdownSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(countdownSoundToggle, LV_STATE_CHECKED);
     settings->getCountDownLeds() ? lv_obj_add_state(countdownLedToggle, LV_STATE_CHECKED) : lv_obj_clear_state(countdownLedToggle, LV_STATE_CHECKED);

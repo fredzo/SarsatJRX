@@ -16,6 +16,7 @@
 #define COUNTDOWN_DURATION      "CDD"
 #define ALLOW_FRAME_SIMU        "AFS"
 #define FILTER_ORBITO           "FO"
+#define FILTER_INVALID          "FI"
 
 Settings *Settings::settingsInstance = nullptr;
 
@@ -28,7 +29,7 @@ void Settings::init()
     screenOffOnCharge = preferences.getBool(SCREEN_OFF_ON_CHRAGE,true);
     showBatteryPercentage = preferences.getBool(SHOW_BAT_PERCENTAGE,true);
     showBatteryWarnMessage = preferences.getBool(SHOW_BAT_WARN_MESSAGE,true);
-    buzzerLevel = preferences.getUChar(BUZZER_LEVEL,128);
+    buzzerLevel = preferences.getUChar(BUZZER_LEVEL,120);
     touchSound = preferences.getBool(TOUCH_SOUND,true);
     frameSound = preferences.getBool(FRAME_SOUND,true);
     countDownSound = preferences.getBool(COUNTDOWN_SOUND,true);
@@ -37,6 +38,7 @@ void Settings::init()
     countdownDuration = preferences.getUChar(COUNTDOWN_DURATION,FRAME_COUNTDOWN_DEFAULT_DURATION);
     allowFrameSimu = preferences.getBool(ALLOW_FRAME_SIMU,false);
     filterOrbito = preferences.getBool(FILTER_ORBITO,false);
+    filterInvalid = preferences.getBool(FILTER_INVALID,true);
 }
 
 bool Settings::getWifiState()
@@ -218,6 +220,19 @@ void Settings::setFilterOrbito(bool active)
     if(filterOrbito == active) return;
     filterOrbito = active;
     preferences.putBool(FILTER_ORBITO,active);
+    dirty = true;
+}
+
+bool Settings::getFilterInvalid()
+{
+    return filterInvalid;
+}
+
+void Settings::setFilterInvalid(bool active)
+{
+    if(filterInvalid == active) return;
+    filterInvalid = active;
+    preferences.putBool(FILTER_INVALID,active);
     dirty = true;
 }
 

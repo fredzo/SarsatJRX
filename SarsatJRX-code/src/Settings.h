@@ -59,6 +59,9 @@ class Settings
         bool getFilterOrbito();
         void setFilterOrbito(bool active);
 
+        bool getFilterInvalid();
+        void setFilterInvalid(bool active);
+
         void save();
 
     private :
@@ -87,6 +90,7 @@ class Settings
         uint8_t countdownDuration;
         bool allowFrameSimu;
         bool filterOrbito;
+        bool filterInvalid;
 
         static Settings *settingsInstance;
 };

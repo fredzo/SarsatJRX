@@ -27,7 +27,9 @@
 #define SYMBOL_SLIDERS              "\xEF\x87\x9E"
 #define SYMBOL_WRENCH               "\xEF\x82\xAD"
 #define SYMBOL_BELL                 "\xEF\x83\xB3"
-
+#define SYMBOL_TOWER_CELL           "\xEE\x96\x85"
+#define SYMBOL_RADIO                "\xEF\x94\x99"
+ 
 extern const lv_font_t casscadia_mono;
 extern const lv_font_t casscadia_mono_16;
 extern const lv_font_t additional_symbols;

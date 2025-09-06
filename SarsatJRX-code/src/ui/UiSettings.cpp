@@ -31,7 +31,7 @@ void uiSettingsCreateView(lv_obj_t * cont)
     lv_obj_set_style_text_font(tab_btns, &additional_symbols, LV_PART_ITEMS | LV_STATE_DEFAULT);
 
     /*Add 6 tabs */
-    lv_obj_t * tab1 = lv_tabview_add_tab(settingsTabview, SYMBOL_SETTINGS);
+    lv_obj_t * tab1 = lv_tabview_add_tab(settingsTabview, SYMBOL_RADIO);
     lv_obj_t * tab2 = lv_tabview_add_tab(settingsTabview, SYMBOL_AUDIO);
     lv_obj_t * tab3 = lv_tabview_add_tab(settingsTabview, SYMBOL_DISPLAY);
     lv_obj_t * tab4 = lv_tabview_add_tab(settingsTabview, SYMBOL_WIFI_CONNECTED);

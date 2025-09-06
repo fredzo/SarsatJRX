@@ -10,11 +10,8 @@
 #define LABEL_WIDTH                 200
 #define BUZZER_LEVEL_LABEL          "Buzzer level:"
 #define TOUCH_SOUND_LABEL           "Touch sound:"
-#define FRAME_SOUND_LABEL           "Frame received sound:"
-#define COUNTDOWN_SOUND_LABEL       "Countdown sound:"
-#define COUNTDOWN_LED_LABEL         "Led:"
-#define COUNTDOWN_LED_LABEL_WIDTH   40
-#define COUNTDOWN_RELOAD_LABEL      "Countdown auto reload:"
+//#define FRAME_SOUND_LABEL           "Frame received sound:"
+//#define COUNTDOWN_SOUND_LABEL       "Countdown sound:"
 
 // Audio
 static lv_obj_t * audioTab;
@@ -28,14 +25,10 @@ static lv_obj_t * buzzerLevelSpinboxDownButton;
 
 static lv_obj_t * touchSoundLabel;
 static lv_obj_t * touchSoundToggle;
-static lv_obj_t * frameSoundLabel;
-static lv_obj_t * frameSoundToggle;
-static lv_obj_t * countDownSoundLabel;
-static lv_obj_t * countDownSoundToggle;
-static lv_obj_t * countDownLedLabel;
-static lv_obj_t * countDownLedToggle;
-static lv_obj_t * countDownReloadLabel;
-static lv_obj_t * countDownReloadToggle;
+//static lv_obj_t * frameSoundLabel;
+//static lv_obj_t * frameSoundToggle;
+//static lv_obj_t * countDownSoundLabel;
+//static lv_obj_t * countDownSoundToggle;
 
 static void updateBuzzerLevelSpinboxValue()
 {
@@ -82,6 +75,7 @@ static void toggleTouchSoundCb(lv_event_t * e)
     Settings::getSettings()->setTouchSound(state);
 }
 
+/*
 static void toggleFrameSoundCb(lv_event_t * e)
 {
     bool state = lv_obj_has_state(frameSoundToggle, LV_STATE_CHECKED);
@@ -92,19 +86,7 @@ static void toggleCountDownSoundCb(lv_event_t * e)
 {
     bool state = lv_obj_has_state(countDownSoundToggle, LV_STATE_CHECKED);
     Settings::getSettings()->setCountDownSound(state);
-}
-
-static void toggleCountDownLedCb(lv_event_t * e)
-{
-    bool state = lv_obj_has_state(countDownLedToggle, LV_STATE_CHECKED);
-    Settings::getSettings()->setCountDownLeds(state);
-}
-
-static void toggleCountDownReloadCb(lv_event_t * e)
-{
-    bool state = lv_obj_has_state(countDownReloadToggle, LV_STATE_CHECKED);
-    Settings::getSettings()->setReloadCountDown(state);
-}
+}*/
 
 void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
 {   // Keep track on tab, tabWith and tabHeugth for keyboard creation
@@ -149,20 +131,12 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     touchSoundToggle = uiCreateToggle(tab,&style_section_text,toggleTouchSoundCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
     // Frame sound
-    frameSoundLabel  = uiCreateLabel (tab,&style_section_title,FRAME_SOUND_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
+    /*frameSoundLabel  = uiCreateLabel (tab,&style_section_title,FRAME_SOUND_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
     frameSoundToggle = uiCreateToggle(tab,&style_section_text,toggleFrameSoundCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
     // Countdown sound
     countDownSoundLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_SOUND_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
-    countDownSoundToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownSoundCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    // Countdown led
-    countDownLedLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_LED_LABEL,TOGGLE_X+TOGGLE_WIDTH+20,currentY,COUNTDOWN_LED_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
-    countDownLedToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownLedCb,TOGGLE_X+TOGGLE_WIDTH+COUNTDOWN_LED_LABEL_WIDTH+40,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
-    // Countdown reload
-    countDownReloadLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_RELOAD_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
-    countDownReloadToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownReloadCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
+    countDownSoundToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownSoundCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);*/
 }
 
 
@@ -173,10 +147,8 @@ void uiSettingsUpdateAudio()
     buzzerLevelSpinboxValue = settings->getBuzzerLevel();
     updateBuzzerLevelSpinboxValue();
     settings->getTouchSound() ? lv_obj_add_state(touchSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(touchSoundToggle, LV_STATE_CHECKED);
-    settings->getFrameSound() ? lv_obj_add_state(frameSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(frameSoundToggle, LV_STATE_CHECKED);
-    settings->getCountDownSound() ? lv_obj_add_state(countDownSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(countDownSoundToggle, LV_STATE_CHECKED);
-    settings->getCountDownLeds() ? lv_obj_add_state(countDownLedToggle, LV_STATE_CHECKED) : lv_obj_clear_state(countDownLedToggle, LV_STATE_CHECKED);
-    settings->getReloadCountDown() ? lv_obj_add_state(countDownReloadToggle, LV_STATE_CHECKED) : lv_obj_clear_state(countDownReloadToggle, LV_STATE_CHECKED);
+    //settings->getFrameSound() ? lv_obj_add_state(frameSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(frameSoundToggle, LV_STATE_CHECKED);
+    //settings->getCountDownSound() ? lv_obj_add_state(countDownSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(countDownSoundToggle, LV_STATE_CHECKED);
 }
 
 
