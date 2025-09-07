@@ -6,9 +6,9 @@
 #define MAX_BATTERY_VOLTAGE_UP      4.2
 #define POWER_SAMPLE_PERIOD         200  // 200ms
 #define POWER_UPDATE_PERIOD         1000 // 1s
-#define CHARGE_SAMPLE_PERIOD        25   // 25ms
-#define CHARGE_SAMPLE_COUNT         30   // Wait for 30 consecutive samples with same value to validate charge state
-#define CHARGE_BATTERY_OFF_COUNT    15   // Wait for 15 state changes to determine if battery is off
+#define CHARGE_SAMPLE_PERIOD        1    // 1 ms: depending on charger chip mode, fickering is charge pin going low for around 1ms every 10 to 50 ms 
+#define CHARGE_SAMPLE_COUNT         100  // Wait for 100 consecutive samples with same value to validate charge state
+#define CHARGE_BATTERY_OFF_COUNT    10   // Wait for 10 state changes to determine if battery is off
 
 // Static members
 Power *Power::powerInstance = nullptr;
