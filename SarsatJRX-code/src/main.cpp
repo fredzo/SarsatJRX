@@ -455,8 +455,7 @@ void loop()
       bool error = (filter == BEACON_FILTER_INVALID) || !(beacons[beaconsReadIndex]->isFrameValid());
       if(error)
       { // Error led
-        digitalWrite(ERROR_PIN, HIGH);
-        ledFrameErrorOn = true;
+        invalidFrameReceivedLedBlink();
         Serial.println("Frame error !");
       }
       if(filter == BEACON_FILTER_NONE)
@@ -475,15 +474,17 @@ void loop()
           }
         }
       }
-      else if(settings->getFrameSound())
-      { // Frame has been filterd, but we want a sound notification
+      else
+      { // Frame has been filterd
         if(filter == BEACON_FILTER_INVALID)
         {
-          hardware->getSoundManager()->playFrameSound(true);
+          if(settings->getFrameSound()) hardware->getSoundManager()->playFrameSound(true);
         }
         else
         {
-          hardware->getSoundManager()->playFilteredFrameSound();
+          if(settings->getFrameSound()) hardware->getSoundManager()->playFilteredFrameSound();
+          // Also blink red led for filtered valid frames
+          invalidFrameReceivedLedBlink();
         }
       }
     }

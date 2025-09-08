@@ -15,6 +15,7 @@ void SoundManager::init()
   frameOkSound = MelodyFactory.loadRtttlString(frameOkSoundString);
   frameKoSound = MelodyFactory.loadRtttlString(frameKoSoundString);
   frameInvalidSound = MelodyFactory.loadRtttlString(frameInvalidSoundString);
+  frameFilteredSound = MelodyFactory.loadRtttlString(frameFilteredSoundString);
   countDownLowSound  = MelodyFactory.loadRtttlString(countDownLowString);
   countDownHighSound = MelodyFactory.loadRtttlString(countDownHighString);
   touchSound = MelodyFactory.loadRtttlString(touchSoundString);
