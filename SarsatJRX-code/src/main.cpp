@@ -34,37 +34,15 @@ bool beaconsFull = false;
 Hardware* hardware = nullptr; 
 Display *display = nullptr;
 
-void readBeacon()
+typedef enum { BEACON_FILTER_NONE, BEACON_FILTER_INVALID, BEACON_FILTER_ORBITO } BeaconFilter;
+
+BeaconFilter readBeacon()
 {
+  BeaconFilter filter = BEACON_FILTER_NONE;
 #ifdef DEBUG_RAM
   Serial.println(freeRam());
 #endif
-  if(beaconsFull)
-  {
-    beaconsWriteIndex++;
-  }
-  else
-  { // Move to the end of the list
-    beaconsWriteIndex = beaconsSize;
-    if(beaconsSize < BEACON_LIST_MAX_SIZE)
-    {
-      beaconsSize++;
-    }
-    else
-    {
-      beaconsFull = true;
-    }
-  }
-  if(beaconsWriteIndex >= BEACON_LIST_MAX_SIZE)
-  { // Circle back to zero
-    beaconsWriteIndex = 0;
-  }
-  // Delete previously stored beacon to prevent memory leak
-  if(beacons[beaconsWriteIndex]) 
-  {
-      delete beacons[beaconsWriteIndex];
-      beacons[beaconsWriteIndex] = nullptr;
-  }
+  // Start by reading beacon
   Beacon* beacon;
   if(isFrameFromDisk())
   {
@@ -74,14 +52,60 @@ void readBeacon()
   {
     beacon = new Beacon(getFrame());
   }
-  // Add beacon to the list
-  beacons[beaconsWriteIndex] = beacon;
-  // Move to last received
-  beaconsReadIndex = beaconsWriteIndex;
+  // See if we need to filter this beacon
+  Settings* settings = hardware->getSettings();
+  if((!beacon->isFrameValid())&&settings->getFilterInvalid())
+  {
+    filter = BEACON_FILTER_INVALID;
+  }
+  else if(beacon->isOrbito()&&settings->getFilterOrbito())
+  {
+    filter = BEACON_FILTER_ORBITO;
+  }
+
+  if(filter == BEACON_FILTER_NONE)
+  { // No filtering => store the beacon in list
+    if(beaconsFull)
+    {
+      beaconsWriteIndex++;
+    }
+    else
+    { // Move to the end of the list
+      beaconsWriteIndex = beaconsSize;
+      if(beaconsSize < BEACON_LIST_MAX_SIZE)
+      {
+        beaconsSize++;
+      }
+      else
+      {
+        beaconsFull = true;
+      }
+    }
+    if(beaconsWriteIndex >= BEACON_LIST_MAX_SIZE)
+    { // Circle back to zero
+      beaconsWriteIndex = 0;
+    }
+    // Delete previously stored beacon to prevent memory leak
+    if(beacons[beaconsWriteIndex]) 
+    {
+        delete beacons[beaconsWriteIndex];
+        beacons[beaconsWriteIndex] = nullptr;
+    }
+    // Add beacon to the list
+    beacons[beaconsWriteIndex] = beacon;
+    // Move to last received
+    beaconsReadIndex = beaconsWriteIndex;
+  }
+  else
+  { // Filter beacon => delete it to free memory
+    delete beacon;
+    beacon = nullptr;
+  }
 
 #ifdef DEBUG_RAM
   Serial.println(freeRam());
 #endif
+  return filter;
 }
 
 // Header LEDS
@@ -427,25 +451,39 @@ void loop()
     { // Blink leds
       frameReceivedLedBlink();
       // Then read beacon and update beacon display
-      readBeacon();
-      bool error = !(beacons[beaconsReadIndex]->isFrameValid());
+      BeaconFilter filter = readBeacon();
+      bool error = (filter == BEACON_FILTER_INVALID) || !(beacons[beaconsReadIndex]->isFrameValid());
       if(error)
       { // Error led
         digitalWrite(ERROR_PIN, HIGH);
         ledFrameErrorOn = true;
         Serial.println("Frame error !");
       }
-      if(settings->getFrameSound())
-      {
-        hardware->getSoundManager()->playFrameSound(error);
+      if(filter == BEACON_FILTER_NONE)
+      { // No filtering => play sound and update display
+        if(settings->getFrameSound())
+        {
+          hardware->getSoundManager()->playFrameSound(error);
+        }
+        updateDisplay();
+        if(!isFrameFromDisk())
+        { // Finally save beacon to sd card
+          bool success = hardware->getFilesystems()->saveBeacon(beacons[beaconsReadIndex]);
+          if(!success)
+          { // Update SD Card indicator
+            display->updateSdCard();
+          }
+        }
       }
-      updateDisplay();
-      if(!isFrameFromDisk())
-      { // Finally save beacon to sd card
-        bool success = hardware->getFilesystems()->saveBeacon(beacons[beaconsReadIndex]);
-        if(!success)
-        { // Update SD Card indicator
-          display->updateSdCard();
+      else if(settings->getFrameSound())
+      { // Frame has been filterd, but we want a sound notification
+        if(filter == BEACON_FILTER_INVALID)
+        {
+          hardware->getSoundManager()->playFrameSound(true);
+        }
+        else
+        {
+          hardware->getSoundManager()->playFilteredFrameSound();
         }
       }
     }

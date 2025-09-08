@@ -811,7 +811,7 @@ void Beacon::parseFrame()
     bch1 = getBits(frame,86,106);
     computedBch1 = computeBCH1(frame);
     // Special handing of Orbitography Protocol that has no BCH2 error correction code
-    hasBch2 = !(protocol == &Protocol::USER_ORB);
+    hasBch2 = !isOrbito();
     if(hasBch2)
     {
         bch2 = getBits(frame,133,144);
@@ -833,4 +833,10 @@ bool Beacon::isFrameValid()
 {
     return isBch1Valid() && ((!hasBch2)||isBch2Valid());
 }
+
+bool Beacon::isOrbito()
+{
+    return (protocol == &Protocol::USER_ORB);    
+}
+
 

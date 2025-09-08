@@ -26,6 +26,8 @@ class SoundManager
 
         void playInvalidFrameSound();
 
+        void playFilteredFrameSound();
+
         void playCountDownLowSound();
 
         void playCountDownHighSound();
@@ -42,6 +44,7 @@ class SoundManager
         Melody frameOkSound;
         Melody frameKoSound;
         Melody frameInvalidSound;
+        Melody frameFilteredSound;
         Melody countDownLowSound;
         Melody countDownHighSound;
         Melody touchSound;
