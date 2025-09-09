@@ -3,10 +3,20 @@
 
 #include <Arduino.h>
 #include <Preferences.h>
+#include <vector>
 
 class Settings
 {
     public :
+        class Setting
+        {
+            public :
+            String key;
+            String configKey;
+            String desciption;
+            Setting(const String keyParam, const String configKeyParam, const String desciptionParam) : key(keyParam), configKey(configKeyParam), desciption(desciptionParam) {};
+        };
+
         static Settings *getSettings()
         {
             if (settingsInstance == nullptr) {
@@ -64,6 +74,8 @@ class Settings
 
         void save();
 
+        void saveToSd();
+
     private :
         Preferences preferences;
         bool dirty = false; // True when save is needed
@@ -75,6 +87,9 @@ class Settings
         ~Settings()
         {
         };
+
+        void saveToConfigLines(std::vector<String>& lines);
+        void updateConfigLine(std::vector<String>& lines, const Setting& setting, const String& value);
 
         bool wifiState;
         bool displayReverse;

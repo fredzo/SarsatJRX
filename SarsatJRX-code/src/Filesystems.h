@@ -5,6 +5,7 @@
 #include <FS.h>
 #include <Beacon.h>
 #include <SD.h>
+#include <vector>
 
 class Filesystems
 {
@@ -32,6 +33,9 @@ class Filesystems
         bool loadBeacon(const char* fileName, volatile byte* frameBuffer);
         bool deleteBeacon(const char* fileName);
         int deleteAllBeacons();
+        // Preferences load/save to sd card
+        bool loadConfigFile(std::vector<String>& lines);
+        bool saveConfigFile(const std::vector<String>& lines);
 
     private :
 

@@ -29,7 +29,7 @@ void Filesystems::initSdFs()
 {   // Start SD card
     if(!sdFilesystemMounted)
     {   // Since our hardware is what it is, we don't use default 4MHz frequency but a lower value
-        if(SD.begin(SD_CS,*sdHandler,2000000))
+        if(SD.begin(SD_CS,*sdHandler,1000000))
         {
             sdFilesystemMounted = true;
             // Create SarsatJRX folder if needed
@@ -206,6 +206,68 @@ File Filesystems::getLogDir()
         return File();
     }
 }
+
+bool Filesystems::loadConfigFile(std::vector<String>& lines)
+{
+    if(!sdFilesystemMounted) return false;
+    if(sdFileSystem->exists(SARSATJRX_CONFIG_FILENAME))
+    {
+        File configFile = sdFileSystem->open(SARSATJRX_CONFIG_FILENAME);
+        if(!configFile)
+        {
+            Serial.printf("Could not open config file '%s' (file does not exist)\n",SARSATJRX_CONFIG_FILENAME);
+            return false;
+        }
+        if(configFile.isDirectory())
+        {
+            Serial.printf("Could not open config file '%s' (it's an directory)\n",SARSATJRX_CONFIG_FILENAME);
+            return false;
+        }
+        while (configFile.available()) 
+        {
+            String line = configFile.readStringUntil('\n');
+            line.trim();
+            if(!line.isEmpty())
+            {
+                lines.push_back(line);
+                //Serial.printf("Read conf line:%s\n",line.c_str());
+            }
+        }
+        configFile.close();
+        return true;
+    }
+    else
+    {
+        Serial.printf("Could not open config file '%s' (file does not exist)\n",SARSATJRX_CONFIG_FILENAME);
+        return false;
+    }
+}
+
+bool Filesystems::saveConfigFile(const std::vector<String>& lines)
+{
+    if(!sdFilesystemMounted) return false;
+    File configFile = sdFileSystem->open(SARSATJRX_CONFIG_FILENAME, FILE_READ);
+    if(configFile)
+    {   // Remove previously existing file
+        sdFileSystem->remove(SARSATJRX_CONFIG_FILENAME);
+    }
+    // (Re)create the file
+    configFile = sdFileSystem->open(SARSATJRX_CONFIG_FILENAME, FILE_WRITE, true);
+    if(!configFile)
+    {
+        Serial.printf("Could not open config file '%s'\n",SARSATJRX_CONFIG_FILENAME);
+        return false;
+    }
+    configFile.seek(0);
+    for (auto line : lines) 
+    {   // Save lines
+        configFile.println(line);
+    }
+    configFile.close();
+    //Serial.println("Config file saved !");
+    return true;
+}
+
 
 FS *Filesystems::spiFileSystem = &SPIFFS;
 

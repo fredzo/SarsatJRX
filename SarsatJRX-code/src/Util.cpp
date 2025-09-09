@@ -173,6 +173,41 @@ uint8_t voltageToPercent(float voltage, float voltageMin, float voltageMax)
     return 0;
 }
 
+// String to data conversion helpers
+int stringToInt(String stringValue, int defaultVal) 
+{
+    return stringValue.toInt();
+}
+
+bool stringToBool(String stringValue) 
+{
+    stringValue.trim();
+    stringValue.toLowerCase();
+    if (stringValue == "true" || stringValue == "1") return true;
+    //if (stringValue == "false" || val == "0") return false;
+    return false;
+}
+
+uint8_t stringToUChar(String stringValue) 
+{
+    return (uint8_t) stringValue.toInt();
+}
+// Data to string conversion helpers
+String intToString(int value) 
+{
+    return String(value);
+}
+
+String boolToString(bool value) 
+{
+    return value ? "true" : "false";
+}
+
+String ucharToString(uint8_t value) 
+{
+    return String(value);
+}
+
 /* Baudot code matrix */
 char BAUDOT_CODE[64]   = {' ','5',' ','9',' ',' ',' ',' ',' ',' ','4',' ','8','0',' ',' ',
                           '3',' ',' ',' ',' ','6',' ','/','-','2',' ',' ','7','1',' ',' ',

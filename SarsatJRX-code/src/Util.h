@@ -48,6 +48,20 @@ Rtc::Date parseBeaconFileName(const char* fileName);
 
 uint8_t voltageToPercent(float voltage, float voltageMin, float voltageMax);
 
+// Helper methods for data to string and string to data conversion
+int stringToInt(String stringValue, int defaultVal);
+
+bool stringToBool(String stringValue);
+
+uint8_t stringToUChar(String stringValue);
+
+String intToString(int value);
+
+String boolToString(bool value);
+
+String ucharToString(uint8_t value);
+
+
 /* Baudot code matrix */
 extern char BAUDOT_CODE[64];
 

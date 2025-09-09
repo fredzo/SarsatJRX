@@ -28,6 +28,7 @@
 #define SARSATJRX_LOG_DIR_PATH_TEMPLATE "%s/%02d%02d%02d"
 #define LOG_FILE_EXTENSION              ".bcn"
 #define LOG_FILENAME_TEMPLATE           "%s/%02d%02d%02d-%02d%02d%02d.bcn"
+#define SARSATJRX_CONFIG_FILENAME       "/sarsat-jrx-conf.ini"
 
 // UI
 #define AUDIO_POWER_DISPLAY_PERIOD    5 // 5ms
