@@ -448,18 +448,18 @@ void loop()
   #endif    
 
     if(((frame[1] == 0xFE) && (frame[2] == 0xD0)) || ((frame[1] == 0xFE) && (frame[2] == 0x2F)))// 0XFE/0x2F for normal mode, 0xFE/0xD0  for autotest
-    { // Blink leds
+    { // Blink blue led
       frameReceivedLedBlink();
       // Then read beacon and update beacon display
       BeaconFilter filter = readBeacon();
-      bool error = (filter == BEACON_FILTER_INVALID) || !(beacons[beaconsReadIndex]->isFrameValid());
-      if(error)
-      { // Error led
-        invalidFrameReceivedLedBlink();
-        Serial.println("Frame error !");
-      }
       if(filter == BEACON_FILTER_NONE)
-      { // No filtering => play sound and update display
+      { // No filtering => play sound and update error led and display
+        bool error = !(beacons[beaconsReadIndex]->isFrameValid());
+        if(error)
+        { // Error led
+          invalidFrameReceivedLedBlink();
+          Serial.println("Frame error !");
+        }
         if(settings->getFrameSound())
         {
           hardware->getSoundManager()->playFrameSound(error);
@@ -483,9 +483,9 @@ void loop()
         else
         {
           if(settings->getFrameSound()) hardware->getSoundManager()->playFilteredFrameSound();
-          // Also blink red led for filtered valid frames
-          invalidFrameReceivedLedBlink();
         }
+        // Blink red led for filtered frames (valid or invalid)
+        invalidFrameReceivedLedBlink();
       }
     }
     else
