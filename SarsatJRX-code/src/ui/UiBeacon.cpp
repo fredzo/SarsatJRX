@@ -231,8 +231,8 @@ void uiBeaconCreateView(lv_obj_t * cont)
     /*Add 4 tabs */
     lv_obj_t * tab1 = lv_tabview_add_tab(beaconTabview, SYMBOL_LOCATION);
     lv_obj_t * tab2 = lv_tabview_add_tab(beaconTabview, SYMBOL_SYSTEM);
-    lv_obj_t * tab3 = lv_tabview_add_tab(beaconTabview, SYMBOL_MAG_GLASS_ARROW);
-    lv_obj_t * tab4 = lv_tabview_add_tab(beaconTabview, SYMBOL_DATA);
+    lv_obj_t * tab3 = lv_tabview_add_tab(beaconTabview, SYMBOL_EXTERNAL_LINK);
+    lv_obj_t * tab4 = lv_tabview_add_tab(beaconTabview, SYMBOL_MAG_GLASS);
     lv_obj_add_style(tab1, &style_pad_small, 0);
     lv_obj_add_style(tab2, &style_pad_small, 0);
     lv_obj_add_style(tab3, &style_pad_small, 0);
