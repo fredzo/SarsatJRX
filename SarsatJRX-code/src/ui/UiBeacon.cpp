@@ -466,12 +466,20 @@ void uiBeaconSetBeacon(Beacon* beacon)
     lv_label_set_text(dataDataLabel2,line2.c_str());
 
     // Set map QR data
-    beacon->location.formatFloatLocation(buffer,sizeof(buffer),MAPS_URL_TEMPLATE);
-    #ifdef SERIAL_OUT 
-    Serial.println(buffer); 
-    #endif
-    const char * data = BEACON_URL_TEMPALTE;
-    lv_qrcode_update(mapQr, buffer, strlen(buffer));
+    if(locationKnown)
+    {
+        beacon->location.formatFloatLocation(buffer,sizeof(buffer),MAPS_URL_TEMPLATE);
+        #ifdef SERIAL_OUT 
+        Serial.println(buffer); 
+        #endif
+        const char * data = BEACON_URL_TEMPALTE;
+        lv_qrcode_update(mapQr, buffer, strlen(buffer));
+        lv_obj_clear_flag(mapQr, LV_OBJ_FLAG_HIDDEN);
+    }
+    else
+    {
+        lv_obj_add_flag(mapQr, LV_OBJ_FLAG_HIDDEN);
+    }
     // Set beacon QR data
     lv_snprintf(buffer,sizeof(buffer),BEACON_URL_TEMPALTE, toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14).c_str());
     #ifdef SERIAL_OUT 
