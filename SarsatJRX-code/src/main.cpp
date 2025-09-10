@@ -411,9 +411,7 @@ void loop()
   // If frameParseState > 0, we are reading an frame, if more than 500ms elapsed (a frame should be 144x2.5ms = 360 ms max)
   bool frameTimeout = (isFrameStarted() && ((millis()-getFrameStartTime()) > 500 ));
   if (isFrameComplete() || frameTimeout)
-  { // Start countdown for next frame
-    rtc->startCountDown();    
-    // Get frame content
+  { // Get frame content
     volatile byte* frame = getFrame();
     // Debug purpose 
  #ifdef SERIAL_OUT 
@@ -453,7 +451,9 @@ void loop()
       // Then read beacon and update beacon display
       BeaconFilter filter = readBeacon();
       if(filter == BEACON_FILTER_NONE)
-      { // No filtering => play sound and update error led and display
+      { // Start countdown for next frame only if not filtered
+        rtc->startCountDown();            
+        // Play sound and update error led and display
         bool error = !(beacons[beaconsReadIndex]->isFrameValid());
         if(error)
         { // Error led
@@ -477,7 +477,12 @@ void loop()
       else
       { // Frame has been filterd
         if(filter == BEACON_FILTER_INVALID)
-        {
+        { // Restert countdown on invalid frames if we were close to 0
+          int currentCountDown = rtc->getCountDown();
+          if(abs(currentCountDown)<=1)
+          {
+            rtc->startCountDown();
+          }
           if(settings->getFrameSound()) hardware->getSoundManager()->playFrameSound(true);
         }
         else
@@ -490,6 +495,12 @@ void loop()
     }
     else
     { // Frame preamble detected, but wrong start bytes
+      // Restert countdown on invalid frames if we were close to 0
+      int currentCountDown = rtc->getCountDown();
+      if(abs(currentCountDown)<=1)
+      {
+        rtc->startCountDown();
+      }
       // Error led
       invalidFrameReceivedLedBlink();
       Serial.println("Invalid frame !");
