@@ -29,10 +29,19 @@
 #define SYMBOL_BELL                 "\xEF\x83\xB3"
 #define SYMBOL_TOWER_CELL           "\xEE\x96\x85"
 #define SYMBOL_RADIO                "\xEF\x94\x99"
+#define SYMBOL_LOCATION             "\xEF\x8F\x85"
+#define SYMBOL_MAP_LOCATION         "\xEF\x96\xA0"
+#define SYMBOL_DATA                 "\xEE\x9A\x9B"
+#define SYMBOL_QRCODE               "\xEF\x80\xA9"
+#define SYMBOL_BARCODE              "\xEF\x80\xAA"
+#define SYMBOL_MAG_GLASS            "\xEF\x80\x82"
+#define SYMBOL_MAG_GLASS_CHART      "\xEE\x94\xA2"
+#define SYMBOL_MAG_GLASS_ARROW      "\xEE\x94\xA1"
  
 extern const lv_font_t casscadia_mono;
 extern const lv_font_t casscadia_mono_16;
 extern const lv_font_t additional_symbols;
+extern const lv_font_t additional_symbols_medium;
 extern const lv_font_t lcd_44;
 
 extern lv_style_t style_text_mono;

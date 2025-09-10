@@ -226,12 +226,13 @@ void uiBeaconCreateView(lv_obj_t * cont)
     //lv_obj_set_style_bg_color(tab_btns, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
     //lv_obj_set_style_text_color(tab_btns, lv_palette_lighten(LV_PALETTE_GREY, 5), 0);
     lv_obj_set_style_border_side(tab_btns, LV_BORDER_SIDE_RIGHT, LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_text_font(tab_btns, &additional_symbols_medium, LV_PART_ITEMS | LV_STATE_DEFAULT);
 
     /*Add 4 tabs */
-    lv_obj_t * tab1 = lv_tabview_add_tab(beaconTabview, "Info");
-    lv_obj_t * tab2 = lv_tabview_add_tab(beaconTabview, "Map");
-    lv_obj_t * tab3 = lv_tabview_add_tab(beaconTabview, "Bcn.");
-    lv_obj_t * tab4 = lv_tabview_add_tab(beaconTabview, "Data");
+    lv_obj_t * tab1 = lv_tabview_add_tab(beaconTabview, SYMBOL_LOCATION);
+    lv_obj_t * tab2 = lv_tabview_add_tab(beaconTabview, SYMBOL_SYSTEM);
+    lv_obj_t * tab3 = lv_tabview_add_tab(beaconTabview, SYMBOL_MAG_GLASS_ARROW);
+    lv_obj_t * tab4 = lv_tabview_add_tab(beaconTabview, SYMBOL_DATA);
     lv_obj_add_style(tab1, &style_pad_small, 0);
     lv_obj_add_style(tab2, &style_pad_small, 0);
     lv_obj_add_style(tab3, &style_pad_small, 0);
@@ -254,8 +255,8 @@ void uiBeaconCreateView(lv_obj_t * cont)
 
     // Add content to the tabs
     int currentY = MAIN_BLOC_HEIGHT-4; // Remove padding
-    createInfoTab(tab1,currentY,tabWidth);
-    createMapTab(tab2,currentY,tabWidth);
+    createMapTab(tab1,currentY,tabWidth);
+    createInfoTab(tab2,currentY,tabWidth);
     createBeaconTab(tab3,currentY,tabWidth);
     createDataTab(tab4,currentY,tabWidth);
     lv_obj_clear_flag(lv_tabview_get_content(beaconTabview), LV_OBJ_FLAG_SCROLLABLE);

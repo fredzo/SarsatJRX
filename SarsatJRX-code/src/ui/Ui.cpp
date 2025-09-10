@@ -96,6 +96,7 @@ const lv_font_t * font_small = &lv_font_montserrat_12;
 const lv_font_t * font_mono_medium = &casscadia_mono_16;
 const lv_font_t * font_mono = &casscadia_mono;
 const lv_font_t * font_symbols = &additional_symbols;
+const lv_font_t * font_symbols_medium = &additional_symbols_medium;
 
 lv_obj_t * timeLabel;
 lv_obj_t * wifiIndicator;
