@@ -309,6 +309,11 @@ bool readBeaconFromFile(const char* fileName)
   }
 }
 
+void stopCountdownAutoReload()
+{ // Skip directly to -1 to prevent auto-reload
+  Rtc::getRtc()->setCountDown(-1);
+}
+
 void setup()
 { // Init beacon list
   for(int i=0; i<BEACON_LIST_MAX_SIZE; i++) beacons[i] = nullptr;

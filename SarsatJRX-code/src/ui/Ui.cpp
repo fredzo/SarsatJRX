@@ -41,8 +41,8 @@
 #define FOOTER_WAIT_LABEL           "Waiting for the wave..."
 #define FOOTER_FRAME_LABEL          "Frame received !"
 #define FOOTER_BUTTON_WIDTH         70
-#define FOOTER_SPINNER_SIZE         42
-#define FOOTER_METER_WIDTH          DISPLAY_WIDTH-2*FOOTER_BUTTON_WIDTH-FOOTER_SPINNER_SIZE-16
+#define FOOTER_SPINNER_SIZE         46
+#define FOOTER_METER_WIDTH          DISPLAY_WIDTH-2*FOOTER_BUTTON_WIDTH-FOOTER_SPINNER_SIZE-20
 #define FOOTER_METER_HEIGHT         10
 #define FOOTER_METTER_X             FOOTER_BUTTON_WIDTH+FOOTER_SPINNER_SIZE+8
 #define FOOTER_METTER_Y             FOOTER_HEIGHT-FOOTER_METER_HEIGHT-8
@@ -55,6 +55,7 @@ extern void nextFrame();
 extern void toggleScan();
 extern void blinkNotifLed();
 extern void blinkErrorLed();
+extern void stopCountdownAutoReload();
 
 /**********************
  *  VARIABLES
@@ -241,6 +242,17 @@ static void title_long_press_handler(lv_event_t * e)
     }
 }
 
+static void spinner_long_press_handler(lv_event_t * e)
+{
+    if(Settings::getSettings()->getReloadCountDown())
+    {   // Only if auto-reload is enabled
+        // Audio feedback for button press
+        SoundManager::getSoundManager()->playFilteredFrameSound();
+        // Stop countdown from auto reloading
+        stopCountdownAutoReload();
+    }
+}
+
 static void previous_handler(lv_event_t * e)
 {
     previousFrame();
@@ -386,14 +398,16 @@ void createFooter(lv_obj_t * win)
     lv_obj_set_size(spinner, FOOTER_SPINNER_SIZE, LV_PCT(100));
     lv_obj_set_style_arc_width(spinner,6,LV_PART_INDICATOR);
     lv_obj_set_style_arc_width(spinner,6,LV_PART_MAIN);
-    lv_obj_set_style_pad_top(spinner,4,0);
+    lv_obj_set_style_pad_top(spinner,0,0);
     lv_obj_set_style_pad_left(spinner,4,0);
     lv_obj_set_style_pad_right(spinner,4,0);
+    lv_obj_add_flag(spinner, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(spinner, spinner_long_press_handler, LV_EVENT_LONG_PRESSED, NULL);
     // Spinner label
     spinnerLabel = lv_label_create(spinner);
     lv_label_set_text(spinnerLabel, "");
     lv_obj_set_style_text_color(spinnerLabel, lv_color_white(), 0);
-    lv_obj_set_style_text_font(spinnerLabel, font_mono, 0);
+    lv_obj_set_style_text_font(spinnerLabel, font_mono_medium, 0);
     lv_obj_align(spinnerLabel, LV_ALIGN_CENTER, 0, 0);
 
     // Footer label
