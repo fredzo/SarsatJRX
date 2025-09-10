@@ -223,8 +223,8 @@ void Rtc::tickSecond()
 {   // Update countdown
     countDownValue--;
     if(countDownValue < -RTC_MAX_COUNTDOWN)
-    {
-        countDownValue = 0;
+    {   // -1 instead of 0 to prevent auto-relaod countdown
+        countDownValue = -1;
     }
     countDownChanged = true;
 }
