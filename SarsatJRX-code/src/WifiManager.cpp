@@ -147,7 +147,7 @@ void wifiManagerStart()
   // detect the WiFi connection status in this configuration.
   config.immediateStart = false;
   config.autoReset = false;
-  config.autoRise = true;
+  config.autoRise = false;
   config.autoSave = AC_SAVECREDENTIAL_NEVER; // We'll save crendentials in Preferences
   config.portalTimeout = 1;     // Don't block on AP mode
   config.beginTimeout = 3000;   // Only wait 3s at wifi begin not to block Sarsat JRX setartup
@@ -160,6 +160,7 @@ void wifiManagerStart()
   portal.config(config);
   WiFi.onEvent(onWifiEvent);
   Settings* settings = Settings::getSettings();
+  //Serial.printf("Starting wifi with ssid=%s and psk=%s\n",settings->getWifiSsid().c_str(),settings->getWifiPassPhrase().c_str());
   portal.begin(settings->getWifiSsid().c_str(),settings->getWifiPassPhrase().c_str(),config.beginTimeout);
 }
 

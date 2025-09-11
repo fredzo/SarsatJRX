@@ -32,7 +32,6 @@ void Settings::init()
     wifiState = preferences.getBool(WIFI_STATE.key.c_str(),false);
     wifiSsid = preferences.getString(WIFI_SSID.key.c_str(),"SarsatJRX");
     wifiPassPhrase = preferences.getString(WIFI_PASS_PHRASE.key.c_str(),"SarsatJRX");
-    wifiPassPhrase = preferences.getBool(WIFI_STATE.key.c_str(),false);
     displayReverse = preferences.getBool(DISPLAY_REVERSE.key.c_str(),false);
     screenOffOnCharge = preferences.getBool(SCREEN_OFF_ON_CHRAGE.key.c_str(),true);
     showBatteryPercentage = preferences.getBool(SHOW_BAT_PERCENTAGE.key.c_str(),true);
@@ -71,82 +70,84 @@ void Settings::init()
                         {
                             if(key.equals(WIFI_STATE.configKey))
                             {
-                                wifiState = stringToBool(value);
+                                setWifiState(stringToBool(value));
                             }
                             else if(key.equals(WIFI_SSID.configKey))
                             {
-                                wifiSsid = value;
+                                setWifiSsid(value);
                             }
                             else if(key.equals(WIFI_PASS_PHRASE.configKey))
                             {
-                                wifiPassPhrase = value;
+                                setWifiPassPhrase(value);
                             }
                             else if(key.equals(DISPLAY_REVERSE.configKey))
                             {
-                                displayReverse = stringToBool(value);
+                                setDisplayReverse(stringToBool(value));
                             }
                             else if(key.equals(SCREEN_OFF_ON_CHRAGE.configKey))
                             {
-                                screenOffOnCharge = stringToBool(value);
+                                setScreenOffOnCharge(stringToBool(value));
                             }
                             else if(key.equals(SHOW_BAT_PERCENTAGE.configKey))
                             {
-                                showBatteryPercentage = stringToBool(value);
+                                setShowBatteryPercentage(stringToBool(value));
                             }
                             else if(key.equals(SHOW_BAT_WARN_MESSAGE.configKey))
                             {
-                                showBatteryWarnMessage = stringToBool(value);
+                                setShowBatteryWarnMessage(stringToBool(value));
                             }
                             else if(key.equals(BUZZER_LEVEL.configKey))
                             {
-                                buzzerLevel = stringToUChar(value);
+                                setBuzzerLevel(stringToUChar(value));
                             }
                             else if(key.equals(TOUCH_SOUND.configKey))
                             {
-                                touchSound = stringToBool(value);
+                                setTouchSound(stringToBool(value));
                             }
                             else if(key.equals(FRAME_SOUND.configKey))
                             {
-                                frameSound = stringToBool(value);
+                                setFrameSound(stringToBool(value));
                             }
                             else if(key.equals(COUNTDOWN_SOUND.configKey))
                             {
-                                countDownSound = stringToBool(value);
+                                setCountDownSound(stringToBool(value));
                             }
                             else if(key.equals(COUNTDOWN_LEDS.configKey))
                             {
-                                countDownLeds = stringToBool(value);
+                                setCountDownLeds(stringToBool(value));
                             }
                             else if(key.equals(RELOAD_COUNTDOWN.configKey))
                             {
-                                reloadCountDown = stringToBool(value);
+                                setReloadCountDown(stringToBool(value));
                             }
                             else if(key.equals(COUNTDOWN_DURATION.configKey))
                             {
-                                countdownDuration = stringToUChar(value);
+                                setCountdownDuration(stringToUChar(value));
                             }
                             else if(key.equals(ALLOW_FRAME_SIMU.configKey))
                             {
-                                allowFrameSimu = stringToBool(value);
+                                setAllowFrameSimu(stringToBool(value));
                             }
                             else if(key.equals(FILTER_INVALID.configKey))
                             {
-                                filterInvalid = stringToBool(value);
+                                setFilterInvalid(stringToBool(value));
                             }
                             else if(key.equals(FILTER_ORBITO.configKey))
                             {
-                                filterOrbito = stringToBool(value);
+                                setFilterOrbito(stringToBool(value));
                             }
                         }
                     }
                 }
             }
         }
-        // Save updated content
+        // Save updated content to sd card
         saveToConfigLines(lines);
         filesystems->saveConfigFile(lines);
     }
-
+    // Save preferences after init
+    preferences.end();
+    preferences.begin(PREF_PREFIX, false);
 }
 
 void Settings::saveToConfigLines(std::vector<String>& lines)

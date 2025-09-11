@@ -158,6 +158,10 @@ static lv_anim_t widthAnim;
 static bool batteryBlinkAnimRunning = false;
 static bool batteryChargeAnimRunning = false;
 
+// For wifi indicator animations
+static lv_anim_t wifiOpacityAnim;
+static bool wifiAnimRunning = false;
+
 static void setOpacityCallback(void *object, int32_t value) 
 {
     lv_obj_set_style_opa((lv_obj_t *)object, value, LV_PART_MAIN);
@@ -220,6 +224,38 @@ void stopBatteryChargeAnim(int currentWidth)
     lv_anim_del(batteryBar, setWidthCallback);  // Stop animation
     lv_obj_set_width(batteryBar, currentWidth); // Reset width
     batteryChargeAnimRunning = false;
+}
+
+static void setTextOpacityCallback(void *object, int32_t value) 
+{
+    lv_obj_set_style_text_opa((lv_obj_t *)object, value, LV_PART_MAIN);
+}
+
+void startWifiBlinkAnim() 
+{
+    if (wifiAnimRunning) return;
+
+    lv_obj_set_style_text_opa(wifiIndicator, LV_OPA_30, LV_PART_MAIN); // Start with opacity
+
+    lv_anim_init(&wifiOpacityAnim);
+    lv_anim_set_var(&wifiOpacityAnim, wifiIndicator);
+    lv_anim_set_exec_cb(&wifiOpacityAnim, setTextOpacityCallback);
+    lv_anim_set_values(&wifiOpacityAnim, LV_OPA_30, LV_OPA_100);  // from 100% to 30%
+    lv_anim_set_time(&wifiOpacityAnim, 400);
+    lv_anim_set_repeat_delay(&wifiOpacityAnim, 600);
+    lv_anim_set_repeat_count(&wifiOpacityAnim,LV_ANIM_REPEAT_INFINITE);
+    lv_anim_start(&wifiOpacityAnim);
+
+    wifiAnimRunning = true;
+}
+
+void stopWifiBlinkAnim() 
+{
+    if (!wifiAnimRunning) return;
+
+    lv_anim_del(wifiIndicator, setTextOpacityCallback);  // Stop animation
+    lv_obj_set_style_text_opa(wifiIndicator, LV_OPA_100, LV_PART_MAIN); // Reset opacity
+    wifiAnimRunning = false;
 }
 
 static void settings_handler(lv_event_t * e)
@@ -635,17 +671,24 @@ void uiUpdateWifiStatus()
   switch(wifiManagerGetStatus())
   {
     case WifiStatus::CONNECTED : 
+        stopBatteryBlinkAnim();
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_CONNECTED);
         break;
     case WifiStatus::PORTAL :
+        stopBatteryBlinkAnim();
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_AP);
         break;
     case WifiStatus::PORTAL_CONNECTED:
+        stopBatteryBlinkAnim();
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_AP_CONNECTED);
         break;
     case WifiStatus::DISCONNECTED:
+        lv_label_set_text(wifiIndicator,SYMBOL_WIFI_CONNECTED);
+        startBatteryBlinkAnim();
+        break;
     case WifiStatus::OFF:
     default:
+        stopBatteryBlinkAnim();
         lv_label_set_text(wifiIndicator,"");
         break;
   }
