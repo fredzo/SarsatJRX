@@ -671,24 +671,24 @@ void uiUpdateWifiStatus()
   switch(wifiManagerGetStatus())
   {
     case WifiStatus::CONNECTED : 
-        stopBatteryBlinkAnim();
+        stopWifiBlinkAnim();
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_CONNECTED);
         break;
     case WifiStatus::PORTAL :
-        stopBatteryBlinkAnim();
+        stopWifiBlinkAnim();
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_AP);
         break;
     case WifiStatus::PORTAL_CONNECTED:
-        stopBatteryBlinkAnim();
+        stopWifiBlinkAnim();
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_AP_CONNECTED);
         break;
     case WifiStatus::DISCONNECTED:
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_CONNECTED);
-        startBatteryBlinkAnim();
+        startWifiBlinkAnim();
         break;
     case WifiStatus::OFF:
     default:
-        stopBatteryBlinkAnim();
+        stopWifiBlinkAnim();
         lv_label_set_text(wifiIndicator,"");
         break;
   }
