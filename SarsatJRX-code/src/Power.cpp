@@ -170,13 +170,13 @@ void Power::handleTask()
                     PowerState newState;
                     if(lastChargeValue)
                     {   // Led off (pin high) => either full or on battery
-                        if(rawPowerValue >= MAX_BATTERY_VOLTAGE_UP)
+                        if(powerValue >= MAX_BATTERY_VOLTAGE_UP)
                         {
                             newState = PowerState::FULL;
                         }
                         else
                         {
-                            if(rawPowerValue >= MAX_BATTERY_VOLTAGE_DOWN && state == PowerState::CHARGING)
+                            if(powerValue >= MAX_BATTERY_VOLTAGE_DOWN && state == PowerState::CHARGING)
                             {   // Previous state was charging => must be full now
                                 newState = PowerState::FULL;
                             }
