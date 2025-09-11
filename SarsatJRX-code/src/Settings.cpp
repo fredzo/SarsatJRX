@@ -8,6 +8,8 @@
 Settings *Settings::settingsInstance = nullptr;
 
 static const Settings::Setting WIFI_STATE           ("Wifi" ,"wifiState"            ,"Wifi on (true/false) ?");
+static const Settings::Setting WIFI_SSID            ("SSID" ,"wifiSsid"             ,"Ssid of the wifi network to connect to");
+static const Settings::Setting WIFI_PASS_PHRASE     ("PSK"  ,"wifiPassPhrase"       ,"Passphrase of the Wifi network to connect to");
 static const Settings::Setting DISPLAY_REVERSE      ("DRev" ,"displayReverse"       ,"Display reverse (true/false) ?");
 static const Settings::Setting SHOW_BAT_PERCENTAGE  ("SBP"  ,"showBatPercentage"    ,"Show battery percentage (true/false) ?");
 static const Settings::Setting SHOW_BAT_WARN_MESSAGE("SBW"  ,"showBatWarnMessage"   ,"Show warn message when power cable is plugged but battery is not charging because power switch is off (true/false) ?");
@@ -28,6 +30,9 @@ void Settings::init()
     preferences.begin(PREF_PREFIX, false);
     // Load all settings on startup to avoid accessing them at runtime
     wifiState = preferences.getBool(WIFI_STATE.key.c_str(),false);
+    wifiSsid = preferences.getString(WIFI_SSID.key.c_str(),"SarsatJRX");
+    wifiPassPhrase = preferences.getString(WIFI_PASS_PHRASE.key.c_str(),"SarsatJRX");
+    wifiPassPhrase = preferences.getBool(WIFI_STATE.key.c_str(),false);
     displayReverse = preferences.getBool(DISPLAY_REVERSE.key.c_str(),false);
     screenOffOnCharge = preferences.getBool(SCREEN_OFF_ON_CHRAGE.key.c_str(),true);
     showBatteryPercentage = preferences.getBool(SHOW_BAT_PERCENTAGE.key.c_str(),true);
@@ -67,6 +72,14 @@ void Settings::init()
                             if(key.equals(WIFI_STATE.configKey))
                             {
                                 wifiState = stringToBool(value);
+                            }
+                            else if(key.equals(WIFI_SSID.configKey))
+                            {
+                                wifiSsid = value;
+                            }
+                            else if(key.equals(WIFI_PASS_PHRASE.configKey))
+                            {
+                                wifiPassPhrase = value;
                             }
                             else if(key.equals(DISPLAY_REVERSE.configKey))
                             {
@@ -139,6 +152,8 @@ void Settings::init()
 void Settings::saveToConfigLines(std::vector<String>& lines)
 {
     updateConfigLine(lines,WIFI_STATE           ,boolToString(wifiState));
+    updateConfigLine(lines,WIFI_SSID            ,wifiSsid);
+    updateConfigLine(lines,WIFI_PASS_PHRASE     ,wifiPassPhrase);
     updateConfigLine(lines,DISPLAY_REVERSE      ,boolToString(displayReverse));
     updateConfigLine(lines,SCREEN_OFF_ON_CHRAGE ,boolToString(screenOffOnCharge));
     updateConfigLine(lines,SHOW_BAT_PERCENTAGE  ,boolToString(showBatteryPercentage));
@@ -198,6 +213,32 @@ void Settings::setWifiState(bool state)
     if(wifiState == state) return;
     wifiState = state;
     preferences.putBool(WIFI_STATE.key.c_str(),state);
+    dirty = true;
+}
+
+String Settings::getWifiSsid()
+{
+    return wifiSsid;
+}
+
+void Settings::setWifiSsid(String ssid)
+{
+    if(wifiSsid.equals(ssid)) return;
+    wifiSsid = ssid;
+    preferences.putString(WIFI_SSID.key.c_str(),ssid);
+    dirty = true;
+}
+
+String Settings::getWifiPassPhrase()
+{
+    return wifiPassPhrase;
+}
+
+void Settings::setWifiPassPhrase(String passPhrase)
+{
+    if(wifiPassPhrase.equals(passPhrase)) return;
+    wifiPassPhrase = passPhrase;
+    preferences.putString(WIFI_PASS_PHRASE.key.c_str(),passPhrase);
     dirty = true;
 }
 

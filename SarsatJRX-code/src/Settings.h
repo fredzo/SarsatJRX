@@ -30,6 +30,12 @@ class Settings
         bool getWifiState();
         void setWifiState(bool state);
 
+        String getWifiSsid();
+        void setWifiSsid(String ssid);
+
+        String getWifiPassPhrase();
+        void setWifiPassPhrase(String passPhrase);
+
         bool getDisplayReverse();
         void setDisplayReverse(bool reverse);
 
@@ -92,6 +98,8 @@ class Settings
         void updateConfigLine(std::vector<String>& lines, const Setting& setting, const String& value);
 
         bool wifiState;
+        String wifiSsid;
+        String wifiPassPhrase;
         bool displayReverse;
         bool screenOffOnCharge;
         bool showBatteryPercentage;

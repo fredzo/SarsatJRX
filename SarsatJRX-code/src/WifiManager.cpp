@@ -66,14 +66,25 @@ void onWifiEvent(WiFiEvent_t event)
 #endif
             break;
         case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+        {
             // Update Wifi status when IP is assigned
             wifiStatus = WifiStatus::CONNECTED;
             wifiStatusChanged = true;
+            // Store credentials to settings
+            String ssid = WiFi.SSID();
+            String passPhrase = WiFi.psk();
+            if(!ssid.isEmpty()&&!passPhrase.isEmpty())
+            {
+              Settings* settings = Settings::getSettings();
+              settings->setWifiSsid(ssid);
+              settings->setWifiPassPhrase(passPhrase);
+            }
 #ifdef SERIAL_OUT
             Serial.print("Obtained IP address: ");
             Serial.println(WiFi.localIP());
 #endif
             break;
+        }
         case ARDUINO_EVENT_WIFI_AP_START:
             // Update Wifi status when Access Point is activated (Portal mode)
             wifiStatus = WifiStatus::PORTAL;
@@ -137,6 +148,7 @@ void wifiManagerStart()
   config.immediateStart = false;
   config.autoReset = false;
   config.autoRise = true;
+  config.autoSave = AC_SAVECREDENTIAL_NEVER; // We'll save crendentials in Preferences
   config.portalTimeout = 1;     // Don't block on AP mode
   config.beginTimeout = 3000;   // Only wait 3s at wifi begin not to block Sarsat JRX setartup
   config.autoReconnect = true;  // Automtic only if we have saved credentials
@@ -147,7 +159,8 @@ void wifiManagerStart()
   config.psk = "";              // No password in AP mode
   portal.config(config);
   WiFi.onEvent(onWifiEvent);
-  portal.begin();
+  Settings* settings = Settings::getSettings();
+  portal.begin(settings->getWifiSsid().c_str(),settings->getWifiPassPhrase().c_str(),config.beginTimeout);
 }
 
 String wifiManagerGetStatusString()
