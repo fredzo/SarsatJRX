@@ -76,7 +76,7 @@ Rtc::Date Rtc::getDate()
         {   // Try and get time from NTP server
             if(!ntpStarted)
             {   // Start NTP client and specify TZ
-                configTzTime(TIME_ZONE,NTP_SERVER);
+                configTzTime(TIME_ZONE,NTP_SERVER1,NTP_SERVER2,NTP_SERVER3);
                 ntpStarted = true;
                 #ifdef SERIAL_OUT
                 Serial.println("NTP Server started !");
@@ -87,7 +87,7 @@ Rtc::Date Rtc::getDate()
             int originalYear = dt.year;
             dt.year = 2015;
             setSystemTime(&dt,false);
-            if(getLocalTime(&timeinfo,500))
+            if(getLocalTime(&timeinfo,0))
             {   // Update RTC
                 dt.day = timeinfo.tm_mday;
                 dt.month = timeinfo.tm_mon+1;
