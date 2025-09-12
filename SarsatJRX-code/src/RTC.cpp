@@ -83,6 +83,10 @@ Rtc::Date Rtc::getDate()
                 #endif
             }
             struct tm timeinfo;
+            // Force local time to 2015 to make sure getLocalTime() waits for NTP to resolve
+            int originalYear = dt.year;
+            dt.year = 2015;
+            setSystemTime(&dt,false);
             if(getLocalTime(&timeinfo,0))
             {   // Update RTC
                 dt.day = timeinfo.tm_mday;
@@ -95,6 +99,7 @@ Rtc::Date Rtc::getDate()
                 // Stop ntp service
                 sntp_stop();
                 ntpSynched = true;
+                ntpStarted = false;
                 // Make sure we update time display right away
                 changed = true;
                 #ifdef SERIAL_OUT
@@ -102,13 +107,18 @@ Rtc::Date Rtc::getDate()
                 Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S zone %Z %z ");
                 #endif
             }
+            else 
+            {   // Restore original date
+                dt.year = originalYear;
+                setSystemTime(&dt,false);
+            }
         }
         #endif
     }
     return currentDate;
 }
 
-void Rtc::setSystemTime(RTC_Date* dt)
+void Rtc::setSystemTime(RTC_Date* dt, bool restartTimer)
 {
   // Définir la date et l'heure
   struct tm t;
@@ -123,7 +133,7 @@ void Rtc::setSystemTime(RTC_Date* dt)
   time_t now = mktime(&t); // Convertir en timestamp
   struct timeval tv = { .tv_sec = now, .tv_usec = 0 };
   settimeofday(&tv, NULL); // Positionner l'heure système
-  timerRestart(clockTimer);
+  if(restartTimer) timerRestart(clockTimer);
 }
 
 
