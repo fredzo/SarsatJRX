@@ -1,6 +1,7 @@
 #include <RTC.h>
 #include <SarsatJRXConf.h>
 #include <WifiManager.h>
+#include <Settings.h>
 #include <time.h>
 #include <esp_sntp.h>
 
@@ -76,42 +77,52 @@ Rtc::Date Rtc::getDate()
         {   // Try and get time from NTP server
             if(!ntpStarted)
             {   // Start NTP client and specify TZ
-                configTzTime(TIME_ZONE,NTP_SERVER1,NTP_SERVER2,NTP_SERVER3);
+                configTzTime(Settings::getSettings()->getTimeZone().c_str(),NTP_SERVER1,NTP_SERVER2,NTP_SERVER3);
                 ntpStarted = true;
                 #ifdef SERIAL_OUT
                 Serial.println("NTP Server started !");
                 #endif
             }
-            struct tm timeinfo;
-            // Force local time to 2015 to make sure getLocalTime() waits for NTP to resolve
-            int originalYear = dt.year;
-            dt.year = 2015;
-            setSystemTime(&dt,false);
-            if(getLocalTime(&timeinfo,0))
-            {   // Update RTC
-                dt.day = timeinfo.tm_mday;
-                dt.month = timeinfo.tm_mon+1;
-                dt.year = timeinfo.tm_year+1900;
-                dt.hour = timeinfo.tm_hour;
-                dt.minute = timeinfo.tm_min;
-                dt.second = timeinfo.tm_sec;
-                rtc->setDateTime(dt);
-                // Stop ntp service
-                sntp_stop();
-                ntpSynched = true;
-                ntpStarted = false;
-                // Make sure we update time display right away
-                changed = true;
-                #ifdef SERIAL_OUT
-                Serial.println("NTP time received ! :");
-                Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S zone %Z %z ");
-                #endif
-            }
-            else 
-            {   // Restore original date
-                Serial.println("Could not get time from NTP server.");
-                dt.year = originalYear;
-                setSystemTime(&dt,false);
+            uint32_t now = millis();
+            uint32_t delay = (ntpRequestNumber * NTP_REQUEST_BASE_DELAY);
+            if((now - lastNtpRequestTime) >= delay)
+            {   // Start with short request delay and increase the delay on each request
+                //Serial.printf("Ntp request #%d, delay=%d, actual=%d.\n",ntpRequestNumber,delay,now-lastNtpRequestTime);
+                lastNtpRequestTime = now;
+                ntpRequestNumber++;
+                struct tm timeinfo;
+                if(!ntpWait)
+                {   // First call => Force local time to 2015 to make sure getLocalTime() waits for NTP to resolve
+                    dt.year = 2015;
+                    setSystemTime(&dt,false);
+                    ntpWait = true;
+                }
+                if(getLocalTime(&timeinfo,0))
+                {   // Update RTC
+                    dt.day = timeinfo.tm_mday;
+                    dt.month = timeinfo.tm_mon+1;
+                    dt.year = timeinfo.tm_year+1900;
+                    dt.hour = timeinfo.tm_hour;
+                    dt.minute = timeinfo.tm_min;
+                    dt.second = timeinfo.tm_sec;
+                    rtc->setDateTime(dt);
+                    // Stop ntp service
+                    sntp_stop();
+                    ntpSynched = true;
+                    ntpStarted = false;
+                    ntpWait = false;
+                    ntpRequestNumber = 0;
+                    // Make sure we update time display right away
+                    changed = true;
+                    #ifdef SERIAL_OUT
+                    Serial.println("NTP time received ! :");
+                    Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S zone %Z %z ");
+                    #endif
+                }
+                else 
+                {
+                    Serial.println("Could not get time from NTP server.");
+                }
             }
         }
         #endif

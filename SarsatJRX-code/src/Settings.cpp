@@ -10,6 +10,7 @@ Settings *Settings::settingsInstance = nullptr;
 static const Settings::Setting WIFI_STATE           ("Wifi" ,"wifiState"            ,"Wifi on (true/false) ?");
 static const Settings::Setting WIFI_SSID            ("SSID" ,"wifiSsid"             ,"Ssid of the wifi network to connect to");
 static const Settings::Setting WIFI_PASS_PHRASE     ("PSK"  ,"wifiPassPhrase"       ,"Passphrase of the Wifi network to connect to");
+static const Settings::Setting TIME_ZONE            ("TZ"   ,"timeZone"             ,"TimeZone (see https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv )");
 static const Settings::Setting DISPLAY_REVERSE      ("DRev" ,"displayReverse"       ,"Display reverse (true/false) ?");
 static const Settings::Setting SHOW_BAT_PERCENTAGE  ("SBP"  ,"showBatPercentage"    ,"Show battery percentage (true/false) ?");
 static const Settings::Setting SHOW_BAT_WARN_MESSAGE("SBW"  ,"showBatWarnMessage"   ,"Show warn message when power cable is plugged but battery is not charging because power switch is off (true/false) ?");
@@ -32,6 +33,7 @@ void Settings::init()
     wifiState = preferences.getBool(WIFI_STATE.key.c_str(),false);
     wifiSsid = preferences.getString(WIFI_SSID.key.c_str(),"SarsatJRX");
     wifiPassPhrase = preferences.getString(WIFI_PASS_PHRASE.key.c_str(),"SarsatJRX");
+    timeZone = preferences.getString(TIME_ZONE.key.c_str(),NTP_TIME_ZONE);
     displayReverse = preferences.getBool(DISPLAY_REVERSE.key.c_str(),false);
     screenOffOnCharge = preferences.getBool(SCREEN_OFF_ON_CHRAGE.key.c_str(),true);
     showBatteryPercentage = preferences.getBool(SHOW_BAT_PERCENTAGE.key.c_str(),true);
@@ -79,6 +81,10 @@ void Settings::init()
                             else if(key.equals(WIFI_PASS_PHRASE.configKey))
                             {
                                 setWifiPassPhrase(value);
+                            }
+                            else if(key.equals(TIME_ZONE.configKey))
+                            {
+                                setTimeZone(value);
                             }
                             else if(key.equals(DISPLAY_REVERSE.configKey))
                             {
@@ -155,6 +161,7 @@ void Settings::saveToConfigLines(std::vector<String>& lines)
     updateConfigLine(lines,WIFI_STATE           ,boolToString(wifiState));
     updateConfigLine(lines,WIFI_SSID            ,wifiSsid);
     updateConfigLine(lines,WIFI_PASS_PHRASE     ,wifiPassPhrase);
+    updateConfigLine(lines,TIME_ZONE            ,timeZone);
     updateConfigLine(lines,DISPLAY_REVERSE      ,boolToString(displayReverse));
     updateConfigLine(lines,SCREEN_OFF_ON_CHRAGE ,boolToString(screenOffOnCharge));
     updateConfigLine(lines,SHOW_BAT_PERCENTAGE  ,boolToString(showBatteryPercentage));
@@ -240,6 +247,19 @@ void Settings::setWifiPassPhrase(String passPhrase)
     if(wifiPassPhrase.equals(passPhrase)) return;
     wifiPassPhrase = passPhrase;
     preferences.putString(WIFI_PASS_PHRASE.key.c_str(),passPhrase);
+    dirty = true;
+}
+
+String Settings::getTimeZone()
+{
+    return timeZone;
+}
+
+void Settings::setTimeZone(String tz)
+{
+    if(timeZone.equals(tz)) return;
+    timeZone = tz;
+    preferences.putString(TIME_ZONE.key.c_str(),tz);
     dirty = true;
 }
 

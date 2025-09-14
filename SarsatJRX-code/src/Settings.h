@@ -36,6 +36,9 @@ class Settings
         String getWifiPassPhrase();
         void setWifiPassPhrase(String passPhrase);
 
+        String getTimeZone();
+        void setTimeZone(String timeZone);
+
         bool getDisplayReverse();
         void setDisplayReverse(bool reverse);
 
@@ -100,6 +103,7 @@ class Settings
         bool wifiState;
         String wifiSsid;
         String wifiPassPhrase;
+        String timeZone;
         bool displayReverse;
         bool screenOffOnCharge;
         bool showBatteryPercentage;

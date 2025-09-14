@@ -6,7 +6,8 @@
 #include <pcf8563.h>
 #include <Settings.h>
 
-#define RTC_MAX_COUNTDOWN   999
+#define RTC_MAX_COUNTDOWN       999
+#define NTP_REQUEST_BASE_DELAY  1000 
 
 class Rtc
 {
@@ -57,12 +58,15 @@ class Rtc
         void setSystemTime(RTC_Date* dt, bool restartTimer = true);
         bool changed = true;
         bool ntpStarted = false;
+        bool ntpWait = false;
         bool ntpSynched = false;
         Date currentDate;
         int countDownValue = 0;
         bool countDownChanged = false;
         hw_timer_t * countdownTimer = NULL;
         hw_timer_t * clockTimer = NULL;
+        uint32_t lastNtpRequestTime = 0;
+        int ntpRequestNumber = 0;
 
         Rtc()
         {
