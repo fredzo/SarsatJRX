@@ -69,6 +69,7 @@ class Beacon
         bool hasBch2;
         uint32_t bch2;
         uint32_t computedBch2;
+        bool isEmpty;
         bool isBch2Valid();
         bool isFrameValid();
         bool isOrbito();

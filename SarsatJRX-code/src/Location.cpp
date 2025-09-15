@@ -13,29 +13,36 @@ static char gps_letterize(int x)
 }
 
 static void gps_compute_locator(double lat, double lon, char* gps_locator) 
-{
-    double LON_F[]={20,2.0,0.083333,0.008333,0.0003472083333333333};
-    double LAT_F[]={10,1.0,0.0416665,0.004166,0.0001735833333333333};
-    int i;
-    lon += 180;
-    lat += 90;
-
-    for (i = 0; i < GPS_LOCATOR_SIZE/2; i++)
-    {
-        if (i % 2 == 1) 
-        {
-            gps_locator[i*2] = (char) (lon/LON_F[i] + '0');
-            gps_locator[i*2+1] = (char) (lat/LAT_F[i] + '0');
-        }
-        else 
-        {
-            gps_locator[i*2] = gps_letterize((int) (lon/LON_F[i]));
-            gps_locator[i*2+1] = gps_letterize((int) (lat/LAT_F[i]));
-        }
-        lon = fmod(lon, LON_F[i]);
-        lat = fmod(lat, LAT_F[i]);
+{   // Sanity check
+    if(lat < -90 || lat > 90 || lon < -180 || lon > 180)
+    {   // Invalid values
+        gps_locator[0]=0;
     }
-    gps_locator[i*2]=0;
+    else
+    {
+        double LON_F[]={20,2.0,0.083333,0.008333,0.0003472083333333333};
+        double LAT_F[]={10,1.0,0.0416665,0.004166,0.0001735833333333333};
+        int i;
+        lon += 180;
+        lat += 90;
+
+        for (i = 0; i < GPS_LOCATOR_SIZE/2; i++)
+        {
+            if (i % 2 == 1) 
+            {
+                gps_locator[i*2] = (char) (lon/LON_F[i] + '0');
+                gps_locator[i*2+1] = (char) (lat/LAT_F[i] + '0');
+            }
+            else 
+            {
+                gps_locator[i*2] = gps_letterize((int) (lon/LON_F[i]));
+                gps_locator[i*2+1] = gps_letterize((int) (lat/LAT_F[i]));
+            }
+            lon = fmod(lon, LON_F[i]);
+            lat = fmod(lat, LAT_F[i]);
+        }
+        gps_locator[i*2]=0;
+    }
 }
 
 String Location::toString(LocationFormat format)

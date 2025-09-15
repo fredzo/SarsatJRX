@@ -588,7 +588,8 @@ void Beacon::parseFrame()
     { // Normal message frame synchronisation byte
         frameMode = FrameMode::NORMAL;
     }
-    else{
+    else
+    {
         frameMode = FrameMode::UNKNOWN;
     }
 
@@ -807,6 +808,24 @@ void Beacon::parseFrame()
     // Parse locating device information
     parseLocatingDevices();
 
+    // Check for Empty frame
+    if(isOrbito()&&!longFrame)
+    {
+        isEmpty = true;
+        for (size_t i = 3; i < SIZE; i++) 
+        {
+            if (frame[i] != 0) 
+            {
+                isEmpty = false;
+                break;
+            }
+        }
+    }
+    else
+    {
+        isEmpty = false;
+    }
+
     // Actual and computed BCH1 and BCH2 values
     bch1 = getBits(frame,86,106);
     computedBch1 = computeBCH1(frame);
@@ -831,7 +850,7 @@ bool Beacon::isBch2Valid()
 
 bool Beacon::isFrameValid()
 {
-    return isBch1Valid() && ((!hasBch2)||isBch2Valid());
+    return isBch1Valid() && ((!hasBch2)||isBch2Valid()) && (!isEmpty);
 }
 
 bool Beacon::isOrbito()
