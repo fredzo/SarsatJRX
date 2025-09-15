@@ -18,14 +18,24 @@ class Location
             void toFloatString(char* angleStr);
             Angle();
             Angle(long degrees);
+
+            private :
+            double floatValue = 255;
         };
+
+        enum class LocationFormat { DECIMAL, SEXAGESIMAL, MAIDENHEAD_LOCATOR };
 
         Angle latitude = Angle(127);
         Angle longitude = Angle(255);
         void clear();
         boolean isUnknown();
-        String toString(bool sexagesimal);
+        String toString(LocationFormat format);
         void formatFloatLocation(char* buffer, size_t size, const char* format);
+
+        private :
+        String decimalFormat;
+        String sexagesimalFormat;
+        String locatorFormat;
 
 };
 #endif 

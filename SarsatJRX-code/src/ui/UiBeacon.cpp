@@ -17,6 +17,7 @@
 #define AUX_LABEL           "Aux. loc. device:"
 #define AUX_LABEL_WIDTH     144
 #define LOCATION_LABEL      "Location:"
+#define LCOATION_LABEL_WIDTH 90
 #define CONTROL_LABEL       "Control:"
 #define CONTROL_TITLE_WIDTH 75
 #define CONTROL_LABEL_WIDTH 80
@@ -50,6 +51,7 @@ lv_obj_t * infoLabel1;
 lv_obj_t * infoLabel2;
 lv_obj_t * infoLabel3;
 lv_obj_t * locationTitle;
+lv_obj_t * locationLabel0;
 lv_obj_t * locationLabel1;
 lv_obj_t * locationLabel2;
 lv_obj_t * locationLabel3;
@@ -113,7 +115,8 @@ void createMainBloc(lv_obj_t * bloc, int tabWidth)
     currentY+=LINE_HEIGHT;
 
     // Location
-    locationTitle =  uiCreateLabel(bloc,&style_section_title,LOCATION_LABEL,0,currentY,LV_PCT(100),LINE_HEIGHT);
+    locationTitle =  uiCreateLabel(bloc,&style_section_title,LOCATION_LABEL,0,currentY,LCOATION_LABEL_WIDTH,LINE_HEIGHT);
+    locationLabel0 = uiCreateLabel(bloc,&style_section_text,"",LCOATION_LABEL_WIDTH,currentY,tabWidth-LCOATION_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
     locationLabel1 = uiCreateLabel(bloc,&style_section_text,"",0,currentY,LV_PCT(100),LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
@@ -335,17 +338,20 @@ void uiBeaconSetBeacon(Beacon* beacon)
     bool locationKnown = !beacon->location.isUnknown(); 
     if (beacon->longFrame) 
     {   // Long frame
-        String locationSexa = beacon->location.toString(true);
-        String locationDeci = beacon->location.toString(false);
+        String locationSexa = beacon->location.toString(Location::LocationFormat::SEXAGESIMAL);
+        String locationDeci = beacon->location.toString(Location::LocationFormat::DECIMAL);
+        String locationMaidenhead = beacon->location.toString(Location::LocationFormat::MAIDENHEAD_LOCATOR);
         lv_label_set_text(locationLabel2,locationSexa.c_str());
         #ifdef SERIAL_OUT 
         Serial.println(locationSexa);
         #endif
         if(locationKnown)
         {
+            lv_label_set_text(locationLabel0,locationMaidenhead.c_str());
             lv_label_set_text(locationLabel3,locationDeci.c_str());
         #ifdef SERIAL_OUT 
             Serial.println(locationDeci);
+            Serial.println(locationMaidenhead);
         #endif
         }
         else
