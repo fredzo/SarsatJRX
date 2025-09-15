@@ -25,6 +25,7 @@
 #define BCH1_KO_LABEL       "BCH1-KO"
 #define BCH2_OK_LABEL       "BCH2-OK"
 #define BCH2_KO_LABEL       "BCH2-KO"
+#define EMPTY_LABEL         "Empty"
 #define HEX_ID_LABEL        "Hex ID:"
 #define HEX_ID_WIDTH        75
 #define DATA_LABEL          "Data:"
@@ -372,6 +373,11 @@ void uiBeaconSetBeacon(Beacon* beacon)
     {   // No second proteced field in short frames
         lv_label_set_text(controlLabel2,beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
         lv_obj_set_style_text_color(controlLabel2,beacon->isBch2Valid() ? uiOkColor : uiKoColor,0);
+    }
+    else if(beacon->isEmpty)
+    {
+        lv_label_set_text(controlLabel2,EMPTY_LABEL);
+        lv_obj_set_style_text_color(controlLabel2,uiKoColor,0);
     }
     else
     {
