@@ -2,8 +2,8 @@
 
 #ifdef WIFI
 #include <WiFi.h>
-#include <WebServer.h>
 #include <ESPAsyncWebServer.h>
+#include <ESPmDNS.h>
 #include <Hardware.h>
 
 #define FAVICON_FILE_PATH   "/sarsat-jrx.png"
@@ -133,6 +133,12 @@ void wifiManagerStart()
   /*if (WiFi.waitForConnectResult() != WL_CONNECTED) {
     Serial.printf("WiFi Failed!\n");
   }*/
+  // Setup mDNS
+  if (!MDNS.begin("sarsatjrx")) 
+  {
+    Serial.println("Error : could not start mDNS");
+  }
+  Serial.println("mDNS started : acces with http://sarsatjrx.local/");  
   // Setup webserver
   server.on("/",rootPage);
   server.serveStatic("/favicon.ico", SPIFFS, FAVICON_FILE_PATH);
@@ -176,6 +182,8 @@ WifiStatus wifiManagerGetStatus()
 
 void wifiManagerStop()
 {
+    server.end();
+    MDNS.end();
     WiFi.disconnect(true);  // Disconnect from the network
     WiFi.mode(WIFI_OFF);    // Switch WiFi off
     wifiStatus = WifiStatus::OFF;
