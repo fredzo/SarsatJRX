@@ -14,6 +14,8 @@
 
 // Enable WIFI
 #define WIFI
+// Time to wait before trying again to connect to Wifi
+#define WIFI_RECONNECTION_TIEMOUT   30*1000 // 30 sec
 
 // NTP Server and Timezone
 #define NTP_SERVER1   "pool.ntp.org"

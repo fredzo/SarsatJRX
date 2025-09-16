@@ -3,46 +3,28 @@
 #ifdef WIFI
 #include <WiFi.h>
 #include <WebServer.h>
-#include <AutoConnect.h>
+#include <ESPAsyncWebServer.h>
 #include <Hardware.h>
 
 #define FAVICON_FILE_PATH   "/sarsat-jrx.png"
 
-// Web and Wifi
-WebServer server;
-AutoConnect portal(server);
-AutoConnectConfig config;
+// Web 
+AsyncWebServer server(80);
 // Wifi status
 bool wifiStatusChanged = false;
 int portalStatus = -1;
 WifiStatus wifiStatus = WifiStatus::OFF;
 int wifiRssi = 0;
 IPAddress ipAddr;
-long lastStatusCheckTime = 0;
+uint32_t lastStatusCheckTime = 0;
+uint32_t lastConnectionAttempt = 0;
 // Filesystem
 bool filesystemMounted = false;
 static FS* fileSystem = nullptr;
 
-void rootPage()
+void rootPage(AsyncWebServerRequest *request)
 {
-  server.send(200,"text/plain","--- SarsatJRX ---");
-}
-
-void favicon()
-{
-  if(filesystemMounted && fileSystem->exists(FAVICON_FILE_PATH))
-  {
-      File file = fileSystem->open(FAVICON_FILE_PATH, "r");
-      if (server.streamFile(file, "image/png") != file.size()) 
-      {
-        Serial.println("Sent less data than expected!");
-      }
-      file.close();
-  }
-  else
-  {
-    server.send(404,"text/plain","");
-  }
+  request->send(200,"text/plain","--- SarsatJRX ---");
 }
 
 void onWifiEvent(WiFiEvent_t event) 
@@ -59,11 +41,14 @@ void onWifiEvent(WiFiEvent_t event)
             break;
         case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
             // Update Wifi status when IP is assigned
-            wifiStatus = WifiStatus::DISCONNECTED;
-            wifiStatusChanged = true;
+            if(wifiStatus != WifiStatus::DISCONNECTED)
+            {
+              wifiStatus = WifiStatus::DISCONNECTED;
+              wifiStatusChanged = true;
 #ifdef SERIAL_OUT
-            Serial.println("Disconnected from WiFi access point");
+              Serial.println("Disconnected from WiFi access point");
 #endif
+            }
             break;
         case ARDUINO_EVENT_WIFI_STA_GOT_IP:
         {
@@ -140,28 +125,19 @@ void wifiManagerStart()
   fileSystem = filesystems->getSpiFilesystem();
   // Web and Wifi
   wifiStatus = WifiStatus::DISCONNECTED;
-  server.on("/",rootPage);
-  server.on("/favicon.ico",favicon);
-  // Configure automatic reconnection and captive portal retention, then start
-  // AutoConnect. In subsequent steps, it will use the portalStatus function to
-  // detect the WiFi connection status in this configuration.
-  config.immediateStart = false;
-  config.autoReset = false;
-  config.autoRise = false;
-  config.autoSave = AC_SAVECREDENTIAL_NEVER; // We'll save crendentials in Preferences
-  config.portalTimeout = 1;     // Don't block on AP mode
-  config.beginTimeout = 3000;   // Only wait 3s at wifi begin not to block Sarsat JRX setartup
-  config.autoReconnect = true;  // Automtic only if we have saved credentials
-  config.reconnectInterval = 0; // Only reconnect on 1st connection failure
-  config.retainPortal = true;
-  config.hostName = "sarsatjrx";
-  config.apid = "SarsatJRX";
-  config.psk = "";              // No password in AP mode
-  portal.config(config);
   WiFi.onEvent(onWifiEvent);
   Settings* settings = Settings::getSettings();
   //Serial.printf("Starting wifi with ssid=%s and psk=%s\n",settings->getWifiSsid().c_str(),settings->getWifiPassPhrase().c_str());
-  portal.begin(settings->getWifiSsid().c_str(),settings->getWifiPassPhrase().c_str(),config.beginTimeout);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(settings->getWifiSsid().c_str(),settings->getWifiPassPhrase().c_str());
+  /*if (WiFi.waitForConnectResult() != WL_CONNECTED) {
+    Serial.printf("WiFi Failed!\n");
+  }*/
+  // Setup webserver
+  server.on("/",rootPage);
+  server.serveStatic("/favicon.ico", SPIFFS, FAVICON_FILE_PATH);
+  server.begin();
+  wifiStatusChanged = true;
 }
 
 String wifiManagerGetStatusString()
@@ -199,28 +175,11 @@ WifiStatus wifiManagerGetStatus()
 }
 
 void wifiManagerStop()
-{   // Prevent portal from re-activating wifi
-    config.autoRise = false;
-    portal.config(config);
-    portal.end();           // Stop AutoConnect portal
+{
     WiFi.disconnect(true);  // Disconnect from the network
     WiFi.mode(WIFI_OFF);    // Switch WiFi off
     wifiStatus = WifiStatus::OFF;
 }
-
-void wifiManagerStartPortal()
-{
-    wifi_mode_t mode = WiFi.getMode();
-    if((mode == wifi_mode_t::WIFI_MODE_STA) || (mode == wifi_mode_t::WIFI_MODE_APSTA))
-    { // Only if we currently are in Station mode => switch to Portal mode
-      config.immediateStart= true;
-      config.autoRise = true;
-      config.beginTimeout = 0; // Non blocking start
-      portal.config(config);
-      portal.begin();
-    }
-}
-
 
 /**
  * Returns true if Wifi is connected
@@ -235,13 +194,21 @@ bool wifiManagerIsConnected()
 
 bool wifiManagerHandleClient()
 {
-  // Web and wifi
-  portal.handleClient();
   // Check for status change
   bool changed = wifiStatusChanged;
   long now = millis();
+  // TODO handle reconnection attempt
+
   if(wifiStatusChanged || (now-lastStatusCheckTime >= WIFI_STATUS_CHECK_PERIOD))
   {
+    if ((wifiStatus == WifiStatus::DISCONNECTED) && ((now-lastConnectionAttempt) >= WIFI_RECONNECTION_TIEMOUT)) 
+    { 
+      lastConnectionAttempt = now;
+      Serial.println("WiFi not connected. Reconnection attempt...");
+      Settings* settings = Settings::getSettings();
+      WiFi.disconnect();  // Force disconnect
+      WiFi.begin(settings->getWifiSsid().c_str(),settings->getWifiPassPhrase().c_str());  // and reconnect
+    }
     lastStatusCheckTime = now;
     IPAddress locaIp = WiFi.localIP();
     int rssi = WiFi.RSSI();

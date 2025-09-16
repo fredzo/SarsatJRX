@@ -16,8 +16,6 @@ void wifiManagerStart();
 
 void wifiManagerStop();
 
-void wifiManagerStartPortal();
-
 /**
  * Returns true if wifi status changed
  */

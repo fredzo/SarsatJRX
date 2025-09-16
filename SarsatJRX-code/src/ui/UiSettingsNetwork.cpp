@@ -11,8 +11,6 @@
 // Wifi / Net
 #define WIFI_LABEL          "Wifi:"
 #define WIFI_LABEL_WIDTH    80
-#define PORTAL_LABEL        "Wifi setup portal:"
-#define PORTAL_LABEL_WIDTH  200
 #define MODE_LABEL          "Mode:"
 #define MODE_LABEL_WIDTH    80
 #define STATUS_LABEL        "Status:"
@@ -48,8 +46,6 @@
 // Wifi
 static lv_obj_t * wifiTitle;
 static lv_obj_t * wifiToggle;
-static lv_obj_t * portalTitle;
-static lv_obj_t * portalToggle;
 static lv_obj_t * modeTitle;
 static lv_obj_t * modeLabel;
 static lv_obj_t * statusTitle;
@@ -105,20 +101,6 @@ static void toggle_wifi_cb(lv_event_t * e)
     }
 }
 
-static void toggle_portal_cb(lv_event_t * e)
-{
-    bool state = lv_obj_has_state(portalToggle, LV_STATE_CHECKED);
-    //Serial.println("Toggle portal :" + String(state));
-    if(state)
-    {
-        wifiManagerStartPortal();
-    }
-    else
-    {
-        wifiManagerStart();
-    }
-}
-
 void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
     // Wifi On/Off -> save to EEProm
@@ -126,10 +108,6 @@ void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
     wifiTitle = uiCreateLabel(tab,&style_section_title,WIFI_LABEL,0,currentY,WIFI_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
     wifiToggle = uiCreateToggle(tab,&style_section_text,toggle_wifi_cb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
     currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
-    // Portal On/Off
-    portalTitle = uiCreateLabel(tab,&style_section_title,PORTAL_LABEL,0,currentY,PORTAL_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
-    portalToggle = uiCreateToggle(tab,&style_section_text,toggle_portal_cb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentY+=TOGGLE_LINE_HEIGHT+SPACER;
     // Mode (Station / Acess Point)
     modeTitle = uiCreateLabel(tab,&style_section_title,MODE_LABEL,0,currentY,MODE_LABEL_WIDTH,LINE_HEIGHT);
     modeLabel = uiCreateLabel(tab,&style_section_text,"",MODE_LABEL_WIDTH,currentY,tabWidth-MODE_LABEL_WIDTH,LINE_HEIGHT);
@@ -206,28 +184,15 @@ void createNetworkTab(lv_obj_t * tab, int currentY, int tabWidth)
 
 void uiSettingsUpdateWifi()
 {   // Wifi tab
-    // Wifi state and Portal mode
+    // Wifi state
     WifiStatus status = wifiManagerGetStatus();
     if(status == WifiStatus::OFF)
     {   // Wifi toggle off
         lv_obj_clear_state(wifiToggle, LV_STATE_CHECKED);
-        // Disable portal toggle
-        lv_obj_add_state(portalToggle, LV_STATE_DISABLED);
-        lv_obj_clear_state(portalToggle, LV_STATE_CHECKED);
     }
     else
     {   // Wifi toggle on
         lv_obj_add_state(wifiToggle, LV_STATE_CHECKED);
-        // Enable portal toggle
-        lv_obj_clear_state(portalToggle, LV_STATE_DISABLED);
-        if((status == WifiStatus::PORTAL) || (status == WifiStatus::PORTAL_CONNECTED))
-        {
-            lv_obj_add_state(portalToggle, LV_STATE_CHECKED);
-        }
-        else
-        {
-            lv_obj_clear_state(portalToggle, LV_STATE_CHECKED);
-        }
     }
 
     // Mode (Station / Acess Point)
