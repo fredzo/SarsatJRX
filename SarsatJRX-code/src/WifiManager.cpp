@@ -138,7 +138,7 @@ void wifiManagerStart()
   {
     Serial.println("Error : could not start mDNS");
   }
-  Serial.println("mDNS started : acces with http://sarsatjrx.local/");  
+  Serial.println("mDNS started : you can now access http://myserver.local/");  
   // Setup webserver
   server.on("/",rootPage);
   server.serveStatic("/favicon.ico", SPIFFS, FAVICON_FILE_PATH);
