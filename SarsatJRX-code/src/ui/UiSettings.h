@@ -24,6 +24,8 @@ void uiSettingsUpdateView();
 
 void uiSettingsUpdateWifi();
 
+void uiSettingsUpdateBluetooth();
+
 void uiSettingsUpdateSystem();
 
 void uiSettingsUpdateSystemPower();

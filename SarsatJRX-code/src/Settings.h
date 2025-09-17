@@ -27,6 +27,9 @@ class Settings
 
         void init();
 
+        bool getBluetoothState();
+        void setBluetoothState(bool state);
+
         bool getWifiState();
         void setWifiState(bool state);
 
@@ -100,6 +103,7 @@ class Settings
         void saveToConfigLines(std::vector<String>& lines);
         void updateConfigLine(std::vector<String>& lines, const Setting& setting, const String& value);
 
+        bool bluetoothState;
         bool wifiState;
         String wifiSsid;
         String wifiPassPhrase;

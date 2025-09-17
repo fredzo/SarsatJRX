@@ -15,6 +15,7 @@
 #include <Samples.h>
 #include <Decoder.h>
 #include <WifiManager.h>
+#include <BluetoothManager.h>
 
 // Nedded if stack size of Arduino loop is too small
 // SET_LOOP_TASK_STACK_SIZE(16*1024)
@@ -560,6 +561,12 @@ void loop()
     if(wifiManagerHandleClient())
     {
       display->updateWifi();
+    }
+#endif
+#ifdef BLUETOOTH
+    if(bluetoothManagerHandleClient())
+    {
+      //TODO display->updateBluetooth();
     }
 #endif
   //delay(5);

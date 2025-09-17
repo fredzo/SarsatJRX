@@ -7,6 +7,7 @@
 
 Settings *Settings::settingsInstance = nullptr;
 
+static const Settings::Setting BLUETOOTH_STATE      ("BT"   ,"bluetoothState"       ,"Bluetooth on (true/false) ?");
 static const Settings::Setting WIFI_STATE           ("Wifi" ,"wifiState"            ,"Wifi on (true/false) ?");
 static const Settings::Setting WIFI_SSID            ("SSID" ,"wifiSsid"             ,"Ssid of the wifi network to connect to");
 static const Settings::Setting WIFI_PASS_PHRASE     ("PSK"  ,"wifiPassPhrase"       ,"Passphrase of the Wifi network to connect to");
@@ -30,6 +31,7 @@ void Settings::init()
 {
     preferences.begin(PREF_PREFIX, false);
     // Load all settings on startup to avoid accessing them at runtime
+    bluetoothState = preferences.getBool(BLUETOOTH_STATE.key.c_str(),false);
     wifiState = preferences.getBool(WIFI_STATE.key.c_str(),false);
     wifiSsid = preferences.getString(WIFI_SSID.key.c_str(),"SarsatJRX");
     wifiPassPhrase = preferences.getString(WIFI_PASS_PHRASE.key.c_str(),"SarsatJRX");
@@ -70,7 +72,11 @@ void Settings::init()
                         //Serial.printf("Key=%s; value=%s\n",key.c_str(),value.c_str());
                         if(!value.isEmpty())
                         {
-                            if(key.equals(WIFI_STATE.configKey))
+                            if(key.equals(BLUETOOTH_STATE.configKey))
+                            {
+                                setBluetoothState(stringToBool(value));
+                            }
+                            else if(key.equals(WIFI_STATE.configKey))
                             {
                                 setWifiState(stringToBool(value));
                             }
@@ -158,6 +164,7 @@ void Settings::init()
 
 void Settings::saveToConfigLines(std::vector<String>& lines)
 {
+    updateConfigLine(lines,BLUETOOTH_STATE      ,boolToString(bluetoothState));
     updateConfigLine(lines,WIFI_STATE           ,boolToString(wifiState));
     updateConfigLine(lines,WIFI_SSID            ,wifiSsid);
     updateConfigLine(lines,WIFI_PASS_PHRASE     ,wifiPassPhrase);
@@ -209,6 +216,19 @@ void Settings::saveToSd()
         saveToConfigLines(lines);
         filesystems->saveConfigFile(lines);
     }
+}
+
+bool Settings::getBluetoothState()
+{
+    return bluetoothState;
+}
+
+void Settings::setBluetoothState(bool state)
+{
+    if(bluetoothState == state) return;
+    bluetoothState = state;
+    preferences.putBool(BLUETOOTH_STATE.key.c_str(),state);
+    dirty = true;
 }
 
 bool Settings::getWifiState()

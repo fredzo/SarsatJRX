@@ -55,15 +55,6 @@ void onWifiEvent(WiFiEvent_t event)
             // Update Wifi status when IP is assigned
             wifiStatus = WifiStatus::CONNECTED;
             wifiStatusChanged = true;
-            // Store credentials to settings
-            String ssid = WiFi.SSID();
-            String passPhrase = WiFi.psk();
-            if(!ssid.isEmpty()&&!passPhrase.isEmpty())
-            {
-              Settings* settings = Settings::getSettings();
-              settings->setWifiSsid(ssid);
-              settings->setWifiPassPhrase(passPhrase);
-            }
 #ifdef SERIAL_OUT
             Serial.print("Obtained IP address: ");
             Serial.println(WiFi.localIP());
