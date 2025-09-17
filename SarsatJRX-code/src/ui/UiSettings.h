@@ -15,6 +15,7 @@
 #define SPINBOX_WIDTH       80
 #define SPINBOX_X           254
 #define BUTTON_HEIGHT       36
+#define SEC_COL_X           210
 
 
 void uiSettingsCreateView(lv_obj_t * cont);

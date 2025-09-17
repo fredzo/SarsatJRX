@@ -11,27 +11,35 @@
 // Wifi / Net
 #define WIFI_LABEL          "Wifi:"
 #define WIFI_LABEL_WIDTH    80
+#define WIFI_TOGGLE_X       120
+// Wifi Config
+#define WIFI_CONFIG_LABEL               "Config:"
+#define WIFI_CONFIG_LABEL_WIDTH         60
+#define WIFI_CONFIG_SSID_LABEL          "- Ssid:"
+#define WIFI_CONFIG_SSID_LABEL_WIDTH    54
+#define WIFI_CONFIG_PSK_LABEL           "- Psk:"
+// Wifi setup
 #define MODE_LABEL          "Mode:"
-#define MODE_LABEL_WIDTH    80
+#define MODE_LABEL_WIDTH    64
 #define STATUS_LABEL        "Status:"
-#define STATUS_LABEL_WIDTH  80
+#define STATUS_LABEL_WIDTH  64
 #define SIGNAL_LABEL        "Signal:"
-#define SIGNAL_LABEL_WIDTH  80
+#define SIGNAL_LABEL_WIDTH  64
 #define SSID_LABEL          "SSID:"
-#define SSID_LABEL_WIDTH    80
+#define SSID_LABEL_WIDTH    64
 #define MAC_LABEL           "MAC:"
-#define MAC_LABEL_WIDTH     80
+#define MAC_LABEL_WIDTH     64
 #define IP_LABEL            "IP:"
-#define IP_LABEL_WIDTH      80
-#define GATEWAY_LABEL       "Gateway:"
-#define GATEWAY_LABEL_WIDTH 80
+#define IP_LABEL_WIDTH      64
+#define GATEWAY_LABEL       "Gtway:"
+#define GATEWAY_LABEL_WIDTH 64
 #define DNS_LABEL           "DNS:"
 #define DNS1_LABEL          "DNS 1:"
-#define DNS1_LABEL_WIDTH    80
+#define DNS1_LABEL_WIDTH    64
 #define DNS2_LABEL          "DNS 2:"
-#define DNS2_LABEL_WIDTH    80
+#define DNS2_LABEL_WIDTH    64
 #define MASK_LABEL          "Mask:"
-#define MASK_LABEL_WIDTH    80
+#define MASK_LABEL_WIDTH    64
 // NTP status
 #define NTP_LABEL           "NTP:"
 #define NTP_LABEL_WIDTH     50
@@ -46,6 +54,11 @@
 // Wifi
 static lv_obj_t * wifiTitle;
 static lv_obj_t * wifiToggle;
+static lv_obj_t * wifiConfigTitle;
+static lv_obj_t * wifiConfigSsidTitle;
+static lv_obj_t * wifiConfigSsidLabel;
+static lv_obj_t * wifiConfigPskTitle;
+static lv_obj_t * wifiConfigPskLabel;
 static lv_obj_t * modeTitle;
 static lv_obj_t * modeLabel;
 static lv_obj_t * statusTitle;
@@ -58,22 +71,12 @@ static lv_obj_t * ipTitle;
 static lv_obj_t * ipLabel;
 static lv_obj_t * dnsTitle;
 static lv_obj_t * dnsLabel;
-static lv_obj_t * gatewayTitle;
-static lv_obj_t * gatewayLabel;
-
-// Network
-static lv_obj_t * netStatusTitle;
-static lv_obj_t * netStatusLabel;
-static lv_obj_t * macTitle;
-static lv_obj_t * macLabel;
-static lv_obj_t * netIpTitle;
-static lv_obj_t * netIpLabel;
-static lv_obj_t * netGatewayTitle;
-static lv_obj_t * netGatewayLabel;
-static lv_obj_t * dns1Title;
-static lv_obj_t * dns1Label;
 static lv_obj_t * dns2Title;
 static lv_obj_t * dns2Label;
+static lv_obj_t * gatewayTitle;
+static lv_obj_t * gatewayLabel;
+static lv_obj_t * macTitle;
+static lv_obj_t * macLabel;
 static lv_obj_t * maskTitle;
 static lv_obj_t * maskLabel;
 static lv_obj_t * ntpTitle;
@@ -104,69 +107,53 @@ static void toggle_wifi_cb(lv_event_t * e)
 void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
 {
     // Wifi On/Off -> save to EEProm
-    currentY+=SPACER;
+    currentY+=2;
     wifiTitle = uiCreateLabel(tab,&style_section_title,WIFI_LABEL,0,currentY,WIFI_LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
-    wifiToggle = uiCreateToggle(tab,&style_section_text,toggle_wifi_cb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
-    // Mode (Station / Acess Point)
-    modeTitle = uiCreateLabel(tab,&style_section_title,MODE_LABEL,0,currentY,MODE_LABEL_WIDTH,LINE_HEIGHT);
-    modeLabel = uiCreateLabel(tab,&style_section_text,"",MODE_LABEL_WIDTH,currentY,tabWidth-MODE_LABEL_WIDTH,LINE_HEIGHT);
+    wifiToggle = uiCreateToggle(tab,&style_section_text,toggle_wifi_cb,WIFI_TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
+    currentY+=TOGGLE_LINE_HEIGHT+HALF_SPACER;
+    // Wifi config
+    wifiConfigTitle = uiCreateLabel(tab,&style_section_title,WIFI_CONFIG_LABEL,0,currentY,WIFI_CONFIG_LABEL_WIDTH,LINE_HEIGHT);
+    wifiConfigSsidTitle = uiCreateLabel(tab,&style_section_title,WIFI_CONFIG_SSID_LABEL,WIFI_CONFIG_LABEL_WIDTH,currentY,WIFI_CONFIG_SSID_LABEL_WIDTH,LINE_HEIGHT);
+    wifiConfigSsidLabel = uiCreateLabel(tab,&style_section_text,"",WIFI_CONFIG_LABEL_WIDTH+WIFI_CONFIG_SSID_LABEL_WIDTH,currentY,tabWidth-WIFI_CONFIG_LABEL_WIDTH-WIFI_CONFIG_SSID_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
+    wifiConfigPskTitle = uiCreateLabel(tab,&style_section_title,WIFI_CONFIG_PSK_LABEL,WIFI_CONFIG_LABEL_WIDTH,currentY,WIFI_CONFIG_SSID_LABEL_WIDTH,LINE_HEIGHT);
+    wifiConfigPskLabel = uiCreateLabel(tab,&style_section_text,"",WIFI_CONFIG_LABEL_WIDTH+WIFI_CONFIG_SSID_LABEL_WIDTH,currentY,tabWidth-WIFI_CONFIG_LABEL_WIDTH-WIFI_CONFIG_SSID_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT+HALF_SPACER;
     // Status (Connected etc)
     statusTitle = uiCreateLabel(tab,&style_section_title,STATUS_LABEL,0,currentY,STATUS_LABEL_WIDTH,LINE_HEIGHT);
     statusLabel = uiCreateLabel(tab,&style_section_text,"",STATUS_LABEL_WIDTH,currentY,tabWidth-STATUS_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
-    // Signal (RSSI)
-    signalTitle = uiCreateLabel(tab,&style_section_title,SIGNAL_LABEL,0,currentY,SIGNAL_LABEL_WIDTH,LINE_HEIGHT);
-    signalLabel = uiCreateLabel(tab,&style_section_text,"",SIGNAL_LABEL_WIDTH,currentY,tabWidth-SIGNAL_LABEL_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
     // SSID
     ssidTitle = uiCreateLabel(tab,&style_section_title,SSID_LABEL,0,currentY,SSID_LABEL_WIDTH,LINE_HEIGHT);
     ssidLabel = uiCreateLabel(tab,&style_section_text,"",SSID_LABEL_WIDTH,currentY,tabWidth-SSID_LABEL_WIDTH,LINE_HEIGHT);
+    // Mode (Station / Acess Point)
+    modeTitle = uiCreateLabel(tab,&style_section_title,MODE_LABEL,SEC_COL_X,currentY,MODE_LABEL_WIDTH,LINE_HEIGHT);
+    modeLabel = uiCreateLabel(tab,&style_section_text,"",SEC_COL_X+MODE_LABEL_WIDTH,currentY,tabWidth-SEC_COL_X-MODE_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    // Signal (RSSI)
+    signalTitle = uiCreateLabel(tab,&style_section_title,SIGNAL_LABEL,0,currentY,SIGNAL_LABEL_WIDTH,LINE_HEIGHT);
+    signalLabel = uiCreateLabel(tab,&style_section_text,"",SIGNAL_LABEL_WIDTH,currentY,tabWidth-SIGNAL_LABEL_WIDTH,LINE_HEIGHT);
+    // DNS 1
+    dnsTitle = uiCreateLabel(tab,&style_section_title,DNS1_LABEL,SEC_COL_X,currentY,DNS1_LABEL_WIDTH,LINE_HEIGHT);
+    dnsLabel = uiCreateLabel(tab,&style_section_text,"",SEC_COL_X+DNS1_LABEL_WIDTH,currentY,tabWidth-SEC_COL_X-DNS1_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
     // IP @
     ipTitle = uiCreateLabel(tab,&style_section_title,IP_LABEL,0,currentY,IP_LABEL_WIDTH,LINE_HEIGHT);
     ipLabel = uiCreateLabel(tab,&style_section_text,"",IP_LABEL_WIDTH,currentY,tabWidth-IP_LABEL_WIDTH,LINE_HEIGHT);
+    // DNS 2
+    dns2Title = uiCreateLabel(tab,&style_section_title,DNS2_LABEL,SEC_COL_X,currentY,DNS2_LABEL_WIDTH,LINE_HEIGHT);
+    dns2Label = uiCreateLabel(tab,&style_section_text,"",SEC_COL_X+DNS2_LABEL_WIDTH,currentY,tabWidth-SEC_COL_X-DNS2_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
     // Gateway IP
     gatewayTitle = uiCreateLabel(tab,&style_section_title,GATEWAY_LABEL,0,currentY,GATEWAY_LABEL_WIDTH,LINE_HEIGHT);
     gatewayLabel = uiCreateLabel(tab,&style_section_text,"",GATEWAY_LABEL_WIDTH,currentY,tabWidth-GATEWAY_LABEL_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
-    // DNS
-    dnsTitle = uiCreateLabel(tab,&style_section_title,DNS_LABEL,0,currentY,DNS1_LABEL_WIDTH,LINE_HEIGHT);
-    dnsLabel = uiCreateLabel(tab,&style_section_text,"",DNS1_LABEL_WIDTH,currentY,tabWidth-DNS1_LABEL_WIDTH,LINE_HEIGHT);
-    //currentY+=LINE_HEIGHT;
-}
-
-void createNetworkTab(lv_obj_t * tab, int currentY, int tabWidth)
-{
-    // Status (Connected etc)
-    netStatusTitle = uiCreateLabel(tab,&style_section_title,STATUS_LABEL,0,currentY,STATUS_LABEL_WIDTH,LINE_HEIGHT);
-    netStatusLabel = uiCreateLabel(tab,&style_section_text,"",STATUS_LABEL_WIDTH,currentY,tabWidth-STATUS_LABEL_WIDTH,LINE_HEIGHT);
+    // Mask
+    maskTitle = uiCreateLabel(tab,&style_section_title,MASK_LABEL,SEC_COL_X,currentY,MASK_LABEL_WIDTH,LINE_HEIGHT);
+    maskLabel = uiCreateLabel(tab,&style_section_text,"",SEC_COL_X+MASK_LABEL_WIDTH,currentY,tabWidth-SEC_COL_X-MASK_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
     // Mac @
     macTitle = uiCreateLabel(tab,&style_section_title,MAC_LABEL,0,currentY,MAC_LABEL_WIDTH,LINE_HEIGHT);
     macLabel = uiCreateLabel(tab,&style_section_text,"",MAC_LABEL_WIDTH,currentY,tabWidth-MAC_LABEL_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
-    // IP @
-    netIpTitle = uiCreateLabel(tab,&style_section_title,IP_LABEL,0,currentY,IP_LABEL_WIDTH,LINE_HEIGHT);
-    netIpLabel = uiCreateLabel(tab,&style_section_text,"",IP_LABEL_WIDTH,currentY,tabWidth-IP_LABEL_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
-    // Gateway IP
-    netGatewayTitle = uiCreateLabel(tab,&style_section_title,GATEWAY_LABEL,0,currentY,GATEWAY_LABEL_WIDTH,LINE_HEIGHT);
-    netGatewayLabel = uiCreateLabel(tab,&style_section_text,"",GATEWAY_LABEL_WIDTH,currentY,tabWidth-GATEWAY_LABEL_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
-    // DNS1
-    dns1Title = uiCreateLabel(tab,&style_section_title,DNS1_LABEL,0,currentY,DNS1_LABEL_WIDTH,LINE_HEIGHT);
-    dns1Label = uiCreateLabel(tab,&style_section_text,"",DNS1_LABEL_WIDTH,currentY,tabWidth-DNS1_LABEL_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
-    // DNS2
-    dns2Title = uiCreateLabel(tab,&style_section_title,DNS2_LABEL,0,currentY,DNS2_LABEL_WIDTH,LINE_HEIGHT);
-    dns2Label = uiCreateLabel(tab,&style_section_text,"",DNS2_LABEL_WIDTH,currentY,tabWidth-DNS2_LABEL_WIDTH,LINE_HEIGHT);
-    currentY+=LINE_HEIGHT;
-    // Mask
-    maskTitle = uiCreateLabel(tab,&style_section_title,MASK_LABEL,0,currentY,MASK_LABEL_WIDTH,LINE_HEIGHT);
-    maskLabel = uiCreateLabel(tab,&style_section_text,"",MASK_LABEL_WIDTH,currentY,tabWidth-MASK_LABEL_WIDTH,LINE_HEIGHT);
     currentY+=LINE_HEIGHT;
     // NTP status
     ntpTitle = uiCreateLabel(tab,&style_section_title,NTP_LABEL,0,currentY,NTP_LABEL_WIDTH,LINE_HEIGHT);
@@ -178,8 +165,6 @@ void createNetworkTab(lv_obj_t * tab, int currentY, int tabWidth)
     currentY+=LINE_HEIGHT;
     ntpSyncTitle = uiCreateLabel(tab,&style_section_title,NTP_SYNC_LABEL,NTP_LABEL_WIDTH,currentY,NTP_SYNC_WIDTH,LINE_HEIGHT);
     ntpSyncLabel = uiCreateLabel(tab,&style_section_text,"",NTP_LABEL_WIDTH+NTP_SYNC_WIDTH,currentY,tabWidth-NTP_LABEL_WIDTH-NTP_SYNC_WIDTH,LINE_HEIGHT);
-    //currentY+=LINE_HEIGHT;
-
 }
 
 void uiSettingsUpdateWifi()
@@ -194,6 +179,11 @@ void uiSettingsUpdateWifi()
     {   // Wifi toggle on
         lv_obj_add_state(wifiToggle, LV_STATE_CHECKED);
     }
+
+    Settings* settings = Settings::getSettings();
+    // Wifi config
+    lv_label_set_text(wifiConfigSsidLabel,settings->getWifiSsid().c_str());
+    lv_label_set_text(wifiConfigPskLabel,settings->getWifiPassPhrase().c_str());
 
     // Mode (Station / Acess Point)
     lv_label_set_text(modeLabel,wifiManagerGetMode());
@@ -214,17 +204,8 @@ void uiSettingsUpdateWifi()
     String dnsString = WiFi.dnsIP(0).toString();
     lv_label_set_text(dnsLabel,dnsString.c_str());
 
-    // Net tab
-    lv_label_set_text(netStatusLabel,wifiManagerGetStatusString().c_str());
-    lv_obj_set_style_text_color(netStatusLabel, (wifiManagerIsConnected() ? uiOkColor : uiKoColor),0);
     // Mac @
     lv_label_set_text(macLabel,WiFi.macAddress().c_str());
-    // IP @
-    lv_label_set_text(netIpLabel,ipString.c_str());
-    // Gateway IP
-    lv_label_set_text(netGatewayLabel,gwString.c_str());
-    // DNS
-    lv_label_set_text(dns1Label,dnsString.c_str());
     // DNS2
     lv_label_set_text(dns2Label,WiFi.dnsIP(0).toString().c_str());
     // Mask
