@@ -31,6 +31,8 @@ WifiStatus wifiManagerGetStatus();
  */
 bool wifiManagerIsConnected();
 
+void wifiManagerNtpSynched();
+
 #endif
 
 #endif 

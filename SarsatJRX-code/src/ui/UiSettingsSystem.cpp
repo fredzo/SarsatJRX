@@ -184,7 +184,8 @@ void uiSettingsUpdateSystemPower()
     lv_label_set_text(vBatLabel,power->getVccStringValue().c_str());
     uiSettingsUpdateSystemRawPower();
     // Power state
-    String powerString = power->getPowerStateString() + " ("+power->getBatteryPercentage()+"%)";
+    String powerString = power->getPowerStateString();
+    if((power->getPowerState() != Power::PowerState::NO_BATTERY)) powerString = (powerString + " ("+ power->getBatteryPercentage() +"%)");
     lv_label_set_text(powerStateLabel,powerString.c_str());
 }
 

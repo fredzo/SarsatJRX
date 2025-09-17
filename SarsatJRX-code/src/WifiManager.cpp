@@ -12,6 +12,7 @@
 AsyncWebServer server(80);
 // Wifi status
 bool wifiStatusChanged = false;
+bool ntpStatusChanged = false;
 int portalStatus = -1;
 WifiStatus wifiStatus = WifiStatus::OFF;
 int wifiRssi = 0;
@@ -188,6 +189,12 @@ bool wifiManagerIsConnected()
     return (wifiStatus == WifiStatus::CONNECTED);
 }
 
+void wifiManagerNtpSynched()
+{
+  ntpStatusChanged = true;
+}
+
+
 #define WIFI_STATUS_CHECK_PERIOD    2000 // Check every 2 seconds
 #define WIFI_RSSI_CHANGE_THRESHOLD  10
 
@@ -230,6 +237,10 @@ bool wifiManagerHandleClient()
       Serial.println("Wifi status : " + wifiManagerGetStatusString());
       Serial.println("RSSI : "+ String(wifiRssi) + " dBm");
   #endif
+    }
+    else if(ntpStatusChanged)
+    {
+      changed = true;
     }
   }
   wifiStatusChanged = false;

@@ -114,6 +114,8 @@ Rtc::Date Rtc::getDate()
                     ntpRequestNumber = 0;
                     // Make sure we update time display right away
                     changed = true;
+                    // Alos notify wifi manager
+                    wifiManagerNtpSynched();
                     #ifdef SERIAL_OUT
                     Serial.println("NTP time received ! :");
                     Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S zone %Z %z ");
