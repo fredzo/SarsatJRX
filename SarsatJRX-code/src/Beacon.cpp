@@ -162,7 +162,7 @@ Beacon::Beacon(volatile byte frameBuffer[], Rtc::Date date)
     parseFrame();
 }
 
-String Beacon::getFrameName()
+String Beacon::getFrameTitle()
 {
     if (frameMode == Beacon::FrameMode::SELF_TEST) 
     {  // Self-test message frame synchronisation byte
@@ -204,7 +204,7 @@ String Beacon::getFrameName()
         }
     }
     else
-    { // Unknown fram format
+    {   // Unknown frame format
         return F("Unknown 406");
     }
 }

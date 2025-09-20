@@ -276,10 +276,10 @@ void uiBeaconSetBeacon(Beacon* beacon)
     lv_snprintf(buffer,sizeof(buffer),"%s - %s",date.c_str(),time.c_str());
     lv_label_set_text(infoDateLabel,buffer);
     // Frame name
-    const char* frameName = beacon->getFrameName().c_str();
-    lv_label_set_text(frameModeLabel,frameName);
+    const char* frameTitle = beacon->getFrameTitle().c_str();
+    lv_label_set_text(frameModeLabel,frameTitle);
     #ifdef SERIAL_OUT 
-    Serial.println(frameName);
+    Serial.println(frameTitle);
     #endif
     // Protocol name
     if(beacon->protocol->isUnknown())

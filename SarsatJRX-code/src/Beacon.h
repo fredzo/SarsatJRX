@@ -53,7 +53,7 @@ class Beacon
         Beacon(volatile byte frameBuffer[], Rtc::Date date);
         Beacon(volatile byte frameBuffer[]) : Beacon(frameBuffer,Rtc::getRtc()->getDate()) {}
         Rtc::Date date;
-        String getFrameName();
+        String getFrameTitle();
         String getProtocolName();
         String getProtocolDesciption();
         bool hasMainLocatingDevice();
