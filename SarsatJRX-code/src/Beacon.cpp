@@ -162,6 +162,53 @@ Beacon::Beacon(volatile byte frameBuffer[], Rtc::Date date)
     parseFrame();
 }
 
+String Beacon::getFrameName()
+{
+    if (frameMode == Beacon::FrameMode::SELF_TEST) 
+    {  // Self-test message frame synchronisation byte
+        return F("Self-test 406");
+    }
+    else if (frameMode == Beacon::FrameMode::NORMAL) 
+    {   // Normal message frame synchronisation byte
+        if(protocol == &Protocol::USER_SERIAL)
+        {
+            return F("Serial 406");
+        }
+        else if(protocol == &Protocol::USER_TEST)
+        {
+            return F("User Test 406");
+        }
+        else if(protocol == &Protocol::USER_ORB)
+        {
+            return F("Orbitography 406");
+        }
+        else if(protocol == &Protocol::USER_NAT)
+        {
+            return F("National 406");
+        }
+        else if(protocol == &Protocol::STD_TEST)
+        {
+            return F("Test Std. 406");
+        }
+        else if(protocol == &Protocol::NAT_TEST)
+        {
+            return F("Test Nat. 406");
+        }
+        else if(protocol == &Protocol::SPARE)
+        {
+            return F("Spare 406");
+        }
+        else
+        {
+            return F("Distress 406");
+        }
+    }
+    else
+    { // Unknown fram format
+        return F("Unknown 406");
+    }
+}
+
 String Beacon::getProtocolName()
 {
     return protocol->getTypeName(longFrame);

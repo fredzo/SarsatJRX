@@ -275,23 +275,11 @@ void uiBeaconSetBeacon(Beacon* beacon)
     lv_label_set_text(beaconTimeLabel,time.c_str());
     lv_snprintf(buffer,sizeof(buffer),"%s - %s",date.c_str(),time.c_str());
     lv_label_set_text(infoDateLabel,buffer);
-    // Frame mode
-    const char* frameMode;
-    if (beacon->frameMode == Beacon::FrameMode::SELF_TEST) 
-    {  // Self-test message frame synchronisation byte
-        frameMode = "Self-test 406";
-    }
-    else if (beacon->frameMode == Beacon::FrameMode::NORMAL) 
-    { // Normal message frame synchronisation byte
-        frameMode = "Distress 406";
-    }
-    else
-    { // Unknown fram format
-        frameMode = "Unknown 406";
-    }
-    lv_label_set_text(frameModeLabel,frameMode);
+    // Frame name
+    const char* frameName = beacon->getFrameName().c_str();
+    lv_label_set_text(frameModeLabel,frameName);
     #ifdef SERIAL_OUT 
-    Serial.println(frameMode);
+    Serial.println(frameName);
     #endif
     // Protocol name
     if(beacon->protocol->isUnknown())
