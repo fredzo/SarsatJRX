@@ -33,6 +33,12 @@ bool wifiManagerIsConnected();
 
 void wifiManagerNtpSynched();
 
+size_t wifiManagerClientCount();
+
+void wifiManagerSendTickerEvent(int countdown, String time);
+
+void wifiManagerSendFrameEvent(bool valid, bool error);
+
 #endif
 
 #endif 

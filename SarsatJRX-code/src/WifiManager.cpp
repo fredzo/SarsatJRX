@@ -10,6 +10,8 @@
 
 // Web 
 AsyncWebServer server(80);
+// SSE
+AsyncEventSource events("/sse");
 // Wifi status
 bool wifiStatusChanged = false;
 bool ntpStatusChanged = false;
@@ -130,10 +132,27 @@ void wifiManagerStart()
   {
     Serial.println("Error : could not start mDNS");
   }
-  Serial.println("mDNS started : you can now access http://myserver.local/");  
+  Serial.println("mDNS started : you can now access http://sarsatjrx.local/");  
   // Setup webserver
   server.on("/",rootPage);
   server.serveStatic("/favicon.ico", SPIFFS, FAVICON_FILE_PATH);
+  // Setup SSE
+  events.onConnect([](AsyncEventSourceClient *client)
+  {
+    if(client->lastId())
+    {
+      Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
+    }
+    //send event with message "hello!", id current millis
+    // and set reconnect delay to 1 second
+    client->send("hello!",NULL,millis(),1000);
+  });
+  events.onDisconnect([](AsyncEventSourceClient *client) 
+  {
+    Serial.printf("SSE Client disconnected! ID: %u\n", client->lastId());
+  });
+
+  server.addHandler(&events);  
   server.begin();
   wifiStatusChanged = true;
 }
@@ -246,6 +265,25 @@ bool wifiManagerHandleClient()
   wifiStatusChanged = false;
   return changed;
 }
+
+void wifiManagerSendTickerEvent(int countdown, String time)
+{
+  char buffer[32];
+  snprintf(buffer,sizeof(buffer), "ticker;%d;%s",countdown,time); 
+  events.send(NULL,buffer,millis());
+}
+
+void wifiManagerSendFrameEvent(bool valid, bool error)
+{
+  events.send(NULL,"frame",millis());
+}
+
+size_t wifiManagerClientCount()
+{
+  return events.count();
+}
+
+
 
 #endif
 

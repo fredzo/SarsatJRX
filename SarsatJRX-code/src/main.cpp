@@ -498,6 +498,12 @@ void loop()
         // Blink red led for filtered frames (valid or invalid)
         invalidFrameReceivedLedBlink();
       }
+#ifdef WIFI
+      if(wifiManagerClientCount() > 0)
+      { // TODO
+        wifiManagerSendFrameEvent(true,true);
+      }
+#endif    
     }
     else
     { // Frame preamble detected, but wrong start bytes
@@ -514,6 +520,12 @@ void loop()
       {
         hardware->getSoundManager()->playInvalidFrameSound();
       }
+#ifdef WIFI
+      if(wifiManagerClientCount() > 0)
+      {
+        wifiManagerSendFrameEvent(false,true);
+      }
+#endif    
     }
     // Reset frame decoding
     updateFooter(true);
@@ -550,6 +562,12 @@ void loop()
         blinkErrorLed();
       }
     }
+#ifdef WIFI
+    if(wifiManagerClientCount() > 0)
+    {
+      wifiManagerSendTickerEvent(rtc->getCountDown(), rtc->getTimeString());
+    }
+#endif    
     if((rtc->getCountDown()==0) && settings->getReloadCountDown())
     {
       rtc->startCountDown();
