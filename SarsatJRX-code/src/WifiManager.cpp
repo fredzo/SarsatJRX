@@ -134,7 +134,10 @@ void wifiManagerStart()
   }
     // Add service to mDNS
   MDNS.addService("_http", "_tcp", 80);
+  MDNS.enableWorkstation();
   Serial.println("mDNS started : you can now access http://sarsatjrx.local/");  
+  // Add CORS headers
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   // Setup webserver
   server.on("/",rootPage);
   server.serveStatic("/favicon.ico", SPIFFS, FAVICON_FILE_PATH);
@@ -271,13 +274,15 @@ bool wifiManagerHandleClient()
 void wifiManagerSendTickerEvent(int countdown, String time)
 {
   char buffer[32];
-  snprintf(buffer,sizeof(buffer), "ticker;%d;%s",countdown,time); 
-  events.send(NULL,buffer,millis());
+  snprintf(buffer,sizeof(buffer), "tick;%d;%s",countdown,time); 
+  events.send(buffer);
 }
 
 void wifiManagerSendFrameEvent(bool valid, bool error)
 {
-  events.send(NULL,"frame",millis());
+  char buffer[16];
+  snprintf(buffer,sizeof(buffer), "frame;%d;%d",valid,error); 
+  events.send(buffer);
 }
 
 size_t wifiManagerClientCount()
