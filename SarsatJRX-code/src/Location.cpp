@@ -141,5 +141,5 @@ double Location::Angle::getFloatValue()
 
 void Location::Angle::toFloatString(char* angleStr)
 {   /* 6 is mininum width, 4 is precision; float value is copied onto angleStr */
-    dtostrf(getFloatValue(), 6, 4, angleStr);
+    dtostrf(getFloatValue(), 8, 6, angleStr);
 }

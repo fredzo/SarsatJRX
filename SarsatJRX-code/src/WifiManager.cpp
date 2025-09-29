@@ -24,10 +24,24 @@ uint32_t lastConnectionAttempt = 0;
 // Filesystem
 bool filesystemMounted = false;
 static FS* fileSystem = nullptr;
+// Current frame
+Beacon* currentFrame = nullptr;
 
 void rootPage(AsyncWebServerRequest *request)
 {
   request->send(200,"text/plain","--- SarsatJRX ---");
+}
+
+void frame(AsyncWebServerRequest *request)
+{
+  if(currentFrame)
+  {
+    request->send(200,"text/plain",currentFrame->toKvpString());
+  }
+  else
+  {
+    request->send(204,"text/plain");
+  }
 }
 
 void onWifiEvent(WiFiEvent_t event) 
@@ -140,6 +154,7 @@ void wifiManagerStart()
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   // Setup webserver
   server.on("/",rootPage);
+  server.on("/frame",frame);
   server.serveStatic("/favicon.ico", SPIFFS, FAVICON_FILE_PATH);
   // Setup SSE
   events.onConnect([](AsyncEventSourceClient *client)
@@ -278,11 +293,23 @@ void wifiManagerSendTickerEvent(int countdown, String time)
   events.send(buffer);
 }
 
-void wifiManagerSendFrameEvent(bool valid, bool error)
+void wifiManagerSendFrameEvent(Beacon* beacon,bool valid, bool error)
 {
-  char buffer[16];
-  snprintf(buffer,sizeof(buffer), "frame;%d;%d",valid,error); 
-  events.send(buffer);
+  if(beacon) currentFrame = beacon;
+  if(events.count()>0)
+  {
+    char buffer[16];
+    snprintf(buffer,sizeof(buffer), "frame;%d;%d",valid,error);
+    if(beacon)
+    {
+      String message = String(buffer) + "\n" + beacon->toKvpString();
+      events.send(message.c_str());
+    }
+    else
+    {
+      events.send(buffer);
+    }
+  }
 }
 
 size_t wifiManagerClientCount()

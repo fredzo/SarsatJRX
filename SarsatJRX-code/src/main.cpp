@@ -456,11 +456,13 @@ void loop()
       frameReceivedLedBlink();
       // Then read beacon and update beacon display
       BeaconFilter filter = readBeacon();
+      Beacon* currentFrame = nullptr;
       if(filter == BEACON_FILTER_NONE)
       { // Start countdown for next frame only if not filtered
         rtc->startCountDown();            
         // Play sound and update error led and display
-        bool error = !(beacons[beaconsReadIndex]->isFrameValid());
+        currentFrame = beacons[beaconsReadIndex];
+        bool error = !(currentFrame->isFrameValid());
         if(error)
         { // Error led
           invalidFrameReceivedLedBlink();
@@ -473,7 +475,7 @@ void loop()
         updateDisplay();
         if(!isFrameFromDisk())
         { // Finally save beacon to sd card
-          bool success = hardware->getFilesystems()->saveBeacon(beacons[beaconsReadIndex]);
+          bool success = hardware->getFilesystems()->saveBeacon(currentFrame);
           if(!success)
           { // Update SD Card indicator
             display->updateSdCard();
@@ -499,10 +501,8 @@ void loop()
         invalidFrameReceivedLedBlink();
       }
 #ifdef WIFI
-      if(wifiManagerClientCount() > 0)
-      { // TODO
-        wifiManagerSendFrameEvent(true,true);
-      }
+      // TODO
+      wifiManagerSendFrameEvent(currentFrame,true,true);
 #endif    
     }
     else
@@ -521,10 +521,7 @@ void loop()
         hardware->getSoundManager()->playInvalidFrameSound();
       }
 #ifdef WIFI
-      if(wifiManagerClientCount() > 0)
-      {
-        wifiManagerSendFrameEvent(false,true);
-      }
+      wifiManagerSendFrameEvent(nullptr,false,true);
 #endif    
     }
     // Reset frame decoding

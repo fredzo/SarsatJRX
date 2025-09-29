@@ -934,8 +934,8 @@ String Beacon::toKvpString()
     // Coordinates
     if(!location.isUnknown())
     {
-        result+="lat="+String(location.latitude.getFloatValue())+"\n";
-        result+="long="+String(location.longitude.getFloatValue())+"\n";
+        result+="lat="+String(location.latitude.getFloatValue(),6)+"\n";
+        result+="lon="+String(location.longitude.getFloatValue(),6)+"\n";
     }
     // Control codes
     result+="bch1=" + (isBch1Valid() ? String("ok") : String("ko")) +"\n";

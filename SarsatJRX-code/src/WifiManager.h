@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <SarsatJRXConf.h>
+#include <Beacon.h>
 
 #ifdef WIFI
 
@@ -37,7 +38,7 @@ size_t wifiManagerClientCount();
 
 void wifiManagerSendTickerEvent(int countdown, String time);
 
-void wifiManagerSendFrameEvent(bool valid, bool error);
+void wifiManagerSendFrameEvent(Beacon* beacon,bool valid, bool error);
 
 #endif
 
