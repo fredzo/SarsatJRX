@@ -81,7 +81,7 @@ bool Filesystems::saveBeacon(Beacon* beacon)
         File file = sdFileSystem->open(buffer, FILE_WRITE);
         if(file)
         {
-            if(!file.print(toHexString(beacon->frame,false,0,beacon->longFrame ? 18 : 14)))
+            if(!file.print(beacon->hexString(true)))
             {   // SD card has probably been removed
                 sdFilesystemMounted = false;
                 #ifdef SERIAL_OUT

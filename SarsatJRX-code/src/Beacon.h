@@ -64,6 +64,7 @@ class Beacon
         String additionalData;
         bool hasSerialNumber;
         String serialNumber;
+        String hexId;
         uint32_t bch1;
         uint32_t computedBch1;
         bool isBch1Valid();
@@ -74,6 +75,8 @@ class Beacon
         bool isBch2Valid();
         bool isFrameValid();
         bool isOrbito();
+        String toKvpString();
+        String hexString(bool withHeader);
     private:
         void parseFrame();
         void parseProtocol();

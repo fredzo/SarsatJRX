@@ -642,6 +642,12 @@ void Beacon::parseFrame()
 
     // Hex id from bits 26-85
     identifier = getBits(frame,26,85);
+    // Format HexId to string
+    char buffer[32];
+    uint32_t msb = identifier >> 32;
+    uint32_t lsb = identifier;
+    snprintf(buffer,sizeof(buffer),"%07lX%08lX",msb,lsb);
+    hexId = String(buffer);
 
     if (longFrame)
     {
@@ -905,4 +911,65 @@ bool Beacon::isOrbito()
     return (protocol == &Protocol::USER_ORB);    
 }
 
+String Beacon::toKvpString()
+{
+    String result;
+    result+="date="+date.getDateString()+"\n";
+    result+="time="+date.getTimeString()+"\n";
+    // Frame title
+    result+="title="+getFrameTitle()+"\n";
+    // Protocol name
+    result+="protocol="+getProtocolName()+"\n";
+    // Protocol description
+    result+="protocolDesc="+getProtocolDesciption()+"\n";
+    // Protocol additional data
+    if(hasAdditionalData)
+    {   // Additionnal protocol data
+        result+="protocolAddData="+additionalData+"\n";
+    }
 
+    // Location
+    // Country
+    result+="country="+country.toString()+"\n";
+    // Coordinates
+    if(!location.isUnknown())
+    {
+        result+="lat="+String(location.latitude.getFloatValue())+"\n";
+        result+="long="+String(location.longitude.getFloatValue())+"\n";
+    }
+    // Control codes
+    result+="bch1=" + (isBch1Valid() ? String("ok") : String("ko")) +"\n";
+    if(longFrame && hasBch2) 
+    {   // No second proteced field in short frames
+        result+="bch2=" + (isBch2Valid() ? String("ok") : String("ko")) +"\n";
+    }
+
+    // Hex ID
+    result+="hexId=" + hexId +"\n";
+
+    // Serial #
+    if(hasSerialNumber)
+    { // Serial number
+        result+="serial=" + serialNumber +"\n";
+    }
+
+    // Location devices
+    if(hasMainLocatingDevice())
+    { // Main locating device
+        result+="mainDevice=" + getMainLocatingDeviceName() +"\n";
+    }
+
+    if(hasAuxLocatingDevice())
+    {   // Auxiliary locating device
+        result+="auxDevice=" + getAuxLocatingDeviceName() +"\n";
+    }
+
+    // Data
+    result+="data=" + hexString(false) +"\n";
+    return result;
+}
+
+String Beacon::hexString(bool withHeader)
+{
+    return toHexString(frame, false, (withHeader ? 0 : 3), (longFrame ? 18 : 14));
+}

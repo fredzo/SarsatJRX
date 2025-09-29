@@ -275,7 +275,7 @@ void uiBeaconSetBeacon(Beacon* beacon)
     lv_label_set_text(beaconTimeLabel,time.c_str());
     lv_snprintf(buffer,sizeof(buffer),"%s - %s",date.c_str(),time.c_str());
     lv_label_set_text(infoDateLabel,buffer);
-    // Frame name
+    // Frame title
     const char* frameTitle = beacon->getFrameTitle().c_str();
     lv_label_set_text(frameModeLabel,frameTitle);
     #ifdef SERIAL_OUT 
@@ -391,15 +391,11 @@ void uiBeaconSetBeacon(Beacon* beacon)
     #endif
 
     // Hex ID
-    // "Id = 0x1122334455667788"
-    uint32_t msb = beacon->identifier >> 32;
-    uint32_t lsb = beacon->identifier;
-    lv_snprintf(buffer,sizeof(buffer),"%07lX%08lX",msb,lsb);
-    lv_label_set_text(mapHexIdLabel,buffer);
-    lv_label_set_text(beaconHexIdLabel,buffer);
-    lv_label_set_text(dataHexIdLabel,buffer);
+    lv_label_set_text(mapHexIdLabel,beacon->hexId.c_str());
+    lv_label_set_text(beaconHexIdLabel,beacon->hexId.c_str());
+    lv_label_set_text(dataHexIdLabel,beacon->hexId.c_str());
     #ifdef SERIAL_OUT 
-    Serial.println(buffer);   
+    Serial.println(beacon->hexId.c_str());   
     #endif  
 
     // Serial #
@@ -481,7 +477,7 @@ void uiBeaconSetBeacon(Beacon* beacon)
         lv_obj_add_flag(mapQr, LV_OBJ_FLAG_HIDDEN);
     }
     // Set beacon QR data
-    lv_snprintf(buffer,sizeof(buffer),BEACON_URL_TEMPALTE, toHexString(beacon->frame, false, 3, beacon->longFrame ? 18 : 14).c_str());
+    lv_snprintf(buffer,sizeof(buffer),BEACON_URL_TEMPALTE, beacon->hexString(false).c_str());
     #ifdef SERIAL_OUT 
     Serial.println(buffer); 
     #endif
