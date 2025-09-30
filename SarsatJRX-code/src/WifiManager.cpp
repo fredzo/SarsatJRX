@@ -32,6 +32,14 @@ void rootPage(AsyncWebServerRequest *request)
   request->send(200,"text/plain","--- SarsatJRX ---");
 }
 
+void sseOptions(AsyncWebServerRequest *request)
+{
+  AsyncWebServerResponse *response = request->beginResponse(200);
+  response->addHeader("Access-Control-Allow-Methods","POST, GET, OPTIONS");
+  response->addHeader("Access-Control-Allow-Headers","cache-control, x-requested-with");
+  request->send(response);
+}
+
 void frame(AsyncWebServerRequest *request)
 {
   if(currentFrame)
@@ -155,6 +163,7 @@ void wifiManagerStart()
   // Setup webserver
   server.on("/",rootPage);
   server.on("/frame",frame);
+  server.on("/sse",HTTP_OPTIONS,sseOptions);
   server.serveStatic("/favicon.ico", SPIFFS, FAVICON_FILE_PATH);
   // Setup SSE
   events.onConnect([](AsyncEventSourceClient *client)
