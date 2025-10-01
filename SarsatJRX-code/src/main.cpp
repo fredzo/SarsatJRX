@@ -24,8 +24,6 @@
 bool discriJackPlugged = false;
 
 // Beacon list
-#define BEACON_LIST_MAX_SIZE  16
-
 Beacon* beacons[BEACON_LIST_MAX_SIZE];
 int beaconsWriteIndex = -1;
 int beaconsReadIndex = -1;

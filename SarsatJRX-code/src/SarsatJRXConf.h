@@ -12,6 +12,9 @@
 // Enable serial out
 #define SERIAL_OUT
 
+// Max number of beacons in memory
+#define BEACON_LIST_MAX_SIZE  16
+
 // Enable WIFI
 #define WIFI
 // Time to wait before trying again to connect to Wifi
@@ -28,7 +31,6 @@
 
 // Frame countdown default duration
 #define FRAME_COUNTDOWN_DEFAULT_DURATION    50
-
 
 // Filesystem
 #define SARSATJRX_LOG_DIR_NAME          "/SarsatJRX"

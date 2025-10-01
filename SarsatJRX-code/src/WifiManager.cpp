@@ -8,6 +8,8 @@
 
 #define FAVICON_FILE_PATH   "/sarsat-jrx.png"
 
+#define FRAME_SEPARATOR     "#\n"
+
 // Web 
 AsyncWebServer server(80);
 // SSE
@@ -27,6 +29,13 @@ static FS* fileSystem = nullptr;
 // Current frame
 Beacon* currentFrame = nullptr;
 
+// For frames endpoint
+extern Beacon* beacons[];
+extern int beaconsWriteIndex;
+extern int beaconsSize;
+extern bool beaconsFull;
+
+
 void rootPage(AsyncWebServerRequest *request)
 {
   request->send(200,"text/plain","--- SarsatJRX ---");
@@ -45,6 +54,28 @@ void frame(AsyncWebServerRequest *request)
   if(currentFrame)
   {
     request->send(200,"text/plain",currentFrame->toKvpString());
+  }
+  else
+  {
+    request->send(204,"text/plain");
+  }
+}
+
+void frames(AsyncWebServerRequest *request)
+{
+  if(beaconsSize > 0)
+  { // Start at first frame in list
+    String result;
+    int position = beaconsFull ? ((beaconsWriteIndex+1)%BEACON_LIST_MAX_SIZE) : 0;
+    for(int i = 0 ; i < beaconsSize ; i++)
+    { // Iterate on each frame
+      //Serial.printf("Serializing frame# = %d for position = %d.\n",i,position);
+      result += FRAME_SEPARATOR;
+      result += beacons[position]->toKvpString();
+      position++;
+      if(position >= BEACON_LIST_MAX_SIZE) position = 0;
+    }
+    request->send(200,"text/plain",result);
   }
   else
   {
@@ -163,8 +194,9 @@ void wifiManagerStart()
   // Setup webserver
   server.on("/",rootPage);
   server.on("/frame",frame);
+  server.on("/frames",frames);
   server.on("/sse",HTTP_OPTIONS,sseOptions);
-  server.serveStatic("/favicon.ico", SPIFFS, FAVICON_FILE_PATH);
+  server.serveStatic("/favicon.ico", SPIFFS, FAVICON_FILE_PATH, "public, max-age=31536000, immutable");
   // Setup SSE
   events.onConnect([](AsyncEventSourceClient *client)
   {
