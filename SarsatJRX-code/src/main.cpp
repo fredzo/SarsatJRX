@@ -115,7 +115,7 @@ bool ledFrameErrorState = false;
 bool ledFrameReceivedState = false;
 
 // Leds management (header + physical led)
-#define LED_BLINK_TIME 1000 // 1 s
+#define LED_BLINK_TIME 2000 // 1 s
 #define LED_BLINK_SHORT_TIME 100 // 100 ms
 unsigned long ledsStartBlinkTime;
 unsigned long ledSig1StartBlinkTime;
@@ -137,22 +137,6 @@ void updateLeds()
     ledFrameErrorOn = false;
     countDownModeOn = false;
   }
-}
-
-void frameReceivedLedBlink()
-{ // Switch led on and record time
-  digitalWrite(NOTIFICATION_PIN, HIGH);
-  ledFrameReceivedOn = true;
-  ledsStartBlinkTime = millis();
-  countDownModeOn = false;
-}
-
-void invalidFrameReceivedLedBlink()
-{ // Switch led on and record time
-  digitalWrite(ERROR_PIN, HIGH);
-  ledFrameErrorOn = true;
-  ledsStartBlinkTime = millis();
-  countDownModeOn = false;
 }
 
 // Store last displayed power value
@@ -204,6 +188,24 @@ void updateLedHeader(bool force)
   if(drawledSig2) display->updateLedSig2(ledSig2State);
   if(drawledInFrame) display->updateLedInFrame(ledInFrameState,ledFrameErrorState);
   if(drawledFrameReceived) display->updateLedFrameReceived(ledFrameReceivedState);
+}
+
+void frameReceivedLedBlink()
+{ // Switch led on and record time
+  digitalWrite(NOTIFICATION_PIN, HIGH);
+  ledFrameReceivedOn = true;
+  ledsStartBlinkTime = millis();
+  countDownModeOn = false;
+  updateLedHeader(false);
+}
+
+void invalidFrameReceivedLedBlink()
+{ // Switch led on and record time
+  digitalWrite(ERROR_PIN, HIGH);
+  ledFrameErrorOn = true;
+  ledsStartBlinkTime = millis();
+  countDownModeOn = false;
+  updateLedHeader(false);
 }
 
 void updateHeader()
