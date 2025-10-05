@@ -651,8 +651,8 @@ void Beacon::parseFrame()
 
     if (longFrame)
     {
-        if(protocol->isUser()) 
-        {   // User loc protocol trame longue
+        if(protocol->isUser() && !isOrbito()) 
+        {   // User loc protocol long frame (no location for Obitography frame)
             location.latitude.orientation = (frame[13] & 0x10) >> 4;   
             location.latitude.degrees = ((frame[13] & 0x0F) << 3 | (frame[14] & 0xE0) >> 5);
             location.latitude.minutes = (frame[14] & 0x1E) >> 1;

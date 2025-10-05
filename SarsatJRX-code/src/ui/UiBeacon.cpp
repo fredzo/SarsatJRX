@@ -344,12 +344,14 @@ void uiBeaconSetBeacon(Beacon* beacon)
         }
         else
         {
+            lv_label_set_text(locationLabel0,"");
             lv_label_set_text(locationLabel3,"");
         }
     }
     else 
     {   // Short frame
         lv_label_set_text(locationLabel2,"22 HEX. No location");
+        lv_label_set_text(locationLabel0,"");
         lv_label_set_text(locationLabel3,"");
     }
     // Control codes

@@ -36,7 +36,7 @@ void wifiManagerNtpSynched();
 
 size_t wifiManagerClientCount();
 
-void wifiManagerSendTickerEvent(int countdown, String time);
+void wifiManagerSendTickerEvent(int countdown,int batPercentage, bool sdMounted, String time);
 
 void wifiManagerSendFrameEvent(Beacon* beacon,bool valid, bool error);
 
