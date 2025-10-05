@@ -562,7 +562,7 @@ void loop()
 #ifdef WIFI
     if(wifiManagerClientCount() > 0)
     {
-      wifiManagerSendTickerEvent(rtc->getCountDown(),hardware->getPower()->getBatteryPercentage(),hardware->getFilesystems()->isSdFilesystemMounted(),rtc->getTimeString());
+      wifiManagerSendTickerEvent(rtc->getCountDown(),hardware->getFilesystems()->isSdFilesystemMounted(),hardware->getAudio()->isDiscriInput(),hardware->getPower()->getBatteryPercentage(),rtc->getTimeString());
     }
 #endif    
     if((rtc->getCountDown()==0) && settings->getReloadCountDown())

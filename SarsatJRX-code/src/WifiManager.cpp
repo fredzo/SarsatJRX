@@ -327,10 +327,10 @@ bool wifiManagerHandleClient()
   return changed;
 }
 
-void wifiManagerSendTickerEvent(int countdown,int batPercentage, bool sdMounted, String time)
+void wifiManagerSendTickerEvent(int countdown,bool sdMounted, bool discriOn, int batPercentage, String time)
 {
   char buffer[32];
-  snprintf(buffer,sizeof(buffer), "tick;%d;%d;%d;%s",countdown,batPercentage,(sdMounted ? 1 : 0),time); 
+  snprintf(buffer,sizeof(buffer), "tick;%d;%d;%d;%d;%s",countdown,(sdMounted ? 1 : 0),(discriOn ? 1 : 0),batPercentage,time); 
   events.send(buffer);
 }
 
