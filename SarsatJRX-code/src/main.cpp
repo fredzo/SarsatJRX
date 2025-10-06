@@ -481,6 +481,8 @@ void loop()
             display->updateSdCard();
           }
         }
+        // Unfiltered frame
+        wifiManagerSendFrameEvent(currentFrame,true,false,error);
       }
       else
       { // Frame has been filterd
@@ -492,17 +494,19 @@ void loop()
             rtc->startCountDown();
           }
           if(settings->getFrameSound()) hardware->getSoundManager()->playFrameSound(true);
+          // Filtered error frame
+          wifiManagerSendFrameEvent(currentFrame,true,true,true);
         }
         else
         {
           if(settings->getFrameSound()) hardware->getSoundManager()->playFilteredFrameSound();
+          // Filtered orbito frame
+          wifiManagerSendFrameEvent(currentFrame,true,true,false);
         }
         // Blink red led for filtered frames (valid or invalid)
         invalidFrameReceivedLedBlink();
       }
 #ifdef WIFI
-      // TODO
-      wifiManagerSendFrameEvent(currentFrame,true,true);
 #endif    
     }
     else
@@ -521,7 +525,7 @@ void loop()
         hardware->getSoundManager()->playInvalidFrameSound();
       }
 #ifdef WIFI
-      wifiManagerSendFrameEvent(nullptr,false,true);
+      wifiManagerSendFrameEvent(nullptr,false,true,true);
 #endif    
     }
     // Reset frame decoding

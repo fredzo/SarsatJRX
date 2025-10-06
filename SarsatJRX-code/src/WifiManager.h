@@ -38,7 +38,7 @@ size_t wifiManagerClientCount();
 
 void wifiManagerSendTickerEvent(int countdown,bool sdMounted, bool discriOn, int batPercentage, String time);
 
-void wifiManagerSendFrameEvent(Beacon* beacon,bool valid, bool error);
+void wifiManagerSendFrameEvent(Beacon* beacon,bool valid, bool filtered, bool error);
 
 #endif
 

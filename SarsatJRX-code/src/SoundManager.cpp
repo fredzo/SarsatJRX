@@ -5,7 +5,7 @@ SoundManager* SoundManager::soundManagerInstance = nullptr;
 const char frameOkSoundString[]       = "ok:d=4,o=5,b=300:32d6,32d#6,32e6,32f6,32f#6,32g6,32g#6,32a6";
 const char frameKoSoundString[]       = "ko:d=4,o=5,b=300:32a6,32g#6,32g6,32f#6,32f6,32e6,32d#6,32d6";
 const char frameInvalidSoundString[]  = "invalid:d=4,o=5,b=300:16a,a8,16a";
-const char frameFilteredSoundString[] = "invalid:d=4,o=6,b=300:16a,a8,16a";
+const char frameFilteredSoundString[] = "filtered:d=4,o=6,b=300:16a,a8,16a";
 const char countDownLowString[]       = "countl:d=16,o=5,b=60:a";
 const char countDownHighString[]      = "counth:d=16,o=5,b=60:a6";
 const char touchSoundString[]         = "touch:d=4,o=5,b=300:32a8";

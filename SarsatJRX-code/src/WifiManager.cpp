@@ -334,13 +334,13 @@ void wifiManagerSendTickerEvent(int countdown,bool sdMounted, bool discriOn, int
   events.send(buffer);
 }
 
-void wifiManagerSendFrameEvent(Beacon* beacon,bool valid, bool error)
+void wifiManagerSendFrameEvent(Beacon* beacon,bool valid, bool filtered, bool error)
 {
   if(beacon) currentFrame = beacon;
   if(events.count()>0)
   {
     char buffer[16];
-    snprintf(buffer,sizeof(buffer), "frame;%d;%d",valid,error);
+    snprintf(buffer,sizeof(buffer), "frame;%d;%d;%d",valid,filtered,error);
     if(beacon)
     {
       String message = String(buffer) + "\n" + beacon->toKvpString();
