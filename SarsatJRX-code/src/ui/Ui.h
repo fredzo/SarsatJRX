@@ -39,6 +39,7 @@
 #define SYMBOL_MAG_GLASS_ARROW      "\xEE\x94\xA1"
 #define SYMBOL_EXTERNAL_LINK        "\xEF\x8D\x9D"
 #define SYMBOL_PHONE                "\xEF\x8F\x8D"
+#define SYMBOL_LINK                 "\xEF\x83\x81"
 
 extern const lv_font_t casscadia_mono;
 extern const lv_font_t casscadia_mono_16;

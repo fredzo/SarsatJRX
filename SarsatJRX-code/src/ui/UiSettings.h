@@ -17,8 +17,11 @@
 #define BUTTON_HEIGHT       36
 #define SEC_COL_X           210
 
+#define PARAM_TAB_INDEX     1
 
 void uiSettingsCreateView(lv_obj_t * cont);
+
+uint16_t uiSettingsGetActiveTab();
 
 void uiSettingsUpdateView();
 

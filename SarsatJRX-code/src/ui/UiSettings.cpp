@@ -32,6 +32,7 @@ void uiSettingsCreateView(lv_obj_t * cont)
 
     /*Add 6 tabs */
     lv_obj_t * tab1 = lv_tabview_add_tab(settingsTabview, SYMBOL_RADIO);
+    // Warning PARAM_TAB_INDEX should match this position
     lv_obj_t * tab2 = lv_tabview_add_tab(settingsTabview, SYMBOL_WRENCH);
     lv_obj_t * tab3 = lv_tabview_add_tab(settingsTabview, SYMBOL_DISPLAY);
     lv_obj_t * tab4 = lv_tabview_add_tab(settingsTabview, SYMBOL_WIFI_CONNECTED);
@@ -67,6 +68,11 @@ void uiSettingsCreateView(lv_obj_t * cont)
     createSdTab(tab6,currentY,tabWidth,tabHeight);
     createSystemTab(tab7,currentY,tabWidth);
     lv_obj_clear_flag(lv_tabview_get_content(settingsTabview), LV_OBJ_FLAG_SCROLLABLE);
+}
+
+uint16_t uiSettingsGetActiveTab()
+{
+    return lv_tabview_get_tab_act(settingsTabview);
 }
 
 void uiSettingsUpdateView()

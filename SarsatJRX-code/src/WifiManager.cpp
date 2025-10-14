@@ -207,9 +207,19 @@ void wifiManagerStart()
     //send event with message "hello!", id current millis
     // and set reconnect delay to 1 second
     client->send("hello!",NULL,millis(),1000);
+    if(wifiStatus == WifiStatus::CONNECTED)
+    {
+      wifiStatus = WifiStatus::LINKED;
+      wifiStatusChanged = true;
+    }
   });
   events.onDisconnect([](AsyncEventSourceClient *client) 
   {
+    if(wifiStatus == WifiStatus::LINKED)
+    {
+      wifiStatus = WifiStatus::CONNECTED;
+      wifiStatusChanged = true;
+    }
     Serial.printf("SSE Client disconnected! ID: %u\n", client->lastId());
   });
 
@@ -224,6 +234,8 @@ String wifiManagerGetStatusString()
   {
     case WifiStatus::CONNECTED : 
       return "Connected to Access Point";
+    case WifiStatus::LINKED : 
+      return "Application linked to decoder";
     case WifiStatus::PORTAL :
       return "Portal started";
     case WifiStatus::PORTAL_CONNECTED:
@@ -266,7 +278,7 @@ void wifiManagerStop()
  */
 bool wifiManagerIsConnected()
 {
-    return (wifiStatus == WifiStatus::CONNECTED);
+    return (wifiStatus == WifiStatus::CONNECTED || wifiStatus == WifiStatus::LINKED);
 }
 
 void wifiManagerNtpSynched()
