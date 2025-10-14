@@ -89,6 +89,8 @@ lv_obj_t * dataHexIdLabel;
 lv_obj_t * dataDataTitle;
 lv_obj_t * dataDataLabel1;
 lv_obj_t * dataDataLabel2;
+// Beacon border
+lv_obj_t * beaconBorder;
 
 
 void createMainBloc(lv_obj_t * bloc, int tabWidth)
@@ -264,6 +266,16 @@ void uiBeaconCreateView(lv_obj_t * cont)
     createBeaconTab(tab3,currentY,tabWidth);
     createDataTab(tab4,currentY,tabWidth);
     lv_obj_clear_flag(lv_tabview_get_content(beaconTabview), LV_OBJ_FLAG_SCROLLABLE);
+
+    // Border container
+    beaconBorder = lv_obj_create(cont);
+    lv_obj_add_style(beaconBorder, &style_border_red, 0);
+    lv_obj_set_align(beaconBorder,LV_ALIGN_TOP_RIGHT);
+    lv_obj_set_size(beaconBorder,tabWidth+8,DISPLAY_HEIGHT-HEADER_HEIGHT-FOOTER_HEIGHT);
+    lv_obj_set_style_bg_opa(beaconBorder,LV_OPA_0,0);
+    // Hide it for now
+    lv_obj_add_flag(beaconBorder, LV_OBJ_FLAG_HIDDEN);
+
 }
 
 void uiBeaconSetBeacon(Beacon* beacon)
@@ -483,4 +495,14 @@ void uiBeaconSetBeacon(Beacon* beacon)
     Serial.println(buffer); 
     #endif
     lv_qrcode_update(beaconQr, buffer, strlen(buffer));
+
+    // Red border if frame is invalid
+    if(beacon->isFrameValid())
+    {   // Hide red border
+        lv_obj_add_flag(beaconBorder, LV_OBJ_FLAG_HIDDEN);
+    }
+    else
+    {   // Show red border
+        lv_obj_clear_flag(beaconBorder, LV_OBJ_FLAG_HIDDEN);
+    }
 }

@@ -78,6 +78,9 @@ lv_style_t style_footer_text;
 lv_style_t style_time;
 lv_style_t style_meter;
 
+// Beacon view border styles
+lv_style_t style_border_red;
+
 lv_color_t uiBackgroundColor;
 lv_color_t uiOkColor;
 lv_color_t uiKoColor;
@@ -553,7 +556,13 @@ void createUi()
     lv_style_set_text_font(&style_time, font_mono);
     lv_style_set_text_color(&style_time, lv_palette_lighten(LV_PALETTE_CYAN,1));
     lv_style_set_pad_top(&style_time,4);
-
+    
+    // Beacon border style
+    lv_style_init(&style_border_red);
+    lv_style_set_border_width(&style_border_red, 4);
+    lv_style_set_border_color(&style_border_red, lv_palette_main(LV_PALETTE_RED));
+    lv_style_set_radius(&style_border_red, 0);
+    lv_style_set_pad_all(&style_border_red, 0);
 
     // BG color
     uiBackgroundColor = lv_color_make(7, 7, 7);
