@@ -287,12 +287,16 @@ static void title_long_press_handler(lv_event_t * e)
 
 static void spinner_long_press_handler(lv_event_t * e)
 {
-    if(Settings::getSettings()->getReloadCountDown())
-    {   // Only if auto-reload is enabled
-        // Audio feedback for button press
-        SoundManager::getSoundManager()->playFilteredFrameSound();
-        // Stop countdown from auto reloading
+    // Audio feedback for button press
+    SoundManager::getSoundManager()->playFilteredFrameSound();
+    Rtc* rtc = Rtc::getRtc();
+    if(rtc->getCountDown() >= 0)
+    {   // Stop countdown from auto reloading
         stopCountdownAutoReload();
+    }
+    else
+    {   // Restart countdown
+        rtc->startCountDown();
     }
 }
 

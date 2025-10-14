@@ -35,6 +35,8 @@ extern int beaconsWriteIndex;
 extern int beaconsSize;
 extern bool beaconsFull;
 
+// For reset countdown endpoint
+extern void stopCountdownAutoReload();
 
 void rootPage(AsyncWebServerRequest *request)
 {
@@ -81,6 +83,21 @@ void frames(AsyncWebServerRequest *request)
   {
     request->send(204,"text/plain");
   }
+}
+
+void resetCountdown(AsyncWebServerRequest *request)
+{
+    // Audio feedback for button press
+    SoundManager::getSoundManager()->playFilteredFrameSound();
+    Rtc* rtc = Rtc::getRtc();
+    if(rtc->getCountDown() >= 0)
+    {   // Stop countdown from auto reloading
+        stopCountdownAutoReload();
+    }
+    else
+    {   // Restart countdown
+        rtc->startCountDown();
+    }
 }
 
 void onWifiEvent(WiFiEvent_t event) 
@@ -195,6 +212,7 @@ void wifiManagerStart()
   server.on("/",rootPage);
   server.on("/frame",frame);
   server.on("/frames",frames);
+  server.on("/resetcd",resetCountdown);
   server.on("/sse",HTTP_OPTIONS,sseOptions);
   server.serveStatic("/favicon.ico", SPIFFS, FAVICON_FILE_PATH, "public, max-age=31536000, immutable");
   // Setup SSE
