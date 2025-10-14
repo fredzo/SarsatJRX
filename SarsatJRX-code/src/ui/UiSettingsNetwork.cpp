@@ -50,6 +50,14 @@
 #define NTP_SYNC_LABEL      "- Sync.:"
 #define NTP_SYNC_WIDTH      70
 
+// App connection
+#define APP_IP_LABEL        "Decoder address:"
+#define APP_IP_LABEL_WIDTH  160
+#define APP_QR_TITLE        "QR Code:"
+#define APP_QR_TEXT         "Scan with SarsatJRX app"
+// QR code
+#define APP_QR_SIZE         130
+#define DECODER_ADDRESS_TEMPALTE    "%s"
 
 // Wifi
 static lv_obj_t * wifiTitle;
@@ -86,6 +94,13 @@ static lv_obj_t * ntpServerTitle;
 static lv_obj_t * ntpServerLabel;
 static lv_obj_t * ntpSyncTitle;
 static lv_obj_t * ntpSyncLabel;
+
+// App Connection
+static lv_obj_t * appIpTitle;
+static lv_obj_t * appIpValue;
+static lv_obj_t * appQrTitle;
+static lv_obj_t * appQrCode;
+
 
 static void toggle_wifi_cb(lv_event_t * e)
 {
@@ -167,6 +182,28 @@ void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth)
     ntpSyncLabel = uiCreateLabel(tab,&style_section_text,"",NTP_LABEL_WIDTH+NTP_SYNC_WIDTH,currentY,tabWidth-NTP_LABEL_WIDTH-NTP_SYNC_WIDTH,LINE_HEIGHT);
 }
 
+void createAppConnectionTab(lv_obj_t * tab, int currentY, int tabWidth)
+{
+    // Decoder IP
+    currentY+=2;
+    appIpTitle = uiCreateLabel(tab,&style_section_title,APP_IP_LABEL,0,currentY,APP_IP_LABEL_WIDTH,LINE_HEIGHT);
+    appIpValue = uiCreateLabel(tab,&style_section_text,"",APP_IP_LABEL_WIDTH,currentY,tabWidth-APP_IP_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=TOGGLE_LINE_HEIGHT+HALF_SPACER;
+    // Wifi config
+    appQrTitle = uiCreateLabel(tab,&style_section_title,APP_QR_TITLE,0,currentY,APP_IP_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    appIpValue = uiCreateLabel(tab,&style_section_text,APP_QR_TEXT,0,currentY,APP_IP_LABEL_WIDTH,LINE_HEIGHT);
+
+    // Status (Connected etc)
+    // Map QR Code
+    appQrCode = lv_qrcode_create(tab, APP_QR_SIZE, lv_color_black(), lv_color_white());
+    // Add a border with bg_color
+    lv_obj_set_style_border_color(appQrCode, lv_color_white(), 0);
+    lv_obj_set_style_border_width(appQrCode, 5, 0);
+    lv_obj_center(appQrCode);
+    lv_obj_align(appQrCode,LV_ALIGN_BOTTOM_RIGHT,0,0);
+}
+
 void uiSettingsUpdateWifi()
 {   // Wifi tab
     // Wifi state
@@ -216,5 +253,13 @@ void uiSettingsUpdateWifi()
     // NTP
     lv_label_set_text(ntpSyncLabel,(rtc->isNtpSynched() ? "OK" : "KO"));
     lv_obj_set_style_text_color(ntpSyncLabel, (rtc->isNtpSynched() ? uiOkColor : uiKoColor),0);
+
+    // IP
+    lv_label_set_text(appIpValue,ipString.c_str());
+    // QR code
+    char buffer[32];
+    lv_snprintf(buffer,sizeof(buffer),DECODER_ADDRESS_TEMPALTE, ipString.c_str());
+    lv_qrcode_update(appQrCode, buffer, strlen(buffer));
+
 }
 

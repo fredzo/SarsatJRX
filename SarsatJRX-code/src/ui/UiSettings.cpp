@@ -10,6 +10,7 @@
 extern void createSettingsTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight);
 extern void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight);
 extern void createDisplayTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight);
+extern void createAppConnectionTab(lv_obj_t * tab, int currentY, int tabWidth);
 extern void createWifiTab(lv_obj_t * tab, int currentY, int tabWidth);
 extern void createBluetoothTab(lv_obj_t * tab, int currentY, int tabWidth);
 extern void createSdTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight);
@@ -34,21 +35,23 @@ void uiSettingsCreateView(lv_obj_t * cont)
     lv_obj_t * tab1 = lv_tabview_add_tab(settingsTabview, SYMBOL_RADIO);
     lv_obj_t * tab2 = lv_tabview_add_tab(settingsTabview, SYMBOL_AUDIO);
     lv_obj_t * tab3 = lv_tabview_add_tab(settingsTabview, SYMBOL_DISPLAY);
-    lv_obj_t * tab4 = lv_tabview_add_tab(settingsTabview, SYMBOL_WIFI_CONNECTED);
+    lv_obj_t * tab4 = lv_tabview_add_tab(settingsTabview, SYMBOL_WRENCH);
+    lv_obj_t * tab5 = lv_tabview_add_tab(settingsTabview, SYMBOL_WIFI_CONNECTED);
 #ifdef BLUETOOTH
-    lv_obj_t * tab5 = lv_tabview_add_tab(settingsTabview, SYMBOL_BLUETOOTH);
+    lv_obj_t * tab6 = lv_tabview_add_tab(settingsTabview, SYMBOL_BLUETOOTH);
 #endif
-    lv_obj_t * tab6 = lv_tabview_add_tab(settingsTabview, SYMBOL_SD);
-    lv_obj_t * tab7 = lv_tabview_add_tab(settingsTabview, SYMBOL_SYSTEM);
+    lv_obj_t * tab7 = lv_tabview_add_tab(settingsTabview, SYMBOL_SD);
+    lv_obj_t * tab8 = lv_tabview_add_tab(settingsTabview, SYMBOL_SYSTEM);
     lv_obj_add_style(tab1, &style_pad_small, 0);
     lv_obj_add_style(tab2, &style_pad_small, 0);
     lv_obj_add_style(tab3, &style_pad_small, 0);
     lv_obj_add_style(tab4, &style_pad_small, 0);
-#ifdef BLUETOOTH
     lv_obj_add_style(tab5, &style_pad_small, 0);
-#endif
+#ifdef BLUETOOTH
     lv_obj_add_style(tab6, &style_pad_small, 0);
+#endif
     lv_obj_add_style(tab7, &style_pad_small, 0);
+    lv_obj_add_style(tab8, &style_pad_small, 0);
     int tabWidth = lv_obj_get_width(tab1) - 8; // 2*4 px padding
     int tabHeight = lv_obj_get_height(tab1) - 8 - FOOTER_HEIGHT; // 2*4 px padding
 
@@ -60,12 +63,13 @@ void uiSettingsCreateView(lv_obj_t * cont)
     createSettingsTab(tab1,currentY,tabWidth,tabHeight);
     createAudioTab(tab2,currentY,tabWidth,tabHeight);
     createDisplayTab(tab3,currentY,tabWidth,tabHeight);
-    createWifiTab(tab4,currentY,tabWidth);
+    createAppConnectionTab(tab4,currentY,tabWidth);
+    createWifiTab(tab5,currentY,tabWidth);
 #ifdef BLUETOOTH
-    createBluetoothTab(tab5,currentY,tabWidth);
+    createBluetoothTab(tab6,currentY,tabWidth);
 #endif
-    createSdTab(tab6,currentY,tabWidth,tabHeight);
-    createSystemTab(tab7,currentY,tabWidth);
+    createSdTab(tab7,currentY,tabWidth,tabHeight);
+    createSystemTab(tab8,currentY,tabWidth);
     lv_obj_clear_flag(lv_tabview_get_content(settingsTabview), LV_OBJ_FLAG_SCROLLABLE);
 }
 
