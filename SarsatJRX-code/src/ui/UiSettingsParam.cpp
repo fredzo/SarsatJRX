@@ -5,13 +5,23 @@
 #include <ui/Ui.h>
 #include <Hardware.h>
 #include <Settings.h>
+#include <WiFi.h>
 
 // Audio
 #define LABEL_WIDTH                 200
 #define BUZZER_LEVEL_LABEL          "Buzzer level:"
 #define TOUCH_SOUND_LABEL           "Touch sound:"
-//#define FRAME_SOUND_LABEL           "Frame received sound:"
-//#define COUNTDOWN_SOUND_LABEL       "Countdown sound:"
+
+// App connection
+#define APP_TITLE_LABEL     "App. Connection"
+#define APP_IP_LABEL        "Decoder address:"
+#define APP_IP_LABEL_WIDTH  160
+#define APP_QR_TITLE        "QR Code:"
+#define APP_QR_TEXT         "Scan with SarsatJRX App."
+// QR code
+#define APP_QR_SIZE         130
+#define DECODER_ADDRESS_TEMPALTE    "%s"
+
 
 // Audio
 static lv_obj_t * audioTab;
@@ -25,10 +35,15 @@ static lv_obj_t * buzzerLevelSpinboxDownButton;
 
 static lv_obj_t * touchSoundLabel;
 static lv_obj_t * touchSoundToggle;
-//static lv_obj_t * frameSoundLabel;
-//static lv_obj_t * frameSoundToggle;
-//static lv_obj_t * countDownSoundLabel;
-//static lv_obj_t * countDownSoundToggle;
+
+// App Connection
+static lv_obj_t * appTitle;
+static lv_obj_t * appIpTitle;
+static lv_obj_t * appIpValue;
+static lv_obj_t * appQrTitle;
+static lv_obj_t * appQrText;
+static lv_obj_t * appQrCode;
+
 
 static void updateBuzzerLevelSpinboxValue()
 {
@@ -75,19 +90,6 @@ static void toggleTouchSoundCb(lv_event_t * e)
     Settings::getSettings()->setTouchSound(state);
 }
 
-/*
-static void toggleFrameSoundCb(lv_event_t * e)
-{
-    bool state = lv_obj_has_state(frameSoundToggle, LV_STATE_CHECKED);
-    Settings::getSettings()->setFrameSound(state);
-}
-
-static void toggleCountDownSoundCb(lv_event_t * e)
-{
-    bool state = lv_obj_has_state(countDownSoundToggle, LV_STATE_CHECKED);
-    Settings::getSettings()->setCountDownSound(state);
-}*/
-
 void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
 {   // Keep track on tab, tabWith and tabHeugth for keyboard creation
     audioTab = tab;
@@ -129,16 +131,30 @@ void createAudioTab(lv_obj_t * tab, int currentY, int tabWidth, int tabHeight)
     // Touch sound
     touchSoundLabel  = uiCreateLabel (tab,&style_section_title,TOUCH_SOUND_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
     touchSoundToggle = uiCreateToggle(tab,&style_section_text,toggleTouchSoundCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
-    // Frame sound
-    /*frameSoundLabel  = uiCreateLabel (tab,&style_section_title,FRAME_SOUND_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
-    frameSoundToggle = uiCreateToggle(tab,&style_section_text,toggleFrameSoundCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);
-    currentY+=TOGGLE_LINE_HEIGHT+2*SPACER;
-    // Countdown sound
-    countDownSoundLabel  = uiCreateLabel (tab,&style_section_title,COUNTDOWN_SOUND_LABEL,0,currentY,LABEL_WIDTH,TOGGLE_LINE_HEIGHT);
-    countDownSoundToggle = uiCreateToggle(tab,&style_section_text,toggleCountDownSoundCb,TOGGLE_X,currentY,TOGGLE_WIDTH,TOGGLE_LINE_HEIGHT);*/
-}
+    currentY+=TOGGLE_LINE_HEIGHT;
 
+    // Decoder IP
+    currentY+=SPACER;
+    appTitle = uiCreateLabel(tab,&style_section_title,APP_TITLE_LABEL,0,currentY,APP_IP_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    currentY+=SPACER;
+    appIpTitle = uiCreateLabel(tab,&style_section_title,APP_IP_LABEL,0,currentY,APP_IP_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    appIpValue = uiCreateLabel(tab,&style_section_text,"",0,currentY,APP_IP_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=TOGGLE_LINE_HEIGHT+HALF_SPACER;
+    // Qr code title
+    appQrTitle = uiCreateLabel(tab,&style_section_title,APP_QR_TITLE,0,currentY,APP_IP_LABEL_WIDTH,LINE_HEIGHT);
+    currentY+=LINE_HEIGHT;
+    appQrText = uiCreateLabel(tab,&style_section_text,APP_QR_TEXT,0,currentY,tabWidth,LINE_HEIGHT);
+
+    // App QR Code
+    appQrCode = lv_qrcode_create(tab, APP_QR_SIZE, lv_color_black(), lv_color_white());
+    // Add a border with bg_color
+    lv_obj_set_style_border_color(appQrCode, lv_color_white(), 0);
+    lv_obj_set_style_border_width(appQrCode, 5, 0);
+    lv_obj_center(appQrCode);
+    lv_obj_align(appQrCode,LV_ALIGN_BOTTOM_RIGHT,-6,-6);
+}
 
 void uiSettingsUpdateAudio()
 {   // Display tab
@@ -147,8 +163,18 @@ void uiSettingsUpdateAudio()
     buzzerLevelSpinboxValue = settings->getBuzzerLevel();
     updateBuzzerLevelSpinboxValue();
     settings->getTouchSound() ? lv_obj_add_state(touchSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(touchSoundToggle, LV_STATE_CHECKED);
-    //settings->getFrameSound() ? lv_obj_add_state(frameSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(frameSoundToggle, LV_STATE_CHECKED);
-    //settings->getCountDownSound() ? lv_obj_add_state(countDownSoundToggle, LV_STATE_CHECKED) : lv_obj_clear_state(countDownSoundToggle, LV_STATE_CHECKED);
+}
+
+void uiSettingsUpdateParamWifi()
+{ 
+    // IP @
+    String ipString = WiFi.localIP().toString();
+    // IP
+    lv_label_set_text(appIpValue,ipString.c_str());
+    // QR code
+    char buffer[32];
+    lv_snprintf(buffer,sizeof(buffer),DECODER_ADDRESS_TEMPALTE, ipString.c_str());
+    lv_qrcode_update(appQrCode, buffer, strlen(buffer));
 }
 
 

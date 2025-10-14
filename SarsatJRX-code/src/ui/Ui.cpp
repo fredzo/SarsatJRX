@@ -701,8 +701,9 @@ void uiUpdateWifiStatus()
         lv_label_set_text(wifiIndicator,"");
         break;
   }
-  // Update settings page
+  // Update settings pages
   uiSettingsUpdateWifi();
+  uiSettingsUpdateParamWifi();
 }
 #endif
 
