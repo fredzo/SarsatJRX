@@ -39,6 +39,18 @@ class Settings
         String getWifiPassPhrase();
         void setWifiPassPhrase(String passPhrase);
 
+        String getWifiSsid1();
+        void setWifiSsid1(String ssid);
+
+        String getWifiPassPhrase1();
+        void setWifiPassPhrase1(String passPhrase);
+
+        String getWifiSsid2();
+        void setWifiSsid2(String ssid);
+
+        String getWifiPassPhrase2();
+        void setWifiPassPhrase2(String passPhrase);
+
         String getTimeZone();
         void setTimeZone(String timeZone);
 
@@ -107,6 +119,10 @@ class Settings
         bool wifiState;
         String wifiSsid;
         String wifiPassPhrase;
+        String wifiSsid1;
+        String wifiPassPhrase1;
+        String wifiSsid2;
+        String wifiPassPhrase2;
         String timeZone;
         bool displayReverse;
         bool screenOffOnCharge;

@@ -11,6 +11,10 @@ static const Settings::Setting BLUETOOTH_STATE      ("BT"   ,"bluetoothState"   
 static const Settings::Setting WIFI_STATE           ("Wifi" ,"wifiState"            ,"Wifi on (true/false) ?");
 static const Settings::Setting WIFI_SSID            ("SSID" ,"wifiSsid"             ,"Ssid of the wifi network to connect to");
 static const Settings::Setting WIFI_PASS_PHRASE     ("PSK"  ,"wifiPassPhrase"       ,"Passphrase of the Wifi network to connect to");
+static const Settings::Setting WIFI_SSID1           ("SSID1","wifiSsid1"            ,"Ssid of the 2nd wifi network to connect to");
+static const Settings::Setting WIFI_PASS_PHRASE1    ("PSK1" ,"wifiPassPhrase1"      ,"Passphrase of 2nd the Wifi network to connect to");
+static const Settings::Setting WIFI_SSID2           ("SSID2","wifiSsid2"            ,"Ssid of the 3rd wifi network to connect to");
+static const Settings::Setting WIFI_PASS_PHRASE2    ("PSK2" ,"wifiPassPhrase2"      ,"Passphrase of the 3rd Wifi network to connect to");
 static const Settings::Setting TIME_ZONE            ("TZ"   ,"timeZone"             ,"TimeZone (see https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv )");
 static const Settings::Setting DISPLAY_REVERSE      ("DRev" ,"displayReverse"       ,"Display reverse (true/false) ?");
 static const Settings::Setting SHOW_BAT_PERCENTAGE  ("SBP"  ,"showBatPercentage"    ,"Show battery percentage (true/false) ?");
@@ -35,6 +39,10 @@ void Settings::init()
     wifiState = preferences.getBool(WIFI_STATE.key.c_str(),false);
     wifiSsid = preferences.getString(WIFI_SSID.key.c_str(),"SarsatJRX");
     wifiPassPhrase = preferences.getString(WIFI_PASS_PHRASE.key.c_str(),"SarsatJRX");
+    wifiSsid1 = preferences.getString(WIFI_SSID1.key.c_str(),"KrakenAndroid");
+    wifiPassPhrase1 = preferences.getString(WIFI_PASS_PHRASE1.key.c_str(),"KrakenAndroid");
+    wifiSsid2 = preferences.getString(WIFI_SSID2.key.c_str(),"");
+    wifiPassPhrase2 = preferences.getString(WIFI_PASS_PHRASE2.key.c_str(),"");
     timeZone = preferences.getString(TIME_ZONE.key.c_str(),NTP_TIME_ZONE);
     displayReverse = preferences.getBool(DISPLAY_REVERSE.key.c_str(),false);
     screenOffOnCharge = preferences.getBool(SCREEN_OFF_ON_CHRAGE.key.c_str(),true);
@@ -87,6 +95,22 @@ void Settings::init()
                             else if(key.equals(WIFI_PASS_PHRASE.configKey))
                             {
                                 setWifiPassPhrase(value);
+                            }
+                            else if(key.equals(WIFI_SSID1.configKey))
+                            {
+                                setWifiSsid1(value);
+                            }
+                            else if(key.equals(WIFI_PASS_PHRASE1.configKey))
+                            {
+                                setWifiPassPhrase1(value);
+                            }
+                            else if(key.equals(WIFI_SSID2.configKey))
+                            {
+                                setWifiSsid2(value);
+                            }
+                            else if(key.equals(WIFI_PASS_PHRASE2.configKey))
+                            {
+                                setWifiPassPhrase2(value);
                             }
                             else if(key.equals(TIME_ZONE.configKey))
                             {
@@ -168,6 +192,10 @@ void Settings::saveToConfigLines(std::vector<String>& lines)
     updateConfigLine(lines,WIFI_STATE           ,boolToString(wifiState));
     updateConfigLine(lines,WIFI_SSID            ,wifiSsid);
     updateConfigLine(lines,WIFI_PASS_PHRASE     ,wifiPassPhrase);
+    updateConfigLine(lines,WIFI_SSID1           ,wifiSsid1);
+    updateConfigLine(lines,WIFI_PASS_PHRASE1    ,wifiPassPhrase1);
+    updateConfigLine(lines,WIFI_SSID2           ,wifiSsid2);
+    updateConfigLine(lines,WIFI_PASS_PHRASE2    ,wifiPassPhrase2);
     updateConfigLine(lines,TIME_ZONE            ,timeZone);
     updateConfigLine(lines,DISPLAY_REVERSE      ,boolToString(displayReverse));
     updateConfigLine(lines,SCREEN_OFF_ON_CHRAGE ,boolToString(screenOffOnCharge));
@@ -267,6 +295,58 @@ void Settings::setWifiPassPhrase(String passPhrase)
     if(wifiPassPhrase.equals(passPhrase)) return;
     wifiPassPhrase = passPhrase;
     preferences.putString(WIFI_PASS_PHRASE.key.c_str(),passPhrase);
+    dirty = true;
+}
+
+String Settings::getWifiSsid1()
+{
+    return wifiSsid1;
+}
+
+void Settings::setWifiSsid1(String ssid)
+{
+    if(wifiSsid1.equals(ssid)) return;
+    wifiSsid1 = ssid;
+    preferences.putString(WIFI_SSID1.key.c_str(),ssid);
+    dirty = true;
+}
+
+String Settings::getWifiPassPhrase1()
+{
+    return wifiPassPhrase1;
+}
+
+void Settings::setWifiPassPhrase1(String passPhrase)
+{
+    if(wifiPassPhrase1.equals(passPhrase)) return;
+    wifiPassPhrase1 = passPhrase;
+    preferences.putString(WIFI_PASS_PHRASE1.key.c_str(),passPhrase);
+    dirty = true;
+}
+
+String Settings::getWifiSsid2()
+{
+    return wifiSsid2;
+}
+
+void Settings::setWifiSsid2(String ssid)
+{
+    if(wifiSsid2.equals(ssid)) return;
+    wifiSsid2 = ssid;
+    preferences.putString(WIFI_SSID2.key.c_str(),ssid);
+    dirty = true;
+}
+
+String Settings::getWifiPassPhrase2()
+{
+    return wifiPassPhrase2;
+}
+
+void Settings::setWifiPassPhrase2(String passPhrase)
+{
+    if(wifiPassPhrase2.equals(passPhrase)) return;
+    wifiPassPhrase2 = passPhrase;
+    preferences.putString(WIFI_PASS_PHRASE2.key.c_str(),passPhrase);
     dirty = true;
 }
 
