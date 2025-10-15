@@ -51,6 +51,40 @@ class Settings
         String getWifiPassPhrase2();
         void setWifiPassPhrase2(String passPhrase);
 
+        uint8_t getWifiNetworkNumber() { return 3;};
+        String getWifiSsid(int index)
+        {
+            switch(index)
+            {
+                case 0:
+                default:
+                    return getWifiSsid();
+                    break;
+                case 1:
+                    return getWifiSsid1();
+                    break;
+                case 2:
+                    return getWifiSsid2();
+                    break;
+            }
+        }
+        String getWifiPassPhrase(int index)
+        {
+            switch(index)
+            {
+                case 0:
+                default:
+                    return getWifiPassPhrase();
+                    break;
+                case 1:
+                    return getWifiPassPhrase1();
+                    break;
+                case 2:
+                    return getWifiPassPhrase2();
+                    break;
+            }
+        }
+
         String getTimeZone();
         void setTimeZone(String timeZone);
 

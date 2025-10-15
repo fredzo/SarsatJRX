@@ -181,6 +181,47 @@ void onWifiEvent(WiFiEvent_t event)
     }
 }
 
+void wifiManagerConnect()
+{
+  Settings* settings = Settings::getSettings();
+  String ssid;
+  int n = WiFi.scanNetworks();
+  if (n == 0) 
+  {
+#ifdef SERIAL_OUT
+    Serial.println("No wifi network available.");
+#endif
+    return;
+  }
+#ifdef SERIAL_OUT
+  Serial.printf("Found %d wifi network(s)\n", n);
+#endif
+
+  // Iterate on each registered network and check for it's availability
+  for (int i = 0; i < settings->getWifiNetworkNumber(); i++) 
+  {
+    ssid = settings->getWifiSsid(i);
+    for (int j = 0; j < n; j++) 
+    {
+      if (strcmp(ssid.c_str(), WiFi.SSID(j).c_str()) == 0) 
+      { // Network available
+#ifdef SERIAL_OUT
+          Serial.printf("Connection attempt to %s...\n", ssid.c_str());
+#endif          
+        WiFi.begin(ssid.c_str(), settings->getWifiPassPhrase(i).c_str());
+        /*if (WiFi.waitForConnectResult() != WL_CONNECTED) {
+          Serial.printf("WiFi Failed!\n");
+        }*/
+        //Serial.printf("Starting wifi with ssid=%s and psk=%s\n",settings->getWifiSsid().c_str(),settings->getWifiPassPhrase().c_str());
+        return;
+      }
+    }
+  }
+#ifdef SERIAL_OUT
+  Serial.println("No registered wifi network available.");  
+#endif          
+}
+
 void wifiManagerStart()
 {
   // Check SPIFSS
@@ -190,13 +231,8 @@ void wifiManagerStart()
   // Web and Wifi
   wifiStatus = WifiStatus::DISCONNECTED;
   WiFi.onEvent(onWifiEvent);
-  Settings* settings = Settings::getSettings();
-  //Serial.printf("Starting wifi with ssid=%s and psk=%s\n",settings->getWifiSsid().c_str(),settings->getWifiPassPhrase().c_str());
   WiFi.mode(WIFI_STA);
-  WiFi.begin(settings->getWifiSsid().c_str(),settings->getWifiPassPhrase().c_str());
-  /*if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    Serial.printf("WiFi Failed!\n");
-  }*/
+  wifiManagerConnect();
   // Setup mDNS
   if (!MDNS.begin("sarsatjrx")) 
   {
@@ -322,8 +358,10 @@ bool wifiManagerHandleClient()
       lastConnectionAttempt = now;
       Serial.println("WiFi not connected. Reconnection attempt...");
       Settings* settings = Settings::getSettings();
-      WiFi.disconnect();  // Force disconnect
-      WiFi.begin(settings->getWifiSsid().c_str(),settings->getWifiPassPhrase().c_str());  // and reconnect
+      // Force disconnect
+      WiFi.disconnect();
+      // and reconnect
+      wifiManagerConnect();
     }
     lastStatusCheckTime = now;
     IPAddress locaIp = WiFi.localIP();
