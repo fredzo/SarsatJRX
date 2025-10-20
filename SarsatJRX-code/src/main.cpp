@@ -482,7 +482,7 @@ void loop()
           }
         }
         // Unfiltered frame
-        wifiManagerSendFrameEvent(currentFrame,true,false,error);
+        wifiManagerSendFrameEvent(currentFrame,beaconsReadIndex,true,false,error);
       }
       else
       { // Frame has been filterd
@@ -495,13 +495,13 @@ void loop()
           }
           if(settings->getFrameSound()) hardware->getSoundManager()->playFrameSound(true);
           // Filtered error frame
-          wifiManagerSendFrameEvent(currentFrame,true,true,true);
+          wifiManagerSendFrameEvent(currentFrame,beaconsReadIndex,true,true,true);
         }
         else
         {
           if(settings->getFrameSound()) hardware->getSoundManager()->playFilteredFrameSound();
           // Filtered orbito frame
-          wifiManagerSendFrameEvent(currentFrame,true,true,false);
+          wifiManagerSendFrameEvent(currentFrame,beaconsReadIndex,true,true,false);
         }
         // Blink red led for filtered frames (valid or invalid)
         invalidFrameReceivedLedBlink();
@@ -525,7 +525,7 @@ void loop()
         hardware->getSoundManager()->playInvalidFrameSound();
       }
 #ifdef WIFI
-      wifiManagerSendFrameEvent(nullptr,false,true,true);
+      wifiManagerSendFrameEvent(nullptr,-1,false,true,true);
 #endif    
     }
     // Reset frame decoding

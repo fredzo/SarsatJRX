@@ -134,6 +134,9 @@ class Settings
 
         void saveToSd();
 
+        String toKvpString();
+
+
     private :
         Preferences preferences;
         bool dirty = false; // True when save is needed
@@ -146,8 +149,8 @@ class Settings
         {
         };
 
-        void saveToConfigLines(std::vector<String>& lines);
-        void updateConfigLine(std::vector<String>& lines, const Setting& setting, const String& value);
+        void saveToConfigLines(std::vector<String>& lines, bool keepContent);
+        void updateConfigLine(std::vector<String>& lines, bool keepContent, const Setting& setting, const String& value);
 
         bool bluetoothState;
         bool wifiState;

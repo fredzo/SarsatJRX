@@ -178,7 +178,7 @@ void Settings::init()
             }
         }
         // Save updated content to sd card
-        saveToConfigLines(lines);
+        saveToConfigLines(lines,true);
         filesystems->saveConfigFile(lines);
     }
     // Save preferences after init
@@ -186,50 +186,56 @@ void Settings::init()
     preferences.begin(PREF_PREFIX, false);
 }
 
-void Settings::saveToConfigLines(std::vector<String>& lines)
+void Settings::saveToConfigLines(std::vector<String>& lines, bool keepContent)
 {
-    updateConfigLine(lines,BLUETOOTH_STATE      ,boolToString(bluetoothState));
-    updateConfigLine(lines,WIFI_STATE           ,boolToString(wifiState));
-    updateConfigLine(lines,WIFI_SSID            ,wifiSsid);
-    updateConfigLine(lines,WIFI_PASS_PHRASE     ,wifiPassPhrase);
-    updateConfigLine(lines,WIFI_SSID1           ,wifiSsid1);
-    updateConfigLine(lines,WIFI_PASS_PHRASE1    ,wifiPassPhrase1);
-    updateConfigLine(lines,WIFI_SSID2           ,wifiSsid2);
-    updateConfigLine(lines,WIFI_PASS_PHRASE2    ,wifiPassPhrase2);
-    updateConfigLine(lines,TIME_ZONE            ,timeZone);
-    updateConfigLine(lines,DISPLAY_REVERSE      ,boolToString(displayReverse));
-    updateConfigLine(lines,SCREEN_OFF_ON_CHRAGE ,boolToString(screenOffOnCharge));
-    updateConfigLine(lines,SHOW_BAT_PERCENTAGE  ,boolToString(showBatteryPercentage));
-    updateConfigLine(lines,SHOW_BAT_WARN_MESSAGE,boolToString(showBatteryWarnMessage));
-    updateConfigLine(lines,BUZZER_LEVEL         ,ucharToString(buzzerLevel));
-    updateConfigLine(lines,TOUCH_SOUND          ,boolToString(touchSound));
-    updateConfigLine(lines,FRAME_SOUND          ,boolToString(frameSound));
-    updateConfigLine(lines,COUNTDOWN_SOUND      ,boolToString(countDownSound));
-    updateConfigLine(lines,COUNTDOWN_LEDS       ,boolToString(countDownLeds));
-    updateConfigLine(lines,RELOAD_COUNTDOWN     ,boolToString(reloadCountDown));
-    updateConfigLine(lines,COUNTDOWN_DURATION   ,ucharToString(countdownDuration));
-    updateConfigLine(lines,ALLOW_FRAME_SIMU     ,boolToString(allowFrameSimu));
-    updateConfigLine(lines,FILTER_INVALID       ,boolToString(filterInvalid));
-    updateConfigLine(lines,FILTER_ORBITO        ,boolToString(filterOrbito));
+    updateConfigLine(lines,keepContent,BLUETOOTH_STATE      ,boolToString(bluetoothState));
+    updateConfigLine(lines,keepContent,WIFI_STATE           ,boolToString(wifiState));
+    updateConfigLine(lines,keepContent,WIFI_SSID            ,wifiSsid);
+    updateConfigLine(lines,keepContent,WIFI_PASS_PHRASE     ,wifiPassPhrase);
+    updateConfigLine(lines,keepContent,WIFI_SSID1           ,wifiSsid1);
+    updateConfigLine(lines,keepContent,WIFI_PASS_PHRASE1    ,wifiPassPhrase1);
+    updateConfigLine(lines,keepContent,WIFI_SSID2           ,wifiSsid2);
+    updateConfigLine(lines,keepContent,WIFI_PASS_PHRASE2    ,wifiPassPhrase2);
+    updateConfigLine(lines,keepContent,TIME_ZONE            ,timeZone);
+    updateConfigLine(lines,keepContent,DISPLAY_REVERSE      ,boolToString(displayReverse));
+    updateConfigLine(lines,keepContent,SCREEN_OFF_ON_CHRAGE ,boolToString(screenOffOnCharge));
+    updateConfigLine(lines,keepContent,SHOW_BAT_PERCENTAGE  ,boolToString(showBatteryPercentage));
+    updateConfigLine(lines,keepContent,SHOW_BAT_WARN_MESSAGE,boolToString(showBatteryWarnMessage));
+    updateConfigLine(lines,keepContent,BUZZER_LEVEL         ,ucharToString(buzzerLevel));
+    updateConfigLine(lines,keepContent,TOUCH_SOUND          ,boolToString(touchSound));
+    updateConfigLine(lines,keepContent,FRAME_SOUND          ,boolToString(frameSound));
+    updateConfigLine(lines,keepContent,COUNTDOWN_SOUND      ,boolToString(countDownSound));
+    updateConfigLine(lines,keepContent,COUNTDOWN_LEDS       ,boolToString(countDownLeds));
+    updateConfigLine(lines,keepContent,RELOAD_COUNTDOWN     ,boolToString(reloadCountDown));
+    updateConfigLine(lines,keepContent,COUNTDOWN_DURATION   ,ucharToString(countdownDuration));
+    updateConfigLine(lines,keepContent,ALLOW_FRAME_SIMU     ,boolToString(allowFrameSimu));
+    updateConfigLine(lines,keepContent,FILTER_INVALID       ,boolToString(filterInvalid));
+    updateConfigLine(lines,keepContent,FILTER_ORBITO        ,boolToString(filterOrbito));
 }
 
-void Settings::updateConfigLine(std::vector<String>& lines,const Setting& setting, const String& value)
+void Settings::updateConfigLine(std::vector<String>& lines, bool keepContent,const Setting& setting, const String& value)
 {
     String prefix = setting.configKey + "=";
-    bool found = false;
-
-    for (size_t i = 0; i < lines.size(); i++) 
+    if(keepContent)
     {
-        if (lines[i].startsWith(prefix)) 
-        {   // Line found
-            lines[i] = prefix + value; // replace existing value
-            found = true;
-            break;
+        bool found = false;
+        for (size_t i = 0; i < lines.size(); i++) 
+        {
+            if (lines[i].startsWith(prefix)) 
+            {   // Line found
+                lines[i] = prefix + value; // replace existing value
+                found = true;
+                break;
+            }
+        }
+        if (!found) 
+        {   // append new key and comment
+            lines.push_back("# "+setting.desciption);
+            lines.push_back(prefix + value);
         }
     }
-    if (!found) 
-    {   // append new key and comment
-        lines.push_back("# "+setting.desciption);
+    else
+    {
         lines.push_back(prefix + value);
     }
 }
@@ -241,10 +247,24 @@ void Settings::saveToSd()
     {   // Read current config file content
         std::vector<String> lines;
         filesystems->loadConfigFile(lines);
-        saveToConfigLines(lines);
+        saveToConfigLines(lines,true);
         filesystems->saveConfigFile(lines);
     }
 }
+
+String Settings::toKvpString()
+{
+    String result;
+    std::vector<String> lines;
+    saveToConfigLines(lines,false);
+    for (auto line : lines) 
+    {   // Save lines
+        result += line;
+        result += "\n";
+    }
+    return result;
+}
+
 
 bool Settings::getBluetoothState()
 {

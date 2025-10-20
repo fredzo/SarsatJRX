@@ -34,6 +34,7 @@ extern Beacon* beacons[];
 extern int beaconsWriteIndex;
 extern int beaconsSize;
 extern bool beaconsFull;
+static int lastSentFrame = -1;
 
 // For reset countdown endpoint
 extern void stopCountdownAutoReload();
@@ -63,21 +64,43 @@ void frame(AsyncWebServerRequest *request)
   }
 }
 
+String serializeFrames(bool all)
+{
+    String result;
+    if(beaconsSize == 0) return result; // Nothing to report
+    int position;
+    int size;
+    if(all)
+    {
+      position = beaconsFull ? ((beaconsWriteIndex+1)%BEACON_LIST_MAX_SIZE) : 0;
+      size = beaconsSize;
+    }
+    else
+    { // No new frame since last send
+      if(lastSentFrame == beaconsWriteIndex) return result;
+      // Start after last sent frame
+      position = lastSentFrame + 1;
+      if(position >= BEACON_LIST_MAX_SIZE) position = 0;
+      size = (position <= beaconsWriteIndex ? beaconsWriteIndex-position : BEACON_LIST_MAX_SIZE - (position - beaconsWriteIndex))+1;
+      //Serial.printf("Partial frames position = %d writeIndex = %d, size = %d.\n",position,beaconsWriteIndex,size);
+    }
+    for(int i = 0 ; i < size ; i++)
+    { // Iterate on each frame
+      //Serial.printf("Serializing frame# = %d for position = %d, size = %d.\n",i,position,size);
+      result += FRAME_SEPARATOR;
+      result += beacons[position]->toKvpString();
+      lastSentFrame = position;
+      position++;
+      if(position >= BEACON_LIST_MAX_SIZE) position = 0;
+    }
+    return result;
+}
+
 void frames(AsyncWebServerRequest *request)
 {
   if(beaconsSize > 0)
   { // Start at first frame in list
-    String result;
-    int position = beaconsFull ? ((beaconsWriteIndex+1)%BEACON_LIST_MAX_SIZE) : 0;
-    for(int i = 0 ; i < beaconsSize ; i++)
-    { // Iterate on each frame
-      //Serial.printf("Serializing frame# = %d for position = %d.\n",i,position);
-      result += FRAME_SEPARATOR;
-      result += beacons[position]->toKvpString();
-      position++;
-      if(position >= BEACON_LIST_MAX_SIZE) position = 0;
-    }
-    request->send(200,"text/plain",result);
+    request->send(200,"text/plain",serializeFrames(true));
   }
   else
   {
@@ -258,13 +281,21 @@ void wifiManagerStart()
     {
       Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
     }
-    //send event with message "hello!", id current millis
-    // and set reconnect delay to 1 second
-    client->send("hello!",NULL,millis(),1000);
     if(wifiStatus == WifiStatus::CONNECTED)
     {
       wifiStatus = WifiStatus::LINKED;
       wifiStatusChanged = true;
+    }
+    // Send config
+    String config = Settings::getSettings()->toKvpString();
+    String message = "config\n" + config;
+    events.send(message.c_str());
+    // Send frames if any
+    String frames = serializeFrames(false);
+    if(!frames.isEmpty())
+    {
+      String message = "frames\n" + frames;
+      events.send(message.c_str());
     }
   });
   events.onDisconnect([](AsyncEventSourceClient *client) 
@@ -402,7 +433,7 @@ void wifiManagerSendTickerEvent(int countdown,bool sdMounted, bool discriOn, int
   events.send(buffer);
 }
 
-void wifiManagerSendFrameEvent(Beacon* beacon,bool valid, bool filtered, bool error)
+void wifiManagerSendFrameEvent(Beacon* beacon, int frameIndex, bool valid, bool filtered, bool error)
 {
   if(beacon) currentFrame = beacon;
   if(events.count()>0)
@@ -413,6 +444,7 @@ void wifiManagerSendFrameEvent(Beacon* beacon,bool valid, bool filtered, bool er
     {
       String message = String(buffer) + "\n" + beacon->toKvpString();
       events.send(message.c_str());
+      lastSentFrame = frameIndex;
     }
     else
     {
