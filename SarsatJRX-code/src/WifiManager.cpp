@@ -106,6 +106,9 @@ String serializeConfigEntry(String key, String value)
 String serializeConfig()
 {   // Add all settings
     String config = Settings::getSettings()->toKvpString();
+    Hardware* hardware = Hardware::getHardware();
+    // Screen state
+    config+= serializeConfigEntry("screenOn",boolToString(hardware->getDisplay()->isScreenOn()));
     // Wifi config
     // Mode (Station / Acess Point)
     config+= serializeConfigEntry("wifiMode",wifiManagerGetMode());
@@ -114,7 +117,7 @@ String serializeConfig()
     // Signal (RSSI)
     config+= serializeConfigEntry("wifiRssi",formatDbmValue(WiFi.RSSI()));
     // SSID
-    config+= serializeConfigEntry("wifiSsid",WiFi.SSID());
+    config+= serializeConfigEntry("wifiCurrentSsid",WiFi.SSID());
     // IP @
     config+= serializeConfigEntry("wifiIP",WiFi.localIP().toString());
     // Gateway IP
@@ -131,7 +134,6 @@ String serializeConfig()
     config+= serializeConfigEntry("rtcDate",rtc->getDateString() + " - " + rtc->getTimeString());
     config+= serializeConfigEntry("rtcNtpSync",boolToString(rtc->isNtpSynched()));
     // SD config
-    Hardware* hardware = Hardware::getHardware();
     Filesystems *filesystems = hardware->getFilesystems();
     config+= serializeConfigEntry("sdCardMounted",boolToString(filesystems->isSdFilesystemMounted()));
     // Total size
@@ -190,6 +192,22 @@ void resetCountdown(AsyncWebServerRequest *request)
     else
     {   // Restart countdown
         rtc->startCountDown();
+    }
+}
+
+void postConfig(AsyncWebServerRequest *request)
+{
+    size_t paramsNumber = request->params();
+    for(size_t i = 0 ; i < paramsNumber ; i++)
+    {
+      const AsyncWebParameter* param = request->getParam(i);
+      String name = param->name();
+      if(name == "screenOn")
+      {
+        bool screenOn = (param->value() == "true");
+        Display* display = Hardware::getHardware()->getDisplay();
+        display->setScreenOn(screenOn);
+      }
     }
 }
 
@@ -342,6 +360,7 @@ void wifiManagerStart()
   server.on("/frame",frame);
   server.on("/frames",frames);
   server.on("/resetcd",resetCountdown);
+  server.on("/config",HTTP_POST,postConfig);
   server.on("/sse",HTTP_OPTIONS,sseOptions);
   server.serveStatic("/favicon.ico", SPIFFS, FAVICON_FILE_PATH, "public, max-age=31536000, immutable");
   // Setup SSE

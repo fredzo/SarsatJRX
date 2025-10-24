@@ -59,6 +59,7 @@ class Display
         void backlightOff();
         void screenOn();
         void screenOff();
+        bool isScreenOn();
         void setBrightness(uint8_t level);
         void startDisplayTask();
 
@@ -106,6 +107,12 @@ class Display
         void updateSdCard() { needUpdateSdCard = true; }
         void updateDiscri() { needUpdateDiscri = true; }
         void updateTicker() { needUpdateTicker = true; }
+        void setScreenOn(bool newScreenOnState) 
+        { 
+            if(newScreenOnState == screenOnState) return;
+            screenOnState = newScreenOnState;
+            needUpdateScreenOn = true; 
+        }
 
 
     private : 
@@ -159,9 +166,9 @@ class Display
         bool needUpdateDiscri = false;
         // Ticker
         bool needUpdateTicker = false;
-
-
-
+        // Screen on
+        bool needUpdateScreenOn = false;
+        bool screenOnState = true;
 
 };
 

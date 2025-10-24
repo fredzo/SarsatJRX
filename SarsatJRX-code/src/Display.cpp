@@ -163,6 +163,8 @@ void Display::updateUi()
   needUpdateDiscri = false;
   if(needUpdateTicker)          uiUpdateTicker();
   needUpdateTicker = false;
+  if(needUpdateScreenOn)        screenOnState ? screenOn() : screenOff();
+  needUpdateScreenOn = false;
 
 }
 
@@ -394,6 +396,11 @@ void Display::screenOn()
 void Display::screenOff()
 {
   scrOff();
+}
+
+bool Display::isScreenOn() 
+{
+  return screenIsOn; 
 }
 
 
