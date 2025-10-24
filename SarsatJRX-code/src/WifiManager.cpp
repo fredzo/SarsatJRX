@@ -111,7 +111,6 @@ String serializeConfig()
     config+= serializeConfigEntry("wifiMode",wifiManagerGetMode());
     // Status (Connected etc)
     config+= serializeConfigEntry("wifiStatus",wifiManagerGetStatusString());
-    config+= serializeConfigEntry("wifiMode",wifiManagerGetMode());
     // Signal (RSSI)
     config+= serializeConfigEntry("wifiRssi",formatDbmValue(WiFi.RSSI()));
     // SSID
