@@ -5,6 +5,8 @@
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
 #include <Hardware.h>
+#include <Util.h>
+#include <SarsatJRXConf.h>
 
 #define FAVICON_FILE_PATH   "/sarsat-jrx.png"
 
@@ -94,6 +96,75 @@ String serializeFrames(bool all)
       if(position >= BEACON_LIST_MAX_SIZE) position = 0;
     }
     return result;
+}
+
+String serializeConfigEntry(String key, String value)
+{
+  return key + "=" + value + "\n";
+}
+
+String serializeConfig()
+{   // Add all settings
+    String config = Settings::getSettings()->toKvpString();
+    // Wifi config
+    // Mode (Station / Acess Point)
+    config+= serializeConfigEntry("wifiMode",wifiManagerGetMode());
+    // Status (Connected etc)
+    config+= serializeConfigEntry("wifiStatus",wifiManagerGetStatusString());
+    config+= serializeConfigEntry("wifiMode",wifiManagerGetMode());
+    // Signal (RSSI)
+    config+= serializeConfigEntry("wifiRssi",formatDbmValue(WiFi.RSSI()));
+    // SSID
+    config+= serializeConfigEntry("wifiSsid",WiFi.SSID());
+    // IP @
+    config+= serializeConfigEntry("wifiIP",WiFi.localIP().toString());
+    // Gateway IP
+    config+= serializeConfigEntry("wifiGatewayIP",WiFi.gatewayIP().toString());
+    // DNS
+    config+= serializeConfigEntry("wifiDNS1",WiFi.dnsIP(0).toString());
+    config+= serializeConfigEntry("wifiDNS2",WiFi.dnsIP(1).toString());
+    // Mac @
+    config+= serializeConfigEntry("wifiMacAddress",WiFi.macAddress());
+    // Mask
+    config+= serializeConfigEntry("wifiSubnetMask",WiFi.subnetMask().toString());
+    // Date
+    Rtc* rtc = Rtc::getRtc();
+    config+= serializeConfigEntry("rtcDate",rtc->getDateString() + " - " + rtc->getTimeString());
+    config+= serializeConfigEntry("rtcNtpSync",boolToString(rtc->isNtpSynched()));
+    // SD config
+    Hardware* hardware = Hardware::getHardware();
+    Filesystems *filesystems = hardware->getFilesystems();
+    config+= serializeConfigEntry("sdCardMounted",boolToString(filesystems->isSdFilesystemMounted()));
+    // Total size
+    config+= serializeConfigEntry("sdCardTotalBytes",String((uint32_t)filesystems->getSdTotalBytes()));
+    // Used size
+    config+= serializeConfigEntry("sdCardUsedBytes",String((uint32_t)filesystems->getSdUsedBytes()));
+    // System info
+    config+= serializeConfigEntry("firmwareVersion",SARSAT_JRX_VERSION);
+    config+= serializeConfigEntry("sketchInfo",formatSketchInformation(ESP.getSketchSize(),ESP.getSketchMD5()));
+    config+= serializeConfigEntry("chipModel",ESP.getChipModel());
+    config+= serializeConfigEntry("chipCores",String(ESP.getChipCores()));
+    config+= serializeConfigEntry("chipFrequency",String(ESP.getCpuFreqMHz()));
+    // Ram
+    config+= serializeConfigEntry("ramSize",String(ESP.getHeapSize()));
+    config+= serializeConfigEntry("ramFree",String(ESP.getFreeHeap()));
+    // PS Ram
+    config+= serializeConfigEntry("psRamSize",String(ESP.getPsramSize()));
+    config+= serializeConfigEntry("psRamFree",String(ESP.getFreePsram()));
+    // Flash
+    config+= serializeConfigEntry("flashSize",String(ESP.getFlashChipSize()));
+    config+= serializeConfigEntry("flashFreq",String(ESP.getFlashChipSpeed()));
+    // Vbat
+    Power* power = hardware->getPower();
+    // Vbat
+    config+= serializeConfigEntry("powerVcc",power->getVccStringValue());
+    // Power state
+    config+= serializeConfigEntry("powerState",power->getPowerStateString());
+    config+= serializeConfigEntry("powerBatteryPercentage",String(power->getBatteryPercentage()));
+    // Uptime
+    config+= serializeConfigEntry("upTime",String(rtc->getUptimeString()));
+
+    return config;
 }
 
 void frames(AsyncWebServerRequest *request)
@@ -261,7 +332,7 @@ void wifiManagerStart()
   {
     Serial.println("Error : could not start mDNS");
   }
-    // Add service to mDNS
+  // Add service to mDNS
   MDNS.addService("_http", "_tcp", 80);
   MDNS.enableWorkstation();
   Serial.println("mDNS started : you can now access http://sarsatjrx.local/");  
@@ -287,7 +358,7 @@ void wifiManagerStart()
       wifiStatusChanged = true;
     }
     // Send config
-    String config = Settings::getSettings()->toKvpString();
+    String config = serializeConfig();
     String message = "config\n" + config;
     events.send(message.c_str());
     // Send frames if any

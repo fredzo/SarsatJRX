@@ -318,7 +318,7 @@ void uiSettingsUpdateSd()
     }
     // total size
     lv_label_set_text(totalBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdTotalBytes(),true).c_str());
-    // total size
+    // Used size
     lv_label_set_text(usedBytesLabel,formatMemoryValue((uint32_t)filesystems->getSdUsedBytes(),true).c_str());
     // Update log folder
     uiUpdateLogFolder();

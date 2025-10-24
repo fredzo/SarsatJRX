@@ -206,7 +206,7 @@ void uiSettingsUpdateWifi()
     // Mac @
     lv_label_set_text(macLabel,WiFi.macAddress().c_str());
     // DNS2
-    lv_label_set_text(dns2Label,WiFi.dnsIP(0).toString().c_str());
+    lv_label_set_text(dns2Label,WiFi.dnsIP(1).toString().c_str());
     // Mask
     lv_label_set_text(maskLabel,WiFi.subnetMask().toString().c_str());
     // Date
