@@ -77,102 +77,7 @@ void Settings::init()
                     {
                         String key = line.substring(0,equalIndex);
                         String value = line.substring(equalIndex+1);
-                        //Serial.printf("Key=%s; value=%s\n",key.c_str(),value.c_str());
-                        if(!value.isEmpty())
-                        {
-                            if(key.equals(BLUETOOTH_STATE.configKey))
-                            {
-                                setBluetoothState(stringToBool(value));
-                            }
-                            else if(key.equals(WIFI_STATE.configKey))
-                            {
-                                setWifiState(stringToBool(value));
-                            }
-                            else if(key.equals(WIFI_SSID.configKey))
-                            {
-                                setWifiSsid(value);
-                            }
-                            else if(key.equals(WIFI_PASS_PHRASE.configKey))
-                            {
-                                setWifiPassPhrase(value);
-                            }
-                            else if(key.equals(WIFI_SSID1.configKey))
-                            {
-                                setWifiSsid1(value);
-                            }
-                            else if(key.equals(WIFI_PASS_PHRASE1.configKey))
-                            {
-                                setWifiPassPhrase1(value);
-                            }
-                            else if(key.equals(WIFI_SSID2.configKey))
-                            {
-                                setWifiSsid2(value);
-                            }
-                            else if(key.equals(WIFI_PASS_PHRASE2.configKey))
-                            {
-                                setWifiPassPhrase2(value);
-                            }
-                            else if(key.equals(TIME_ZONE.configKey))
-                            {
-                                setTimeZone(value);
-                            }
-                            else if(key.equals(DISPLAY_REVERSE.configKey))
-                            {
-                                setDisplayReverse(stringToBool(value));
-                            }
-                            else if(key.equals(SCREEN_OFF_ON_CHRAGE.configKey))
-                            {
-                                setScreenOffOnCharge(stringToBool(value));
-                            }
-                            else if(key.equals(SHOW_BAT_PERCENTAGE.configKey))
-                            {
-                                setShowBatteryPercentage(stringToBool(value));
-                            }
-                            else if(key.equals(SHOW_BAT_WARN_MESSAGE.configKey))
-                            {
-                                setShowBatteryWarnMessage(stringToBool(value));
-                            }
-                            else if(key.equals(BUZZER_LEVEL.configKey))
-                            {
-                                setBuzzerLevel(stringToUChar(value));
-                            }
-                            else if(key.equals(TOUCH_SOUND.configKey))
-                            {
-                                setTouchSound(stringToBool(value));
-                            }
-                            else if(key.equals(FRAME_SOUND.configKey))
-                            {
-                                setFrameSound(stringToBool(value));
-                            }
-                            else if(key.equals(COUNTDOWN_SOUND.configKey))
-                            {
-                                setCountDownSound(stringToBool(value));
-                            }
-                            else if(key.equals(COUNTDOWN_LEDS.configKey))
-                            {
-                                setCountDownLeds(stringToBool(value));
-                            }
-                            else if(key.equals(RELOAD_COUNTDOWN.configKey))
-                            {
-                                setReloadCountDown(stringToBool(value));
-                            }
-                            else if(key.equals(COUNTDOWN_DURATION.configKey))
-                            {
-                                setCountdownDuration(stringToUChar(value));
-                            }
-                            else if(key.equals(ALLOW_FRAME_SIMU.configKey))
-                            {
-                                setAllowFrameSimu(stringToBool(value));
-                            }
-                            else if(key.equals(FILTER_INVALID.configKey))
-                            {
-                                setFilterInvalid(stringToBool(value));
-                            }
-                            else if(key.equals(FILTER_ORBITO.configKey))
-                            {
-                                setFilterOrbito(stringToBool(value));
-                            }
-                        }
+                        setSettingValue(key,value);
                     }
                 }
             }
@@ -185,6 +90,107 @@ void Settings::init()
     preferences.end();
     preferences.begin(PREF_PREFIX, false);
 }
+
+void Settings::setSettingValue(String key, String value)
+{
+    //Serial.printf("Key=%s; value=%s\n",key.c_str(),value.c_str());
+    if(!value.isEmpty())
+    {
+        if(key.equals(BLUETOOTH_STATE.configKey))
+        {
+            setBluetoothState(stringToBool(value));
+        }
+        else if(key.equals(WIFI_STATE.configKey))
+        {
+            setWifiState(stringToBool(value));
+        }
+        else if(key.equals(WIFI_SSID.configKey))
+        {
+            setWifiSsid(value);
+        }
+        else if(key.equals(WIFI_PASS_PHRASE.configKey))
+        {
+            setWifiPassPhrase(value);
+        }
+        else if(key.equals(WIFI_SSID1.configKey))
+        {
+            setWifiSsid1(value);
+        }
+        else if(key.equals(WIFI_PASS_PHRASE1.configKey))
+        {
+            setWifiPassPhrase1(value);
+        }
+        else if(key.equals(WIFI_SSID2.configKey))
+        {
+            setWifiSsid2(value);
+        }
+        else if(key.equals(WIFI_PASS_PHRASE2.configKey))
+        {
+            setWifiPassPhrase2(value);
+        }
+        else if(key.equals(TIME_ZONE.configKey))
+        {
+            setTimeZone(value);
+        }
+        else if(key.equals(DISPLAY_REVERSE.configKey))
+        {
+            setDisplayReverse(stringToBool(value));
+        }
+        else if(key.equals(SCREEN_OFF_ON_CHRAGE.configKey))
+        {
+            setScreenOffOnCharge(stringToBool(value));
+        }
+        else if(key.equals(SHOW_BAT_PERCENTAGE.configKey))
+        {
+            setShowBatteryPercentage(stringToBool(value));
+        }
+        else if(key.equals(SHOW_BAT_WARN_MESSAGE.configKey))
+        {
+            setShowBatteryWarnMessage(stringToBool(value));
+        }
+        else if(key.equals(BUZZER_LEVEL.configKey))
+        {
+            setBuzzerLevel(stringToUChar(value));
+        }
+        else if(key.equals(TOUCH_SOUND.configKey))
+        {
+            setTouchSound(stringToBool(value));
+        }
+        else if(key.equals(FRAME_SOUND.configKey))
+        {
+            setFrameSound(stringToBool(value));
+        }
+        else if(key.equals(COUNTDOWN_SOUND.configKey))
+        {
+            setCountDownSound(stringToBool(value));
+        }
+        else if(key.equals(COUNTDOWN_LEDS.configKey))
+        {
+            setCountDownLeds(stringToBool(value));
+        }
+        else if(key.equals(RELOAD_COUNTDOWN.configKey))
+        {
+            setReloadCountDown(stringToBool(value));
+        }
+        else if(key.equals(COUNTDOWN_DURATION.configKey))
+        {
+            setCountdownDuration(stringToUChar(value));
+        }
+        else if(key.equals(ALLOW_FRAME_SIMU.configKey))
+        {
+            setAllowFrameSimu(stringToBool(value));
+        }
+        else if(key.equals(FILTER_INVALID.configKey))
+        {
+            setFilterInvalid(stringToBool(value));
+        }
+        else if(key.equals(FILTER_ORBITO.configKey))
+        {
+            setFilterOrbito(stringToBool(value));
+        }
+    }
+}
+
 
 void Settings::saveToConfigLines(std::vector<String>& lines, bool keepContent)
 {

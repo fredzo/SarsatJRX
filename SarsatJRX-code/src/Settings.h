@@ -136,6 +136,8 @@ class Settings
 
         String toKvpString();
 
+        void setSettingValue(String key, String value);
+
 
     private :
         Preferences preferences;

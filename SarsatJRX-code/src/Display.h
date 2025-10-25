@@ -113,6 +113,13 @@ class Display
             screenOnState = newScreenOnState;
             needUpdateScreenOn = true; 
         }
+        void setScreenReverse(bool newScreenReverseState) 
+        { 
+            if(newScreenReverseState == screenReverseState) return;
+            screenReverseState = newScreenReverseState;
+            needUpdateScreenReverse = true; 
+        }
+        void updateSettings() { needUpdateSettings = true; }
 
 
     private : 
@@ -169,6 +176,11 @@ class Display
         // Screen on
         bool needUpdateScreenOn = false;
         bool screenOnState = true;
+        // Screen reverse
+        bool needUpdateScreenReverse = false;
+        bool screenReverseState = false;
+        // Settings
+        bool needUpdateSettings = false;
 
 };
 

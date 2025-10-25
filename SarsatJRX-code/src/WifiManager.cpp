@@ -198,16 +198,27 @@ void resetCountdown(AsyncWebServerRequest *request)
 void postConfig(AsyncWebServerRequest *request)
 {
     size_t paramsNumber = request->params();
+    Settings* settings = Settings::getSettings();
     for(size_t i = 0 ; i < paramsNumber ; i++)
     {
       const AsyncWebParameter* param = request->getParam(i);
+        Display* display = Hardware::getHardware()->getDisplay();
       String name = param->name();
+      String value = param->value();
       if(name == "screenOn")
       {
-        bool screenOn = (param->value() == "true");
-        Display* display = Hardware::getHardware()->getDisplay();
+        bool screenOn = (value == "true");
         display->setScreenOn(screenOn);
+        // No settings for this
+        continue;
       }
+      else if(name == "displayReverse")
+      {
+        bool reverse = (value == "true");
+        display->setScreenReverse(reverse);
+      }
+      settings->setSettingValue(name,value);
+      display->updateSettings();
     }
 }
 
@@ -386,6 +397,8 @@ void wifiManagerStart()
       String message = "frames\n" + frames;
       events.send(message.c_str());
     }
+    // Send connected event
+    events.send("connected");
   });
   events.onDisconnect([](AsyncEventSourceClient *client) 
   {

@@ -6,6 +6,7 @@
 #include <gt911.h>
 #include <ledc.h>
 #include <ui/Ui.h>
+#include <ui/UiSettings.h>
 #include <SoundManager.h>
 #include <Settings.h>
 
@@ -165,7 +166,10 @@ void Display::updateUi()
   needUpdateTicker = false;
   if(needUpdateScreenOn)        screenOnState ? screenOn() : screenOff();
   needUpdateScreenOn = false;
-
+  if(needUpdateScreenReverse)   setReverse(screenOnState);
+  needUpdateScreenReverse = false;
+  if(needUpdateSettings)        uiSettingsUpdateView();
+  needUpdateSettings = false;
 }
 
 void Display::setup(I2CBus *i2c)
