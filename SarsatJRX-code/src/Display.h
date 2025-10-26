@@ -109,13 +109,11 @@ class Display
         void updateTicker() { needUpdateTicker = true; }
         void setScreenOn(bool newScreenOnState) 
         { 
-            if(newScreenOnState == screenOnState) return;
             screenOnState = newScreenOnState;
             needUpdateScreenOn = true; 
         }
         void setScreenReverse(bool newScreenReverseState) 
         { 
-            if(newScreenReverseState == screenReverseState) return;
             screenReverseState = newScreenReverseState;
             needUpdateScreenReverse = true; 
         }

@@ -40,6 +40,8 @@ void wifiManagerSendTickerEvent(int countdown,bool sdMounted, bool discriOn, int
 
 void wifiManagerSendFrameEvent(Beacon* beacon, int frameIndex, bool valid, bool filtered, bool error);
 
+void wifiManagerSendConfigEvent();
+
 #endif
 
 #endif 

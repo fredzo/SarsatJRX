@@ -217,7 +217,11 @@ void postConfig(AsyncWebServerRequest *request)
         bool reverse = (value == "true");
         display->setScreenReverse(reverse);
       }
-      settings->setSettingValue(name,value);
+      else if(name == "buzzerLevel")
+      {
+        SoundManager::getSoundManager()->playTouchSound();
+      }
+      settings->setSettingValue(name,value,false);
       display->updateSettings();
     }
 }
@@ -387,9 +391,7 @@ void wifiManagerStart()
       wifiStatusChanged = true;
     }
     // Send config
-    String config = serializeConfig();
-    String message = "config\n" + config;
-    events.send(message.c_str());
+    wifiManagerSendConfigEvent();
     // Send frames if any
     String frames = serializeFrames(false);
     if(!frames.isEmpty())
@@ -553,6 +555,13 @@ void wifiManagerSendFrameEvent(Beacon* beacon, int frameIndex, bool valid, bool 
       events.send(buffer);
     }
   }
+}
+
+void wifiManagerSendConfigEvent()
+{ // Send config
+  String config = serializeConfig();
+  String message = "config\n" + config;
+  events.send(message.c_str());
 }
 
 size_t wifiManagerClientCount()

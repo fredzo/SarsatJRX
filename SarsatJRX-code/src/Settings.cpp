@@ -2,6 +2,7 @@
 #include <SarsatJRXConf.h>
 #include <Filesystems.h>
 #include <Util.h>
+#include <WifiManager.h>
 
 #define PREF_PREFIX             "SarsatJRX"
 
@@ -77,7 +78,8 @@ void Settings::init()
                     {
                         String key = line.substring(0,equalIndex);
                         String value = line.substring(equalIndex+1);
-                        setSettingValue(key,value);
+                        // No need to update app at this point, this is startup
+                        setSettingValue(key,value,false);
                     }
                 }
             }
@@ -91,7 +93,7 @@ void Settings::init()
     preferences.begin(PREF_PREFIX, false);
 }
 
-void Settings::setSettingValue(String key, String value)
+void Settings::setSettingValue(String key, String value, bool updateApp)
 {
     //Serial.printf("Key=%s; value=%s\n",key.c_str(),value.c_str());
     if(!value.isEmpty())
@@ -188,6 +190,10 @@ void Settings::setSettingValue(String key, String value)
         {
             setFilterOrbito(stringToBool(value));
         }
+        if(!updateApp)
+        {   // Value change is comming from the app, no need to update it
+            dirtyApp = false;
+        }
     }
 }
 
@@ -283,6 +289,7 @@ void Settings::setBluetoothState(bool state)
     bluetoothState = state;
     preferences.putBool(BLUETOOTH_STATE.key.c_str(),state);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getWifiState()
@@ -296,6 +303,7 @@ void Settings::setWifiState(bool state)
     wifiState = state;
     preferences.putBool(WIFI_STATE.key.c_str(),state);
     dirty = true;
+    dirtyApp = true;
 }
 
 String Settings::getWifiSsid()
@@ -309,6 +317,7 @@ void Settings::setWifiSsid(String ssid)
     wifiSsid = ssid;
     preferences.putString(WIFI_SSID.key.c_str(),ssid);
     dirty = true;
+    dirtyApp = true;
 }
 
 String Settings::getWifiPassPhrase()
@@ -322,6 +331,7 @@ void Settings::setWifiPassPhrase(String passPhrase)
     wifiPassPhrase = passPhrase;
     preferences.putString(WIFI_PASS_PHRASE.key.c_str(),passPhrase);
     dirty = true;
+    dirtyApp = true;
 }
 
 String Settings::getWifiSsid1()
@@ -335,6 +345,7 @@ void Settings::setWifiSsid1(String ssid)
     wifiSsid1 = ssid;
     preferences.putString(WIFI_SSID1.key.c_str(),ssid);
     dirty = true;
+    dirtyApp = true;
 }
 
 String Settings::getWifiPassPhrase1()
@@ -348,6 +359,7 @@ void Settings::setWifiPassPhrase1(String passPhrase)
     wifiPassPhrase1 = passPhrase;
     preferences.putString(WIFI_PASS_PHRASE1.key.c_str(),passPhrase);
     dirty = true;
+    dirtyApp = true;
 }
 
 String Settings::getWifiSsid2()
@@ -361,6 +373,7 @@ void Settings::setWifiSsid2(String ssid)
     wifiSsid2 = ssid;
     preferences.putString(WIFI_SSID2.key.c_str(),ssid);
     dirty = true;
+    dirtyApp = true;
 }
 
 String Settings::getWifiPassPhrase2()
@@ -374,6 +387,7 @@ void Settings::setWifiPassPhrase2(String passPhrase)
     wifiPassPhrase2 = passPhrase;
     preferences.putString(WIFI_PASS_PHRASE2.key.c_str(),passPhrase);
     dirty = true;
+    dirtyApp = true;
 }
 
 String Settings::getTimeZone()
@@ -387,6 +401,7 @@ void Settings::setTimeZone(String tz)
     timeZone = tz;
     preferences.putString(TIME_ZONE.key.c_str(),tz);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getDisplayReverse()
@@ -400,6 +415,7 @@ void Settings::setDisplayReverse(bool state)
     displayReverse = state;
     preferences.putBool(DISPLAY_REVERSE.key.c_str(),state);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getScreenOffOnCharge()
@@ -413,6 +429,7 @@ void Settings::setScreenOffOnCharge(bool active)
     screenOffOnCharge = active;
     preferences.putBool(SCREEN_OFF_ON_CHRAGE.key.c_str(),active);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getShowBatteryPercentage()
@@ -426,6 +443,7 @@ void Settings::setShowBatteryPercentage(bool show)
     showBatteryPercentage = show;
     preferences.putBool(SHOW_BAT_PERCENTAGE.key.c_str(),show);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getShowBatteryWarnMessage()
@@ -439,6 +457,7 @@ void Settings::setShowBatteryWarnMessage(bool show)
     showBatteryWarnMessage = show;
     preferences.putBool(SHOW_BAT_WARN_MESSAGE.key.c_str(),show);
     dirty = true;
+    dirtyApp = true;
 }
 
 uint8_t Settings::getBuzzerLevel()
@@ -452,6 +471,7 @@ void Settings::setBuzzerLevel(uint8_t level)
     buzzerLevel = level;
     preferences.putUChar(BUZZER_LEVEL.key.c_str(),level);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getTouchSound()
@@ -465,6 +485,7 @@ void Settings::setTouchSound(bool active)
     touchSound = active;
     preferences.putBool(TOUCH_SOUND.key.c_str(),active);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getFrameSound()
@@ -478,6 +499,7 @@ void Settings::setFrameSound(bool active)
     frameSound = active;
     preferences.putBool(FRAME_SOUND.key.c_str(),active);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getCountDownSound()
@@ -491,6 +513,7 @@ void Settings::setCountDownSound(bool active)
     countDownSound = active;
     preferences.putBool(COUNTDOWN_SOUND.key.c_str(),active);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getCountDownLeds()
@@ -504,6 +527,7 @@ void Settings::setCountDownLeds(bool active)
     countDownLeds = active;
     preferences.putBool(COUNTDOWN_LEDS.key.c_str(),active);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getReloadCountDown()
@@ -517,6 +541,7 @@ void Settings::setReloadCountDown(bool active)
     reloadCountDown = active;
     preferences.putBool(RELOAD_COUNTDOWN.key.c_str(),active);
     dirty = true;
+    dirtyApp = true;
 }
 
 uint8_t Settings::getCountdownDuration()
@@ -530,6 +555,7 @@ void Settings::setCountdownDuration(uint8_t duration)
     countdownDuration = duration;
     preferences.putUChar(COUNTDOWN_DURATION.key.c_str(),duration);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getAllowFrameSimu()
@@ -543,6 +569,7 @@ void Settings::setAllowFrameSimu(bool active)
     allowFrameSimu = active;
     preferences.putBool(ALLOW_FRAME_SIMU.key.c_str(),active);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getFilterOrbito()
@@ -556,6 +583,7 @@ void Settings::setFilterOrbito(bool active)
     filterOrbito = active;
     preferences.putBool(FILTER_ORBITO.key.c_str(),active);
     dirty = true;
+    dirtyApp = true;
 }
 
 bool Settings::getFilterInvalid()
@@ -569,6 +597,25 @@ void Settings::setFilterInvalid(bool active)
     filterInvalid = active;
     preferences.putBool(FILTER_INVALID.key.c_str(),active);
     dirty = true;
+    dirtyApp = true;
+}
+
+void Settings::handleTask()
+{
+    if(dirty)
+    {
+        uint32_t now = millis();
+        if((now - lastSavedTime) > SETTINGS_SAVE_PERIOD)
+        {
+            Serial.println("Auto-saving preferences...");
+            save();
+        }
+    }
+    if(dirtyApp)
+    {
+        wifiManagerSendConfigEvent();
+        dirtyApp = false;
+    }
 }
 
 void Settings::save()
@@ -583,5 +630,6 @@ void Settings::save()
         preferences.begin(PREF_PREFIX, false);
         saveToSd();
         dirty = false;
+        lastSavedTime = millis();
     }
 }

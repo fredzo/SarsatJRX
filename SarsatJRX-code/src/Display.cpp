@@ -166,7 +166,7 @@ void Display::updateUi()
   needUpdateTicker = false;
   if(needUpdateScreenOn)        screenOnState ? screenOn() : screenOff();
   needUpdateScreenOn = false;
-  if(needUpdateScreenReverse)   setReverse(screenOnState);
+  if(needUpdateScreenReverse)   setReverse(screenReverseState);
   needUpdateScreenReverse = false;
   if(needUpdateSettings)        uiSettingsUpdateView();
   needUpdateSettings = false;

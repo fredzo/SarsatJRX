@@ -588,6 +588,8 @@ void loop()
       //TODO display->updateBluetooth();
     }
 #endif
+// Save settings if needed
+hardware->getSettings()->handleTask();
   //delay(5);
 }
 

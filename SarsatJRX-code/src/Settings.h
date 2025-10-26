@@ -136,12 +136,15 @@ class Settings
 
         String toKvpString();
 
-        void setSettingValue(String key, String value);
+        void setSettingValue(String key, String value, bool udpateApp);
+
+        void handleTask();
 
 
     private :
         Preferences preferences;
         bool dirty = false; // True when save is needed
+        bool dirtyApp = false; // True when app sync is needed
 
         Settings()
         {
@@ -177,6 +180,8 @@ class Settings
         bool allowFrameSimu;
         bool filterOrbito;
         bool filterInvalid;
+
+        uint32_t lastSavedTime = 0;
 
         static Settings *settingsInstance;
 };
