@@ -689,13 +689,12 @@ void uiUpdateWifiStatus()
     case WifiStatus::CONNECTED : 
         stopWifiBlinkAnim();
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_CONNECTED);
-        appLinked = false;
         break;
     case WifiStatus::LINKED : 
         stopWifiBlinkAnim();
         lv_label_set_text(wifiIndicator,SYMBOL_LINK);
         if(!appLinked && currentScreen == UiScreen::SETTINGS && uiSettingsGetActiveTab() == PARAM_TAB_INDEX)
-        {   // We where waitinf for a scan => go back to previous sceren
+        {   // We where waiting for a scan => go back to previous sceren
             uiShowScreen(previousScreen);
         }
         appLinked = true;
@@ -703,23 +702,19 @@ void uiUpdateWifiStatus()
     case WifiStatus::PORTAL :
         stopWifiBlinkAnim();
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_AP);
-        appLinked = false;
         break;
     case WifiStatus::PORTAL_CONNECTED:
         stopWifiBlinkAnim();
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_AP_CONNECTED);
-        appLinked = false;
         break;
     case WifiStatus::DISCONNECTED:
         lv_label_set_text(wifiIndicator,SYMBOL_WIFI_CONNECTED);
         startWifiBlinkAnim();
-        appLinked = false;
         break;
     case WifiStatus::OFF:
     default:
         stopWifiBlinkAnim();
         lv_label_set_text(wifiIndicator,"");
-        appLinked = false;
         break;
   }
   // Update settings pages

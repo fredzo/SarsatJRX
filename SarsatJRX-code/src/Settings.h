@@ -156,6 +156,7 @@ class Settings
 
         void saveToConfigLines(std::vector<String>& lines, bool keepContent);
         void updateConfigLine(std::vector<String>& lines, bool keepContent, const Setting& setting, const String& value);
+        void settingsChanged();
 
         bool bluetoothState;
         bool wifiState;

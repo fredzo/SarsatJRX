@@ -288,8 +288,7 @@ void Settings::setBluetoothState(bool state)
     if(bluetoothState == state) return;
     bluetoothState = state;
     preferences.putBool(BLUETOOTH_STATE.key.c_str(),state);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getWifiState()
@@ -302,8 +301,7 @@ void Settings::setWifiState(bool state)
     if(wifiState == state) return;
     wifiState = state;
     preferences.putBool(WIFI_STATE.key.c_str(),state);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 String Settings::getWifiSsid()
@@ -316,8 +314,7 @@ void Settings::setWifiSsid(String ssid)
     if(wifiSsid.equals(ssid)) return;
     wifiSsid = ssid;
     preferences.putString(WIFI_SSID.key.c_str(),ssid);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 String Settings::getWifiPassPhrase()
@@ -330,8 +327,7 @@ void Settings::setWifiPassPhrase(String passPhrase)
     if(wifiPassPhrase.equals(passPhrase)) return;
     wifiPassPhrase = passPhrase;
     preferences.putString(WIFI_PASS_PHRASE.key.c_str(),passPhrase);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 String Settings::getWifiSsid1()
@@ -344,8 +340,7 @@ void Settings::setWifiSsid1(String ssid)
     if(wifiSsid1.equals(ssid)) return;
     wifiSsid1 = ssid;
     preferences.putString(WIFI_SSID1.key.c_str(),ssid);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 String Settings::getWifiPassPhrase1()
@@ -358,8 +353,7 @@ void Settings::setWifiPassPhrase1(String passPhrase)
     if(wifiPassPhrase1.equals(passPhrase)) return;
     wifiPassPhrase1 = passPhrase;
     preferences.putString(WIFI_PASS_PHRASE1.key.c_str(),passPhrase);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 String Settings::getWifiSsid2()
@@ -372,8 +366,7 @@ void Settings::setWifiSsid2(String ssid)
     if(wifiSsid2.equals(ssid)) return;
     wifiSsid2 = ssid;
     preferences.putString(WIFI_SSID2.key.c_str(),ssid);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 String Settings::getWifiPassPhrase2()
@@ -386,8 +379,7 @@ void Settings::setWifiPassPhrase2(String passPhrase)
     if(wifiPassPhrase2.equals(passPhrase)) return;
     wifiPassPhrase2 = passPhrase;
     preferences.putString(WIFI_PASS_PHRASE2.key.c_str(),passPhrase);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 String Settings::getTimeZone()
@@ -400,8 +392,7 @@ void Settings::setTimeZone(String tz)
     if(timeZone.equals(tz)) return;
     timeZone = tz;
     preferences.putString(TIME_ZONE.key.c_str(),tz);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getDisplayReverse()
@@ -414,8 +405,7 @@ void Settings::setDisplayReverse(bool state)
     if(displayReverse == state) return;
     displayReverse = state;
     preferences.putBool(DISPLAY_REVERSE.key.c_str(),state);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getScreenOffOnCharge()
@@ -428,8 +418,7 @@ void Settings::setScreenOffOnCharge(bool active)
     if(screenOffOnCharge == active) return;
     screenOffOnCharge = active;
     preferences.putBool(SCREEN_OFF_ON_CHRAGE.key.c_str(),active);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getShowBatteryPercentage()
@@ -442,8 +431,7 @@ void Settings::setShowBatteryPercentage(bool show)
     if(showBatteryPercentage == show) return;
     showBatteryPercentage = show;
     preferences.putBool(SHOW_BAT_PERCENTAGE.key.c_str(),show);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getShowBatteryWarnMessage()
@@ -456,8 +444,7 @@ void Settings::setShowBatteryWarnMessage(bool show)
     if(showBatteryWarnMessage == show) return;
     showBatteryWarnMessage = show;
     preferences.putBool(SHOW_BAT_WARN_MESSAGE.key.c_str(),show);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 uint8_t Settings::getBuzzerLevel()
@@ -470,8 +457,7 @@ void Settings::setBuzzerLevel(uint8_t level)
     if(buzzerLevel == level) return;
     buzzerLevel = level;
     preferences.putUChar(BUZZER_LEVEL.key.c_str(),level);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getTouchSound()
@@ -484,8 +470,7 @@ void Settings::setTouchSound(bool active)
     if(touchSound == active) return;
     touchSound = active;
     preferences.putBool(TOUCH_SOUND.key.c_str(),active);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getFrameSound()
@@ -498,8 +483,7 @@ void Settings::setFrameSound(bool active)
     if(frameSound == active) return;
     frameSound = active;
     preferences.putBool(FRAME_SOUND.key.c_str(),active);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getCountDownSound()
@@ -512,8 +496,7 @@ void Settings::setCountDownSound(bool active)
     if(countDownSound == active) return;
     countDownSound = active;
     preferences.putBool(COUNTDOWN_SOUND.key.c_str(),active);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getCountDownLeds()
@@ -526,8 +509,7 @@ void Settings::setCountDownLeds(bool active)
     if(countDownLeds == active) return;
     countDownLeds = active;
     preferences.putBool(COUNTDOWN_LEDS.key.c_str(),active);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getReloadCountDown()
@@ -540,8 +522,7 @@ void Settings::setReloadCountDown(bool active)
     if(reloadCountDown == active) return;
     reloadCountDown = active;
     preferences.putBool(RELOAD_COUNTDOWN.key.c_str(),active);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 uint8_t Settings::getCountdownDuration()
@@ -554,8 +535,7 @@ void Settings::setCountdownDuration(uint8_t duration)
     if(countdownDuration == duration) return;
     countdownDuration = duration;
     preferences.putUChar(COUNTDOWN_DURATION.key.c_str(),duration);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getAllowFrameSimu()
@@ -568,8 +548,7 @@ void Settings::setAllowFrameSimu(bool active)
     if(allowFrameSimu == active) return;
     allowFrameSimu = active;
     preferences.putBool(ALLOW_FRAME_SIMU.key.c_str(),active);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getFilterOrbito()
@@ -582,8 +561,7 @@ void Settings::setFilterOrbito(bool active)
     if(filterOrbito == active) return;
     filterOrbito = active;
     preferences.putBool(FILTER_ORBITO.key.c_str(),active);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 bool Settings::getFilterInvalid()
@@ -596,8 +574,7 @@ void Settings::setFilterInvalid(bool active)
     if(filterInvalid == active) return;
     filterInvalid = active;
     preferences.putBool(FILTER_INVALID.key.c_str(),active);
-    dirty = true;
-    dirtyApp = true;
+    settingsChanged();
 }
 
 void Settings::handleTask()
@@ -616,6 +593,14 @@ void Settings::handleTask()
         wifiManagerSendConfigEvent();
         dirtyApp = false;
     }
+}
+
+void Settings::settingsChanged()
+{
+    dirty = true;
+    dirtyApp = true;
+    // Reset save delay at each settings change
+    lastSavedTime = millis();
 }
 
 void Settings::save()
