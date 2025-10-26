@@ -87,4 +87,6 @@ void uiSettingsUpdateView()
 #endif
     uiSettingsUpdateSd();
     uiSettingsUpdateSystem();
+    // To update battery percentage display when setting is changed
+    uiUpdatePower();
 }
