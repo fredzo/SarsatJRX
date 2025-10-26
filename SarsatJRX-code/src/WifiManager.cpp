@@ -224,6 +224,7 @@ void postConfig(AsyncWebServerRequest *request)
       settings->setSettingValue(name,value,false);
       display->updateSettings();
     }
+    request->send(200);
 }
 
 void onWifiEvent(WiFiEvent_t event) 
