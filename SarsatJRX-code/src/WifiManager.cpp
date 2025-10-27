@@ -36,6 +36,7 @@ extern Beacon* beacons[];
 extern int beaconsWriteIndex;
 extern int beaconsSize;
 extern bool beaconsFull;
+extern bool playTouchSound;
 static int lastSentFrame = -1;
 
 // For reset countdown endpoint
@@ -193,6 +194,7 @@ void resetCountdown(AsyncWebServerRequest *request)
     {   // Restart countdown
         rtc->startCountDown();
     }
+    request->send(200);
 }
 
 void postConfig(AsyncWebServerRequest *request)
@@ -219,7 +221,7 @@ void postConfig(AsyncWebServerRequest *request)
       }
       else if(name == "buzzerLevel")
       {
-        SoundManager::getSoundManager()->playTouchSound();
+        playTouchSound = true;
       }
       settings->setSettingValue(name,value,false);
       display->updateSettings();
@@ -367,7 +369,6 @@ void wifiManagerStart()
   }
   // Add service to mDNS
   MDNS.addService("_http", "_tcp", 80);
-  MDNS.enableWorkstation();
   Serial.println("mDNS started : you can now access http://sarsatjrx.local/");  
   // Add CORS headers
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");

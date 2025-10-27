@@ -30,6 +30,9 @@ int beaconsReadIndex = -1;
 int beaconsSize = 0;
 bool beaconsFull = false;
 
+// Flag to play touch sound in main loop core
+bool playTouchSound = false;
+
 Hardware* hardware = nullptr; 
 Display *display = nullptr;
 
@@ -588,8 +591,14 @@ void loop()
       //TODO display->updateBluetooth();
     }
 #endif
-// Save settings if needed
-hardware->getSettings()->handleTask();
+  // Save settings if needed
+  hardware->getSettings()->handleTask();
+
+  if(playTouchSound)
+  {
+    SoundManager::getSoundManager()->playTouchSound();
+    playTouchSound = false;
+  }
   //delay(5);
 }
 
