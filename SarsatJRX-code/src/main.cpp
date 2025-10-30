@@ -30,8 +30,9 @@ int beaconsReadIndex = -1;
 int beaconsSize = 0;
 bool beaconsFull = false;
 
-// Flag to play touch sound in main loop core
-bool playTouchSound = false;
+// Flag to update buzzer level in main loop core
+bool updateBuzzerLevel = false;
+uint8_t buzzerLevel = 0;
 
 Hardware* hardware = nullptr; 
 Display *display = nullptr;
@@ -598,10 +599,11 @@ void loop()
   // Save settings if needed
   hardware->getSettings()->handleTask();
 
-  if(playTouchSound)
+  if(updateBuzzerLevel)
   {
+    hardware->getSoundManager()->setVolume(buzzerLevel);
     SoundManager::getSoundManager()->playTouchSound();
-    playTouchSound = false;
+    updateBuzzerLevel = false;
   }
   //delay(5);
 }

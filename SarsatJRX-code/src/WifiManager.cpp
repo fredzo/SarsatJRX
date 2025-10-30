@@ -36,7 +36,8 @@ extern Beacon* beacons[];
 extern int beaconsWriteIndex;
 extern int beaconsSize;
 extern bool beaconsFull;
-extern bool playTouchSound;
+extern bool updateBuzzerLevel;
+extern uint8_t buzzerLevel;
 static int lastSentFrame = -1;
 
 // For reset countdown endpoint
@@ -201,10 +202,11 @@ void postConfig(AsyncWebServerRequest *request)
 {
     size_t paramsNumber = request->params();
     Settings* settings = Settings::getSettings();
+    Hardware* hardware = Hardware::getHardware();
+    Display* display = hardware->getDisplay();
     for(size_t i = 0 ; i < paramsNumber ; i++)
     {
       const AsyncWebParameter* param = request->getParam(i);
-        Display* display = Hardware::getHardware()->getDisplay();
       String name = param->name();
       String value = param->value();
       if(name == "screenOn")
@@ -221,7 +223,8 @@ void postConfig(AsyncWebServerRequest *request)
       }
       else if(name == "buzzerLevel")
       {
-        playTouchSound = true;
+        buzzerLevel = stringToUChar(value);
+        updateBuzzerLevel = true;
       }
       settings->setSettingValue(name,value,false);
       display->updateSettings();
