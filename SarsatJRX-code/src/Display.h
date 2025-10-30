@@ -25,6 +25,7 @@ class Display
         };
         enum class TouchType {NONE,PRESS,HOLD,RELEASE};
         Display();
+        void bootScreen();
         void setup(I2CBus *i2c);
         void clearDisplay();
         void setReverse(bool reverse);

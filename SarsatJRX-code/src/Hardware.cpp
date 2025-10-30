@@ -4,6 +4,12 @@
 
 Hardware *Hardware::hardware = nullptr;
 
+void Hardware::bootScreen()
+{
+    display = new Display();
+    display->bootScreen();
+}
+
 void Hardware::init()
 {
     i2c = new I2CBus(Wire,I2C_SDA_PIN,I2C_SCL_PIN);
@@ -15,7 +21,7 @@ void Hardware::init()
     filesystems->init();
     settings = Settings::getSettings();
     settings->init();
-    display = new Display();
+    if(!display) bootScreen();
     display->setup(i2c);
     audio = Audio::getAudio();
     audio->audioInit();

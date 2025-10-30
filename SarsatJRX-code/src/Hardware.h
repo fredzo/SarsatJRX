@@ -20,6 +20,8 @@ public:
         return hardware;
     }
 
+    void bootScreen();
+
     void init();
 
     Display* getDisplay();

@@ -172,13 +172,21 @@ void Display::updateUi()
   needUpdateSettings = false;
 }
 
+extern uint8_t boot_logo_map[];
+
+void Display::bootScreen()
+{ // Init TFT_eSPI driver
+  myGLCD->init();
+  myGLCD->setRotation(1);
+  // Push boot logo
+  myGLCD->pushImage(0,0,DISPLAY_WIDTH,DISPLAY_HEIGHT,boot_logo_map);
+}
+
 void Display::setup(I2CBus *i2c)
 {
   // Lvgl init
   lv_init();
   // Initial setup
-  myGLCD->init();
-  myGLCD->setRotation(reverse ? 3 : 1);
   reverseScreen = reverse;
   currentColor = Color::White;
   currentTextColor = Color::White;

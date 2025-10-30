@@ -319,7 +319,11 @@ void stopCountdownAutoReload()
 }
 
 void setup()
-{ // Init beacon list
+{ 
+  hardware = Hardware::getHardware();
+  hardware->bootScreen();
+  
+  // Init beacon list
   for(int i=0; i<BEACON_LIST_MAX_SIZE; i++) beacons[i] = nullptr;
 
   // For heap corruption debugging
@@ -335,7 +339,6 @@ void setup()
   Serial.begin(115200);
   attachInterrupt(digitalPinToInterrupt(RECEIVER_PIN), analyze, CHANGE);  // interruption sur Rise et Fall
 
-  hardware = Hardware::getHardware();
   hardware->init();
   display = hardware->getDisplay();
 
