@@ -175,11 +175,16 @@ void Display::updateUi()
 extern uint8_t boot_logo_map[];
 
 void Display::bootScreen()
-{ // Init TFT_eSPI driver
+{ 
+  // Init backlight (defaults to off)
+  bl->begin();
+  // Init TFT_eSPI driver
   myGLCD->init();
   myGLCD->setRotation(1);
   // Push boot logo
   myGLCD->pushImage(0,0,DISPLAY_WIDTH,DISPLAY_HEIGHT,boot_logo_map);
+  // Switch bl on now that boot screen is pushed
+  bl->on();
 }
 
 void Display::setup(I2CBus *i2c)
@@ -199,9 +204,6 @@ void Display::setup(I2CBus *i2c)
   {
       Serial.println("Begin touch OK !");
   }
-  // Init backlight
-  bl->begin();
-  bl->on();
   
   lv_disp_draw_buf_init( &draw_buf, buf, NULL, DISPLAY_WIDTH * DISPLAY_HEIGHT / 10 );
 

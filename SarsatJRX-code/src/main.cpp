@@ -319,7 +319,8 @@ void stopCountdownAutoReload()
 }
 
 void setup()
-{ 
+{ // First show boot screen
+  digitalWrite(LILYPI_TFT_BL,0); // Force BL off for now
   hardware = Hardware::getHardware();
   hardware->bootScreen();
   
