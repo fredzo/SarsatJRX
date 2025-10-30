@@ -227,6 +227,10 @@ void postConfig(AsyncWebServerRequest *request)
         updateBuzzerLevel = true;
       }
       settings->setSettingValue(name,value,false);
+      if(name.startsWith("wifiSsid") || name.startsWith("wifiPassPhrase") || name.startsWith("timeZone"))
+      { // Save settings right now for Strings
+        settings->save();
+      }
       display->updateSettings();
     }
     request->send(200);

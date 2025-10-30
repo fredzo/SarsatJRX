@@ -607,7 +607,7 @@ void Settings::save()
 {
     if(dirty)
     {
-        /*Serial.println("Saving preferences...");
+        Serial.println("Saving preferences...");/*
         Serial.printf("Wifi : %d\n",getWifiState());
         Serial.printf("Radio : %d\n",getRadioState());
         Serial.printf("Filter1 : %d\n",getRadioFilter1());*/
