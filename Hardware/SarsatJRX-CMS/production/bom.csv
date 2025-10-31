@@ -1,8 +1,8 @@
 ﻿Designator,Footprint,Quantity,Value,LCSC Part #
 BZ1,MagneticBuzzer_PUI_AT-0927-TT-6-R-side-horn,1,Buzzer,
 "C1, C10, C7, C8, C9",0603,5,100nF,
-C11,CP_EIA-3216-18_Kemet-A,1,10uF,
-C12,CP_Radial_D8.0mm_P3.50mm,1,470uF,
+"C11, C13",CP_EIA-3216-18_Kemet-A,2,10uF,
+C12,CP_Radial_D10.0mm_P5.00mm,1,3300uF,
 "C2, C4, C6",0603,3,220pF,
 "C3, C5",0603,2,10nF,
 "D1, D2, D3, D4",LED_D5.0mm,4,LED,
