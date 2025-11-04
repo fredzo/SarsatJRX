@@ -20,7 +20,6 @@
 
 // Init display and touch screen
 TFT_eSPI *myGLCD = new TFT_eSPI(DISPLAY_HEIGHT,DISPLAY_WIDTH);
-BackLight *bl = new BackLight(LILYPI_TFT_BL);
 GT9xx_Class *touch = new GT9xx_Class();
 bool reverseScreen = false;
 
@@ -29,12 +28,12 @@ static bool screenIsOn = true;
 
 static void blOn()
 {
-  if(!bl->isOn()) bl->on();
+  digitalWrite(LILYPI_TFT_BL,1);
 }
 
 static void blOff()
 {
-  if(bl->isOn()) bl->off();
+  digitalWrite(LILYPI_TFT_BL,0);
 }
 
 static void scrOn()
@@ -74,12 +73,15 @@ void lvglTask(void *pvParameters)
 }
 
 static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
-{
-    uint32_t w = ( area->x2 - area->x1 + 1 );
-    uint32_t h = ( area->y2 - area->y1 + 1 );
+{   
+    if(screenIsOn)
+    { // No display update if screen is off
+      uint32_t w = ( area->x2 - area->x1 + 1 );
+      uint32_t h = ( area->y2 - area->y1 + 1 );
 
-    myGLCD->setAddrWindow( area->x1, area->y1, w, h );
-    myGLCD->pushColors( ( uint16_t * )&color_p->full, w * h, true );
+      myGLCD->setAddrWindow( area->x1, area->y1, w, h );
+      myGLCD->pushColors( ( uint16_t * )&color_p->full, w * h, true );
+    }
 
     lv_disp_flush_ready(disp_drv);
 }
@@ -133,7 +135,6 @@ Display::Display()
 { 
     x = 0;
     y = 0;
-    displayBuffer = "";
 }
 
 void Display::updateUi()
@@ -176,15 +177,12 @@ extern uint8_t boot_logo_map[];
 
 void Display::bootScreen()
 { 
-  // Init backlight (defaults to off)
-  bl->begin();
   // Init TFT_eSPI driver
   myGLCD->init();
   myGLCD->setRotation(1);
   // Push boot logo
   myGLCD->pushImage(0,0,DISPLAY_WIDTH,DISPLAY_HEIGHT,boot_logo_map);
-  // Switch bl on now that boot screen is pushed
-  bl->on();
+  blOn();
 }
 
 void Display::setup(I2CBus *i2c)
@@ -193,9 +191,6 @@ void Display::setup(I2CBus *i2c)
   lv_init();
   // Initial setup
   reverseScreen = reverse;
-  currentColor = Color::White;
-  currentTextColor = Color::White;
-  //clearDisplay();
   // Init touch screen
   if (!touch->begin(Wire, GT911_ADDRESS)) {
       Serial.println("Begin touch FAIL");
@@ -264,134 +259,6 @@ void Display::startDisplayTask()
   );
 }
 
-
-Display::Color::Color(byte red, byte green, byte blue)
-{
-    this->red = red;
-    this->green= green;
-    this->blue = blue;
-}
-
-const Display::Color Display::Color::White(255,255,255);
-const Display::Color Display::Color::Black(0,0,0);
-const Display::Color Display::Color::Red(206,132,85);
-const Display::Color Display::Color::DarkGreen(106,138,54);
-const Display::Color Display::Color::Green(106,153,85);
-const Display::Color Display::Color::LightGreen(59,201,176);
-const Display::Color Display::Color::Blue(28,143,255);
-const Display::Color Display::Color::Yellow(255,255,0);
-const Display::Color Display::Color::Magenta(255,0,255);
-const Display::Color Display::Color::Beige(220,220,170);
-const Display::Color Display::Color::Grey(121,121,121);
-const Display::Color Display::Color::DarkGrey(10,10,10);
-const Display::Color Display::Color::LightBlue(156,220,254);
-const Display::Color Display::Color::Orange(255,200,20);
-const Display::Color Display::Color::Purple(218,85,131);
-
-void Display::setColor(Color color)
-{
-  currentColor = color;
-}
-
-void Display::setBackgroundColor(Color bgColor)
-{
-  currentBackColor = bgColor;
-}
-
-void Display::setTextColor(Color color)
-{
-  currentTextColor = color;
-  myGLCD->setTextColor(RGB565(currentTextColor.red, currentTextColor.green, currentTextColor.blue));
-}
-
-void Display::setTextColors(Color color, Color bgColor)
-{
-  currentTextColor = color;
-  currentTextBackColor = bgColor;
-  myGLCD->setTextColor(RGB565(currentTextColor.red, currentTextColor.green, currentTextColor.blue),RGB565(currentTextBackColor.red, currentTextBackColor.green, currentTextBackColor.blue));
-}
-
-void Display::fillRectangle(int width, int height)
-{
-  myGLCD->fillRect(x,y,width,height,RGB565(currentColor.red, currentColor.green, currentColor.blue));
-}
-
-void Display::drawRectangle(int width, int height)
-{
-  myGLCD->drawRect(x,y,width,height,RGB565(currentColor.red, currentColor.green, currentColor.blue));
-}
-
-void Display::fillRoundRectangle(int width, int height)
-{
-  myGLCD->fillRoundRect(x,y,width,height,ROUND_RECT_RADIUS,RGB565(currentColor.red, currentColor.green, currentColor.blue));
-}
-
-void Display::fillArc(int oradius, int iradius, float start, float end)
-{
-  myGLCD->drawArc(x,y,oradius,iradius,start,end,RGB565(currentColor.red, currentColor.green, currentColor.blue),RGB565(currentBackColor.red, currentBackColor.green, currentBackColor.blue),true);
-}
-
-void Display::drawRoundRectangle(int width, int height)
-{
-  myGLCD->drawRoundRect(x,y,width,height,ROUND_RECT_RADIUS,RGB565(currentColor.red, currentColor.green, currentColor.blue));
-}
-
-void Display::drawLine(int x1,int y1,int x2,int y2)
-{
-  myGLCD->drawLine(x1,y1,x2,y2,RGB565(currentColor.red, currentColor.green, currentColor.blue));
-}
-
-void Display::setCursor(int x, int y)
-{
-    Display::x = x;
-    Display::y = y;
-    myGLCD->setCursor(x,y);
-}
-
-void Display::println(String s)
-{   
-    displayBuffer+=s;
-    // Font adaptation for ° sign
-    //displayBuffer.replace("°","\xB0");
-    displayBuffer.replace("°","'");
-
-    // u8g2 fonts are printend with bottom left position instead of top left...
-    //setCursor(x,y+getFontHeight(fontSize));
-    // Actually display the string
-    myGLCD->drawString(displayBuffer,x,y);
-    // Restpre original position
-    setCursor(x,y);
-    displayBuffer = "";
-}
-
-void Display::println()
-{
-    Display::println("");
-}
-
-void Display::print(String s)
-{
-    displayBuffer += s;
-}
-
-void Display::print(long value)
-{
-    displayBuffer += value;
-}
-
-void Display::printHex(byte value)
-{
-    char buffer[4];
-    snprintf(buffer,sizeof(buffer), "%02X", value);
-    displayBuffer += buffer;
-}
-
-void Display::clearDisplay()
-{
-  myGLCD->fillScreen(RGB565(currentBackColor.red, currentBackColor.green, currentBackColor.blue));
-  displayBuffer = "";
-}
-
 int Display::getWidth()
 {
   return DISPLAY_WIDTH;
@@ -429,9 +296,4 @@ void Display::backlightOn()
 void Display::backlightOff()
 {
   blOff();
-}
-
-void Display::setBrightness(uint8_t level)
-{
-    bl->adjust(level);
 }
