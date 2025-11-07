@@ -1,0 +1,37 @@
+name: Crowdin Upload (Wiki)
+
+on:
+  workflow_dispatch:  # manual execution
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Main Repo
+        uses: actions/checkout@v3
+
+      - name: Clone Wiki Repository
+        run: |
+          git clone https://github.com/${{ github.repository }}.wiki.git wiki
+          ls wiki
+
+      - name: Install Crowdin CLI
+        run: npm install -g @crowdin/cli
+
+      - name: Upload Wiki Markdown Files to Crowdin
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_API_TOKEN: ${{ secrets.CROWDIN_API_TOKEN }}
+        run: |
+          cd wiki
+          echo "project_id_env: CROWDIN_PROJECT_ID" > crowdin.yml
+          echo "api_token_env: CROWDIN_API_TOKEN" >> crowdin.yml
+          echo "preserve_hierarchy: true" >> crowdin.yml
+          echo "files:" >> crowdin.yml
+          echo "  - source: '/**/*.md'" >> crowdin.yml
+          echo "    translation: '/%two_letters_code%/%original_file_name%'" >> crowdin.yml
+          echo "    type: 'fm_markdown'" >> crowdin.yml
+
+          crowdin upload sources --auto-update
+          echo "✅ Wiki Markdown uploadé sur Crowdin."
