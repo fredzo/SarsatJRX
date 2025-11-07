@@ -13,9 +13,9 @@ jobs:
 
       - name: Clone Wiki Repository
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git wiki
+          git clone https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.wiki.git wiki
           ls wiki
 
       - name: Install Crowdin CLI
