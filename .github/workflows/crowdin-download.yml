@@ -31,7 +31,6 @@ jobs:
           echo "files:" >> crowdin.yml
           echo "  - source: '/**/*.md'" >> crowdin.yml
           echo "    translation: '/%two_letters_code%/%original_file_name%'" >> crowdin.yml
-          echo "    type: 'markdown'" >> crowdin.yml
 
           crowdin download --verbose
           echo "✅ Traductions téléchargées depuis Crowdin."
