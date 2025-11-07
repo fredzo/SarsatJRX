@@ -30,9 +30,10 @@ jobs:
           echo "preserve_hierarchy: true" >> crowdin.yml
           echo "files:" >> crowdin.yml
           echo "  - source: '/**/*.md'" >> crowdin.yml
-          echo "    translation: '/%two_letters_code%/%original_file_name%'" >> crowdin.yml
+          echo "    translation: '/%original_file_name_without_extension%.%two_letters_code%.md'" >> crowdin.yml
 
           crowdin upload sources --auto-update
           echo "✅ Wiki Markdown uploadé sur Crowdin."
+
 
 
