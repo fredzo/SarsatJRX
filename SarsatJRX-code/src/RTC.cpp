@@ -108,17 +108,25 @@ Rtc::Date Rtc::getDate()
                     rtc->setDateTime(dt);
                     // Stop ntp service
                     sntp_stop();
+                    // Update flags
                     ntpSynched = true;
                     ntpStarted = false;
                     ntpWait = false;
                     ntpRequestNumber = 0;
+                    // Update system time
+                    setSystemTime(&dt);
                     // Make sure we update time display right away
                     changed = true;
-                    // Alos notify wifi manager
+                    // Also notify wifi manager
                     wifiManagerNtpSynched();
+                    // For some reeason first call to rtc->setDateTime() might fail, so let's call it a second time
+                    rtc->setDateTime(dt);
                     #ifdef SERIAL_OUT
                     Serial.println("NTP time received ! :");
                     Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S zone %Z %z ");
+                    Serial.println("Date from RTC :");
+                    dt = rtc->getDateTime();
+                    Serial.printf("%d/%d/%d - %d:%d:%d\n",dt.day,dt.month,dt.year,dt.hour,dt.minute,dt.second);
                     #endif
                 }
                 else 
@@ -134,7 +142,6 @@ Rtc::Date Rtc::getDate()
 
 void Rtc::setSystemTime(RTC_Date* dt, bool restartTimer)
 {
-  // Définir la date et l'heure
   struct tm t;
   t.tm_year = dt->year - 1900;  // Years since 1900
   t.tm_mon  = dt->month -1;     // Month 0-11 (0=Jan)
@@ -144,9 +151,9 @@ void Rtc::setSystemTime(RTC_Date* dt, bool restartTimer)
   t.tm_sec  = dt->second;       // Sec
   t.tm_isdst = -1;              // Automatic DST detection
 
-  time_t now = mktime(&t); // Convertir en timestamp
+  time_t now = mktime(&t); // Convert to timestamp
   struct timeval tv = { .tv_sec = now, .tv_usec = 0 };
-  settimeofday(&tv, NULL); // Positionner l'heure système
+  settimeofday(&tv, NULL); // Set system time
   if(restartTimer) timerRestart(clockTimer);
 }
 
