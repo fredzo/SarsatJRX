@@ -7,6 +7,7 @@
 #include <Hardware.h>
 #include <Util.h>
 #include <SarsatJRXConf.h>
+#include <JPEGENC.h>
 
 #define FAVICON_FILE_PATH   "/sarsat-jrx.png"
 
@@ -236,6 +237,64 @@ void postConfig(AsyncWebServerRequest *request)
     request->send(200);
 }
 
+#define SCREENSHOT_BUFFER_SIZE 128*1024
+uint8_t* screenBuffer;
+uint8_t* imageBuffer;
+static JPEGENC jpeg;
+static JPEGENCODE jpe;
+void takeScreenshot(AsyncWebServerRequest *request)
+{
+  int rc;
+  int screenshotSize;
+  if(!screenBuffer || !imageBuffer)
+  {
+    screenBuffer = (uint8_t*) ps_malloc(DISPLAY_WIDTH*DISPLAY_HEIGHT*3);
+    imageBuffer = (uint8_t*) ps_malloc(SCREENSHOT_BUFFER_SIZE);
+
+    if (!screenBuffer || !imageBuffer) 
+    {
+      Serial.println("No memory !");
+      request->send(500,"text/plain","No memory !");
+      return;
+    }    
+  }
+  rc = jpeg.open(imageBuffer,SCREENSHOT_BUFFER_SIZE);
+  if (rc == JPEGE_SUCCESS) 
+  {
+    rc = jpeg.encodeBegin(&jpe, DISPLAY_WIDTH, DISPLAY_HEIGHT, JPEGE_PIXEL_RGB888, JPEGE_SUBSAMPLE_420, JPEGE_Q_BEST);
+    if (rc == JPEGE_SUCCESS) 
+    {
+      Display* display = Hardware::getHardware()->getDisplay();
+      display->screenshot(screenBuffer);
+      rc = jpeg.addFrame(&jpe,screenBuffer, 3*DISPLAY_WIDTH);
+      if(rc != JPEGE_SUCCESS)
+      {
+#ifdef SERIAL_OUT
+        Serial.println("Screenshot error: jpg.addFrame() failed.");
+#endif
+      }
+      screenshotSize = jpeg.close();
+      // Send response
+      AsyncResponseStream *response = request->beginResponseStream("image/jpeg");
+      response->addHeader("Cache-Control", "no-store");
+      response->write(imageBuffer, screenshotSize);
+      request->send(response);
+    }
+    else
+    {
+#ifdef SERIAL_OUT
+      Serial.println("Screenshot error: jpg.encodeBegin() failed.");
+#endif
+    }
+  }
+  else
+  {
+#ifdef SERIAL_OUT
+    Serial.println("Screenshot error: jpg.open() failed.");
+#endif
+  }
+}
+
 void onWifiEvent(WiFiEvent_t event) 
 {
 #ifdef SERIAL_OUT
@@ -387,6 +446,8 @@ void wifiManagerStart()
   server.on("/config",HTTP_POST,postConfig);
   server.on("/sse",HTTP_OPTIONS,sseOptions);
   server.serveStatic("/favicon.ico", SPIFFS, FAVICON_FILE_PATH, "public, max-age=31536000, immutable");
+  server.on("/screenshot",HTTP_GET,takeScreenshot);
+
   // Setup SSE
   events.onConnect([](AsyncEventSourceClient *client)
   {

@@ -30,6 +30,9 @@ class Display
         bool isScreenOn();
         void startDisplayTask();
 
+        // For screenshot
+        void screenshot(uint8_t *buffer);
+
         // Called by lvgl task to peform needed ui updates
         void updateUi();
 

@@ -9,7 +9,7 @@
 #include <ui/UiSettings.h>
 #include <SoundManager.h>
 #include <Settings.h>
-
+#include <freertos/semphr.h>
 
 #define GT911_ADDRESS               0x5D
 
@@ -22,6 +22,9 @@
 TFT_eSPI *myGLCD = new TFT_eSPI(DISPLAY_HEIGHT,DISPLAY_WIDTH);
 GT9xx_Class *touch = new GT9xx_Class();
 bool reverseScreen = false;
+
+// Mutex for SPI access
+SemaphoreHandle_t lvglMutex;
 
 // Scren / backlight management
 static bool screenIsOn = true;
@@ -79,8 +82,12 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
       uint32_t w = ( area->x2 - area->x1 + 1 );
       uint32_t h = ( area->y2 - area->y1 + 1 );
 
+      xSemaphoreTake(lvglMutex, portMAX_DELAY);
+      myGLCD->startWrite();
       myGLCD->setAddrWindow( area->x1, area->y1, w, h );
       myGLCD->pushColors( ( uint16_t * )&color_p->full, w * h, true );
+      myGLCD->endWrite();
+      xSemaphoreGive(lvglMutex);
     }
 
     lv_disp_flush_ready(disp_drv);
@@ -187,6 +194,8 @@ void Display::bootScreen()
 
 void Display::setup(I2CBus *i2c)
 {
+  // Setup SPI access mutex
+  lvglMutex = xSemaphoreCreateMutex();
   // Lvgl init
   lv_init();
   // Initial setup
@@ -284,6 +293,13 @@ bool Display::isScreenOn()
   return screenIsOn; 
 }
 
+// Screenshot
+void Display::screenshot(uint8_t *buffer)
+{
+  xSemaphoreTake(lvglMutex, portMAX_DELAY);
+  myGLCD->readRectRGB(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, buffer);
+  xSemaphoreGive(lvglMutex);
+}
 
 /******************************************
  *              BACKLIGHT
