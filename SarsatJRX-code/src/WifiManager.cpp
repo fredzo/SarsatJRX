@@ -7,7 +7,6 @@
 #include <Hardware.h>
 #include <Util.h>
 #include <SarsatJRXConf.h>
-#include <JPEGENC.h>
 
 #define FAVICON_FILE_PATH   "/sarsat-jrx.png"
 
@@ -237,62 +236,38 @@ void postConfig(AsyncWebServerRequest *request)
     request->send(200);
 }
 
-#define SCREENSHOT_BUFFER_SIZE 128*1024
-uint8_t* screenBuffer;
-uint8_t* imageBuffer;
-static JPEGENC jpeg;
-static JPEGENCODE jpe;
-void takeScreenshot(AsyncWebServerRequest *request)
-{
-  int rc;
-  int screenshotSize;
-  if(!screenBuffer || !imageBuffer)
-  {
-    screenBuffer = (uint8_t*) ps_malloc(DISPLAY_WIDTH*DISPLAY_HEIGHT*3);
-    imageBuffer = (uint8_t*) ps_malloc(SCREENSHOT_BUFFER_SIZE);
+#define SCREENSHOT_BUFFER_SIZE DISPLAY_WIDTH*DISPLAY_HEIGHT*3+1024
+static uint8_t* screenBuffer = nullptr;
+static uint8_t* imageBuffer = nullptr;
 
+void prepareBuffers()
+{
+    if(!screenBuffer) screenBuffer = (uint8_t*) ps_malloc(DISPLAY_WIDTH*DISPLAY_HEIGHT*3);
+    if(!imageBuffer) imageBuffer = (uint8_t*) ps_malloc(SCREENSHOT_BUFFER_SIZE);
+    
     if (!screenBuffer || !imageBuffer) 
     {
+      Serial.println("Allocating buffers failed !");
+    }
+}
+
+void takeScreenshot(AsyncWebServerRequest *request)
+{
+  size_t screenshotSize;
+  if(!screenBuffer || !imageBuffer)
+  {
       Serial.println("No memory !");
       request->send(500,"text/plain","No memory !");
       return;
-    }    
   }
-  rc = jpeg.open(imageBuffer,SCREENSHOT_BUFFER_SIZE);
-  if (rc == JPEGE_SUCCESS) 
-  {
-    rc = jpeg.encodeBegin(&jpe, DISPLAY_WIDTH, DISPLAY_HEIGHT, JPEGE_PIXEL_RGB888, JPEGE_SUBSAMPLE_420, JPEGE_Q_BEST);
-    if (rc == JPEGE_SUCCESS) 
-    {
-      Display* display = Hardware::getHardware()->getDisplay();
-      display->screenshot(screenBuffer);
-      rc = jpeg.addFrame(&jpe,screenBuffer, 3*DISPLAY_WIDTH);
-      if(rc != JPEGE_SUCCESS)
-      {
-#ifdef SERIAL_OUT
-        Serial.println("Screenshot error: jpg.addFrame() failed.");
-#endif
-      }
-      screenshotSize = jpeg.close();
-      // Send response
-      AsyncResponseStream *response = request->beginResponseStream("image/jpeg");
-      response->addHeader("Cache-Control", "no-store");
-      response->write(imageBuffer, screenshotSize);
-      request->send(response);
-    }
-    else
-    {
-#ifdef SERIAL_OUT
-      Serial.println("Screenshot error: jpg.encodeBegin() failed.");
-#endif
-    }
-  }
-  else
-  {
-#ifdef SERIAL_OUT
-    Serial.println("Screenshot error: jpg.open() failed.");
-#endif
-  }
+  Display* display = Hardware::getHardware()->getDisplay();
+  display->screenshot(screenBuffer);
+  screenshotSize = screenshotToBmp(screenBuffer,imageBuffer,DISPLAY_WIDTH,DISPLAY_HEIGHT);
+  AsyncResponseStream *response = request->beginResponseStream("image/bmp");
+  response->addHeader("Cache-Control", "no-store");
+  response->addHeader("Content-Disposition", "inline; filename=\"screenshot.bmp\"");
+  response->write(imageBuffer, screenshotSize);
+  request->send(response);
 }
 
 void onWifiEvent(WiFiEvent_t event) 
@@ -436,6 +411,8 @@ void wifiManagerStart()
   // Add service to mDNS
   MDNS.addService("_http", "_tcp", 80);
   Serial.println("mDNS started : you can now access http://sarsatjrx.local/");  
+  // Prepare buffers
+  prepareBuffers();
   // Add CORS headers
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   // Setup webserver

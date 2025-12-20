@@ -61,6 +61,8 @@ String boolToString(bool value);
 
 String ucharToString(uint8_t value);
 
+size_t screenshotToBmp(uint8_t* screenBuffer, uint8_t* imageBuffer, size_t width, size_t height);
+
 
 /* Baudot code matrix */
 extern char BAUDOT_CODE[64];

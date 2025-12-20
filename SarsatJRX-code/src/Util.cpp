@@ -213,3 +213,89 @@ char BAUDOT_CODE[64]   = {' ','5',' ','9',' ',' ',' ',' ',' ',' ','4',' ','8','0
                           '3',' ',' ',' ',' ','6',' ','/','-','2',' ',' ','7','1',' ',' ',
                           ' ','T',' ','O',' ','H','N','M',' ','L','R','G','I','P','C','V',
                           'E','Z','D','B','S','Y','F','X','A','W','J',' ','U','Q','K','\0'};
+
+
+/**
+ * Structure for BMP serialization
+ */
+#pragma pack(push, 1)
+
+struct BMPFileHeader {
+  uint16_t bfType;
+  uint32_t bfSize;
+  uint16_t bfReserved1;
+  uint16_t bfReserved2;
+  uint32_t bfOffBits;
+};
+
+struct BMPInfoHeader {
+  uint32_t biSize;
+  int32_t  biWidth;
+  int32_t  biHeight;
+  uint16_t biPlanes;
+  uint16_t biBitCount;
+  uint32_t biCompression;
+  uint32_t biSizeImage;
+  int32_t  biXPelsPerMeter;
+  int32_t  biYPelsPerMeter;
+  uint32_t biClrUsed;
+  uint32_t biClrImportant;
+};
+
+#pragma pack(pop)
+
+size_t screenshotToBmp(uint8_t* screenBuffer, uint8_t* imageBuffer, size_t width, size_t height)
+{
+    const uint32_t rowSize = (width * 3 + 3) & ~3; // 4 byte allignement
+    const uint32_t imageSize = rowSize * height;
+    const uint32_t bmpSize = sizeof(BMPFileHeader) + sizeof(BMPInfoHeader) + imageSize;
+
+    uint8_t *p = imageBuffer;
+
+    BMPFileHeader fh = {
+      .bfType = 0x4D42,
+      .bfSize = bmpSize,
+      .bfReserved1 = 0,
+      .bfReserved2 = 0,
+      .bfOffBits = sizeof(BMPFileHeader) + sizeof(BMPInfoHeader)
+    };
+
+    BMPInfoHeader ih = {
+      .biSize = sizeof(BMPInfoHeader),
+      .biWidth = (int32_t)width,
+      .biHeight = (int32_t)height,
+      .biPlanes = 1,
+      .biBitCount = 24,
+      .biCompression = 0,
+      .biSizeImage = imageSize,
+      .biXPelsPerMeter = 2835,
+      .biYPelsPerMeter = 2835,
+      .biClrUsed = 0,
+      .biClrImportant = 0
+    };
+
+    memcpy(p, &fh, sizeof(fh)); p += sizeof(fh);
+    memcpy(p, &ih, sizeof(ih)); p += sizeof(ih);
+
+    // Pixels BMP = BGR + bottom-up
+    const uint8_t pad[3] = {0};
+
+    for (int32_t y = height - 1; y >= 0; y--)
+    {
+      uint8_t *src = screenBuffer + y * width * 3;
+
+      for (uint32_t x = 0; x < width; x++)
+      {
+        uint8_t b = src[x*3 + 0];
+        uint8_t g = src[x*3 + 1];
+        uint8_t r = src[x*3 + 2];
+        *p++ = b;
+        *p++ = g;
+        *p++ = r;
+      }
+
+      memcpy(p, pad, rowSize - width * 3);
+      p += rowSize - width * 3;
+    }
+    return bmpSize;
+}
