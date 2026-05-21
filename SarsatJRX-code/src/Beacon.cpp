@@ -507,6 +507,7 @@ void Beacon::parseAdditionalData()
                 hasSerialNumber = true;
                 setSerialNumber(getBits(frame,61,64));
                 }
+                break;
             case 0b1100 :
                 {
                 hasAdditionalData = true;
