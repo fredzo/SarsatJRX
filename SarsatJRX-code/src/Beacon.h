@@ -67,21 +67,29 @@ class Beacon
         String hexId;
         uint32_t bch1;
         uint32_t computedBch1;
+        bool bch1Corrected{false};
         bool isBch1Valid();
         bool hasBch2;
         uint32_t bch2;
         uint32_t computedBch2;
+        bool bch2Corrected{false};
         bool isEmpty;
         bool isBch2Valid();
         bool isFrameValid();
         bool isOrbito();
         String toKvpString();
         String hexString(bool withHeader);
+        bool hasEmergency{false};
+        bool isAutoamticEmergency{false};
+        bool isMaritime{false};
+        String emergencyType;
     private:
         void parseFrame();
         void parseProtocol();
         void parseAdditionalData();
         void parseLocatingDevices();
         void setSerialNumber(uint32_t serial);
+        void flipBit(int bit);
+        void simpleCorrection(bool isBCH1);
 };
 #endif 

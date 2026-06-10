@@ -82,7 +82,10 @@ lv_style_t style_meter;
 lv_style_t style_border_red;
 
 lv_color_t uiBackgroundColor;
+lv_color_t uiTextColor;
+lv_color_t uiTitleColor;
 lv_color_t uiOkColor;
+lv_color_t uiCorrColor;
 lv_color_t uiKoColor;
 lv_color_t uiOnColor;
 lv_color_t uiOffColor;
@@ -573,8 +576,12 @@ void createUi()
 
     // BG color
     uiBackgroundColor = lv_color_make(7, 7, 7);
+    uiTextColor = lv_palette_lighten(LV_PALETTE_YELLOW,4);
+    uiTitleColor = lv_palette_lighten(LV_PALETTE_CYAN,1);
+
     // OK  / KO color
     uiOkColor = lv_palette_main(LV_PALETTE_GREEN);
+    uiCorrColor = lv_palette_main(LV_PALETTE_YELLOW);
     uiKoColor = lv_palette_lighten(LV_PALETTE_RED,2);
     // Scan ON / OFF color
     uiOffColor = lv_palette_main(LV_PALETTE_GREEN);

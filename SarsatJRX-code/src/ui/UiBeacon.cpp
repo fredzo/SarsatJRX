@@ -336,6 +336,8 @@ void uiBeaconSetBeacon(Beacon* beacon)
     #endif
     // Coordinates
     bool locationKnown = !beacon->location.isUnknown(); 
+    lv_obj_set_style_text_color(locationLabel2,beacon->hasEmergency ? uiTitleColor : uiTextColor,0);
+    lv_obj_set_style_text_color(locationLabel3,beacon->hasEmergency ? uiKoColor : uiTextColor,0);
     if (beacon->longFrame) 
     {   // Long frame
         String locationSexa = beacon->location.toString(Location::LocationFormat::SEXAGESIMAL);
@@ -362,18 +364,27 @@ void uiBeaconSetBeacon(Beacon* beacon)
     }
     else 
     {   // Short frame
-        lv_label_set_text(locationLabel2,"22 HEX. No location");
-        lv_label_set_text(locationLabel0,"");
-        lv_label_set_text(locationLabel3,"");
+        if(beacon->hasEmergency)
+        {
+            lv_label_set_text(locationLabel0,"");
+            lv_label_set_text(locationLabel2,beacon->isAutoamticEmergency ? "Emergency (auto):" : "Emergency (manual):");
+            lv_label_set_text(locationLabel3,beacon->emergencyType.c_str());
+        }
+        else
+        {
+            lv_label_set_text(locationLabel2,"22 HEX. No location");
+            lv_label_set_text(locationLabel0,"");
+            lv_label_set_text(locationLabel3,"");
+        }
     }
     // Control codes
     // Append BCH values before frame data
     lv_label_set_text(controlLabel1,beacon->isBch1Valid() ? BCH1_OK_LABEL : BCH1_KO_LABEL);
-    lv_obj_set_style_text_color(controlLabel1,beacon->isBch1Valid() ? uiOkColor : uiKoColor,0);
+    lv_obj_set_style_text_color(controlLabel1,beacon->isBch1Valid() ? beacon->bch1Corrected ? uiCorrColor : uiOkColor : uiKoColor,0);
     if(beacon->longFrame && beacon->hasBch2) 
     {   // No second proteced field in short frames
         lv_label_set_text(controlLabel2,beacon->isBch2Valid() ? BCH2_OK_LABEL : BCH2_KO_LABEL);
-        lv_obj_set_style_text_color(controlLabel2,beacon->isBch2Valid() ? uiOkColor : uiKoColor,0);
+        lv_obj_set_style_text_color(controlLabel2,beacon->isBch2Valid() ? beacon->bch2Corrected ? uiCorrColor : uiOkColor : uiKoColor,0);
     }
     else if(beacon->isEmpty)
     {

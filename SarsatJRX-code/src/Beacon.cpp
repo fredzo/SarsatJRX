@@ -155,6 +155,37 @@ uint64_t computeBCH2(byte* frame)
     return computeBCH(frame,107,132,BCH_12_POLYNOMIAL,BCH_12_POLY_LENGTH);
 }
 
+/**
+ * Flip the specified bit in this beacon's data
+ */
+void Beacon::flipBit(int bit) {
+    int byteIdx = (bit - 1) / 8;
+    int bitIdx = 7 - ((bit - 1) % 8);
+    frame[byteIdx] ^= (1 << bitIdx);
+}
+
+/**
+ * Single bit error correction to match BCH1 or BCH2 code
+ */
+void Beacon::simpleCorrection(bool isBCH1) {
+    for (int i = (isBCH1 ? 25 : 107); i <= (isBCH1 ? 85 : 132); i++) {
+        flipBit(i);
+        if ((isBCH1 ? (computeBCH1(frame) == bch1) : (computeBCH2(frame) == bch2))) {
+            if (isBCH1) {
+                computedBch1 = bch1;
+                bch1Corrected = true;
+            } else {
+                computedBch2 = bch2;
+                bch2Corrected = true;
+            }
+            break;
+        }
+        flipBit(i);  // Restore bit value
+    }
+}
+
+
+
 Beacon::Beacon(volatile byte frameBuffer[], Rtc::Date date)
 {   // Get a local copy of the original frame
     memcpy(frame,(const void*)frameBuffer,SIZE);
@@ -391,6 +422,7 @@ void Beacon::parseProtocol()
                 break;
             case 0b010 :
                 protocol = &Protocol::USER_EPIRB_MARITIME;
+                isMaritime = true;
                 break;
             case 0b011 :
                 protocol = &Protocol::USER_SERIAL;
@@ -403,6 +435,7 @@ void Beacon::parseProtocol()
                 break;
             case 0b110 :
                 protocol = &Protocol::USER_EPIRB_RADIO;
+                isMaritime = true;
                 break;
             case 0b111 :
                 protocol = &Protocol::USER_TEST;
@@ -488,14 +521,47 @@ void Beacon::parseAdditionalData()
             {
                 case 0b000: additionalData  = F("ELTs/serial identification number"); break;
                 case 0b001: additionalData  = F("ELTs/aircraft operator & serial #"); break;
-                case 0b010: additionalData  = F("Float free EPIRBs/serial #"); break;
+                case 0b010: additionalData  = F("Float free EPIRBs/serial #"); isMaritime = true; break;
                 case 0b011: additionalData  = F("ELTs with aircraft 24-bit address"); break;
                 case 0b100: additionalData  = F("Non float free EPIRBs/serial #"); break;
                 case 0b110: additionalData  = F("PLBs/serial identification #"); break;
                 default : hasAdditionalData = false;
             }
             hasSerialNumber = true;
-            setSerialNumber(getBits(frame,44, 67));
+            setSerialNumber((serialUserProtocol == 0b011) ? getBits(frame, 44, 67) : (serialUserProtocol == 0b001) ? getBits(frame, 62, 73) : getBits(frame, 44, 63));
+        }
+        if (!longFrame) {
+            hasEmergency = getBits(frame, 107, 107);
+            if (hasEmergency) {
+                isAutoamticEmergency = getBits(frame, 108, 108);
+                if (isMaritime) {
+                    uint8_t emmergency = getBits(frame, 109, 112);
+                    switch (emmergency) {
+                        case 0b0001: emergencyType = F("Fire/explosion"); break;
+                        case 0b0010: emergencyType = F("Flooding"); break;
+                        case 0b0011: emergencyType = F("Collision"); break;
+                        case 0b0100: emergencyType = F("Grounding"); break;
+                        case 0b0101: emergencyType = F("Danger of capsizing"); break;
+                        case 0b0110: emergencyType = F("Sinking"); break;
+                        case 0b0111: emergencyType = F("Disabled and adrift"); break;
+                        case 0b1000: emergencyType = F("Abandoning ship"); break;
+                        default:     emergencyType = F("Unspecified distress");
+                    }
+                } else {
+                    bool fire = getBits(frame, 109, 109);
+                    bool med = getBits(frame, 110, 110);
+                    bool disabled = getBits(frame, 111, 111);
+                    if (fire) emergencyType = "Fire";
+                    if (med) {
+                        if (fire) emergencyType += "+";
+                        emergencyType += "Medical";
+                    }
+                    if (disabled) {
+                        if (fire || med) emergencyType += "+";
+                        emergencyType += "Disabled";
+                    }
+                }
+            }
         }
     }
     else if (longFrame)
@@ -641,15 +707,6 @@ void Beacon::parseFrame()
         frameMode = FrameMode::UNKNOWN;
     }
 
-    // Hex id from bits 26-85
-    identifier = getBits(frame,26,85);
-    // Format HexId to string
-    char buffer[32];
-    uint32_t msb = identifier >> 32;
-    uint32_t lsb = identifier;
-    snprintf(buffer,sizeof(buffer),"%07lX%08lX",msb,lsb);
-    hexId = String(buffer);
-
     if (longFrame)
     {
         if(protocol->isUser() && !isOrbito()) 
@@ -662,7 +719,6 @@ void Beacon::parseFrame()
             location.longitude.degrees = (frame[15]);
             location.longitude.minutes = (frame[16] & 0xF0) >> 4;
             location.longitude.minutes = (location.longitude.minutes * 4);
-            // Identification data in bits 26-85 (no default location values)
         }
         else if(protocol->isNational())
         {   // Nat loc protocol
@@ -723,9 +779,6 @@ void Beacon::parseFrame()
                     location.longitude.minutes -= 1;
                 }
             }
-            // Default location on bits 1/7-5/1/8-5 (27bits)
-            identifier &= 0xFFFFFFFFF8000000ULL;
-            identifier |= 0b011111110000001111111100000;
         }
         else if (protocol->isStandard())
         {   //Std loc protocol
@@ -786,9 +839,6 @@ void Beacon::parseFrame()
                     location.longitude.minutes -= 1;
                 }
             }
-            // Default location on bits 1/9/1/10
-            identifier &= 0xFFFFFFFFFFE00000ULL;
-            identifier |= 0b011111111101111111111;
         }
         else if(protocol->isRlsOrElt())
         {   // RLS Location protocol => protocolCode == 0b1101 / ELT(DT) Location protocol => protocolCode == 0b1001
@@ -849,18 +899,38 @@ void Beacon::parseFrame()
                     location.longitude.minutes -= 1;
                 }
             }
-            // Default location on bits 1/8/1/9 (19bits)
-            identifier &= 0xFFFFFFFFFFF80000ULL;
-            identifier |= 0b0111111110111111111;
         }
     }
-    // else = User Protocol / short frame => Identification data in bits 26-85 (no default values)
 
     // Parse additional data
     parseAdditionalData();
 
     // Parse locating device information
     parseLocatingDevices();
+
+    // Hex id from bits 26-85
+    identifier = getBits(frame,26,85);
+
+    uint32_t hexIdHigh = (uint32_t)(identifier >> 32);
+    uint32_t hexIdLow = (uint32_t)identifier;
+
+    if (protocol->isStandard()) {
+        // default value of bits 65 to 74 = 0 111111111 / default value of bits 75 to 85 = 0 1111111111
+        hexIdLow &= 0b11111111111000000000000000000000;
+        hexIdLow |= 0b00000000000011111111101111111111;
+    } else if (protocol->isNational()) {
+        // default value of bits 59 to 71 = 0 1111111 00000 / default value of bits 72 to 85 = 0 11111111 00000
+        hexIdLow &= 0b11111000000000000000000000000000;
+        hexIdLow |= 0b00000011111110000001111111100000;
+    } else if (protocol->isRlsOrElt()) {
+        // default value of bits 67 to 75 = 0 11111111 / default value of bits 76 to 85 = 0 111111111
+        hexIdLow &= 0b11111111111110000000000000000000;
+        hexIdLow |= 0b00000000000000111111110111111111;
+    }
+    // Format HexId to string
+    char buffer[32];
+    snprintf(buffer,sizeof(buffer),"%07lX%08lX",hexIdHigh,hexIdLow);
+    hexId = String(buffer);
 
     // Check for Empty frame
     if(isOrbito()&&!longFrame)
@@ -883,12 +953,29 @@ void Beacon::parseFrame()
     // Actual and computed BCH1 and BCH2 values
     bch1 = getBits(frame,86,106);
     computedBch1 = computeBCH1(frame);
+    // Try and correct single bit error on  BCH1 (bits 25-85)
+    if (computedBch1 != bch1) {
+        simpleCorrection(true);
+    }
+
     // Special handing of Orbitography Protocol that has no BCH2 error correction code
-    hasBch2 = !isOrbito();
+    hasBch2 = longFrame && !isOrbito();
     if(hasBch2)
     {
         bch2 = getBits(frame,133,144);
         computedBch2 = computeBCH2(frame);
+        // Try and correct single bit error on  BCH2 (bits 107 - 132)
+        if (computedBch2 != bch2) {
+            simpleCorrection(false);
+        }
+    }
+    static bool isCorrecting = false;
+    // If BCH1 or BCH2 has been corrected, we need to parse frame again to update beacon properties
+    if (!isCorrecting && (bch1Corrected || bch2Corrected)) {
+        // Prevent recursion
+        isCorrecting = true;
+        parseFrame();
+        isCorrecting = false;
     }
 }
 
@@ -939,10 +1026,10 @@ String Beacon::toKvpString()
         result+="lon="+String(location.longitude.getFloatValue(),6)+"\n";
     }
     // Control codes
-    result+="bch1=" + (isBch1Valid() ? String("ok") : String("ko")) +"\n";
+    result+="bch1=" + (isBch1Valid() ? (bch1Corrected ? String("co") : String("ok")) : String("ko")) +"\n";
     if(longFrame && hasBch2) 
     {   // No second proteced field in short frames
-        result+="bch2=" + (isBch2Valid() ? String("ok") : String("ko")) +"\n";
+        result+="bch2=" + (isBch2Valid() ? (bch2Corrected ? String("co") : String("ok")) : String("ko")) +"\n";
     }
 
     // Hex ID
@@ -952,6 +1039,13 @@ String Beacon::toKvpString()
     if(hasSerialNumber)
     { // Serial number
         result+="serial=" + serialNumber +"\n";
+    }
+
+    // Emergency
+    if(hasEmergency)
+    { // Serial number
+        result+="emergency=" + emergencyType +"\n";
+        result+="emergencyMode=" + (isAutoamticEmergency ? String("auto") : String("manual")) +"\n";
     }
 
     // Location devices

@@ -66,7 +66,10 @@ extern lv_style_t style_meter;
 extern lv_style_t style_border_red;
 
 extern lv_color_t uiBackgroundColor;
+extern lv_color_t uiTextColor;
+extern lv_color_t uiTitleColor;
 extern lv_color_t uiOkColor;
+extern lv_color_t uiCorrColor;
 extern lv_color_t uiKoColor;
 extern lv_color_t uiOnColor;
 extern lv_color_t uiOffColor;
